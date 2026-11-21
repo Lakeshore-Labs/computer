@@ -14,7 +14,7 @@ import (
 
 // Commands is every command in the package.
 func Commands() []commands.Command {
-	return []commands.Command{imageCommand, chartCommand}
+	return []commands.Command{magickCommand, convertCommand, identifyCommand, chartCommand}
 }
 
 // usageError is a mistake in the command line, as opposed to a failure of the work: it exits 2, not 1.

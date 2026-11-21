@@ -3,6 +3,7 @@ package computer
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/binary"
 	"image"
 	"image/color"
@@ -67,67 +68,6 @@ func testPNG(t *testing.T, w, h int) []byte {
 	return b.Bytes()
 }
 
-func TestExtraImageInfo(t *testing.T) {
-	c := newExtra(t)
-	writeHome(t, c, "a.png", testPNG(t, 40, 20))
-	if got := run(t, c, "image info a.png"); got != "a.png: png 40x20" {
-		t.Errorf("got %q", got)
-	}
-	if got := run(t, c, "image info --json a.png | jq -c '[.format, .width, .height]'"); got != `["png",40,20]` {
-		t.Errorf("got %q", got)
-	}
-}
-
-func TestExtraImageConvert(t *testing.T) {
-	c := newExtra(t)
-	writeHome(t, c, "a.png", testPNG(t, 40, 20))
-	formats := []string{"jpg", "jpeg", "gif", "bmp", "tiff", "png"}
-	for _, ext := range formats {
-		run(t, c, "image convert a.png out."+ext)
-		want := map[string]string{"jpg": "jpeg", "jpeg": "jpeg"}[ext]
-		if want == "" {
-			want = ext
-		}
-		if got := run(t, c, "image info --json out."+ext+" | jq -c '[.format, .width, .height]'"); got != `["`+want+`",40,20]` {
-			t.Errorf("%s: got %q", ext, got)
-		}
-	}
-	if msg, code := fail(t, c, "image convert a.png out.xyz"); code != 2 || !strings.HasPrefix(msg, "image: ") {
-		t.Errorf("got %d %q", code, msg)
-	}
-}
-
-func TestExtraImageResize(t *testing.T) {
-	c := newExtra(t)
-	writeHome(t, c, "a.png", testPNG(t, 40, 20))
-	run(t, c, "image resize a.png w.png --width 10")
-	if got := run(t, c, "image info w.png"); got != "w.png: png 10x5" {
-		t.Errorf("width only: %q", got)
-	}
-	run(t, c, "image resize a.png h.png --height 10")
-	if got := run(t, c, "image info h.png"); got != "h.png: png 20x10" {
-		t.Errorf("height only: %q", got)
-	}
-	run(t, c, "image resize a.png wh.png --width 7 --height 9")
-	if got := run(t, c, "image info wh.png"); got != "wh.png: png 7x9" {
-		t.Errorf("both: %q", got)
-	}
-}
-
-func TestExtraImageThumbnailFitsWithinASquare(t *testing.T) {
-	c := newExtra(t)
-	writeHome(t, c, "a.png", testPNG(t, 40, 20))
-	run(t, c, "image thumbnail a.png t.png --size 10")
-	if got := run(t, c, "image info t.png"); got != "t.png: png 10x5" {
-		t.Errorf("got %q", got)
-	}
-	// An image already smaller than the square is not enlarged.
-	run(t, c, "image thumbnail a.png big.png --size 100")
-	if got := run(t, c, "image info big.png"); got != "big.png: png 40x20" {
-		t.Errorf("got %q", got)
-	}
-}
-
 func pixel(t *testing.T, c *Computer, name string, x, y int) color.NRGBA {
 	t.Helper()
 	b, err := os.ReadFile(filepath.Join(hostHome(c), name))
@@ -141,41 +81,195 @@ func pixel(t *testing.T, c *Computer, name string, x, y int) color.NRGBA {
 	return color.NRGBAModel.Convert(img.At(x, y)).(color.NRGBA)
 }
 
-func TestExtraImageCrop(t *testing.T) {
+// size is the dimensions that identify reports for name, as "WxH".
+func size(t *testing.T, c *Computer, name string) string {
+	t.Helper()
+	f := strings.Fields(run(t, c, "identify "+name))
+	return f[len(f)-1]
+}
+
+func TestExtraMagickResizeGeometries(t *testing.T) {
 	c := newExtra(t)
 	writeHome(t, c, "a.png", testPNG(t, 40, 20))
-	run(t, c, "image crop a.png c.png --x 5 --y 3 --width 10 --height 8")
-	if got := run(t, c, "image info c.png"); got != "c.png: png 10x8" {
-		t.Errorf("got %q", got)
+	for geometry, want := range map[string]string{
+		"10":      "10x5",  // width, keeping the aspect ratio
+		"x10":     "20x10", // height, keeping the aspect ratio
+		"10x10":   "10x5",  // fit within the box
+		"7x9!":    "7x9",   // exactly, ignoring the aspect ratio
+		"50%":     "20x10", // both sides scaled
+		"100x50>": "40x20", // only shrinks: the image is smaller than the box
+		"10x10>":  "10x5",  // only shrinks: the image is larger than the box
+		"10x10^":  "20x10", // fill the box, keeping the aspect ratio
+	} {
+		run(t, c, "magick a.png -resize '"+geometry+"' out.png")
+		if got := size(t, c, "out.png"); got != want {
+			t.Errorf("-resize %s: got %s, want %s", geometry, got, want)
+		}
+	}
+}
+
+func TestExtraMagickThumbnailIsResize(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 40, 20))
+	run(t, c, "magick a.png -thumbnail 10x10 t.png")
+	if got := size(t, c, "t.png"); got != "10x5" {
+		t.Errorf("got %s", got)
+	}
+}
+
+func TestExtraMagickCrop(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 40, 20))
+	run(t, c, "magick a.png -crop 10x8+5+3 c.png")
+	if got := size(t, c, "c.png"); got != "10x8" {
+		t.Errorf("got %s", got)
 	}
 	if p := pixel(t, c, "c.png", 0, 0); p.R != 5 || p.G != 3 {
 		t.Errorf("the crop starts at the wrong pixel: %v", p)
 	}
-	if _, code := fail(t, c, "image crop a.png c.png --x 35 --y 0 --width 10 --height 5"); code != 1 {
-		t.Errorf("a crop outside the image exited %d", code)
+	run(t, c, "magick a.png -crop 10x8 d.png")
+	if p := pixel(t, c, "d.png", 0, 0); p.R != 0 || p.G != 0 {
+		t.Errorf("without offsets the crop starts at the corner: %v", p)
 	}
 }
 
-func TestExtraImageRotate(t *testing.T) {
+func TestExtraMagickRotate(t *testing.T) {
 	c := newExtra(t)
 	writeHome(t, c, "a.png", testPNG(t, 40, 20))
-	run(t, c, "image rotate a.png r.png --degrees 90")
-	if got := run(t, c, "image info r.png"); got != "r.png: png 20x40" {
-		t.Errorf("got %q", got)
+	run(t, c, "magick a.png -rotate 90 r.png")
+	if got := size(t, c, "r.png"); got != "20x40" {
+		t.Errorf("got %s", got)
 	}
 	// Turning clockwise puts the top left pixel at the top right.
 	if p := pixel(t, c, "r.png", 19, 0); p.R != 0 || p.G != 0 {
 		t.Errorf("top right after 90 degrees: %v", p)
 	}
-	if p := pixel(t, c, "r.png", 0, 0); p.R != 0 || p.G != 19 {
-		t.Errorf("top left after 90 degrees: %v", p)
+	run(t, c, "magick a.png -rotate -90 l.png")
+	if p := pixel(t, c, "l.png", 0, 39); p.R != 0 || p.G != 0 {
+		t.Errorf("bottom left after -90 degrees: %v", p)
 	}
-	run(t, c, "image rotate a.png r180.png --degrees 180")
-	if p := pixel(t, c, "r180.png", 0, 0); p.R != 39 || p.G != 19 {
-		t.Errorf("top left after 180 degrees: %v", p)
+	msg, code := fail(t, c, "magick a.png -rotate 45 r.png")
+	if code != 2 || !strings.Contains(msg, "multiples of 90") {
+		t.Errorf("45 degrees: exit %d, %q", code, msg)
 	}
-	if _, code := fail(t, c, "image rotate a.png r.png --degrees 45"); code != 2 {
-		t.Errorf("45 degrees exited %d", code)
+}
+
+func TestExtraMagickFlipAndFlop(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 40, 20))
+	run(t, c, "magick a.png -flip v.png")
+	if p := pixel(t, c, "v.png", 0, 0); p.R != 0 || p.G != 19 {
+		t.Errorf("top left after -flip: %v", p)
+	}
+	run(t, c, "magick a.png -flop h.png")
+	if p := pixel(t, c, "h.png", 0, 0); p.R != 39 || p.G != 0 {
+		t.Errorf("top left after -flop: %v", p)
+	}
+}
+
+func TestExtraMagickAppliesOptionsInOrder(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 40, 20))
+	run(t, c, "magick a.png -crop 20x20+0+0 -resize 10x10 one.png")
+	run(t, c, "magick a.png -resize 10x10 -crop 20x20+0+0 two.png")
+	if a, b := size(t, c, "one.png"), size(t, c, "two.png"); a != "10x10" || b != "10x5" {
+		t.Errorf("crop then resize gave %s, resize then crop gave %s", a, b)
+	}
+}
+
+func TestExtraMagickWritesTheFormatOfTheOutputName(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 40, 20))
+	for ext, want := range map[string]string{"jpg": "JPEG", "jpeg": "JPEG", "gif": "GIF", "bmp": "BMP", "tiff": "TIFF", "png": "PNG"} {
+		run(t, c, "magick a.png out."+ext)
+		if got := run(t, c, "identify out."+ext); got != "out."+ext+" "+want+" 40x20" {
+			t.Errorf("%s: got %q", ext, got)
+		}
+	}
+	if msg, code := fail(t, c, "magick a.png out.xyz"); code != 2 || !strings.HasPrefix(msg, "magick: ") {
+		t.Errorf("got %d %q", code, msg)
+	}
+}
+
+func TestExtraConvertIsMagick(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 40, 20))
+	run(t, c, "convert a.png -resize 10 c.png")
+	if got := size(t, c, "c.png"); got != "10x5" {
+		t.Errorf("convert: got %s", got)
+	}
+	run(t, c, "magick convert a.png -resize 10 m.png")
+	if got := size(t, c, "m.png"); got != "10x5" {
+		t.Errorf("magick convert: got %s", got)
+	}
+}
+
+func TestExtraIgnoredOptionsAreAccepted(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 40, 20))
+	run(t, c, "magick a.png -auto-orient -strip -quality 80 q.jpg")
+	if got := size(t, c, "q.jpg"); got != "40x20" {
+		t.Errorf("got %s", got)
+	}
+}
+
+func TestExtraIdentify(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 40, 20))
+	writeHome(t, c, "b.png", testPNG(t, 8, 6))
+	if got := run(t, c, "identify a.png"); got != "a.png PNG 40x20" {
+		t.Errorf("got %q", got)
+	}
+	if got := run(t, c, "magick identify a.png b.png"); got != "a.png PNG 40x20\nb.png PNG 8x6" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestExtraMagickReadsWebPButDoesNotWriteIt(t *testing.T) {
+	c := newExtra(t)
+	// A 1x1 lossless WebP.
+	webp, err := base64.StdEncoding.DecodeString("UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==")
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeHome(t, c, "a.webp", webp)
+	if got := run(t, c, "identify a.webp"); got != "a.webp WEBP 1x1" {
+		t.Errorf("got %q", got)
+	}
+	run(t, c, "magick a.webp out.png")
+	if msg, code := fail(t, c, "magick out.png out.webp"); code != 2 || !strings.Contains(msg, "cannot write") {
+		t.Errorf("writing WebP: exit %d, %q", code, msg)
+	}
+}
+
+func TestExtraMagickRefusesUnsupportedOptions(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 40, 20))
+	for _, name := range []string{"magick", "convert"} {
+		msg, code := fail(t, c, name+" a.png -blur 0x3 out.png")
+		if code != 2 || strings.Contains(msg, "\n") || !strings.HasPrefix(msg, name+": ") || !strings.Contains(msg, "-blur") {
+			t.Errorf("%s: exit %d, %q", name, code, msg)
+		}
+		for _, opt := range []string{"-resize", "-thumbnail", "-crop", "-rotate", "-flip", "-flop", "-quality", "-strip", "-auto-orient"} {
+			if !strings.Contains(msg, opt) {
+				t.Errorf("%s: the message does not list %s: %q", name, opt, msg)
+			}
+		}
+	}
+}
+
+func TestExtraMagickUsageErrors(t *testing.T) {
+	c := newExtra(t)
+	for _, script := range []string{
+		"magick", "magick a.png", "magick a.png b.png c.png", "magick a.png -resize",
+		"magick a.png -resize big b.png", "magick a.png -crop 10 b.png", "identify",
+	} {
+		if msg, code := fail(t, c, script); code != 2 || !strings.Contains(msg, ": ") {
+			t.Errorf("%s: exit %d, %q", script, code, msg)
+		}
+	}
+	if _, code := fail(t, c, "magick missing.png out.png"); code != 1 {
+		t.Errorf("a missing input exited %d", code)
 	}
 }
 
@@ -192,37 +286,38 @@ func hugeBMP(w, h int32) []byte {
 	return b
 }
 
-func TestExtraImageRefusesHugeImages(t *testing.T) {
+func TestExtraMagickRefusesHugeImages(t *testing.T) {
 	c := newExtra(t)
 	writeHome(t, c, "huge.bmp", hugeBMP(20000, 20000))
 	writeHome(t, c, "a.png", testPNG(t, 40, 20))
-	if msg, code := fail(t, c, "image resize huge.bmp out.png --width 10"); code != 1 || !strings.Contains(msg, "megapixels") {
+	if msg, code := fail(t, c, "magick huge.bmp -resize 10 out.png"); code != 1 || !strings.Contains(msg, "megapixels") {
 		t.Errorf("a huge input: %d %q", code, msg)
 	}
-	if msg, code := fail(t, c, "image resize a.png out.png --width 20000 --height 20000"); code != 1 || !strings.Contains(msg, "megapixels") {
+	if msg, code := fail(t, c, "magick a.png -resize '20000x20000!' out.png"); code != 1 || !strings.Contains(msg, "megapixels") {
 		t.Errorf("a huge output: %d %q", code, msg)
 	}
 }
 
-func TestExtraImageHelpAndUsage(t *testing.T) {
+func TestExtraMagickHelp(t *testing.T) {
 	c := newExtra(t)
-	help := run(t, c, "image --help")
-	for _, want := range []string{"info", "convert", "resize", "thumbnail", "crop", "rotate", "--json", "--width", "--height", "--size", "--degrees", "--x", "--y"} {
-		if !strings.Contains(help, want) {
-			t.Errorf("--help lacks %q", want)
+	for _, script := range []string{"magick --help", "magick -help", "convert -help", "identify -help", "identify --help"} {
+		help := run(t, c, script)
+		if !strings.Contains(help, "subset of ImageMagick") {
+			t.Errorf("%s: no mention of the subset: %q", script, help)
 		}
 	}
-	for _, script := range []string{"image", "image nosuch", "image info", "image resize a.png b.png", "image crop a.png b.png --width 3"} {
-		if msg, code := fail(t, c, script); code != 2 || !strings.HasPrefix(msg, "image: ") {
-			t.Errorf("%s: exit %d, %q", script, code, msg)
+	help := run(t, c, "magick --help")
+	for _, want := range []string{"-resize", "-thumbnail", "-crop", "-rotate", "-flip", "-flop", "-quality", "-strip", "-auto-orient", "identify"} {
+		if !strings.Contains(help, want) {
+			t.Errorf("--help lacks %q", want)
 		}
 	}
 }
 
 func TestExtraCommandsCannotReadTheHost(t *testing.T) {
 	c := newExtra(t)
-	if msg, code := fail(t, c, "image info /etc/passwd"); !strings.Contains(msg, "does not exist") {
-		t.Errorf("image info /etc/passwd: %d %q", code, msg)
+	if msg, code := fail(t, c, "identify /etc/passwd"); !strings.Contains(msg, "does not exist") {
+		t.Errorf("identify /etc/passwd: %d %q", code, msg)
 	}
 }
 

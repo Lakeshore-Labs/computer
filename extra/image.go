@@ -2,10 +2,9 @@ package extra
 
 import (
 	"bytes"
+	"cmp"
 	"context"
-	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"image"
 	"image/color"
@@ -16,6 +15,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/ewhauser/gbash/commands"
@@ -30,139 +30,204 @@ import (
 // pixels, and decoding it would exhaust memory.
 const maxPixels = 100_000_000
 
-const imageUsage = `usage: image COMMAND [ARGUMENTS]
+const magickUsage = `usage: magick INPUT [OPTION...] OUTPUT
+       convert INPUT [OPTION...] OUTPUT       (the same as magick)
+       identify FILE...                       print NAME FORMAT WIDTHxHEIGHT for each file
 
-  image info FILE [--json]                         print the format, width and height
-  image convert IN OUT                             write IN as the format OUT's extension names
-  image resize IN OUT --width N [--height N]       scale to a size; one of the two keeps the aspect ratio
-  image thumbnail IN OUT --size N                  scale down to fit within N by N
-  image crop IN OUT --x N --y N --width N --height N   cut out a rectangle
-  image rotate IN OUT --degrees 90|180|270         turn clockwise
+A subset of ImageMagick. Options are applied left to right. The output format is the extension of OUTPUT.
+Reads png, jpeg, gif, bmp, tiff and webp. Writes png, jpg, jpeg, gif, bmp and tiff.
 
-Reads png, jpeg, gif, bmp, tiff and webp. Writes png, jpg, jpeg, gif, bmp and tiff, by the extension of OUT.
 Options:
-  --json        info: print JSON
-  --width N     resize, crop: the width in pixels
-  --height N    resize, crop: the height in pixels
-  --size N      thumbnail: the side of the square
-  --x N, --y N  crop: the left and top of the rectangle
-  --degrees N   rotate: 90, 180 or 270
-  --help        print this text`
+  -resize GEOMETRY, -thumbnail GEOMETRY   W, xH, WxH (fit within), WxH! (exactly), N%, WxH> (only shrink), WxH^ (fill)
+  -crop WxH+X+Y                           cut out a rectangle; +X+Y is optional and defaults to +0+0
+  -rotate DEGREES                         clockwise, a multiple of 90; negative turns counterclockwise
+  -flip, -flop                            mirror top to bottom, mirror left to right
+  -quality N, -strip, -auto-orient        accepted and ignored
+  -help                                   print this text`
 
-var imageCommand = commands.DefineCommand("image", func(ctx context.Context, inv *commands.Invocation) error {
-	err := runImage(ctx, inv)
+const identifyUsage = `usage: identify FILE...
+
+A subset of ImageMagick. Prints one line per file: NAME FORMAT WIDTHxHEIGHT, for example "a.png PNG 800x600".
+Reads png, jpeg, gif, bmp, tiff and webp.`
+
+const supportedOptions = "-resize, -thumbnail, -crop, -rotate, -flip, -flop, -quality, -strip, -auto-orient"
+
+// define registers a command whose run reports mistakes as "name: message" and prints usage for -help.
+func define(name, usage string, run func(context.Context, *commands.Invocation) error) commands.Command {
+	return commands.DefineCommand(name, func(ctx context.Context, inv *commands.Invocation) error {
+		for _, a := range inv.Args {
+			if a == "-help" || a == "--help" {
+				fmt.Fprintln(inv.Stdout, usage)
+				return nil
+			}
+		}
+		if err := run(ctx, inv); err != nil {
+			return exit(inv, name, err)
+		}
+		return nil
+	})
+}
+
+var (
+	magickCommand   = define("magick", magickUsage, runMagick)
+	convertCommand  = define("convert", magickUsage, runMagick)
+	identifyCommand = define("identify", identifyUsage, runIdentify)
+)
+
+// geometry is an ImageMagick geometry, WxH+X+Y with the flags ! > ^ and %.
+type geometry struct {
+	w, h, x, y             int
+	hasW, hasH             bool
+	percent, exact, shrink bool
+	fill                   bool
+}
+
+func parseGeometry(s string) (geometry, error) {
+	var g geometry
+	rest := s
+	if i := strings.IndexAny(rest, "+-"); i >= 0 {
+		if n, _ := fmt.Sscanf(rest[i:], "%d%d", &g.x, &g.y); n == 0 {
+			return g, usagef("bad geometry %q: the offsets must look like +X+Y", s)
+		}
+		rest = rest[:i]
+	}
+	for rest != "" && strings.ContainsRune("!>^%", rune(rest[len(rest)-1])) {
+		switch rest[len(rest)-1] {
+		case '!':
+			g.exact = true
+		case '>':
+			g.shrink = true
+		case '^':
+			g.fill = true
+		case '%':
+			g.percent = true
+		}
+		rest = rest[:len(rest)-1]
+	}
+	ws, hs, _ := strings.Cut(rest, "x")
+	var err1, err2 error
+	if ws != "" {
+		g.w, err1 = strconv.Atoi(ws)
+		g.hasW = true
+	}
+	if hs != "" {
+		g.h, err2 = strconv.Atoi(hs)
+		g.hasH = true
+	}
+	if err1 != nil || err2 != nil || !(g.hasW || g.hasH) || g.w < 0 || g.h < 0 {
+		return g, usagef("bad geometry %q: it must look like 800, x600, 800x600 or 50%%", s)
+	}
+	return g, nil
+}
+
+// size is the dimensions that g asks for an image of sw by sh.
+func (g geometry) size(sw, sh int) (int, int) {
 	switch {
-	case err == nil:
-		return nil
-	case errors.Is(err, flag.ErrHelp):
-		fmt.Fprintln(inv.Stdout, imageUsage)
-		return nil
-	}
-	return exit(inv, "image", err)
-})
-
-func runImage(ctx context.Context, inv *commands.Invocation) error {
-	if len(inv.Args) == 0 {
-		return usagef("a command is needed; see image --help")
-	}
-	sub, args := inv.Args[0], inv.Args[1:]
-	if sub == "--help" || sub == "-h" || sub == "help" {
-		return flag.ErrHelp
-	}
-	fs := flag.NewFlagSet(sub, flag.ContinueOnError)
-	var asJSON bool
-	var width, height, size, x, y, degrees int
-	fs.BoolVar(&asJSON, "json", false, "")
-	fs.IntVar(&width, "width", 0, "")
-	fs.IntVar(&height, "height", 0, "")
-	fs.IntVar(&size, "size", 0, "")
-	fs.IntVar(&x, "x", 0, "")
-	fs.IntVar(&y, "y", 0, "")
-	fs.IntVar(&degrees, "degrees", 0, "")
-	files, err := parse(fs, args)
-	if err != nil {
-		return err
-	}
-	want := 2
-	if sub == "info" {
-		want = 1
-	}
-	switch sub {
-	case "info", "convert", "resize", "thumbnail", "crop", "rotate":
-	default:
-		return usagef("unknown command %q; see image --help", sub)
-	}
-	if len(files) != want {
-		return usagef("%s takes %d file name(s), not %d", sub, want, len(files))
-	}
-
-	if sub == "info" {
-		data, err := inv.FS.ReadFile(ctx, files[0])
-		if err != nil {
-			return err
+	case g.percent:
+		if !g.hasH {
+			g.h = g.w
 		}
-		cfg, format, err := image.DecodeConfig(bytes.NewReader(data))
-		if err != nil {
-			return fmt.Errorf("%s: %w", files[0], err)
-		}
-		if asJSON {
-			return json.NewEncoder(inv.Stdout).Encode(map[string]any{"file": files[0], "format": format, "width": cfg.Width, "height": cfg.Height})
-		}
-		_, err = fmt.Fprintf(inv.Stdout, "%s: %s %dx%d\n", files[0], format, cfg.Width, cfg.Height)
-		return err
+		return scaled(sw, g.w, 100), scaled(sh, g.h, 100)
+	case g.exact:
+		return cmp.Or(g.w, sw), cmp.Or(g.h, sh)
+	case !g.hasH:
+		return g.w, scaled(sh, g.w, sw)
+	case !g.hasW:
+		return scaled(sw, g.h, sh), g.h
 	}
+	// Both sides are given: the image fits within the box when its width is the limit, and fills it otherwise.
+	if widthLimits := int64(g.w)*int64(sh) <= int64(g.h)*int64(sw); widthLimits != g.fill {
+		return g.w, scaled(sh, g.w, sw)
+	}
+	return scaled(sw, g.h, sh), g.h
+}
 
+// op is one option's change to the image.
+type op func(*image.NRGBA) (*image.NRGBA, error)
+
+func runMagick(ctx context.Context, inv *commands.Invocation) error {
+	args := inv.Args
+	if len(args) > 0 && args[0] == "identify" {
+		inv.Args = args[1:]
+		return runIdentify(ctx, inv)
+	}
+	if len(args) > 0 && args[0] == "convert" {
+		args = args[1:]
+	}
 	// The command line is checked before the input is read.
-	var transform func(*image.NRGBA) (*image.NRGBA, error)
-	switch sub {
-	case "resize":
-		if width <= 0 && height <= 0 {
-			return usagef("resize needs --width, --height or both")
+	var files []string
+	var ops []op
+	for i := 0; i < len(args); i++ {
+		name := args[i]
+		if len(name) < 2 || (name[0] != '-' && name[0] != '+') {
+			files = append(files, name)
+			continue
 		}
-		transform = func(src *image.NRGBA) (*image.NRGBA, error) {
-			w, h := width, height
-			b := src.Bounds()
-			if w <= 0 {
-				w = scaled(b.Dx(), h, b.Dy())
-			} else if h <= 0 {
-				h = scaled(b.Dy(), w, b.Dx())
+		// -strip and -auto-orient have nothing to do, because the encoders write no metadata and the decoders
+		// do not read an orientation. -quality is accepted but the encoders use a fixed quality. +repage is
+		// a no-op because a crop here always makes a new image with no offset.
+		switch name {
+		case "-strip", "-auto-orient", "+repage":
+			continue
+		case "-flip", "-flop":
+			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) { return mirror(src, name == "-flip"), nil })
+			continue
+		case "-resize", "-thumbnail", "-crop", "-rotate", "-quality":
+		default:
+			return usagef("unsupported option %s; the supported options are %s", name, supportedOptions)
+		}
+		if i++; i == len(args) {
+			return usagef("%s needs a value", name)
+		}
+		value := args[i]
+		switch name {
+		case "-resize", "-thumbnail":
+			g, err := parseGeometry(value)
+			if err != nil {
+				return err
 			}
-			return scale(src, w, h)
-		}
-	case "thumbnail":
-		if size <= 0 {
-			return usagef("thumbnail needs --size")
-		}
-		transform = func(src *image.NRGBA) (*image.NRGBA, error) {
-			b := src.Bounds()
-			if b.Dx() <= size && b.Dy() <= size {
-				return src, nil
+			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) {
+				b := src.Bounds()
+				w, h := g.size(b.Dx(), b.Dy())
+				if g.shrink && w >= b.Dx() && h >= b.Dy() {
+					return src, nil
+				}
+				return scale(src, w, h)
+			})
+		case "-crop":
+			g, err := parseGeometry(value)
+			if err != nil {
+				return err
 			}
-			if b.Dx() >= b.Dy() {
-				return scale(src, size, scaled(b.Dy(), size, b.Dx()))
+			if !g.hasW || !g.hasH {
+				return usagef("-crop needs both a width and a height, as in 100x50+10+10")
 			}
-			return scale(src, scaled(b.Dx(), size, b.Dy()), size)
-		}
-	case "crop":
-		if width <= 0 || height <= 0 {
-			return usagef("crop needs --width and --height")
-		}
-		transform = func(src *image.NRGBA) (*image.NRGBA, error) {
-			r := image.Rect(x, y, x+width, y+height)
-			if !r.In(src.Bounds()) {
-				return nil, fmt.Errorf("the rectangle %v is not inside the image, which is %v", r, src.Bounds())
+			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) {
+				// ImageMagick keeps the part of the rectangle that is inside the image.
+				r := image.Rect(g.x, g.y, g.x+g.w, g.y+g.h).Intersect(src.Bounds())
+				if r.Empty() {
+					return nil, fmt.Errorf("the crop %s is outside the image, which is %v", value, src.Bounds())
+				}
+				dst := image.NewNRGBA(image.Rect(0, 0, r.Dx(), r.Dy()))
+				draw.Draw(dst, dst.Bounds(), src, r.Min, draw.Src)
+				return dst, nil
+			})
+		case "-rotate":
+			degrees, err := strconv.Atoi(value)
+			if err != nil || degrees%90 != 0 {
+				return usagef("-rotate supports only multiples of 90 degrees, not %q", value)
 			}
-			dst := image.NewNRGBA(image.Rect(0, 0, width, height))
-			draw.Draw(dst, dst.Bounds(), src, r.Min, draw.Src)
-			return dst, nil
+			degrees = (degrees%360 + 360) % 360
+			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) {
+				if degrees == 0 {
+					return src, nil
+				}
+				return rotate(src, degrees), nil
+			})
 		}
-	case "rotate":
-		if degrees != 90 && degrees != 180 && degrees != 270 {
-			return usagef("rotate needs --degrees 90, 180 or 270")
-		}
-		transform = func(src *image.NRGBA) (*image.NRGBA, error) { return rotate(src, degrees), nil }
-	case "convert":
-		transform = func(src *image.NRGBA) (*image.NRGBA, error) { return src, nil }
+	}
+	if len(files) != 2 {
+		return usagef("an input and an output file are needed, not %d file names; see -help", len(files))
 	}
 	encode, err := encoder(files[1])
 	if err != nil {
@@ -184,11 +249,12 @@ func runImage(ctx context.Context, inv *commands.Invocation) error {
 	if err != nil {
 		return fmt.Errorf("%s: %w", files[0], err)
 	}
-	src := image.NewNRGBA(img.Bounds())
-	draw.Draw(src, src.Bounds(), img, img.Bounds().Min, draw.Src)
-	out, err := transform(src)
-	if err != nil {
-		return err
+	out := image.NewNRGBA(img.Bounds())
+	draw.Draw(out, out.Bounds(), img, img.Bounds().Min, draw.Src)
+	for _, apply := range ops {
+		if out, err = apply(out); err != nil {
+			return err
+		}
 	}
 	var buf bytes.Buffer
 	if err := encode(&buf, out); err != nil {
@@ -200,6 +266,24 @@ func runImage(ctx context.Context, inv *commands.Invocation) error {
 	}
 	_, err = f.Write(buf.Bytes())
 	return errors.Join(err, f.Close())
+}
+
+func runIdentify(ctx context.Context, inv *commands.Invocation) error {
+	if len(inv.Args) == 0 {
+		return usagef("a file name is needed; see identify -help")
+	}
+	for _, name := range inv.Args {
+		data, err := inv.FS.ReadFile(ctx, name)
+		if err != nil {
+			return err
+		}
+		cfg, format, err := image.DecodeConfig(bytes.NewReader(data))
+		if err != nil {
+			return fmt.Errorf("%s: %w", name, err)
+		}
+		fmt.Fprintf(inv.Stdout, "%s %s %dx%d\n", name, strings.ToUpper(format), cfg.Width, cfg.Height)
+	}
+	return nil
 }
 
 func checkSize(w, h int) error {
@@ -224,6 +308,22 @@ func scale(src *image.NRGBA, w, h int) (*image.NRGBA, error) {
 	dst := image.NewNRGBA(image.Rect(0, 0, w, h))
 	xdraw.CatmullRom.Scale(dst, dst.Bounds(), src, src.Bounds(), xdraw.Src, nil)
 	return dst, nil
+}
+
+// mirror flips src top to bottom if vertical, and left to right otherwise.
+func mirror(src *image.NRGBA, vertical bool) *image.NRGBA {
+	b := src.Bounds()
+	dst := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	for y := range b.Dy() {
+		for x := range b.Dx() {
+			dx, dy := b.Dx()-1-x, y
+			if vertical {
+				dx, dy = x, b.Dy()-1-y
+			}
+			dst.SetNRGBA(dx, dy, src.NRGBAAt(b.Min.X+x, b.Min.Y+y))
+		}
+	}
+	return dst
 }
 
 // rotate turns src clockwise by degrees, which is 90, 180 or 270.

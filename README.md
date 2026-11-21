@@ -107,7 +107,7 @@ does not, so an embedder passes `extra.Commands()` in `Config.Commands`. Each co
 inside the mounts, and `NAME --help` lists its options.
 
 ```
-image resize photo.jpg small.png --width 800      # also info, convert, thumbnail, crop and rotate
+magick photo.jpg -resize 800 small.png     # a subset of ImageMagick: also convert, identify, -crop, -rotate, -flip, -flop
 chart bar --x month --y north,south sales.csv --out sales.png    # or line, pie, scatter; SVG or PNG
 ```
 
@@ -121,7 +121,7 @@ chart bar --x month --y north,south sales.csv --out sales.png    # or line, pie,
 | [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Talks to the MCP servers |
 | `wasm/` | Runs a WASI program like a command: memory cap, deadline, and directories that are afero filesystems |
 | `files/` | A host directory as an afero filesystem that cannot be left |
-| `extra/` | Commands the shell lacks: `image` and `chart`, one file each |
+| `extra/` | Commands the shell lacks: `magick`, `convert`, `identify` (a subset of ImageMagick) and `chart` |
 | `tools/` | Turns MCP tools into commands and a Python package |
 | `agent/` | The command `agent`: runs the agent and answers its requests for the shell, files and the model |
 | `computer.go` | Assembles the above |
