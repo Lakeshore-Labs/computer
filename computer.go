@@ -91,6 +91,7 @@ type Computer struct {
 
 	mu      sync.Mutex
 	listed  [sha256.Size]byte // the tools the session was built from
+	written [sha256.Size]byte // the tools the Python package was last written from
 	session *gbash.Session
 	calling []string          // the commands that call tools, as the session names them
 	modules []string          // the same tools' modules in the Python package, in the same order
@@ -206,8 +207,7 @@ func (c *Computer) Session(ctx context.Context) (*gbash.Session, error) {
 		}
 		return nil, err
 	}
-	b, _ := json.Marshal(listed)
-	if sum := sha256.Sum256(b); c.session == nil || sum != c.listed {
+	if sum := digest(listed); c.session == nil || sum != c.listed {
 		opts, err := c.options(listed)
 		if err != nil {
 			return nil, err
@@ -223,6 +223,12 @@ func (c *Computer) Session(ctx context.Context) (*gbash.Session, error) {
 		c.session, c.listed = s, sum
 	}
 	return c.session, nil
+}
+
+// digest identifies a listing of the tools, to tell whether it has changed.
+func digest(listed []tools.Tool) [sha256.Size]byte {
+	b, _ := json.Marshal(listed)
+	return sha256.Sum256(b)
 }
 
 // ToolCommands are the commands that call tools, as the shell last built names them.
@@ -260,8 +266,11 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	mounts := c.cfg.Mounts
 	custom := c.cfg.Commands
 	if c.cfg.Python != nil {
-		if err := tools.WritePython(filepath.Join(c.site, "tools"), listed); err != nil {
-			return nil, err
+		if sum := digest(listed); sum != c.written {
+			if err := tools.WritePython(filepath.Join(c.site, "tools"), listed); err != nil {
+				return nil, err
+			}
+			c.written = sum
 		}
 		custom = append(custom[:len(custom):len(custom)], c.python("python3", mounts), c.python("python", mounts))
 	}

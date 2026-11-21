@@ -48,3 +48,36 @@ func TestThePackageNamesItsModulesAsPythonSpellsThem(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestThePackageIsNeverMissingWhileItIsRewritten(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "tools")
+	tools := []Tool{{Tool: &mcp.Tool{Name: "fetch", InputSchema: map[string]any{"type": "object"}}, Group: "wiki", Short: "fetch"}}
+	if err := WritePython(dir, tools); err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for range 500 {
+			if err := WritePython(dir, tools); err != nil {
+				t.Error(err)
+				return
+			}
+		}
+	}()
+	for missing := 0; ; {
+		select {
+		case <-done:
+			if missing > 0 {
+				t.Errorf("a module was missing or empty %d times while the package was rewritten", missing)
+			}
+			return
+		default:
+		}
+		for _, name := range []string{"__init__.py", "wiki.py"} {
+			if b, err := os.ReadFile(filepath.Join(dir, name)); err != nil || len(b) == 0 {
+				missing++
+			}
+		}
+	}
+}

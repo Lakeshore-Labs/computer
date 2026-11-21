@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -295,5 +296,22 @@ func TestTheAgentIsToldEachToolModuleByItsPythonName(t *testing.T) {
 	}
 	if got := c.About(c.ToolCommands(), c.ToolModules()); !strings.Contains(got, "my-server") || !strings.Contains(got, "`from tools import my_server`") {
 		t.Errorf("got %q", got)
+	}
+}
+
+func TestThePythonPackageIsNotRewrittenWhenTheToolsAreUnchanged(t *testing.T) {
+	c := newComputer(t, Config{Python: &Python{lib: t.TempDir()}, Tools: testTools(t, listNotes)})
+	if _, err := c.Session(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	init, past := filepath.Join(c.site, "tools", "__init__.py"), time.Now().Add(-time.Hour)
+	if err := os.Chtimes(init, past, past); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Options(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if info, err := os.Stat(init); err != nil || !info.ModTime().Equal(past) {
+		t.Errorf("the package was written again for the same tools: %v %v", info.ModTime(), err)
 	}
 }

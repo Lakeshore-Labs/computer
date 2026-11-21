@@ -2,6 +2,7 @@ package tools
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -67,13 +68,17 @@ func Modules(groups []string) []string {
 
 // WritePython writes the tools as a Python package in the directory dir, replacing what is there: a module per
 // group and a function per tool, with the tool's description and arguments as the function's own. A script that
-// has dir's parent on its path writes `from <dir's name> import notes; notes.list_notes()`.
+// has dir's parent on its path writes `from <dir's name> import notes; notes.list_notes()`. Each module is replaced
+// in one step, so that a script importing the package meanwhile finds every module whole; a module of a group that
+// is gone is removed last.
 func WritePython(dir string, tools []Tool) error {
-	if err := os.RemoveAll(dir); err != nil {
-		return err
-	}
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return err
+	}
+	written := map[string]bool{}
+	write := func(name, text string) error {
+		written[name] = true
+		return writeFile(filepath.Join(dir, name), text)
 	}
 	groups := Groups(tools)
 	names := sortedKeys(groups)
@@ -81,7 +86,7 @@ func WritePython(dir string, tools []Tool) error {
 	list, _ := json.Marshal(modules)
 	doc := "The tools, a module per group: `from " + filepath.Base(dir) + " import <module>`, then help(<module>).\n\nModules: " + strings.Join(modules, ", ")
 	init := fmt.Sprintf(pythonInit, literal(doc), list)
-	if err := os.WriteFile(filepath.Join(dir, "__init__.py"), []byte(init), 0o600); err != nil {
+	if err := write("__init__.py", init); err != nil {
 		return err
 	}
 	for i, group := range names {
@@ -130,9 +135,31 @@ func WritePython(dir string, tools []Tool) error {
 			fmt.Fprintf(&m, "\n\ndef %s(%s%s):\n    %s\n    return _call(%d, %s, **{k: v for k, v in {%s}.items() if v is not None})\n",
 				identifier(t.Short, functions), star, strings.Join(signature, ", "), literal(text), t.Source, name, strings.Join(pass, ", "))
 		}
-		if err := os.WriteFile(filepath.Join(dir, modules[i]+".py"), []byte(m.String()), 0o600); err != nil {
+		if err := write(modules[i]+".py", m.String()); err != nil {
 			return err
 		}
 	}
-	return nil
+	entries, err := os.ReadDir(dir)
+	for _, e := range entries {
+		if !written[e.Name()] {
+			err = errors.Join(err, os.RemoveAll(filepath.Join(dir, e.Name())))
+		}
+	}
+	return err
+}
+
+// writeFile replaces the file at path with text by renaming a file written beside it over it.
+func writeFile(path, text string) error {
+	f, err := os.CreateTemp(filepath.Dir(path), ".new-*")
+	if err != nil {
+		return err
+	}
+	_, err = f.WriteString(text)
+	if err = errors.Join(err, f.Close()); err == nil {
+		err = os.Rename(f.Name(), path)
+	}
+	if err != nil {
+		_ = os.Remove(f.Name())
+	}
+	return err
 }
