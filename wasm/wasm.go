@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"io"
+	"slices"
 	"sync"
 	"time"
 
@@ -69,7 +70,7 @@ func Compile(ctx context.Context, p Program) (*Module, error) {
 		}
 		cfg = cfg.WithCompilationCache(cache)
 	}
-	m := &Module{runtime: wazero.NewRuntimeWithConfig(ctx, cfg), sum: sha256.Sum256(append(p.Binary, byte(p.Features), b2i(p.Unstoppable)))}
+	m := &Module{runtime: wazero.NewRuntimeWithConfig(ctx, cfg), sum: sha256.Sum256(slices.Concat(p.Binary, []byte{byte(p.Features), b2i(p.Unstoppable)}))}
 	if _, err := wasi_snapshot_preview1.Instantiate(ctx, m.runtime); err != nil {
 		return nil, errors.Join(err, m.Close(ctx))
 	}
