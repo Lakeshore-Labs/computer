@@ -69,8 +69,8 @@ Check a new package by importing it and running a round trip in the computer bef
 left out: python-docx and docx2python (import lxml), reportlab (imports Pillow at import time), fpdf2 2.8.8 and
 later (import `urllib.request.HTTPSHandler`, which needs `ssl`), and xlrd (imports `mmap`, which is absent).
 PyYAML and MarkupSafe publish no pure wheel, so the source archive is used and only its Python package is copied.
-Importing most packages takes one to five seconds, since there is no compiled bytecode cache; the first import of
-`fpdf` takes about ten.
+The library is compiled to bytecode ahead of time (`build.sh` step 7), so an import does not compile its source
+again, but importing a large package is still slow, and the first import of `fpdf` takes about ten seconds.
 
 ## Known gaps
 

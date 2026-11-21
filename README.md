@@ -1,6 +1,6 @@
 # computer
 
-A sandboxed computer for an AI agent, as a Go library and one binary. No Node, no container, no cgo.
+A sandboxed computer for an AI agent, as a Go library and one binary. It needs no Node and no container at run time, and it is built without cgo.
 
 You give it folders and MCP servers. The agent gets a shell, SQLite and Python over those folders, and every MCP
 tool appears as a shell command and as a Python function. Nothing inside reaches the network or a file outside the
@@ -190,8 +190,9 @@ other 8 are for reporting file changes, which this environment does not do.
 - **Files.** The shell and programs see only the mounted folders. Programs reach them through Go's `os.Root`.
   Neither can create a symbolic link. The shell may write only inside writable mounts.
 - **Network.** None, unless the embedder passes gbash's network options, which allow `curl` to listed URL prefixes.
-- **Python and SQLite** run as WebAssembly with their own memory. Python has a memory cap and stops at the
-  request's deadline.
+- **Python and SQLite** run as WebAssembly with their own memory. Python has a memory cap, applied to each run
+  and not to all runs together, and stops at the request's deadline. The shell's `sqlite3` also runs as
+  WebAssembly, and we set no memory cap on it.
 - **The shell and its Go commands run in the host process.** gbash limits them, but it does not claim to be a
   hardened sandbox. Put the process in a container with CPU and memory limits if runaway scripts matter.
 - **MCP tool names and descriptions** are treated as untrusted text when commands and Python are generated.
@@ -201,7 +202,9 @@ other 8 are for reporting file changes, which this environment does not do.
 - Stopping a WebAssembly run at its deadline makes Python three to four times slower. `wasm.Program.Unstoppable`
   trades that away for trusted scripts.
 - In our Python build `asyncio` and thread timeouts do not work, and there is no numpy or pandas.
-- Tested on macOS and Linux. It compiles for Windows and has not been run there.
+- A shell command works under gbash's default limits, which we do not change: it reads a file of at most 8 MiB,
+  and a script runs at most 10,000 commands. A larger file has to be handled in Python.
+- Developed on macOS; the tests run on Linux in CI.
 
 ## Tests
 
@@ -210,6 +213,8 @@ go test .
 ```
 
 The tests that need Python are skipped unless `PYTHON_WASM`, `PYTHON_LIB` and `PYTHON_HOST_MODULE` are set.
+The tests of the agent are skipped unless `AGENT_ENGINE` names QuickJS built for WASI and `AGENT_BUNDLE` the
+directory of `agent.js`.
 
 ## License
 
