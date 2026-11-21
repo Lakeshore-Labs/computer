@@ -124,7 +124,7 @@ func run(ctx context.Context) error {
 	flag.Var(&mounts, "mount", "a host directory and where the computer sees it, as host:guest; add :ro for read-only; repeatable")
 	flag.Var(&allow, "allow-url", "a URL prefix curl may fetch; repeatable; none gives the computer no network")
 	workDir := flag.String("workdir", "", "where commands start; the first mount when empty")
-	flag.Var(&servers, "mcp", "an MCP server whose tools become commands: name=URL, or name='command arguments' for a server started as a program and spoken to on its standard streams, each one command of that name; or a bare URL, to group its tools by the prefix of their names; repeatable; a bearer token for a URL is read from COMPUTER_MCP_TOKEN_<NAME>, or COMPUTER_MCP_TOKEN for a bare URL")
+	flag.Var(&servers, "mcp", "an MCP server whose tools become commands: name=URL, or name='command arguments' for a server started as a program and spoken to on its standard streams, each one command of that name; or a bare URL, to group its tools by the prefix of their names; repeatable; a bearer token for a URL is read from COMPUTER_MCP_TOKEN_<NAME>, with a hyphen as an underscore, or COMPUTER_MCP_TOKEN for a bare URL")
 	python := flag.String("python", "", "a CPython built for WASI, for python3")
 	pythonLib := flag.String("python-lib", "", "the directory holding that build's lib/python3.x")
 	pythonHost := flag.String("python-host", "computer", "the module name the Python build imports its host call from")
@@ -167,7 +167,8 @@ func run(ctx context.Context) error {
 	}
 	for _, flagged := range servers {
 		name, url, named := strings.Cut(flagged, "=")
-		token := "COMPUTER_MCP_TOKEN_" + strings.ToUpper(name)
+		// The variable is spelt with an underscore for a hyphen, so that a shell can export it.
+		token := "COMPUTER_MCP_TOKEN_" + strings.ToUpper(strings.ReplaceAll(name, "-", "_"))
 		if !named || !isName(name) { // a bare URL or program, which may itself hold an equals sign
 			name, url, token = "", flagged, "COMPUTER_MCP_TOKEN"
 		}
@@ -189,7 +190,10 @@ func run(ctx context.Context) error {
 		switch {
 		case s.Command != "" && s.URL == "":
 			command := exec.CommandContext(ctx, s.Command, s.Args...)
-			command.Env = os.Environ()
+			// The program is not given the model's key or any server's token, unless its own env names one.
+			command.Env = slices.DeleteFunc(os.Environ(), func(kv string) bool {
+				return strings.HasPrefix(kv, "COMPUTER_MODEL_KEY=") || strings.HasPrefix(kv, "COMPUTER_MCP_TOKEN")
+			})
 			for k, v := range s.Env {
 				command.Env = append(command.Env, k+"="+v)
 			}

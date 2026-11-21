@@ -62,7 +62,9 @@ read, so a `.mcp.json` you already have works as it is; `mounts` are as `-mount`
 `${NAME}` in a header or an `env` value is read from the environment. Flags add to the file.
 
 A server that needs a bearer token reads it from the environment: `COMPUTER_MCP_TOKEN_WIKI` for a server named
-`wiki`. A server started as a program runs on the host, outside the sandbox, like any other program you start.
+`wiki`, `COMPUTER_MCP_TOKEN_MY_WIKI` for `my-wiki`. A server started as a program runs on the host, outside the
+sandbox, like any other program you start; it inherits the environment except `COMPUTER_MODEL_KEY` and the
+`COMPUTER_MCP_TOKEN` variables, which its `env` can pass on by name.
 
 For Claude Code:
 

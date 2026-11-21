@@ -200,13 +200,17 @@ func Command(name string, cfg Config) commands.Command {
 			}
 		}
 		exit := make(chan int, 1)
+		var failed error // why the engine could not run the agent, when it was not stopped
 		go func() {
-			code, _ := cfg.Engine.Run(run, wasm.Run{
+			code, err := cfg.Engine.Run(run, wasm.Run{
 				Args:  append([]string{"qjs", scripts + "/load.js", scripts + "/" + entry}, args...),
 				Env:   env,
 				Stdin: toAgent, Stdout: fromAgent, Stderr: inv.Stderr,
 				Dirs: dirs,
 			})
+			if run.Err() == nil {
+				failed = err
+			}
 			_ = fromAgent.Close()
 			close(ended)
 			exit <- code
@@ -284,7 +288,11 @@ func Command(name string, cfg Config) commands.Command {
 		_ = toAgent.Close()
 		_ = replies.Close()
 		requested.Wait()
-		if code := <-exit; code != 0 {
+		code := <-exit
+		if failed != nil {
+			return commands.Exitf(inv, code, "%s: %v", name, failed)
+		}
+		if code != 0 {
 			return &commands.ExitError{Code: code}
 		}
 		return nil

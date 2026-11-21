@@ -31,6 +31,7 @@ import (
 	"github.com/ewhauser/gbash/contrib/yq"
 	gbfs "github.com/ewhauser/gbash/fs"
 	"github.com/ewhauser/gbash/policy"
+	"github.com/ewhauser/gbash/shell/syntax"
 )
 
 // A Mount is a directory the shell and every program see at the path Guest: the filesystem FS, which can be
@@ -99,15 +100,19 @@ type Computer struct {
 }
 
 // New makes a computer. Close it to free what it holds on the host.
-func New(cfg Config) (*Computer, error) {
-	site, err := os.MkdirTemp("", "computer-python")
-	if err != nil {
+func New(cfg Config) (_ *Computer, err error) {
+	c := &Computer{cfg: cfg}
+	defer func() { // what was made before an error is removed
+		if err != nil {
+			err = errors.Join(err, c.Close())
+		}
+	}()
+	if c.site, err = os.MkdirTemp("", "computer-python"); err != nil {
 		return nil, err
 	}
-	if err := os.WriteFile(filepath.Join(site, "sitecustomize.py"), []byte(sitecustomize), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(c.site, "sitecustomize.py"), []byte(sitecustomize), 0o600); err != nil {
 		return nil, err
 	}
-	c := &Computer{cfg: cfg, site: site}
 	c.cfg.Mounts = slices.Clone(cfg.Mounts)
 	if !slices.ContainsFunc(cfg.Mounts, func(m Mount) bool { return m.Guest == "/tmp" }) {
 		if c.tmp, err = os.MkdirTemp("", "computer-tmp"); err != nil {
@@ -116,7 +121,7 @@ func New(cfg Config) (*Computer, error) {
 		c.cfg.Mounts = append(c.cfg.Mounts, Mount{Guest: "/tmp", Host: c.tmp})
 	}
 	if cfg.Python != nil {
-		c.cfg.Mounts = append(c.cfg.Mounts, Mount{Guest: pythonLib, Host: cfg.Python.lib, ReadOnly: true}, Mount{Guest: pythonSite, Host: site, ReadOnly: true})
+		c.cfg.Mounts = append(c.cfg.Mounts, Mount{Guest: pythonLib, Host: cfg.Python.lib, ReadOnly: true}, Mount{Guest: pythonSite, Host: c.site, ReadOnly: true})
 	}
 	// Each host directory is opened once, so that the shell and every program are given the one filesystem.
 	for i, m := range c.cfg.Mounts {
@@ -125,7 +130,7 @@ func New(cfg Config) (*Computer, error) {
 		}
 		dir, err := files.Dir(m.Host)
 		if err != nil {
-			return nil, errors.Join(err, c.Close())
+			return nil, err
 		}
 		c.cfg.Mounts[i].FS, c.opened = dir, append(c.opened, dir)
 	}
@@ -225,6 +230,25 @@ func (c *Computer) Session(ctx context.Context) (*gbash.Session, error) {
 	return c.session, nil
 }
 
+// shellBuiltins are the shell's builtins. gbash keeps its list to itself, so its shell is asked, once.
+var shellBuiltins = sync.OnceValue(func() map[string]bool {
+	builtins := map[string]bool{}
+	rt, err := gbash.New()
+	if err != nil {
+		return builtins
+	}
+	res, err := rt.Run(context.Background(), &gbash.ExecutionRequest{Script: "enable -a"})
+	if err != nil {
+		return builtins
+	}
+	for _, line := range strings.Split(res.Stdout, "\n") {
+		if name, ok := strings.CutPrefix(line, "enable "); ok {
+			builtins[strings.TrimPrefix(name, "-n ")] = true
+		}
+	}
+	return builtins
+})
+
 // digest identifies a listing of the tools, to tell whether it has changed.
 func digest(listed []tools.Tool) [sha256.Size]byte {
 	b, _ := json.Marshal(listed)
@@ -287,8 +311,9 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 		if name == "" { // a group whose name has no letter or digit a command can be spelled with
 			name = "tools"
 		}
-		// The shell's command, the agent, or a group whose name spells the same, keeps the name.
-		for _, taken := registry.Lookup(name); taken || c.cfg.Agent != nil && name == "agent"; _, taken = registry.Lookup(name) {
+		// The shell's command, builtin or keyword, the agent, or a group whose name spells the same, keeps the
+		// name: the shell would run its own, and the group's command could not be reached.
+		for _, taken := registry.Lookup(name); taken || syntax.IsKeyword(name) || shellBuiltins()[name] || c.cfg.Agent != nil && name == "agent"; _, taken = registry.Lookup(name) {
 			name += "-tools"
 		}
 		if err := registry.Register(tools.Command(name, c.cfg.Tools, groups[group])); err != nil {
@@ -336,7 +361,18 @@ var limits = policy.Limits{MaxFileBytes: 256 << 20, MaxCommandCount: 1_000_000, 
 // Python, as ToolCommands and ToolModules name them.
 func (c *Computer) About(toolCommands, toolModules []string) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "You work on a computer through a shell. Your files are under %s. There is no network.\n", c.cfg.WorkDir)
+	fmt.Fprintf(&b, "You work on a computer through a shell. Your files are under %s.", c.cfg.WorkDir)
+	var opts gbash.Config // what the embedder's options make of the shell, to see whether curl has a network
+	for _, option := range c.cfg.Options {
+		_ = option(&opts)
+	}
+	switch {
+	case opts.Network != nil && len(opts.Network.AllowedURLPrefixes) > 0:
+		fmt.Fprintf(&b, " curl can fetch only URLs that start with %s.", strings.Join(opts.Network.AllowedURLPrefixes, ", "))
+	case opts.Network == nil && opts.NetworkClient == nil:
+		b.WriteString(" There is no network.")
+	}
+	b.WriteString("\n")
 	b.WriteString("The shell has the usual commands, and jq, yq, awk and sqlite3.")
 	if c.cfg.Python != nil {
 		b.WriteString(" python3 has the standard library.")

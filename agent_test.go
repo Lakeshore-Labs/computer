@@ -2,6 +2,7 @@ package computer
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -349,5 +350,33 @@ func TestAgentHelpIsPrintedWithoutStartingTheAgent(t *testing.T) {
 		if got := run(t, c, "agent "+flag); !strings.Contains(got, `usage: agent [-q] [--json] "message"`) {
 			t.Errorf("agent %s: %q", flag, got)
 		}
+	}
+}
+
+func TestAnEngineThatFailsSaysWhy(t *testing.T) {
+	// A WebAssembly module whose _start traps at once.
+	trap := []byte{0, 'a', 's', 'm', 1, 0, 0, 0, 1, 4, 1, 0x60, 0, 0, 3, 2, 1, 0, 7, 10, 1, 6, '_', 's', 't', 'a', 'r', 't', 0, 0, 10, 5, 1, 3, 0, 0, 0x0b}
+	module, err := wasm.Compile(context.Background(), wasm.Program{Binary: trap})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = module.Close(context.Background()) })
+	bundle, cache := t.TempDir(), t.TempDir()
+	if err := os.WriteFile(filepath.Join(bundle, "agent.js"), []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	// The bundle's bytecode is already in the cache, so the engine is first run for the agent itself.
+	sum := module.Sum()
+	compiled := filepath.Join(cache, fmt.Sprintf("%x", sha256.Sum256(append(sum[:], 'x'))))
+	if err := os.MkdirAll(compiled, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(compiled, "agent.js.bc"), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	c := newComputer(t, Config{Agent: &agent.Config{Engine: module, Script: bundle, Cache: cache}})
+	res := exec(t, c, `agent "hello"`, time.Minute)
+	if res.ExitCode == 0 || !strings.Contains(res.Stderr, "unreachable") {
+		t.Errorf("exit %d, stderr %q", res.ExitCode, res.Stderr)
 	}
 }

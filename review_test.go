@@ -328,3 +328,24 @@ for i in range(3000):
 		t.Errorf("%s lines of 6000 were kept", got)
 	}
 }
+
+func TestAServerNamedLikeAShellWordGetsACommandItCanReach(t *testing.T) {
+	var sources []tools.Source
+	for _, name := range []string{"test", "cd", "time"} {
+		sources = append(sources, tools.Source{Name: name, Session: testSession(t, listNotes)})
+	}
+	c := newComputer(t, Config{Tools: sources})
+	if got := run(t, c, "test-tools notes-list-notes | jq length; cd-tools notes-list-notes | jq length; time-tools notes-list-notes | jq length"); got != "3\n3\n3" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestTheAgentIsToldOfTheNetworkItHas(t *testing.T) {
+	if got := newComputer(t, Config{}).About(nil, nil); !strings.Contains(got, "There is no network.") {
+		t.Errorf("without a network: %q", got)
+	}
+	allowed := newComputer(t, Config{Options: []gbash.Option{gbash.WithNetwork(&gbash.NetworkConfig{AllowedURLPrefixes: []string{"https://example.com/"}})}})
+	if got := allowed.About(nil, nil); strings.Contains(got, "no network") || !strings.Contains(got, "https://example.com/") {
+		t.Errorf("with a network: %q", got)
+	}
+}
