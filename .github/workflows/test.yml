@@ -1,8 +1,8 @@
 name: test
+# Runs for a pull request and when started by hand, not on every push.
 on:
-  push:
-    branches: [main]
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 env:
