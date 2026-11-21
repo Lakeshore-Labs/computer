@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -42,6 +43,10 @@ type Config struct {
 	ModelURL string // an OpenAI-compatible address, up to and not including /chat/completions
 	ModelKey string // sent as a bearer token; empty sends none
 	Model    string // the model's name
+	// The model's limits; zero leaves the agent program's default. ContextWindow is how many tokens the model
+	// reads, from which Pi Durable decides when to compact the conversation; MaxTokens is the most the model may
+	// write in one reply; MaxTurns is the most tool rounds one run takes.
+	ContextWindow, MaxTokens, MaxTurns int
 
 	Instructions string // what the agent is told about this computer
 	Home         string // the agent's working directory
@@ -89,6 +94,9 @@ func Command(name string, cfg Config) commands.Command {
 				quiet = true
 			case "--json":
 				asJSON = true
+			case "--help", "-h":
+				fmt.Fprintf(inv.Stdout, "usage: %s [-q] [--json] [-c | -r NAME] \"message\"\n       %s --list\n\nAnswers one message in a new conversation and prints the answer; the steps taken go to standard error.\n  -q        show no steps\n  --json    print the whole run as JSON lines\n  -c        continue the latest conversation\n  -r NAME   continue the conversation NAME\n  --list    print the conversations' names, newest first\n", name, name)
+				return nil
 			case "--list":
 				for _, c := range slices.Backward(kept) {
 					fmt.Fprintln(inv.Stdout, c)
@@ -119,6 +127,7 @@ func Command(name string, cfg Config) commands.Command {
 				return commands.Exitf(inv, 1, "%s: %v", name, err)
 			}
 		}
+		// Help is answered here, since the agent program would take it for a message to the model.
 		// One agent at a time over one conversation: a second would write the same files, and a run that starts
 		// agents without end would take the host's memory.
 		busy, _ := running.LoadOrStore(cfg.State, new(sync.Mutex))
@@ -184,11 +193,17 @@ func Command(name string, cfg Config) commands.Command {
 		if dir != "" {
 			dirs = append(dirs, wasm.Dir{Guest: state, Host: dir})
 		}
+		env := map[string]string{"HOME": cfg.Home, "AGENT_STATE": state, "AGENT_MODEL": cfg.Model, "AGENT_INSTRUCTIONS": cfg.Instructions}
+		for name, n := range map[string]int{"AGENT_CONTEXT_WINDOW": cfg.ContextWindow, "AGENT_MAX_TOKENS": cfg.MaxTokens, "AGENT_MAX_TURNS": cfg.MaxTurns} {
+			if n > 0 {
+				env[name] = strconv.Itoa(n)
+			}
+		}
 		exit := make(chan int, 1)
 		go func() {
 			code, _ := cfg.Engine.Run(run, wasm.Run{
 				Args:  append([]string{"qjs", scripts + "/load.js", scripts + "/" + entry}, args...),
-				Env:   map[string]string{"HOME": cfg.Home, "AGENT_STATE": state, "AGENT_MODEL": cfg.Model, "AGENT_INSTRUCTIONS": cfg.Instructions},
+				Env:   env,
 				Stdin: toAgent, Stdout: fromAgent, Stderr: inv.Stderr,
 				Dirs: dirs,
 			})

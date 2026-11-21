@@ -177,7 +177,9 @@ export COMPUTER_MODEL_KEY=...
 - One agent runs at a time in a computer; a second, such as one the agent starts itself, is refused. A
   conversation is held by one process at a time.
 - The model is any OpenAI-compatible chat-completions address. The command makes the request; the agent never
-  holds the key or the address.
+  holds the key or the address. `-model-context` and `-model-max-tokens` give the model's context window and
+  output limit (by default 200,000 and 16,384 tokens), and `-agent-max-turns` the most tool rounds in one run
+  (by default 50).
 - Stopping the command asks the agent to abort its run, which it records, so the next message starts a new one. An
   agent that does not stop is stopped where it stands.
 - The bundle is compiled to the engine's bytecode once and loaded from there, so a run starts in about 0.15 s.

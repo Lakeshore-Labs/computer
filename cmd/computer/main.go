@@ -135,6 +135,9 @@ func run(ctx context.Context) error {
 	agentState := flag.String("agent-state", "", "a directory in which the agent keeps its conversation, outside every mount; by default one under the user's cache directory, named for the first mount")
 	modelURL := flag.String("model-url", "", "the agent's model: an OpenAI-compatible address, without /chat/completions; its key is read from COMPUTER_MODEL_KEY")
 	modelName := flag.String("model", "", "the agent's model's name")
+	contextWindow := flag.Int("model-context", 0, "how many tokens the agent's model reads, which sets when the conversation is compacted; 0 is the agent's default of 200,000")
+	maxTokens := flag.Int("model-max-tokens", 0, "the most tokens the agent's model may write in one reply; 0 is the agent's default of 16,384")
+	maxTurns := flag.Int("agent-max-turns", 0, "the most tool rounds one run of the agent takes; 0 is the agent's default of 50")
 	script := flag.String("c", "", "run this command and exit")
 	config := flag.String("config", "", `a JSON file of mounts and MCP servers, added to those the flags give: {"mounts": ["host:guest"], "mcpServers": {"name": {"url": "..."} or {"command": "...", "args": [...]}}}; mcpServers is as in Claude Code's .mcp.json, and ${NAME} in a header or an env value is read from the environment`)
 	flag.Parse()
@@ -249,7 +252,8 @@ func run(ctx context.Context) error {
 				return fmt.Errorf("-agent-state: %w", err)
 			}
 		}
-		cfg.Agent = &agent.Config{Engine: module, Script: *agentDir, Cache: cache + "/agent-bytecode", State: stateDir, ModelURL: *modelURL, ModelKey: os.Getenv("COMPUTER_MODEL_KEY"), Model: *modelName}
+		cfg.Agent = &agent.Config{Engine: module, Script: *agentDir, Cache: cache + "/agent-bytecode", State: stateDir, ModelURL: *modelURL, ModelKey: os.Getenv("COMPUTER_MODEL_KEY"), Model: *modelName,
+			ContextWindow: *contextWindow, MaxTokens: *maxTokens, MaxTurns: *maxTurns}
 	}
 	c, err := computer.New(cfg)
 	if err != nil {

@@ -331,3 +331,23 @@ func TestTheModelsKeyIsNotSentWhereAReplyRedirects(t *testing.T) {
 		t.Errorf("the model's address reached the agent's output: %q", res.Stderr)
 	}
 }
+
+func TestTheAgentIsGivenTheModelsLimits(t *testing.T) {
+	m := newModel(t, "$ echo one", "$ echo two", "Done.")
+	c, _ := agentComputer(t, m)
+	c.cfg.Agent.MaxTokens, c.cfg.Agent.MaxTurns = 1234, 1
+	exec(t, c, `agent -q "work"`, time.Minute)
+	sent := m.sent()
+	if len(sent) != 1 || !strings.Contains(sent[0], `"max_completion_tokens":1234`) {
+		t.Errorf("one request with the output limit 1234 should have been sent: %d requests, the first %.300q", len(sent), sent)
+	}
+}
+
+func TestAgentHelpIsPrintedWithoutStartingTheAgent(t *testing.T) {
+	c := newComputer(t, Config{Agent: &agent.Config{}})
+	for _, flag := range []string{"--help", "-h"} {
+		if got := run(t, c, "agent "+flag); !strings.Contains(got, `usage: agent [-q] [--json] "message"`) {
+			t.Errorf("agent %s: %q", flag, got)
+		}
+	}
+}
