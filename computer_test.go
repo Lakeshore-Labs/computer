@@ -17,9 +17,9 @@ import (
 	"github.com/Lakeshore-Labs/computer/wasm"
 )
 
-type store struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+type note struct {
+	ID    int    `json:"id"`
+	Title string `json:"title"`
 }
 
 // testTools is an MCP server in this process, whose tools are added by add, as an unnamed source.
@@ -44,12 +44,12 @@ func testSession(t *testing.T, add func(*mcp.Server)) *mcp.ClientSession {
 	return cs
 }
 
-func listStores(s *mcp.Server) {
-	mcp.AddTool(s, &mcp.Tool{Name: "stores_listStores", Description: "List the stores."},
+func listNotes(s *mcp.Server) {
+	mcp.AddTool(s, &mcp.Tool{Name: "notes_listNotes", Description: "List the notes."},
 		func(_ context.Context, _ *mcp.CallToolRequest, in struct {
 			MinID int `json:"minId,omitempty" jsonschema:"the lowest id to list"`
-		}) (*mcp.CallToolResult, []store, error) {
-			all := []store{{1, "Joliet"}, {2, "Peoria"}, {3, "Aurora"}}
+		}) (*mcp.CallToolResult, []note, error) {
+			all := []note{{1, "first"}, {2, "second"}, {3, "third"}}
 			return nil, all[max(in.MinID, 1)-1:], nil
 		})
 }
@@ -79,24 +79,24 @@ func newComputer(t *testing.T, cfg Config) *Computer {
 }
 
 func TestAToolIsACommand(t *testing.T) {
-	c := newComputer(t, Config{Tools: testTools(t, listStores)})
-	if got := run(t, c, "stores list-stores --min-id 2 | jq -r '.[].name' | sort | tr '\\n' ' '"); got != "Aurora Peoria" {
+	c := newComputer(t, Config{Tools: testTools(t, listNotes)})
+	if got := run(t, c, "notes list-notes --min-id 2 | jq -r '.[].title' | sort | tr '\\n' ' '"); got != "second third" {
 		t.Errorf("got %q", got)
 	}
-	if got := run(t, c, "stores list-stores --help"); !strings.Contains(got, "--min-id") || !strings.Contains(got, "the lowest id to list") {
+	if got := run(t, c, "notes list-notes --help"); !strings.Contains(got, "--min-id") || !strings.Contains(got, "the lowest id to list") {
 		t.Errorf("help does not describe the argument: %q", got)
 	}
 }
 
 func TestAToolAddedLaterIsACommand(t *testing.T) {
 	var server *mcp.Server
-	c := newComputer(t, Config{Tools: testTools(t, func(s *mcp.Server) { server = s; listStores(s) })})
-	run(t, c, "stores list-stores")
-	mcp.AddTool(server, &mcp.Tool{Name: "notes_count", Description: "Count the notes."},
+	c := newComputer(t, Config{Tools: testTools(t, func(s *mcp.Server) { server = s; listNotes(s) })})
+	run(t, c, "notes list-notes")
+	mcp.AddTool(server, &mcp.Tool{Name: "tasks_count", Description: "Count the tasks."},
 		func(context.Context, *mcp.CallToolRequest, struct{}) (*mcp.CallToolResult, map[string]int, error) {
 			return nil, map[string]int{"count": 7}, nil
 		})
-	if got := run(t, c, "notes count | jq .count"); got != "7" {
+	if got := run(t, c, "tasks count | jq .count"); got != "7" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -118,13 +118,13 @@ func python(t *testing.T) *Python {
 }
 
 func TestPythonCallsAToolAndSharesTheShellsFiles(t *testing.T) {
-	c := newComputer(t, Config{Tools: testTools(t, listStores), Python: python(t)})
+	c := newComputer(t, Config{Tools: testTools(t, listNotes), Python: python(t)})
 	run(t, c, `cat > names.py <<'EOF'
-from tools import stores
-open("names.txt", "w").write(",".join(s["name"] for s in stores.list_stores(min_id=2)))
+from tools import notes
+open("names.txt", "w").write(",".join(n["title"] for n in notes.list_notes(min_id=2)))
 EOF
 python3 names.py`)
-	if got := run(t, c, "cat names.txt"); got != "Peoria,Aurora" {
+	if got := run(t, c, "cat names.txt"); got != "second,third" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -171,8 +171,8 @@ func TestCurlReachesOnlyAllowedURLs(t *testing.T) {
 	}
 }
 
-func countNotes(s *mcp.Server) {
-	mcp.AddTool(s, &mcp.Tool{Name: "count_all", Description: "Count the notes."},
+func countTasks(s *mcp.Server) {
+	mcp.AddTool(s, &mcp.Tool{Name: "count_all", Description: "Count the tasks."},
 		func(context.Context, *mcp.CallToolRequest, struct{}) (*mcp.CallToolResult, map[string]int, error) {
 			return nil, map[string]int{"count": 7}, nil
 		})
@@ -180,12 +180,12 @@ func countNotes(s *mcp.Server) {
 
 func TestANamedServerIsOneCommandBesideAnother(t *testing.T) {
 	c := newComputer(t, Config{Python: python(t), Tools: []tools.Source{
-		{Session: testSession(t, listStores)}, {Name: "notes", Session: testSession(t, countNotes)},
+		{Session: testSession(t, listNotes)}, {Name: "tasks", Session: testSession(t, countTasks)},
 	}})
-	if got := run(t, c, "notes count-all | jq .count; stores list-stores | jq length"); got != "7\n3" {
+	if got := run(t, c, "tasks count-all | jq .count; notes list-notes | jq length"); got != "7\n3" {
 		t.Errorf("got %q", got)
 	}
-	if got := run(t, c, `python3 -c "from tools import notes, stores; print(notes.count_all()['count'], len(stores.list_stores()))"`); got != "7 3" {
+	if got := run(t, c, `python3 -c "from tools import notes, tasks; print(tasks.count_all()['count'], len(notes.list_notes()))"`); got != "7 3" {
 		t.Errorf("got %q", got)
 	}
 }

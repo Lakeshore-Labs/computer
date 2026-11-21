@@ -1,7 +1,7 @@
 // Package tools turns the tools of an MCP server into what a shell and a script can use: a command per group of
 // tools, with a subcommand per tool, and a Python package with a module per group and a function per tool.
 //
-// A tool named stores_listStores is the command `stores list-stores` and the function stores.list_stores().
+// A tool named notes_listNotes is the command `notes list-notes` and the function notes.list_notes().
 package tools
 
 import (
@@ -165,8 +165,8 @@ func Groups(tools []Tool) map[string][]Tool {
 	return groups
 }
 
-// words splits a name at its capitals and at anything that is not an ASCII letter or digit: listStores is list,
-// stores. Only ASCII is kept: Python and a shell disagree with Unicode about which other characters make a name.
+// words splits a name at its capitals and at anything that is not an ASCII letter or digit: listNotes is list,
+// notes. Only ASCII is kept: Python and a shell disagree with Unicode about which other characters make a name.
 func words(s string) []string {
 	var out []string
 	var w strings.Builder
@@ -191,7 +191,7 @@ func words(s string) []string {
 	return out
 }
 
-// Kebab is a name as a command line spells it: listStores is list-stores.
+// Kebab is a name as a command line spells it: listNotes is list-notes.
 func Kebab(s string) string { return strings.Join(words(s), "-") }
 
 // unique is name, or name with the first of 2, 3, ... after sep that makes it one not yet in taken; it is then
@@ -246,7 +246,7 @@ func Command(name string, sources []Source, group []Tool) commands.Command {
 			return commands.Exitf(inv, 2, "%s: no tool %q; run `%s --help`", name, args[0], name)
 		}
 		s := schemaOf(tool)
-		flags := map[string]string{} // --store-id and --storeId both name storeId
+		flags := map[string]string{} // --note-id and --noteId both name noteId
 		for p := range s.Properties {
 			flags[Kebab(p)], flags[p] = p, p
 		}

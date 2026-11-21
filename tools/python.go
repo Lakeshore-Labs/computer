@@ -43,8 +43,8 @@ func literal(s string) string {
 	return string(b)
 }
 
-// identifier is a name as Python spells it, and one not yet in taken: listStores is list_stores, a keyword or a
-// name that starts with a digit gets a leading x_, and a second list_stores is list_stores_2.
+// identifier is a name as Python spells it, and one not yet in taken: listNotes is list_notes, a keyword or a
+// name that starts with a digit gets a leading x_, and a second list_notes is list_notes_2.
 func identifier(s string, taken map[string]bool) string {
 	name := strings.Join(words(s), "_")
 	if name == "" || pythonKeywords[name] || name[0] >= '0' && name[0] <= '9' {
@@ -55,7 +55,7 @@ func identifier(s string, taken map[string]bool) string {
 
 // WritePython writes the tools as a Python package in the directory dir, replacing what is there: a module per
 // group and a function per tool, with the tool's description and arguments as the function's own. A script that
-// has dir's parent on its path writes `from <dir's name> import stores; stores.list_stores()`.
+// has dir's parent on its path writes `from <dir's name> import notes; notes.list_notes()`.
 func WritePython(dir string, tools []Tool) error {
 	if err := os.RemoveAll(dir); err != nil {
 		return err

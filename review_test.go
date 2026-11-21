@@ -101,7 +101,7 @@ print(hits)"`, 0)
 func TestAToolNameCannotBecomePythonCode(t *testing.T) {
 	evil := "x\"\"\"\nimport os\nos.environ['INJECTED'] = '1'\n\"\"\"_y"
 	c := newComputer(t, Config{Python: python(t), Tools: testTools(t, func(s *mcp.Server) {
-		listStores(s)
+		listNotes(s)
 		s.AddTool(&mcp.Tool{Name: evil, Description: `Match C:\Users\name and """quotes"""`, InputSchema: map[string]any{"type": "object"}},
 			func(context.Context, *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 				return &mcp.CallToolResult{}, nil
@@ -109,8 +109,8 @@ func TestAToolNameCannotBecomePythonCode(t *testing.T) {
 	})})
 	got := run(t, c, `python3 -c "
 import os
-from tools import stores
-print(os.environ.get('INJECTED'), len(stores.list_stores()))"`)
+from tools import notes
+print(os.environ.get('INJECTED'), len(notes.list_notes()))"`)
 	if got != "None 3" {
 		t.Errorf("got %q", got)
 	}
@@ -139,8 +139,8 @@ func TestTheDeadlineReachesASleepingOrBlockedScript(t *testing.T) {
 }
 
 func TestAToolCommandSurvivesOddArguments(t *testing.T) {
-	c := newComputer(t, Config{Tools: testTools(t, listStores)})
-	if got := run(t, c, "stores list-stores --json null --min-id 2 | jq length; echo after"); got != "2\nafter" {
+	c := newComputer(t, Config{Tools: testTools(t, listNotes)})
+	if got := run(t, c, "notes list-notes --json null --min-id 2 | jq length; echo after"); got != "2\nafter" {
 		t.Errorf("got %q", got)
 	}
 }
@@ -161,9 +161,9 @@ func TestGroupsWhoseNamesSpellTheSameBothGetACommand(t *testing.T) {
 }
 
 func TestTheShellOutlivesAnMCPServer(t *testing.T) {
-	cs := testSession(t, listStores)
+	cs := testSession(t, listNotes)
 	c := newComputer(t, Config{Tools: []tools.Source{{Session: cs}}})
-	run(t, c, "stores list-stores")
+	run(t, c, "notes list-notes")
 	_ = cs.Close()
 	if got := run(t, c, "echo still here"); got != "still here" {
 		t.Errorf("got %q", got)
@@ -258,8 +258,8 @@ func TestToolsWhoseNamesSpellTheSameAllStayReachable(t *testing.T) {
 			}
 		}
 		object := map[string]any{"type": "object"}
-		s.AddTool(&mcp.Tool{Name: "crm_listStores", InputSchema: object}, answer("camel"))
-		s.AddTool(&mcp.Tool{Name: "crm_list_stores", InputSchema: object}, answer("snake"))
+		s.AddTool(&mcp.Tool{Name: "crm_listNotes", InputSchema: object}, answer("camel"))
+		s.AddTool(&mcp.Tool{Name: "crm_list_notes", InputSchema: object}, answer("snake"))
 		s.AddTool(&mcp.Tool{Name: "crm_٣x", InputSchema: object}, answer("digit"))
 		s.AddTool(&mcp.Tool{Name: "call_now", InputSchema: object}, answer("call"))
 		s.AddTool(&mcp.Tool{Name: "fooBar_a", InputSchema: object}, answer("a"))
@@ -267,13 +267,13 @@ func TestToolsWhoseNamesSpellTheSameAllStayReachable(t *testing.T) {
 		s.AddTool(&mcp.Tool{Name: "crm_both", InputSchema: map[string]any{"type": "object",
 			"properties": map[string]any{"a_b": map[string]any{"type": "string"}, "aB": map[string]any{"type": "string"}, "class": map[string]any{"type": "string"}}}}, answer("both"))
 	})})
-	if got := run(t, c, "crm list-stores; crm list-stores-2"); got != "camel\nsnake" {
+	if got := run(t, c, "crm list-notes; crm list-notes-2"); got != "camel\nsnake" {
 		t.Errorf("shell: got %q", got)
 	}
 	got := run(t, c, `python3 -c "
 import tools
 from tools import crm, call_2, foo_bar, foo_bar_2
-print(crm.list_stores(), crm.list_stores_2(), crm.x(), crm.both(a_b='1', a_b_2='2', x_class='3'), call_2.now(), foo_bar.b() + foo_bar_2.a(), callable(tools.call))"`)
+print(crm.list_notes(), crm.list_notes_2(), crm.x(), crm.both(a_b='1', a_b_2='2', x_class='3'), call_2.now(), foo_bar.b() + foo_bar_2.a(), callable(tools.call))"`)
 	if got != "camel snake digit both call ba True" {
 		t.Errorf("python: got %q", got)
 	}
