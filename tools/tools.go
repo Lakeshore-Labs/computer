@@ -7,11 +7,12 @@ package tools
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"path"
+	"os"
 	"slices"
 	"sort"
 	"strconv"
@@ -19,7 +20,6 @@ import (
 
 	"github.com/ewhauser/gbash/commands"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/spf13/afero"
 )
 
 // A Source is one MCP server. With a Name, the server is one command and one Python module of that name, and
@@ -28,8 +28,6 @@ import (
 type Source struct {
 	Name    string
 	Session *mcp.ClientSession
-	// Tmp is where a result that is a file is saved, the computer's /tmp, which the computer sets when it is nil.
-	Tmp afero.Fs
 }
 
 // A Tool is a listed tool: the group it is in, its name within the group, and which source serves it.
@@ -60,36 +58,40 @@ func List(ctx context.Context, sources []Source) ([]Tool, error) {
 	return tools, nil
 }
 
-// Call calls one tool of src and returns its result as JSON: the structured result when the tool gives one, else
-// its text. A result that is a file, such as an image, is saved in src.Tmp and named by its path in the computer,
-// a line each after the text, or under "_files" in a structured result; a link to a resource is named by its URI.
-func Call(ctx context.Context, src Source, name string, arguments json.RawMessage) (json.RawMessage, error) {
+// Call calls one tool and returns its result as JSON: the structured result when the tool gives one, else its text.
+// A result that is a file, such as an image, is written to /tmp through files, the filesystem of the command that
+// made the call, so the shell's rules for a write hold; it is named by its path, a line each after the text, or
+// under "_files" in a structured result. A link to a resource is named by its URI.
+func Call(ctx context.Context, cs *mcp.ClientSession, files *commands.CommandFS, name string, arguments json.RawMessage) (json.RawMessage, error) {
 	if len(arguments) == 0 {
 		arguments = json.RawMessage("{}")
 	}
-	res, err := src.Session.CallTool(ctx, &mcp.CallToolParams{Name: name, Arguments: arguments})
+	res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: name, Arguments: arguments})
 	if err != nil {
 		return nil, err
 	}
 	var text strings.Builder
-	var files []string
+	var saved []string
 	save := func(data []byte, mimeType string) error {
-		if res.IsError {
+		if res.IsError { // a failed call is told by its text alone
 			return nil
 		}
-		if src.Tmp == nil {
+		if files == nil {
 			return fmt.Errorf("the tool returned a file (%s), and there is nowhere to save it", mimeType)
 		}
-		f, err := afero.TempFile(src.Tmp, "/", Kebab(name)+"-*"+extension(mimeType))
+		var unique [4]byte
+		_, _ = rand.Read(unique[:])
+		path := fmt.Sprintf("/tmp/%s-%x%s", Kebab(name), unique, extension(mimeType))
+		f, err := files.OpenFile(ctx, path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 		if err != nil {
 			return err
 		}
 		_, err = f.Write(data)
 		if err = errors.Join(err, f.Close()); err != nil {
-			_ = src.Tmp.Remove(f.Name()) // not left half written
+			_ = files.Remove(ctx, path, false) // not left half written
 			return err
 		}
-		files = append(files, "/tmp/"+path.Base(f.Name())) // a host directory's file is named by its host path
+		saved = append(saved, path)
 		return nil
 	}
 	for _, c := range res.Content {
@@ -102,7 +104,7 @@ func Call(ctx context.Context, src Source, name string, arguments json.RawMessag
 		case *mcp.AudioContent:
 			err = save(c.Data, c.MIMEType)
 		case *mcp.ResourceLink:
-			files = append(files, c.URI)
+			saved = append(saved, c.URI)
 		case *mcp.EmbeddedResource:
 			if c.Resource == nil {
 				continue
@@ -120,11 +122,11 @@ func Call(ctx context.Context, src Source, name string, arguments json.RawMessag
 	}
 	if res.StructuredContent == nil {
 		out := text.String()
-		if len(files) > 0 {
+		if len(saved) > 0 {
 			if out != "" && !strings.HasSuffix(out, "\n") {
 				out += "\n"
 			}
-			out += strings.Join(files, "\n")
+			out += strings.Join(saved, "\n")
 		}
 		return json.Marshal(out)
 	}
@@ -138,7 +140,7 @@ func Call(ctx context.Context, src Source, name string, arguments json.RawMessag
 	if json.Unmarshal(structured, &wrapped) == nil && len(wrapped) == 1 && wrapped["result"] != nil {
 		result = wrapped["result"]
 	}
-	if len(files) == 0 {
+	if len(saved) == 0 {
 		return result, nil
 	}
 	// The files are named under _files, a key no tool's own result is expected to have: in the result when it is
@@ -147,7 +149,7 @@ func Call(ctx context.Context, src Source, name string, arguments json.RawMessag
 	if json.Unmarshal(result, &object) != nil || object == nil {
 		object = map[string]any{"result": result}
 	}
-	object["_files"] = files
+	object["_files"] = saved
 	return json.Marshal(object)
 }
 
@@ -164,9 +166,12 @@ func extension(mimeType string) string {
 
 type sessionKey struct{}
 
-// With returns a context whose programs' host calls reach the tools of sources.
-func With(ctx context.Context, sources []Source) context.Context {
-	return context.WithValue(ctx, sessionKey{}, sources)
+type filesKey struct{}
+
+// With returns a context whose programs' host calls reach the tools of sources, and save a result that is a file
+// through files, the filesystem of the command that runs the program.
+func With(ctx context.Context, sources []Source, files *commands.CommandFS) context.Context {
+	return context.WithValue(context.WithValue(ctx, sessionKey{}, sources), filesKey{}, files)
 }
 
 // Host answers a program's host call (see wasm.Program.Host). The request is {"source": index, "tool": name,
@@ -175,6 +180,7 @@ func With(ctx context.Context, sources []Source) context.Context {
 func Host(ctx context.Context, request []byte) []byte {
 	reply := func(v map[string]any) []byte { b, _ := json.Marshal(v); return b }
 	sources, _ := ctx.Value(sessionKey{}).([]Source)
+	files, _ := ctx.Value(filesKey{}).(*commands.CommandFS)
 	var in struct {
 		Source    int
 		Tool      string
@@ -183,7 +189,7 @@ func Host(ctx context.Context, request []byte) []byte {
 	if err := json.Unmarshal(request, &in); err != nil || in.Tool == "" || in.Source < 0 || in.Source >= len(sources) {
 		return reply(map[string]any{"ok": false, "error": "no tool to call"})
 	}
-	result, err := Call(ctx, sources[in.Source], in.Tool, in.Arguments)
+	result, err := Call(ctx, sources[in.Source].Session, files, in.Tool, in.Arguments)
 	if err != nil {
 		return reply(map[string]any{"ok": false, "error": err.Error()})
 	}
@@ -433,7 +439,7 @@ func Command(name string, sources []Source, group []Tool) commands.Command {
 			}
 		}
 		arguments, _ := json.Marshal(values)
-		result, err := Call(ctx, sources[tool.Source], tool.Name, arguments)
+		result, err := Call(ctx, sources[tool.Source].Session, inv.FS, tool.Name, arguments)
 		if err != nil {
 			return commands.Exitf(inv, 1, "%s %s: %v", name, args[0], err)
 		}
