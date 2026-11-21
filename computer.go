@@ -418,7 +418,7 @@ func (c *Computer) python(name string, mounts []Mount) commands.Command {
 				break script
 			}
 		}
-		code, err := c.cfg.Python.module.Run(tools.With(ctx, c.cfg.Tools), wasm.Run{
+		code, err := c.cfg.Python.module.Run(tools.With(ctx, c.cfg.Tools, inv.FS), wasm.Run{
 			Args: args, Env: env,
 			Stdin: stdin, Stdout: inv.Stdout, Stderr: inv.Stderr, Dirs: mounts,
 		})

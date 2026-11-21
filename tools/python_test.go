@@ -81,3 +81,11 @@ func TestThePackageIsNeverMissingWhileItIsRewritten(t *testing.T) {
 		}
 	}
 }
+
+func TestExtensionIsTheSubtypeAndNothingElse(t *testing.T) {
+	for mimeType, want := range map[string]string{"IMAGE/JPEG; q=1": ".jpeg", "image/png": ".png", "image/svg+xml": ".svg-xml", "../../x": ".x", "": ""} {
+		if got := extension(mimeType); got != want {
+			t.Errorf("extension(%q) = %q, want %q", mimeType, got, want)
+		}
+	}
+}
