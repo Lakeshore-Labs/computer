@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"slices"
 	"sort"
 	"strings"
 	"syscall"
@@ -93,6 +94,9 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 	}
 }
 
+// quote is word as one word of a shell command, whatever it holds.
+func quote(word string) string { return "'" + strings.ReplaceAll(word, "'", `'\''`) + "'" }
+
 // candidates is what could complete word, the last word of before: a command when it is the first word, a tool or
 // one of its arguments after a command that calls tools, and otherwise a file.
 func candidates(ctx context.Context, c *computer.Computer, cwd, before, word string) []string {
@@ -111,7 +115,15 @@ func candidates(ctx context.Context, c *computer.Computer, cwd, before, word str
 	case strings.HasPrefix(word, "-") || len(words) == 1:
 		// A command that calls tools lists them, and a tool its arguments, in the first word of its help's
 		// indented lines. Any other command's help is not read this way, and its arguments complete as files.
-		help := run(strings.Join(append(words[:min(len(words), 2)], "--help"), " ") + " 2>/dev/null")
+		// Only such a command is run: any other, such as agent, would do its work with --help as its argument.
+		if !slices.Contains(c.ToolCommands(), words[0]) {
+			break
+		}
+		probe := quote(words[0])
+		if len(words) > 1 {
+			probe += " " + quote(words[1])
+		}
+		help := run(probe + " --help 2>/dev/null")
 		if len(help) > 0 && strings.HasPrefix(help[0], "usage: "+words[0]+" <tool>") || len(words) > 1 && len(help) > 0 && strings.HasPrefix(help[0], words[0]+" "+words[1]+":") {
 			for _, line := range help[1:] {
 				if fields := strings.Fields(line); strings.HasPrefix(line, "  ") && len(fields) > 0 {
@@ -121,7 +133,7 @@ func candidates(ctx context.Context, c *computer.Computer, cwd, before, word str
 		}
 	}
 	if all == nil {
-		all = run("compgen -f -- '" + strings.ReplaceAll(word, "'", `'\''`) + "'")
+		all = run("compgen -f -- " + quote(word))
 	}
 	var found []string
 	for _, candidate := range all {

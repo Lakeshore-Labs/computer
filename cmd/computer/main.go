@@ -21,7 +21,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
@@ -124,8 +123,11 @@ func run(ctx context.Context) error {
 		cfg.Tools = append(cfg.Tools, tools.Source{Name: name, Session: cs})
 	}
 	if *python != "" {
-		cache, _ := os.UserCacheDir()
-		p, err := computer.LoadPython(ctx, *python, *pythonLib, wasm.Program{MemoryPages: 8192, CacheDir: cache + "/computer", HostModule: *pythonHost, Unstoppable: *pythonFast})
+		cache, err := cacheDir(cfg.Mounts)
+		if err != nil {
+			return err
+		}
+		p, err := computer.LoadPython(ctx, *python, *pythonLib, wasm.Program{MemoryPages: 8192, CacheDir: cache, HostModule: *pythonHost, Unstoppable: *pythonFast})
 		if err != nil {
 			return fmt.Errorf("-python: %w", err)
 		}
@@ -136,10 +138,13 @@ func run(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("-agent-engine: %w", err)
 		}
-		cache, _ := os.UserCacheDir()
+		cache, err := cacheDir(cfg.Mounts)
+		if err != nil {
+			return err
+		}
 		// The agent can be stopped where it stands: what the model asks of it, such as many edits of a large
 		// file, can keep it computing long past the time a caller allows.
-		module, err := wasm.Compile(ctx, wasm.Program{Binary: engine, MemoryPages: 8192, CacheDir: cache + "/computer"})
+		module, err := wasm.Compile(ctx, wasm.Program{Binary: engine, MemoryPages: 8192, CacheDir: cache})
 		if err != nil {
 			return fmt.Errorf("-agent-engine: %w", err)
 		}
@@ -148,14 +153,14 @@ func run(ctx context.Context) error {
 		stateDir := *agentState
 		if stateDir == "" && len(cfg.Mounts) > 0 {
 			folder, _ := filepath.Abs(cfg.Mounts[0].Host)
-			stateDir = fmt.Sprintf("%s/computer/agent/%x", cache, sha256.Sum256([]byte(folder)))
+			stateDir = fmt.Sprintf("%s/agent/%x", cache, sha256.Sum256([]byte(folder)))
 		}
 		if stateDir != "" {
-			if err := os.MkdirAll(stateDir, 0o700); err != nil {
+			if err := outside(stateDir, cfg.Mounts); err != nil {
 				return fmt.Errorf("-agent-state: %w", err)
 			}
 		}
-		cfg.Agent = &agent.Config{Engine: module, Script: *agentDir, Cache: cache + "/computer/agent-bytecode", State: stateDir, ModelURL: *modelURL, ModelKey: os.Getenv("COMPUTER_MODEL_KEY"), Model: *modelName}
+		cfg.Agent = &agent.Config{Engine: module, Script: *agentDir, Cache: cache + "/agent-bytecode", State: stateDir, ModelURL: *modelURL, ModelKey: os.Getenv("COMPUTER_MODEL_KEY"), Model: *modelName}
 	}
 	c, err := computer.New(cfg)
 	if err != nil {
@@ -186,6 +191,51 @@ func run(ctx context.Context) error {
 		os.Exit(code)
 	}
 	return nil
+}
+
+// cacheDir is where compiled programs and, by default, the agent's conversation are kept. What is compiled there
+// is native code that this process runs, so a script must not be able to write it.
+func cacheDir(mounts []computer.Mount) (string, error) {
+	dir, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+	dir = filepath.Join(dir, "computer")
+	return dir, outside(dir, mounts)
+}
+
+// outside makes dir and reports, as an error, that it is within a mounted host directory or holds one, where
+// what runs in the computer could read and write it.
+func outside(dir string, mounts []computer.Mount) error {
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return err
+	}
+	dir, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return err
+	}
+	for _, m := range mounts {
+		if m.Host == "" {
+			continue
+		}
+		host, err := filepath.Abs(m.Host)
+		if err == nil {
+			host, err = filepath.EvalSymlinks(host)
+		}
+		if err != nil {
+			return err
+		}
+		if within(dir, host) || within(host, dir) {
+			return fmt.Errorf("%s must not be inside the mounted folder %s, nor hold it: what runs in the computer could change it", dir, host)
+		}
+	}
+	return nil
+}
+
+// within reports whether p is dir or below it.
+func within(p, dir string) bool {
+	rel, err := filepath.Rel(dir, p)
+	return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
 }
 
 // isName reports whether s can name an MCP server: letters, digits, hyphens and underscores.
@@ -221,16 +271,10 @@ func serve(ctx context.Context, c *computer.Computer, cfg computer.Config, limit
 		description += ", and python3"
 	}
 	if len(cfg.Tools) > 0 {
-		listed, err := tools.List(ctx, cfg.Tools)
-		if err != nil {
+		if _, err := c.Session(ctx); err != nil {
 			return err
 		}
-		var groups []string
-		for group := range tools.Groups(listed) {
-			groups = append(groups, tools.Kebab(group))
-		}
-		sort.Strings(groups)
-		description += ". These commands call tools; run one with --help to see what it does: " + strings.Join(groups, ", ")
+		description += ". These commands call tools; run one with --help to see what it does: " + strings.Join(c.ToolCommands(), ", ")
 		if cfg.Python != nil {
 			description += ". In Python the same tools are the package `tools`: from tools import <command>"
 		}

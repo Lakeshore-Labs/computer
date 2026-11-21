@@ -67,10 +67,15 @@ func (d *dirFS) OpenFile(p string, flag sys.Oflag, perm fs.FileMode) (sys.File, 
 		mode = os.O_WRONLY
 	}
 	for bit, osFlag := range map[sys.Oflag]int{sys.O_APPEND: os.O_APPEND, sys.O_CREAT: os.O_CREATE, sys.O_EXCL: os.O_EXCL,
-		sys.O_TRUNC: os.O_TRUNC, sys.O_SYNC: os.O_SYNC, sys.O_DSYNC: os.O_SYNC, sys.O_RSYNC: os.O_SYNC} {
+		sys.O_TRUNC: os.O_TRUNC} {
 		if flag&bit != 0 {
 			mode |= osFlag
 		}
+	}
+	// A read stays exactly O_RDONLY: afero's memory and read-only filesystems hand out a file that can be written
+	// for any other flags, and syncing means nothing to a read.
+	if mode != os.O_RDONLY && flag&(sys.O_SYNC|sys.O_DSYNC|sys.O_RSYNC) != 0 {
+		mode |= os.O_SYNC
 	}
 	f, err := d.fs.OpenFile(name, mode, perm)
 	if err != nil {
@@ -155,6 +160,11 @@ func (d *dirFS) remove(p string, dir bool) sys.Errno {
 			return sys.ENOTDIR
 		case !dir && info.IsDir():
 			return sys.EISDIR
+		}
+		if dir { // afero's memory filesystem removes a directory that has entries and strands them
+			if entries, _ := afero.ReadDir(d.fs, "/"+p); len(entries) > 0 {
+				return sys.ENOTEMPTY
+			}
 		}
 		return d.fs.Remove("/" + p)
 	})

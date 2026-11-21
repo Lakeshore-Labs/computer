@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"sync"
+	"syscall"
 	"time"
 
 	gbfs "github.com/ewhauser/gbash/fs"
@@ -74,7 +75,9 @@ func (s *shellFS) Readlink(_ context.Context, name string) (string, error) {
 	return "", &fs.PathError{Op: "readlink", Path: name, Err: fs.ErrInvalid}
 }
 
-// Realpath is name itself once it is known to exist: the filesystem resolves names, and none leads out of it.
+// Realpath is name itself once it is known to exist: the filesystem resolves names, and none leads out of it. So
+// the shell follows a link that is already in a mount, to wherever in that mount it leads, and gbash's policy
+// against links refuses only one whose target is missing. What keeps a link from leading out is the filesystem.
 func (s *shellFS) Realpath(ctx context.Context, name string) (string, error) {
 	if _, err := s.Lstat(ctx, name); err != nil {
 		return "", err
@@ -113,6 +116,10 @@ func (s *shellFS) Remove(_ context.Context, name string, recursive bool) error {
 	return s.change("remove", name, func() error {
 		if recursive {
 			return s.fs.RemoveAll(name)
+		}
+		// afero's memory filesystem removes a directory that has entries and strands them.
+		if entries, _ := afero.ReadDir(s.fs, name); len(entries) > 0 {
+			return &fs.PathError{Op: "remove", Path: name, Err: syscall.ENOTEMPTY}
 		}
 		return s.fs.Remove(name)
 	})

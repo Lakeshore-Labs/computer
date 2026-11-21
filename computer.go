@@ -91,6 +91,7 @@ type Computer struct {
 	mu      sync.Mutex
 	listed  [sha256.Size]byte // the tools the session was built from
 	session *gbash.Session
+	calling []string          // the commands that call tools, as the session names them
 	env     map[string]string // the shell's exported variables and working directory after the last Exec
 }
 
@@ -215,6 +216,13 @@ func (c *Computer) Session(ctx context.Context) (*gbash.Session, error) {
 	return c.session, nil
 }
 
+// ToolCommands are the commands that call tools, as the shell last built names them.
+func (c *Computer) ToolCommands() []string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.calling
+}
+
 // Options is the computer as gbash options, with the tools as they are now, for gbash's own front ends: its
 // command-line program, its server and its tool for a model.
 func (c *Computer) Options(ctx context.Context) ([]gbash.Option, error) {
@@ -262,6 +270,7 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 		}
 		names = append(names, name)
 	}
+	c.calling = names
 	if c.cfg.Agent != nil {
 		a := *c.cfg.Agent
 		a.Mounts, a.Home, a.State = mounts, c.cfg.WorkDir, c.state

@@ -81,6 +81,10 @@ func Command(name string, cfg Config) commands.Command {
 		if entry == "" {
 			entry = "agent.js"
 		}
+		compiled, err := bytecode(ctx, cfg, entry)
+		if err != nil {
+			return commands.Exitf(inv, 1, "%s: %v", name, err)
+		}
 		toAgent, replies, err := os.Pipe()
 		if err != nil {
 			return err
@@ -118,10 +122,6 @@ func Command(name string, cfg Config) commands.Command {
 			kill()
 		}()
 
-		compiled, err := bytecode(ctx, cfg, entry)
-		if err != nil {
-			return commands.Exitf(inv, 1, "%s: %v", name, err)
-		}
 		dirs := append(cfg.Mounts[:len(cfg.Mounts):len(cfg.Mounts)], wasm.Dir{Guest: scripts, Host: compiled, ReadOnly: true})
 		if cfg.State != "" {
 			dirs = append(dirs, wasm.Dir{Guest: state, Host: cfg.State})
@@ -259,6 +259,9 @@ func bytecode(ctx context.Context, cfg Config, entry string) (string, error) {
 	dir := filepath.Join(cache, fmt.Sprintf("%x", sha256.Sum256(append(engine[:], source...))))
 	if _, err := os.Stat(filepath.Join(dir, entry+".bc")); err == nil {
 		return dir, nil
+	}
+	if err := os.MkdirAll(cache, 0o700); err != nil {
+		return "", err
 	}
 	work, err := os.MkdirTemp(cache, "compiling")
 	if err != nil {
