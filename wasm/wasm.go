@@ -1,0 +1,158 @@
+// Package wasm runs a WebAssembly program built for WASI the way a command runs: with arguments, an environment,
+// standard streams and directories, to an exit code. The program reaches nothing else, except through the one host
+// call its embedder chooses to answer.
+package wasm
+
+import (
+	"context"
+	"crypto/rand"
+	"errors"
+	"io"
+	"sync"
+	"time"
+
+	"github.com/tetratelabs/wazero"
+	"github.com/tetratelabs/wazero/api"
+	"github.com/tetratelabs/wazero/experimental/sysfs"
+	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
+	"github.com/tetratelabs/wazero/sys"
+)
+
+// A Program is a WASI binary and what it is allowed.
+type Program struct {
+	Binary      []byte
+	Features    api.CoreFeatures // what the binary needs beyond WebAssembly 2.0, such as exception handling
+	MemoryPages uint32           // the most memory one run may hold, in 64 KiB pages; 0 is wazero's limit of 4 GiB
+	CacheDir    string           // where compiled code is kept between processes; empty keeps none
+
+	// Unstoppable runs the program at full speed and gives up stopping it: a run then ends only when the program
+	// does, whatever its context. Stopping costs a call into Go on every loop iteration, which slows an interpreter
+	// such as CPython three to four times. Set it only for a program trusted to end.
+	Unstoppable bool
+
+	// Host answers the program's host call, and HostModule is the module name the binary imports it from. The
+	// module exports call(ptr, len) -> replyLen, which hands Host a message from the program's memory, and
+	// read(ptr), which copies the reply into it. Nil gives the program no host call.
+	HostModule string
+	Host       func(ctx context.Context, request []byte) []byte
+}
+
+// A Module is a compiled Program. It is safe for concurrent runs, each with its own memory.
+type Module struct {
+	runtime wazero.Runtime
+	code    wazero.CompiledModule
+	replies sync.Map // a running instance to the reply it has not read yet
+}
+
+// Compile compiles p once, for every run of it.
+func Compile(ctx context.Context, p Program) (*Module, error) {
+	// ponytail: a goroutine cannot be killed, so wazero stops a run by having it check at every loop. The upgrade
+	// that keeps both speed and the stop is to run programs in a worker process, which the system can kill.
+	cfg := wazero.NewRuntimeConfig().WithCoreFeatures(api.CoreFeaturesV2 | p.Features).WithCloseOnContextDone(!p.Unstoppable).
+		WithDebugInfoEnabled(false) // or a stopped run spends seconds reading the binary's debug data for a stack trace
+	if p.MemoryPages > 0 {
+		cfg = cfg.WithMemoryLimitPages(p.MemoryPages)
+	}
+	if p.CacheDir != "" {
+		cache, err := wazero.NewCompilationCacheWithDir(p.CacheDir)
+		if err != nil {
+			return nil, err
+		}
+		cfg = cfg.WithCompilationCache(cache)
+	}
+	m := &Module{runtime: wazero.NewRuntimeWithConfig(ctx, cfg)}
+	if _, err := wasi_snapshot_preview1.Instantiate(ctx, m.runtime); err != nil {
+		return nil, errors.Join(err, m.Close(ctx))
+	}
+	if p.Host != nil {
+		_, err := m.runtime.NewHostModuleBuilder(p.HostModule).
+			NewFunctionBuilder().WithFunc(func(ctx context.Context, mod api.Module, ptr, n uint32) uint32 {
+			request, ok := mod.Memory().Read(ptr, n)
+			if !ok {
+				panic("host call: the message is outside the program's memory")
+			}
+			reply := p.Host(ctx, request)
+			m.replies.Store(mod, reply)
+			return uint32(len(reply))
+		}).Export("call").
+			NewFunctionBuilder().WithFunc(func(_ context.Context, mod api.Module, ptr uint32) {
+			reply, _ := m.replies.LoadAndDelete(mod)
+			if b, _ := reply.([]byte); !mod.Memory().Write(ptr, b) {
+				panic("host call: the reply does not fit the program's memory")
+			}
+		}).Export("read").
+			Instantiate(ctx)
+		if err != nil {
+			return nil, errors.Join(err, m.Close(ctx))
+		}
+	}
+	var err error
+	if m.code, err = m.runtime.CompileModule(ctx, p.Binary); err != nil {
+		return nil, errors.Join(err, m.Close(ctx))
+	}
+	return m, nil
+}
+
+// Close frees the compiled code.
+func (m *Module) Close(ctx context.Context) error { return m.runtime.Close(ctx) }
+
+// A Dir is a host directory the program sees at the path Guest.
+type Dir struct {
+	Guest, Host string
+	ReadOnly    bool
+}
+
+// A Run is one execution of a program. Args includes the program's own name.
+type Run struct {
+	Args           []string
+	Env            map[string]string
+	Stdin          io.Reader
+	Stdout, Stderr io.Writer
+	Dirs           []Dir
+}
+
+// Run runs the program to its end and returns its exit code. When ctx ends first the program is stopped and the
+// error is ctx's.
+func (m *Module) Run(ctx context.Context, r Run) (int, error) {
+	fs := wazero.NewFSConfig()
+	for _, d := range r.Dirs {
+		dir, err := newRooted(d.Host, d.ReadOnly)
+		if err != nil {
+			return 70, err
+		}
+		defer dir.root.Close()
+		if d.ReadOnly {
+			fs = fs.(sysfs.FSConfig).WithSysFSMount(&sysfs.ReadFS{FS: dir}, d.Guest)
+		} else {
+			fs = fs.(sysfs.FSConfig).WithSysFSMount(dir, d.Guest)
+		}
+	}
+	// The empty name lets any number of instances of the one module run at once.
+	cfg := wazero.NewModuleConfig().WithName("").WithArgs(r.Args...).WithFSConfig(fs).
+		WithStdin(r.Stdin).WithStdout(r.Stdout).WithStderr(r.Stderr).
+		WithSysWalltime().WithSysNanotime().WithRandSource(rand.Reader).
+		WithNanosleep(func(ns int64) { // a sleep the run's deadline can end, which time.Sleep is not
+			select {
+			case <-time.After(time.Duration(ns)):
+			case <-ctx.Done():
+			}
+		})
+	for k, v := range r.Env {
+		cfg = cfg.WithEnv(k, v)
+	}
+	mod, err := m.runtime.InstantiateModule(ctx, m.code, cfg)
+	if mod != nil {
+		m.replies.Delete(mod)
+		_ = mod.Close(ctx)
+	}
+	var exit *sys.ExitError
+	switch {
+	case ctx.Err() != nil:
+		return 124, ctx.Err()
+	case errors.As(err, &exit):
+		return int(exit.ExitCode()), nil
+	case err != nil:
+		return 70, err
+	}
+	return 0, nil
+}

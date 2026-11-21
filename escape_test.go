@@ -1,0 +1,47 @@
+package computer
+
+import (
+	"context"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/ewhauser/gbash"
+)
+
+func TestAProgramCannotFollowALinkOutOfAMount(t *testing.T) {
+	outside := filepath.Join(t.TempDir(), "secret.txt")
+	if err := os.WriteFile(outside, []byte("TOPSECRET"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	home := t.TempDir()
+	rel, err := filepath.Rel(home, outside)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// A link a host process left in the mount, which neither the shell nor a program made.
+	if err := os.Symlink(outside, filepath.Join(home, "planted")); err != nil {
+		t.Fatal(err)
+	}
+	c := newComputer(t, Config{Python: python(t), Mounts: []Mount{{Guest: "/data", Host: home}}})
+	for name, script := range map[string]string{
+		"python links by a relative path": `cd /data; python3 -c "import os; os.symlink('` + rel + `', 'r'); print(open('r').read())"`,
+		"python reads a planted link":     `cd /data; python3 -c "print(open('planted').read())"`,
+		"shell reads a planted link":      `cat /data/planted`,
+		"python makes the link":           `python3 -c "import os; os.symlink('` + outside + `', 'a'); print(open('a').read())"`,
+		"shell makes the link":            `ln -s ` + outside + ` b; python3 -c "print(open('b').read())"`,
+		"shell reads the link":            `ln -s ` + outside + ` c; cat c`,
+		"relative climb":                  `python3 -c "print(open('../../../../../../../../` + outside + `').read())"`,
+	} {
+		res, err := c.Exec(context.Background(), &gbash.ExecutionRequest{Script: script})
+		if err != nil {
+			t.Fatal(err)
+		}
+		lines := strings.Split(strings.TrimSpace(res.Stderr), "\n")
+		t.Logf("%s: exit %d stdout %q stderr %q", name, res.ExitCode, res.Stdout, lines[len(lines)-1])
+		if strings.Contains(res.Stdout, "TOPSECRET") {
+			t.Errorf("%s: read a file outside every mount", name)
+		}
+	}
+}
