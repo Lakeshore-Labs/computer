@@ -13,7 +13,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
-	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -31,8 +30,6 @@ import (
 
 	"github.com/ewhauser/gbash"
 	"github.com/ewhauser/gbash/cli"
-	"github.com/ewhauser/gbash/contrib/codingtools"
-	gbfs "github.com/ewhauser/gbash/fs"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"golang.org/x/term"
 
@@ -275,7 +272,11 @@ func run(ctx context.Context) error {
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if flag.Arg(0) == "mcp" {
-		return serve(ctx, c, cfg, *timeout)
+		server, err := c.MCPServer(ctx, *timeout)
+		if err != nil {
+			return err
+		}
+		return server.Run(ctx, &mcp.StdioTransport{})
 	}
 	opts, err := c.Options(ctx)
 	if err != nil {
@@ -365,131 +366,4 @@ func within(p, dir string) bool {
 // isName reports whether s can name an MCP server: letters, digits, hyphens and underscores.
 func isName(s string) bool {
 	return s != "" && strings.Trim(s, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_") == ""
-}
-
-// writable reports, as an error, a path the file tools may not write: one outside every writable mount. The shell
-// is held to the same rule by the computer; the file tools reach the filesystem directly.
-func writable(c *computer.Computer, workDir, p string) error {
-	if p == "~" || strings.HasPrefix(p, "~/") { // the file tools read a leading ~ as the working directory
-		p = workDir + p[1:]
-	}
-	p = gbfs.Resolve(workDir, p)
-	for _, m := range c.Mounts() {
-		if !m.ReadOnly && (p == m.Guest || strings.HasPrefix(p, strings.TrimSuffix(m.Guest, "/")+"/")) {
-			return nil
-		}
-	}
-	return fmt.Errorf("%s is outside the writable folders", p)
-}
-
-// bashInput is the input of the bash tool, the same as gbash's bash tool takes.
-type bashInput struct {
-	Commands  string `json:"commands,omitempty" jsonschema:"Bash commands to execute."`
-	Script    string `json:"script,omitempty" jsonschema:"The same as commands, for callers that send script."`
-	TimeoutMS int64  `json:"timeout_ms,omitempty" jsonschema:"Per-call timeout in milliseconds."`
-}
-
-// serve offers the computer to an agent as an MCP server on stdin and stdout. The tools and their wording are
-// gbash's: the input of its bash tool, and codingtools' read, edit and write.
-func serve(ctx context.Context, c *computer.Computer, cfg computer.Config, limit time.Duration) error {
-	server := mcp.NewServer(&mcp.Implementation{Name: "computer"}, nil)
-	text := func(s string, failed bool) (*mcp.CallToolResult, error) {
-		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: s}}, IsError: failed}, nil
-	}
-
-	// The agent is told what the agent in the computer is told, so the two cannot differ.
-	if _, err := c.Session(ctx); err != nil {
-		return err
-	}
-	description := "Run bash commands in a sandboxed computer. " + c.About(c.ToolCommands(), c.ToolModules())
-	mcp.AddTool(server, &mcp.Tool{Name: "bash", Description: description},
-		func(ctx context.Context, _ *mcp.CallToolRequest, in bashInput) (*mcp.CallToolResult, any, error) {
-			script := in.Commands
-			if script == "" {
-				script = in.Script
-			}
-			if script == "" {
-				result, err := text("`commands` or `script` is required", true)
-				return result, nil, err
-			}
-			timeout := limit
-			if t := time.Duration(in.TimeoutMS) * time.Millisecond; t > 0 && t < limit {
-				timeout = t
-			}
-			res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: script, Timeout: timeout})
-			if err != nil {
-				result, err := text(err.Error(), true)
-				return result, nil, err
-			}
-			// The result is worded as gbash's bash tool words it.
-			var out []string
-			if res.Stdout != "" {
-				out = append(out, res.Stdout)
-			}
-			if res.Stderr != "" {
-				out = append(out, "STDERR: "+res.Stderr)
-			}
-			if res.ExitCode != 0 {
-				out = append(out, fmt.Sprintf("Exit code: %d", res.ExitCode))
-			}
-			if len(out) == 0 {
-				out = append(out, "(no output)")
-			}
-			result, err := text(strings.Join(out, "\n"), false)
-			return result, nil, err
-		})
-
-	for _, def := range codingtools.New(codingtools.Config{}).ToolDefinitions() {
-		server.AddTool(&mcp.Tool{Name: def.Name, Description: def.Description, InputSchema: def.InputSchema},
-			func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-				s, err := c.Session(ctx)
-				if err != nil {
-					return text(err.Error(), true)
-				}
-				files := codingtools.New(codingtools.Config{FS: s.FileSystem(), WorkingDir: cfg.WorkDir, HomeDir: cfg.WorkDir})
-				var input map[string]any
-				_ = json.Unmarshal(req.Params.Arguments, &input)
-				var blocks []codingtools.ContentBlock
-				switch def.Name {
-				case files.ReadToolDefinition().Name:
-					var in codingtools.ReadRequest
-					var out codingtools.ReadResponse
-					if in, err = codingtools.ParseReadRequest(input); err == nil {
-						out, err = files.Read(ctx, in)
-					}
-					blocks = out.Content
-				case files.EditToolDefinition().Name:
-					var in codingtools.EditRequest
-					var out codingtools.EditResponse
-					if in, err = codingtools.ParseEditRequest(input); err == nil {
-						if err = writable(c, cfg.WorkDir, in.Path); err == nil {
-							out, err = files.Edit(ctx, in)
-						}
-					}
-					blocks = out.Content
-				default:
-					var in codingtools.WriteRequest
-					var out codingtools.WriteResponse
-					if in, err = codingtools.ParseWriteRequest(input); err == nil {
-						if err = writable(c, cfg.WorkDir, in.Path); err == nil {
-							out, err = files.Write(ctx, in)
-						}
-					}
-					blocks = out.Content
-				}
-				if err != nil {
-					return text(err.Error(), true)
-				}
-				result := &mcp.CallToolResult{}
-				for _, b := range blocks {
-					if data, err := base64.StdEncoding.DecodeString(b.Data); b.Data != "" && err == nil {
-						result.Content = append(result.Content, &mcp.ImageContent{Data: data, MIMEType: b.MIMEType})
-					} else {
-						result.Content = append(result.Content, &mcp.TextContent{Text: b.Text})
-					}
-				}
-				return result, nil
-			})
-	}
-	return server.Run(ctx, &mcp.StdioTransport{})
 }
