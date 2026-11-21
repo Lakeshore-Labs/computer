@@ -18,6 +18,7 @@ import (
 
 	"github.com/Lakeshore-Labs/computer/files"
 	"github.com/tetratelabs/wazero/api"
+	experimentalsys "github.com/tetratelabs/wazero/experimental/sys"
 	"github.com/tetratelabs/wazero/experimental/sysfs"
 	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 	"github.com/tetratelabs/wazero/sys"
@@ -146,6 +147,11 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 		}
 		fs = fs.(sysfs.FSConfig).WithSysFSMount(&dirFS{fs: dir, readOnly: d.ReadOnly}, d.Guest)
 	}
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	if r.Stdin != nil {
+		r.Stdin = newStdin(ctx, r.Stdin)
+	}
 	// The empty name lets any number of instances of the one module run at once.
 	cfg := wazero.NewModuleConfig().WithName("").WithArgs(r.Args...).WithFSConfig(fs).
 		WithStdin(r.Stdin).WithStdout(r.Stdout).WithStderr(r.Stderr).
@@ -174,4 +180,82 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 		return 70, err
 	}
 	return 0, nil
+}
+
+// stdin is a program's standard input, read for it by a goroutine, so that a program waiting on its input is still
+// stopped when its context ends: a Read of the caller's reader cannot be interrupted, and wazero would make the
+// program wait in that Read. It is pollable, so a program can wait for input with a timeout, as the agent's engine
+// does to keep its timers running.
+//
+// The goroutine ends when the reader ends, or, once the run is over, when its pending Read returns. A reader whose
+// Read never returns keeps the goroutine for as long as that Read lasts; nothing in Go can end it sooner.
+type stdin struct {
+	ctx     context.Context
+	chunks  chan chunk
+	pending []byte
+	err     error // what the reader returned after pending, or the context's error
+}
+
+type chunk struct {
+	b   []byte
+	err error
+}
+
+func newStdin(ctx context.Context, r io.Reader) *stdin {
+	s := &stdin{ctx: ctx, chunks: make(chan chunk)}
+	go func() {
+		for {
+			b := make([]byte, 32<<10)
+			n, err := r.Read(b)
+			if n == 0 && err == nil {
+				continue
+			}
+			select {
+			case s.chunks <- chunk{b[:n], err}:
+			case <-ctx.Done():
+				return
+			}
+			if err != nil {
+				return
+			}
+		}
+	}()
+	return s
+}
+
+// fill waits until there is something to read or timeout fires, and says which. A nil timeout waits for ever.
+func (s *stdin) fill(timeout <-chan time.Time) bool {
+	if len(s.pending) > 0 || s.err != nil {
+		return true
+	}
+	select {
+	case c := <-s.chunks:
+		s.pending, s.err = c.b, c.err
+	case <-s.ctx.Done():
+		s.err = s.ctx.Err()
+	case <-timeout:
+		return false
+	}
+	return true
+}
+
+func (s *stdin) Read(p []byte) (int, error) {
+	s.fill(nil)
+	n := copy(p, s.pending)
+	if s.pending = s.pending[n:]; n > 0 {
+		return n, nil
+	}
+	return 0, s.err
+}
+
+// Poll implements wazero's experimental sys.Pollable, which it asks of a standard input before a program waits on it.
+func (s *stdin) Poll(flag experimentalsys.Pflag, timeoutMillis int32) (bool, experimentalsys.Errno) {
+	if flag != experimentalsys.POLLIN {
+		return false, experimentalsys.ENOTSUP
+	}
+	var timeout <-chan time.Time
+	if timeoutMillis >= 0 {
+		timeout = time.After(time.Duration(timeoutMillis) * time.Millisecond)
+	}
+	return s.fill(timeout), 0
 }

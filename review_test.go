@@ -4,6 +4,7 @@ package computer
 
 import (
 	"context"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -122,13 +123,18 @@ print(os.environ.get('INJECTED'), len(notes.list_notes()))"`)
 
 func TestTheDeadlineReachesASleepingOrBlockedScript(t *testing.T) {
 	c := newComputer(t, Config{Python: python(t)})
-	for name, script := range map[string]string{
-		"sleep":  `python3 -c "import time; time.sleep(30)"`,
-		"select": `python3 -c "import select; select.select([], [], [], 30)"`,
-		"pipe":   `mkfifo p 2>/dev/null; python3 -c "open('p').read()"`,
+	blocked, writer := io.Pipe() // standard input that nothing writes to
+	t.Cleanup(func() { _ = writer.Close() })
+	for name, req := range map[string]*gbash.ExecutionRequest{
+		"sleep":  {Script: `python3 -c "import time; time.sleep(30)"`},
+		"select": {Script: `python3 -c "import select; select.select([], [], [], 30)"`},
+		"stdin":  {Script: `python3 -c "input()"`, Stdin: blocked},
 	} {
+		req.Timeout = 2 * time.Second
 		start := time.Now()
-		exec(t, c, script, 2*time.Second)
+		if _, err := c.Exec(context.Background(), req); err != nil {
+			t.Fatal(err)
+		}
 		if took := time.Since(start); took > 5*time.Second {
 			t.Errorf("%s: ran %v past a 2s deadline", name, took.Round(100*time.Millisecond))
 		}
