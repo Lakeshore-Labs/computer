@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 env:
-  PYTHON_RELEASE: python-3.15.2-1
+  PYTHON_RELEASE: python-3.15.2-2
 jobs:
   test:
     runs-on: ubuntu-24.04

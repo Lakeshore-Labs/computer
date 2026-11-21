@@ -103,7 +103,7 @@ underscore: a tool `notes_addNote` is `notes add-note`. This suits one server th
 the tool commands still work.
 
 ```
-gh release download python-3.15.2-1 --repo Lakeshore-Labs/computer --pattern '*.tar.gz'
+gh release download python-3.15.2-2 --repo Lakeshore-Labs/computer --pattern '*.tar.gz'
 mkdir python-wasi && tar -xzf python-3.15.2-wasi.tar.gz -C python-wasi
 ./computer -mount ./work:/home/user -python python-wasi/python.wasm -python-lib python-wasi/lib
 ```

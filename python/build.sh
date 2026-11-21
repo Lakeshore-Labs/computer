@@ -92,10 +92,11 @@ rm -rf "$B"; mkdir -p "$B/Modules"; cd "$B"
 	ZLIB_CFLAGS="-I$DEPS/include" "ZLIB_LIBS=-L$DEPS/lib -lz" \
 	LIBSQLITE3_CFLAGS="-I$DEPS/include" "LIBSQLITE3_LIBS=-L$DEPS/lib -lsqlite3"
 if grep -q '^#define HAVE_CLOCK_NANOSLEEP' pyconfig.h; then echo "HAVE_CLOCK_NANOSLEEP is defined" >&2; exit 1; fi
-# Register _host as a static module. Touching Setup.local makes make regenerate the Makefile and config.c,
-# which takes a first run; the second run builds with the regenerated files.
+# Register _host as a static module. Deleting config.c makes make regenerate it and the Makefile, which takes a
+# first run; the second run builds with the regenerated files. Touching Setup.local is not enough: configure
+# wrote config.c in the same second, and a make with one-second timestamps (macOS) then sees nothing to do.
 printf '*static*\n_host _host.c\n' > Modules/Setup.local
-touch Modules/Setup.local
+rm -f Modules/config.c
 make -j "$JOBS" all || true
 make -j "$JOBS" all
 
@@ -107,3 +108,34 @@ cp "$B/python.wasm" "$D/python.wasm"
 	--exclude idlelib --exclude tkinter --exclude turtledemo .) | (cd "$D/lib/python3.15" && tar xf -)
 cp "$B"/build/lib.wasi-wasm32-3.15/_sysconfigdata__wasi_wasm32-wasi.py "$D/lib/python3.15/"
 ls -l "$D/python.wasm"
+
+# 6. Pure-Python packages from requirements.txt, unpacked into site-packages. pip is not used: each archive is
+# downloaded from its pinned URL, checked against its SHA-256 and unpacked, so no package code runs. A wheel is
+# unpacked as it is. PyYAML and MarkupSafe publish no pure wheel, so their source archives are used and the
+# package directories under lib/ or src/ are copied; both fall back to Python when their C speedups are absent.
+SP=$D/lib/python3.15/site-packages
+mkdir -p "$SP"
+while read -r name at url hash; do
+	case $name in ''|'#'*) continue ;; esac
+	file=${url##*/}
+	fetch "$url" "$file" "${hash#--hash=sha256:}"
+	case $file in
+	*.whl) unzip -q -o "$WORK/downloads/$file" -d "$SP" ;;
+	*.tar.gz)
+		rm -rf "$WORK/build/sdist" && mkdir -p "$WORK/build/sdist" "$SP/$name.dist-info"
+		tar xzf "$WORK/downloads/$file" -C "$WORK/build/sdist" --strip-components=1
+		for p in "$WORK/build/sdist"/lib/* "$WORK/build/sdist"/src/*; do
+			if [ -f "$p/__init__.py" ]; then cp -R "$p" "$SP/"; fi
+		done
+		cp "$WORK/build/sdist"/LICENSE* "$SP/$name.dist-info/" ;;
+	*) echo "unsupported archive $file" >&2; exit 1 ;;
+	esac
+done < "$HERE/requirements.txt"
+# A wheel's scripts are command-line programs; nothing here runs them.
+rm -rf "$SP"/*.data
+
+# 7. Compile every module ahead of time. The sandbox mounts the library read-only and so never writes this cache
+# itself; without it each import compiles its source again, which made `import openpyxl` take 3.7 s, not 0.7 s.
+# unchecked-hash makes Python trust a compiled file whatever the source's time stamp, which unpacking changes.
+"$HOSTPY" -m compileall -q --invalidation-mode unchecked-hash "$D/lib" >/dev/null
+du -sk "$D/lib"

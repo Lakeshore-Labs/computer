@@ -7,14 +7,15 @@ built-in module, `_host`, through which a script calls MCP tools.
 
 Each build is made by the `python` workflow in this repository from `build.sh` and attached to a release:
 
-    gh release download python-3.15.2-1 --repo Lakeshore-Labs/computer --pattern '*.tar.gz*'
+    gh release download python-3.15.2-2 --repo Lakeshore-Labs/computer --pattern '*.tar.gz*'
     shasum -a 256 -c python-3.15.2-wasi.tar.gz.sha256
     mkdir python-wasi && tar -xzf python-3.15.2-wasi.tar.gz -C python-wasi
 
     computer -mount ./work:/home/user -python python-wasi/python.wasm -python-lib python-wasi/lib
 
-The archive is about 16 MB. It holds `python.wasm` and `lib/python3.15/`, the standard library without its tests,
-`ensurepip`, `idlelib`, `tkinter` and `turtledemo`.
+The archive is about 30 MB; the library in it is compiled ahead of time, so an import does not compile its source
+on every run. It holds `python.wasm` and `lib/python3.15/`, the standard library without its tests, `ensurepip`,
+`idlelib`, `tkinter` and `turtledemo`, and the packages listed below in `site-packages`.
 
 ## Build it
 
@@ -24,8 +25,8 @@ From an empty working directory, on Linux or macOS:
 
 It writes `downloads/`, `src/`, `build/` and `dist/` there, and takes a few minutes. It needs `curl`, `tar`,
 `unzip`, `make` and a C compiler; on Debian or Ubuntu, `apt-get install build-essential ca-certificates curl unzip`.
-It downloads wasi-sdk 33, CPython 3.15.2, zlib 1.3.1 and SQLite 3.46.1, each pinned to a version and checked
-against a SHA-256 written in the script.
+It downloads wasi-sdk 33, CPython 3.15.2, zlib 1.3.1, SQLite 3.46.1 and the packages in `requirements.txt`, each
+pinned to a version and checked against a SHA-256 written in the script or in that file.
 
 ## What differs from a stock CPython build
 
@@ -40,7 +41,37 @@ against a SHA-256 written in the script.
 - **No WASI runtime is needed to build.** CPython's configure asks for one, to run its own tests; the script names
   one that is never run.
 
+## Bundled packages
+
+`requirements.txt` pins each package to a PyPI file and its SHA-256. `build.sh` downloads the file, checks the hash
+and unpacks it into `lib/python3.15/site-packages` without pip, so no package code runs during the build. The
+licence files stay in each package's `*.dist-info`.
+
+| Package | Version | For |
+| --- | --- | --- |
+| openpyxl (et_xmlfile) | 3.1.5 (2.0.0) | read and write `.xlsx` |
+| XlsxWriter | 3.3.3 | write `.xlsx` with formats and charts |
+| pypdf | 7.1.1 | read text from, merge and split PDFs |
+| fpdf2 (fonttools, defusedxml) | 2.8.7 (4.68.0, 0.7.1) | create PDFs; no images, because Pillow is absent |
+| mammoth (cobble) | 1.13.0 (0.1.4) | read `.docx` as HTML or text |
+| PyYAML | 6.0.4 | YAML, without libyaml |
+| Jinja2 (MarkupSafe) | 3.1.6 (3.0.4) | templates |
+| python-dateutil (tzdata) | 4.0.0 (2026.6) | date parsing and arithmetic |
+| tabulate | 0.10.0 | text tables |
+| beautifulsoup4 (soupsieve, typing_extensions) | 4.15.0 (4.1.3, 4.16.0) | parse HTML with `html.parser` |
+| markdownify | 1.2.4 | HTML to Markdown |
+| Markdown | 3.11.3 | Markdown to HTML |
+| tomli_w | 1.2.0 | write TOML; `tomllib` reads it |
+
+The rule is pure Python only. The sandbox cannot load C extension modules, has no network and no `ssl`, so a
+package with a compiled part (lxml, Pillow, numpy, pandas) cannot work, and neither can one that needs the network.
+Check a new package by importing it and running a round trip in the computer before adding it. These were tried and
+left out: python-docx and docx2python (import lxml), reportlab (imports Pillow at import time), fpdf2 2.8.8 and
+later (import `urllib.request.HTTPSHandler`, which needs `ssl`), and xlrd (imports `mmap`, which is absent).
+PyYAML and MarkupSafe publish no pure wheel, so the source archive is used and only its Python package is copied.
+Importing most packages takes one to five seconds, since there is no compiled bytecode cache; the first import of
+`fpdf` takes about ten.
+
 ## Known gaps
 
-`asyncio.run` and lock or event timeouts do not work in this build. There are no third-party packages; a
-pure-Python package can be added by putting it under `lib/python3.15/site-packages`.
+`asyncio.run` and lock or event timeouts do not work in this build. `fpdf2` prints a warning that Pillow is missing.
