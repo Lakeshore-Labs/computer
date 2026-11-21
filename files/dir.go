@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/spf13/afero"
-	"golang.org/x/sys/unix"
 )
 
 // A Root is a host directory as an afero.Fs that cannot be left. Every operation goes through os.Root, which
@@ -176,22 +175,3 @@ func (r *Root) Link(from, to string) error {
 // A File is an open file or directory of a Root. Nothing it does names a path again, so it stays the file that
 // was opened whatever happens to the name it was opened by.
 type File struct{ *os.File }
-
-// IsAppend reports whether the system places each write at the end of the file.
-func (f *File) IsAppend() bool {
-	flags, err := unix.FcntlInt(f.Fd(), unix.F_GETFL, 0)
-	return err == nil && flags&unix.O_APPEND != 0
-}
-
-// SetAppend changes the open file's own append mode, which holds also when another program appends to the file.
-func (f *File) SetAppend(on bool) error {
-	flags, err := unix.FcntlInt(f.Fd(), unix.F_GETFL, 0)
-	if err != nil {
-		return err
-	}
-	if flags &^= unix.O_APPEND; on {
-		flags |= unix.O_APPEND
-	}
-	_, err = unix.FcntlInt(f.Fd(), unix.F_SETFL, flags)
-	return err
-}
