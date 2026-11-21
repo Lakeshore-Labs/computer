@@ -92,14 +92,16 @@ func TestTheConfigFileIsReadAsClaudeCodesIs(t *testing.T) {
 }
 
 // gbash's bash tool imports its contrib python, which embeds a native library and a loader for it. The binary must
-// not carry either, though neither is ever called.
+// not carry either, though neither is ever called. go-pdfium has a second backend that loads a native pdfium, and
+// plugin support that starts a process; only its WebAssembly backend may be linked.
 func TestTheBinaryLinksNoNativeLibrary(t *testing.T) {
 	out, err := exec.Command("go", "list", "-deps", ".").Output()
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, pkg := range strings.Fields(string(out)) {
-		if strings.Contains(pkg, "purego") || strings.Contains(pkg, "gomonty") {
+		if strings.Contains(pkg, "purego") || strings.Contains(pkg, "gomonty") ||
+			strings.Contains(pkg, "go-pdfium/internal/implementation_cgo") || strings.Contains(pkg, "go-plugin") {
 			t.Errorf("the binary links %s", pkg)
 		}
 	}
