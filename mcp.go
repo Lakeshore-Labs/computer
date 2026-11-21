@@ -42,6 +42,10 @@ type bashInput struct {
 // server.Connect with one end of mcp.NewInMemoryTransports for an agent in this process. limit is how long a bash
 // call may run when the agent sets no shorter time. The tools and their wording are gbash's: the input of its bash
 // tool, and codingtools' read, edit and write.
+//
+// A computer is one agent's: every server made from it shares the one shell, with its working directory and
+// variables. The file tools take a relative path from the computer's WorkDir, wherever the shell has since moved.
+// The bash tool describes the commands that call tools as they are when MCPServer is called.
 func (c *Computer) MCPServer(ctx context.Context, limit time.Duration) (*mcp.Server, error) {
 	workDir := c.cfg.WorkDir
 	server := mcp.NewServer(&mcp.Implementation{Name: "computer"}, nil)
