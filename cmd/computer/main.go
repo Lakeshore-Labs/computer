@@ -38,6 +38,7 @@ import (
 
 	"github.com/Lakeshore-Labs/computer"
 	"github.com/Lakeshore-Labs/computer/agent"
+	"github.com/Lakeshore-Labs/computer/extra"
 	"github.com/Lakeshore-Labs/computer/tools"
 	"github.com/Lakeshore-Labs/computer/wasm"
 )
@@ -151,7 +152,7 @@ func run(ctx context.Context) error {
 		mounts, listed = append(mounts, f...), named
 	}
 
-	cfg := computer.Config{WorkDir: *workDir}
+	cfg := computer.Config{WorkDir: *workDir, Commands: extra.Commands()}
 	if len(allow) > 0 {
 		cfg.Options = append(cfg.Options, gbash.WithNetwork(&gbash.NetworkConfig{AllowedURLPrefixes: allow, DenyPrivateRanges: true}))
 	}

@@ -1,0 +1,381 @@
+package extra
+
+import (
+	"bytes"
+	"cmp"
+	"context"
+	"errors"
+	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/gif"
+	"image/jpeg"
+	"image/png"
+	"io"
+	"os"
+	"path"
+	"strconv"
+	"strings"
+
+	"github.com/ewhauser/gbash/commands"
+	xdraw "golang.org/x/image/draw"
+
+	"golang.org/x/image/bmp"
+	"golang.org/x/image/tiff"
+	_ "golang.org/x/image/webp" // registers the WebP decoder
+)
+
+// maxPixels bounds the size of an image to decode and of one to make. A small file can declare billions of
+// pixels, and decoding it would exhaust memory.
+const maxPixels = 100_000_000
+
+const magickUsage = `usage: magick INPUT [OPTION...] OUTPUT
+       convert INPUT [OPTION...] OUTPUT       (the same as magick)
+       identify FILE...                       print NAME FORMAT WIDTHxHEIGHT for each file
+
+A subset of ImageMagick. Options are applied left to right. The output format is the extension of OUTPUT.
+Reads png, jpeg, gif, bmp, tiff and webp. Writes png, jpg, jpeg, gif, bmp and tiff.
+
+Options:
+  -resize GEOMETRY, -thumbnail GEOMETRY   W, xH, WxH (fit within), WxH! (exactly), N%, WxH> (only shrink), WxH^ (fill)
+  -crop WxH+X+Y                           cut out a rectangle; +X+Y is optional and defaults to +0+0
+  -rotate DEGREES                         clockwise, a multiple of 90; negative turns counterclockwise
+  -flip, -flop                            mirror top to bottom, mirror left to right
+  -quality N, -strip, -auto-orient        accepted and ignored
+  -help                                   print this text`
+
+const identifyUsage = `usage: identify FILE...
+
+A subset of ImageMagick. Prints one line per file: NAME FORMAT WIDTHxHEIGHT, for example "a.png PNG 800x600".
+Reads png, jpeg, gif, bmp, tiff and webp.`
+
+const supportedOptions = "-resize, -thumbnail, -crop, -rotate, -flip, -flop, -quality, -strip, -auto-orient"
+
+// define registers a command whose run reports mistakes as "name: message" and prints usage for -help.
+func define(name, usage string, run func(context.Context, *commands.Invocation) error) commands.Command {
+	return commands.DefineCommand(name, func(ctx context.Context, inv *commands.Invocation) error {
+		for _, a := range inv.Args {
+			if a == "-help" || a == "--help" {
+				fmt.Fprintln(inv.Stdout, usage)
+				return nil
+			}
+		}
+		if err := run(ctx, inv); err != nil {
+			return exit(inv, name, err)
+		}
+		return nil
+	})
+}
+
+var (
+	magickCommand   = define("magick", magickUsage, runMagick)
+	convertCommand  = define("convert", magickUsage, runMagick)
+	identifyCommand = define("identify", identifyUsage, runIdentify)
+)
+
+// geometry is an ImageMagick geometry, WxH+X+Y with the flags ! > ^ and %.
+type geometry struct {
+	w, h, x, y             int
+	hasW, hasH             bool
+	percent, exact, shrink bool
+	fill                   bool
+}
+
+func parseGeometry(s string) (geometry, error) {
+	var g geometry
+	rest := s
+	if i := strings.IndexAny(rest, "+-"); i >= 0 {
+		if n, _ := fmt.Sscanf(rest[i:], "%d%d", &g.x, &g.y); n == 0 {
+			return g, usagef("bad geometry %q: the offsets must look like +X+Y", s)
+		}
+		rest = rest[:i]
+	}
+	for rest != "" && strings.ContainsRune("!>^%", rune(rest[len(rest)-1])) {
+		switch rest[len(rest)-1] {
+		case '!':
+			g.exact = true
+		case '>':
+			g.shrink = true
+		case '^':
+			g.fill = true
+		case '%':
+			g.percent = true
+		}
+		rest = rest[:len(rest)-1]
+	}
+	ws, hs, _ := strings.Cut(rest, "x")
+	var err1, err2 error
+	if ws != "" {
+		g.w, err1 = strconv.Atoi(ws)
+		g.hasW = true
+	}
+	if hs != "" {
+		g.h, err2 = strconv.Atoi(hs)
+		g.hasH = true
+	}
+	if err1 != nil || err2 != nil || !(g.hasW || g.hasH) || g.w < 0 || g.h < 0 {
+		return g, usagef("bad geometry %q: it must look like 800, x600, 800x600 or 50%%", s)
+	}
+	return g, nil
+}
+
+// size is the dimensions that g asks for an image of sw by sh.
+func (g geometry) size(sw, sh int) (int, int) {
+	switch {
+	case g.percent:
+		if !g.hasH {
+			g.h = g.w
+		}
+		return scaled(sw, g.w, 100), scaled(sh, g.h, 100)
+	case g.exact:
+		return cmp.Or(g.w, sw), cmp.Or(g.h, sh)
+	case !g.hasH:
+		return g.w, scaled(sh, g.w, sw)
+	case !g.hasW:
+		return scaled(sw, g.h, sh), g.h
+	}
+	// Both sides are given: the image fits within the box when its width is the limit, and fills it otherwise.
+	if widthLimits := int64(g.w)*int64(sh) <= int64(g.h)*int64(sw); widthLimits != g.fill {
+		return g.w, scaled(sh, g.w, sw)
+	}
+	return scaled(sw, g.h, sh), g.h
+}
+
+// op is one option's change to the image.
+type op func(*image.NRGBA) (*image.NRGBA, error)
+
+func runMagick(ctx context.Context, inv *commands.Invocation) error {
+	args := inv.Args
+	if len(args) > 0 && args[0] == "identify" {
+		inv.Args = args[1:]
+		return runIdentify(ctx, inv)
+	}
+	if len(args) > 0 && args[0] == "convert" {
+		args = args[1:]
+	}
+	// The command line is checked before the input is read.
+	var files []string
+	var ops []op
+	for i := 0; i < len(args); i++ {
+		name := args[i]
+		if len(name) < 2 || (name[0] != '-' && name[0] != '+') {
+			files = append(files, name)
+			continue
+		}
+		// -strip and -auto-orient have nothing to do, because the encoders write no metadata and the decoders
+		// do not read an orientation. -quality is accepted but the encoders use a fixed quality. +repage is
+		// a no-op because a crop here always makes a new image with no offset.
+		switch name {
+		case "-strip", "-auto-orient", "+repage":
+			continue
+		case "-flip", "-flop":
+			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) { return mirror(src, name == "-flip"), nil })
+			continue
+		case "-resize", "-thumbnail", "-crop", "-rotate", "-quality":
+		default:
+			return usagef("unsupported option %s; the supported options are %s", name, supportedOptions)
+		}
+		if i++; i == len(args) {
+			return usagef("%s needs a value", name)
+		}
+		value := args[i]
+		switch name {
+		case "-resize", "-thumbnail":
+			g, err := parseGeometry(value)
+			if err != nil {
+				return err
+			}
+			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) {
+				b := src.Bounds()
+				w, h := g.size(b.Dx(), b.Dy())
+				if g.shrink && w >= b.Dx() && h >= b.Dy() {
+					return src, nil
+				}
+				return scale(src, w, h)
+			})
+		case "-crop":
+			g, err := parseGeometry(value)
+			if err != nil {
+				return err
+			}
+			if !g.hasW || !g.hasH {
+				return usagef("-crop needs both a width and a height, as in 100x50+10+10")
+			}
+			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) {
+				// ImageMagick keeps the part of the rectangle that is inside the image.
+				r := image.Rect(g.x, g.y, g.x+g.w, g.y+g.h).Intersect(src.Bounds())
+				if r.Empty() {
+					return nil, fmt.Errorf("the crop %s is outside the image, which is %v", value, src.Bounds())
+				}
+				dst := image.NewNRGBA(image.Rect(0, 0, r.Dx(), r.Dy()))
+				draw.Draw(dst, dst.Bounds(), src, r.Min, draw.Src)
+				return dst, nil
+			})
+		case "-rotate":
+			degrees, err := strconv.Atoi(value)
+			if err != nil || degrees%90 != 0 {
+				return usagef("-rotate supports only multiples of 90 degrees, not %q", value)
+			}
+			degrees = (degrees%360 + 360) % 360
+			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) {
+				if degrees == 0 {
+					return src, nil
+				}
+				return rotate(src, degrees), nil
+			})
+		}
+	}
+	if len(files) != 2 {
+		return usagef("an input and an output file are needed, not %d file names; see -help", len(files))
+	}
+	encode, err := encoder(files[1])
+	if err != nil {
+		return err
+	}
+
+	data, err := inv.FS.ReadFile(ctx, files[0])
+	if err != nil {
+		return err
+	}
+	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
+	if err != nil {
+		return fmt.Errorf("%s: %w", files[0], err)
+	}
+	if err := checkSize(cfg.Width, cfg.Height); err != nil {
+		return fmt.Errorf("%s: %w", files[0], err)
+	}
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		return fmt.Errorf("%s: %w", files[0], err)
+	}
+	out := image.NewNRGBA(img.Bounds())
+	draw.Draw(out, out.Bounds(), img, img.Bounds().Min, draw.Src)
+	for _, apply := range ops {
+		if out, err = apply(out); err != nil {
+			return err
+		}
+	}
+	var buf bytes.Buffer
+	if err := encode(&buf, out); err != nil {
+		return err
+	}
+	f, err := inv.FS.OpenFile(ctx, files[1], os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
+	if err != nil {
+		return err
+	}
+	_, err = f.Write(buf.Bytes())
+	return errors.Join(err, f.Close())
+}
+
+func runIdentify(ctx context.Context, inv *commands.Invocation) error {
+	if len(inv.Args) == 0 {
+		return usagef("a file name is needed; see identify -help")
+	}
+	for _, name := range inv.Args {
+		data, err := inv.FS.ReadFile(ctx, name)
+		if err != nil {
+			return err
+		}
+		cfg, format, err := image.DecodeConfig(bytes.NewReader(data))
+		if err != nil {
+			return fmt.Errorf("%s: %w", name, err)
+		}
+		fmt.Fprintf(inv.Stdout, "%s %s %dx%d\n", name, strings.ToUpper(format), cfg.Width, cfg.Height)
+	}
+	return nil
+}
+
+func checkSize(w, h int) error {
+	if w <= 0 || h <= 0 {
+		return fmt.Errorf("the size %dx%d is empty", w, h)
+	}
+	if mp := float64(w) * float64(h) / 1e6; mp > maxPixels/1e6 {
+		return fmt.Errorf("%dx%d is %.0f megapixels, more than the limit of %d", w, h, mp, maxPixels/1_000_000)
+	}
+	return nil
+}
+
+// scaled is n*to/from rounded to the nearest pixel, at least one.
+func scaled(n, to, from int) int {
+	return max(1, int((int64(n)*int64(to)+int64(from)/2)/int64(from)))
+}
+
+func scale(src *image.NRGBA, w, h int) (*image.NRGBA, error) {
+	if err := checkSize(w, h); err != nil {
+		return nil, err
+	}
+	dst := image.NewNRGBA(image.Rect(0, 0, w, h))
+	xdraw.CatmullRom.Scale(dst, dst.Bounds(), src, src.Bounds(), xdraw.Src, nil)
+	return dst, nil
+}
+
+// mirror flips src top to bottom if vertical, and left to right otherwise.
+func mirror(src *image.NRGBA, vertical bool) *image.NRGBA {
+	b := src.Bounds()
+	dst := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	for y := range b.Dy() {
+		for x := range b.Dx() {
+			dx, dy := b.Dx()-1-x, y
+			if vertical {
+				dx, dy = x, b.Dy()-1-y
+			}
+			dst.SetNRGBA(dx, dy, src.NRGBAAt(b.Min.X+x, b.Min.Y+y))
+		}
+	}
+	return dst
+}
+
+// rotate turns src clockwise by degrees, which is 90, 180 or 270.
+func rotate(src *image.NRGBA, degrees int) *image.NRGBA {
+	b := src.Bounds()
+	w, h := b.Dx(), b.Dy()
+	dw, dh := w, h
+	if degrees != 180 {
+		dw, dh = h, w
+	}
+	dst := image.NewNRGBA(image.Rect(0, 0, dw, dh))
+	for y := range h {
+		for x := range w {
+			var dx, dy int
+			switch degrees {
+			case 90:
+				dx, dy = h-1-y, x
+			case 180:
+				dx, dy = w-1-x, h-1-y
+			default:
+				dx, dy = y, w-1-x
+			}
+			dst.SetNRGBA(dx, dy, src.NRGBAAt(b.Min.X+x, b.Min.Y+y))
+		}
+	}
+	return dst
+}
+
+// encoder is the writer for the format that name's extension gives.
+func encoder(name string) (func(io.Writer, *image.NRGBA) error, error) {
+	switch ext := strings.ToLower(path.Ext(name)); ext {
+	case ".png":
+		return func(w io.Writer, m *image.NRGBA) error { return png.Encode(w, m) }, nil
+	case ".jpg", ".jpeg":
+		return func(w io.Writer, m *image.NRGBA) error {
+			return jpeg.Encode(w, flatten(m), &jpeg.Options{Quality: 90})
+		}, nil
+	case ".gif":
+		return func(w io.Writer, m *image.NRGBA) error { return gif.Encode(w, m, nil) }, nil
+	case ".bmp":
+		return func(w io.Writer, m *image.NRGBA) error { return bmp.Encode(w, m) }, nil
+	case ".tif", ".tiff":
+		return func(w io.Writer, m *image.NRGBA) error { return tiff.Encode(w, m, nil) }, nil
+	default:
+		return nil, usagef("cannot write %q: the extension must be png, jpg, jpeg, gif, bmp or tiff", name)
+	}
+}
+
+// flatten puts m on white, since JPEG has no transparency and would show it as black.
+func flatten(m *image.NRGBA) image.Image {
+	dst := image.NewRGBA(m.Bounds())
+	draw.Draw(dst, dst.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
+	draw.Draw(dst, dst.Bounds(), m, m.Bounds().Min, draw.Over)
+	return dst
+}

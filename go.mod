@@ -10,9 +10,11 @@ require (
 	github.com/ewhauser/gbash/contrib/jq v0.0.41
 	github.com/ewhauser/gbash/contrib/sqlite3 v0.0.41
 	github.com/ewhauser/gbash/contrib/yq v0.0.41
+	github.com/go-analyze/charts v0.6.4
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/spf13/afero v1.15.0
 	github.com/tetratelabs/wazero v1.12.0
+	golang.org/x/image v0.46.0
 	golang.org/x/sys v0.50.0
 	golang.org/x/term v0.48.0
 )
@@ -25,11 +27,14 @@ require (
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
+	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elliotchance/orderedmap v1.8.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
+	github.com/go-analyze/bulk v0.1.6 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/hashicorp/hcl/v2 v2.24.0 // indirect
@@ -58,5 +63,4 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.49.0 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

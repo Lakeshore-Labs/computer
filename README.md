@@ -122,6 +122,18 @@ as Python spells it: a server named `my-wiki` is the command `my-wiki` and the m
 A server given without a name, as a bare URL, has its tools grouped by the part of their name before the first
 underscore: a tool `notes_addNote` is `notes add-note`. This suits one server that fronts several applications.
 
+## More commands
+
+The `extra` package holds commands for everyday data and document work. `cmd/computer` includes them; the library
+does not, so an embedder passes `extra.Commands()` in `Config.Commands`. Each command reads and writes files only
+inside the mounts, and `NAME --help` lists its options.
+
+```
+magick photo.jpg -resize 800 small.png     # a subset of ImageMagick: also convert, identify, -crop, -rotate, -flip, -flop
+chart bar --x month --y north,south sales.csv --out sales.png    # or line, pie, scatter; SVG or PNG
+```
+
+
 ## What it is made of
 
 | Part | What it does |
@@ -131,6 +143,7 @@ underscore: a tool `notes_addNote` is `notes add-note`. This suits one server th
 | [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Talks to the MCP servers |
 | `wasm/` | Runs a WASI program like a command: memory cap, deadline, and directories that are afero filesystems |
 | `files/` | A host directory as an afero filesystem that cannot be left |
+| `extra/` | Commands the shell lacks: `magick`, `convert`, `identify` (a subset of ImageMagick) and `chart` |
 | `tools/` | Turns MCP tools into commands and a Python package |
 | `agent/` | The command `agent`: runs the agent and answers its requests for the shell, files and the model |
 | `computer.go` | Assembles the above |
