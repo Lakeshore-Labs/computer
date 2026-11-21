@@ -22,8 +22,8 @@ import (
 )
 
 // A model is a stand-in for a chat-completions service: it answers each request with the next reply in turn and
-// keeps the requests it was sent. A reply is a shell command for the agent to run, the text of an answer, or
-// "hang", which never answers.
+// keeps the requests it was sent. A reply is a shell command for the agent to run, the text of an answer, "hang",
+// which never answers, or "overloaded", which refuses with a 503 and asks to be tried again in a second.
 type model struct {
 	mu       sync.Mutex
 	replies  []string
@@ -44,6 +44,11 @@ func newModel(t *testing.T, replies ...string) *model {
 		m.mu.Unlock()
 		if reply == "hang" {
 			<-r.Context().Done()
+			return
+		}
+		if reply == "overloaded" {
+			w.Header().Set("Retry-After", "1")
+			http.Error(w, "try again", http.StatusServiceUnavailable)
 			return
 		}
 		delta, finish := map[string]any{"role": "assistant", "content": reply}, "stop"
@@ -206,5 +211,18 @@ func TestTheAgentsEnvironmentConformsToPiDurable(t *testing.T) {
 	}
 	if passed != 14 || unsupported != 8 {
 		t.Errorf("%d cases passed and %d are unsupported, where 14 and 8 are expected; stderr %q", passed, unsupported, res.Stderr)
+	}
+}
+
+func TestTheAgentTriesAnOverloadedModelAgain(t *testing.T) {
+	m := newModel(t, "overloaded", "Here now.")
+	c, _ := agentComputer(t, m)
+	start := time.Now()
+	res := exec(t, c, `agent "are you there?"`, time.Minute)
+	if got := lastLine(t, res.Stdout)["answer"]; got != "Here now." {
+		t.Fatalf("answer %v, stdout %q, stderr %q", got, res.Stdout, res.Stderr)
+	}
+	if took := time.Since(start); len(m.sent()) != 2 || took < time.Second {
+		t.Errorf("%d requests in %v; the second should come a second after the first was refused", len(m.sent()), took.Round(100*time.Millisecond))
 	}
 }

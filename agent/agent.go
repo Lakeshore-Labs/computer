@@ -145,6 +145,11 @@ func Command(name string, cfg Config) commands.Command {
 				default:
 					err = errors.New("no such request: " + m.Op)
 				}
+				var refused *modelError
+				if errors.As(err, &refused) { // the agent's retry reads what the model answered
+					reply(map[string]any{"id": m.ID, "error": err.Error(), "detail": refused})
+					return
+				}
 				if err != nil {
 					reply(map[string]any{"id": m.ID, "error": err.Error()})
 					return
@@ -190,11 +195,30 @@ func shell(ctx context.Context, inv *commands.Invocation, arg json.RawMessage) (
 		"notFound": res.CommandNotFound || len(in.Argv) > 0 && res.ExitCode == 127 && strings.Contains(res.Stderr, "not found")}, nil
 }
 
+// A modelError is a model's refusal of a request: its status and, when it gave one, how long to wait.
+type modelError struct {
+	Status     int    `json:"status"`
+	RetryAfter string `json:"retryAfter,omitempty"`
+	body       string
+}
+
+func (e *modelError) Error() string {
+	return fmt.Sprintf("the model answered %d: %s", e.Status, e.body)
+}
+
 // model makes one chat-completions request for the agent and tells it the response's status, then each chunk of
 // the answer as it arrives.
 func model(ctx context.Context, cfg Config, arg json.RawMessage, event func(json.RawMessage)) error {
-	var in struct{ Params json.RawMessage }
+	var in struct {
+		Params    json.RawMessage
+		TimeoutMs int64
+	}
 	_ = json.Unmarshal(arg, &in)
+	if in.TimeoutMs > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, time.Duration(in.TimeoutMs)*time.Millisecond)
+		defer cancel()
+	}
 	req, err := http.NewRequestWithContext(ctx, "POST", strings.TrimRight(cfg.ModelURL, "/")+"/chat/completions", bytes.NewReader(in.Params))
 	if err != nil {
 		return err
@@ -210,7 +234,7 @@ func model(ctx context.Context, cfg Config, arg json.RawMessage, event func(json
 	defer res.Body.Close()
 	if res.StatusCode/100 != 2 {
 		b, _ := io.ReadAll(io.LimitReader(res.Body, 4<<10))
-		return fmt.Errorf("the model answered %d: %s", res.StatusCode, b)
+		return &modelError{Status: res.StatusCode, RetryAfter: res.Header.Get("Retry-After"), body: string(b)}
 	}
 	status, _ := json.Marshal(map[string]any{"status": res.StatusCode, "headers": map[string]string{}})
 	event(status)

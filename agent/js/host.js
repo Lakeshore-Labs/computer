@@ -1,6 +1,6 @@
 // What Pi Durable needs of its surroundings, on the stock QuickJS command. The host is reached over standard input
 // and output, one JSON message a line. A request is {id, op, arg}; the host answers {id, result} or {id, error},
-// after any number of {id, event}. A line {event} is told to whoever ran the agent, and a line {stop} from the host
+// after any number of {id, event}; an error may come with {detail}. A line {event} is told to whoever ran the agent, and a line {stop} from the host
 // asks the agent to end its run.
 import * as std from "qjs:std";
 import * as os from "qjs:os";
@@ -17,6 +17,11 @@ g.TextEncoder ??= encoding.TextEncoder; g.TextDecoder ??= encoding.TextDecoder;
 g.EventTarget ??= EventTarget; g.Event ??= Event;
 g.AbortController ??= AbortController; g.AbortSignal ??= AbortSignal;
 g.structuredClone ??= (value) => structuredClone(value);
+// The little of the web's Headers that pi-ai reads of a response and of a failed request.
+g.Headers ??= class Headers extends Map {
+  constructor(init = {}) { super(Object.entries(init).map(([k, v]) => [k.toLowerCase(), String(v)])); }
+  get(name) { return super.get(name.toLowerCase()) ?? null; }
+};
 g.setTimeout = (f, ms, ...args) => os.setTimeout(() => f(...args), ms ?? 0);
 g.clearTimeout = (timer) => { if (timer !== undefined && timer !== null) os.clearTimeout(timer); };
 // Standard output is the host's; what the agent logs goes to standard error.
@@ -50,7 +55,7 @@ os.setReadHandler(0, () => {
     const m = JSON.parse(decoder.decode(all.subarray(start, end))), p = pending.get(m.id);
     if (m.stop) onStop?.();
     else if (p && m.event !== undefined) p.onEvent?.(m.event);
-    else if (p) { pending.delete(m.id); m.error !== undefined ? p.reject(new Error(m.error)) : p.resolve(m.result); }
+    else if (p) { pending.delete(m.id); m.error !== undefined ? p.reject(Object.assign(new Error(m.error), { detail: m.detail })) : p.resolve(m.result); }
   }
   held = all.slice(start);
 });

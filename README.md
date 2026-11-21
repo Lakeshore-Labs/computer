@@ -119,7 +119,7 @@ as one more WebAssembly program. Its tools are the computer's shell and files, s
 SQLite the way a person at the shell would.
 
 ```
-gh release download agent-1.5.2-2 --repo Lakeshore-Labs/computer --pattern agent.tar.gz
+gh release download agent-1.5.2-3 --repo Lakeshore-Labs/computer --pattern agent.tar.gz
 mkdir agent-wasi && tar -xzf agent.tar.gz -C agent-wasi
 export COMPUTER_MODEL_KEY=...
 ./computer -mount ./work:/home/user -mcp wiki=https://mcp.deepwiki.com/mcp \

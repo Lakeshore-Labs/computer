@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
 env:
+  PYTHON_RELEASE: python-3.15.2-2
   QUICKJS_URL: https://github.com/quickjs-ng/quickjs/releases/download/v0.18.0/qjs-wasi.wasm
   QUICKJS_SHA256: 2c218412cb8b17e46ee91bea7556ec38f5b9b6bd6312fddd3ceeed14aa71eaaa
 jobs:
@@ -32,8 +33,21 @@ jobs:
           cp agent/js/dist/*.js out/
           curl -fsSL -o out/qjs-wasi.wasm "$QUICKJS_URL"
           echo "$QUICKJS_SHA256  out/qjs-wasi.wasm" | sha256sum -c
+      - name: Fetch the Python build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$PYTHON_RELEASE" --pattern '*.tar.gz*' --dir "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP" && sha256sum -c python-3.15.2-wasi.tar.gz.sha256
+          mkdir python-wasi && tar -xzf python-3.15.2-wasi.tar.gz -C python-wasi
+      # Every test, so that a release is of an agent the whole computer was tested with.
       - name: Test
-        run: AGENT_ENGINE="$PWD/out/qjs-wasi.wasm" AGENT_BUNDLE="$PWD/out" go test -count=1 -timeout 600s -run Agent -v . | grep -E '^(--- |ok|FAIL|PASS)' ; exit "${PIPESTATUS[0]}"
+        env:
+          PYTHON_HOST_MODULE: computer
+        run: >
+          PYTHON_WASM="$RUNNER_TEMP/python-wasi/python.wasm" PYTHON_LIB="$RUNNER_TEMP/python-wasi/lib"
+          AGENT_ENGINE="$PWD/out/qjs-wasi.wasm" AGENT_BUNDLE="$PWD/out"
+          go test -count=1 -timeout 900s -v . | grep -E '^(--- |ok|FAIL|PASS)' ; exit "${PIPESTATUS[0]}"
       - name: Package
         run: |
           tar -C out -czf agent.tar.gz agent.js qjs-wasi.wasm
