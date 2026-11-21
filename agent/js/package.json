@@ -6,10 +6,10 @@
     "build": "esbuild agent.js --bundle --platform=browser --format=esm --target=es2023 --outfile=dist/agent.js --alias:openai=./openai.js --define:global=globalThis --external:node:* --external:qjs:* --log-level=warning && esbuild conformance.js --bundle --platform=browser --format=esm --target=es2023 --outfile=dist/conformance.js --alias:openai=./openai.js --define:global=globalThis --external:node:* --external:qjs:* --log-level=warning"
   },
   "dependencies": {
-    "@earendil-works/chord": "1.5.2",
-    "@earendil-works/pi-ai": "1.5.2",
-    "@earendil-works/pi-durable": "1.5.2",
-    "@earendil-works/pi-schema": "1.5.2",
+    "@earendil-works/chord": "1.6.0",
+    "@earendil-works/pi-ai": "1.6.0",
+    "@earendil-works/pi-durable": "1.6.0",
+    "@earendil-works/pi-schema": "1.6.0",
     "@formatjs/intl-getcanonicallocales": "3.4.0",
     "@formatjs/intl-segmenter": "12.3.2",
     "@sinonjs/text-encoding": "0.7.3",
