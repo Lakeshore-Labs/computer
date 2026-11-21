@@ -22,6 +22,7 @@ import (
 	xdraw "golang.org/x/image/draw"
 
 	"golang.org/x/image/bmp"
+	"golang.org/x/image/colornames"
 	"golang.org/x/image/tiff"
 	_ "golang.org/x/image/webp" // registers the WebP decoder
 )
@@ -42,7 +43,10 @@ Options:
   -crop WxH+X+Y                           cut out a rectangle; +X+Y is optional and defaults to +0+0
   -rotate DEGREES                         clockwise, a multiple of 90; negative turns counterclockwise
   -flip, -flop                            mirror top to bottom, mirror left to right
-  -quality N, -strip, -auto-orient        accepted and ignored
+  -background COLOR                       the colour -flatten and a JPEG put behind transparency; white by default
+  -flatten, -alpha remove                 put the image on the background colour
+  -quality N                              JPEG quality, 1 to 100; 90 by default
+  -strip, -auto-orient                    accepted and ignored
   -help                                   print this text`
 
 const identifyUsage = `usage: identify FILE...
@@ -50,7 +54,7 @@ const identifyUsage = `usage: identify FILE...
 A subset of ImageMagick. Prints one line per file: NAME FORMAT WIDTHxHEIGHT, for example "a.png PNG 800x600".
 Reads png, jpeg, gif, bmp, tiff and webp.`
 
-const supportedOptions = "-resize, -thumbnail, -crop, -rotate, -flip, -flop, -quality, -strip, -auto-orient"
+const supportedOptions = "-resize, -thumbnail, -crop, -rotate, -flip, -flop, -background, -flatten, -alpha, -quality, -strip, -auto-orient"
 
 // define registers a command whose run reports mistakes as "name: message" and prints usage for -help.
 func define(name, usage string, run func(context.Context, *commands.Invocation) error) commands.Command {
@@ -157,6 +161,7 @@ func runMagick(ctx context.Context, inv *commands.Invocation) error {
 	// The command line is checked before the input is read.
 	var files []string
 	var ops []op
+	quality, background := 90, color.Color(color.White)
 	for i := 0; i < len(args); i++ {
 		name := args[i]
 		if len(name) < 2 || (name[0] != '-' && name[0] != '+') {
@@ -164,15 +169,19 @@ func runMagick(ctx context.Context, inv *commands.Invocation) error {
 			continue
 		}
 		// -strip and -auto-orient have nothing to do, because the encoders write no metadata and the decoders
-		// do not read an orientation. -quality is accepted but the encoders use a fixed quality. +repage is
-		// a no-op because a crop here always makes a new image with no offset.
+		// do not read an orientation. +repage is a no-op because a crop here always makes a new image with no
+		// offset.
 		switch name {
 		case "-strip", "-auto-orient", "+repage":
 			continue
 		case "-flip", "-flop":
 			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) { return mirror(src, name == "-flip"), nil })
 			continue
-		case "-resize", "-thumbnail", "-crop", "-rotate", "-quality":
+		case "-flatten":
+			over := background // the colour as it is at this point of the command line, as ImageMagick reads it
+			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) { return flatten(src, over), nil })
+			continue
+		case "-resize", "-thumbnail", "-crop", "-rotate", "-quality", "-background", "-alpha":
 		default:
 			return usagef("unsupported option %s; the supported options are %s", name, supportedOptions)
 		}
@@ -181,6 +190,26 @@ func runMagick(ctx context.Context, inv *commands.Invocation) error {
 		}
 		value := args[i]
 		switch name {
+		case "-quality":
+			n, err := strconv.Atoi(value)
+			if err != nil || n < 1 || n > 100 {
+				return usagef("-quality is a number from 1 to 100, not %q", value)
+			}
+			quality = n
+		case "-background":
+			c, err := parseColor(value)
+			if err != nil {
+				return err
+			}
+			background = c
+		case "-alpha":
+			over := background
+			switch value {
+			case "remove", "off": // both leave an image with no transparency; remove is what puts it on the background
+				ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) { return flatten(src, over), nil })
+			default:
+				return usagef("-alpha supports remove and off, not %q", value)
+			}
 		case "-resize", "-thumbnail":
 			g, err := parseGeometry(value)
 			if err != nil {
@@ -229,7 +258,7 @@ func runMagick(ctx context.Context, inv *commands.Invocation) error {
 	if len(files) != 2 {
 		return usagef("an input and an output file are needed, not %d file names; see -help", len(files))
 	}
-	encode, err := encoder(files[1])
+	encode, err := encoder(files[1], quality, background)
 	if err != nil {
 		return err
 	}
@@ -353,13 +382,34 @@ func rotate(src *image.NRGBA, degrees int) *image.NRGBA {
 }
 
 // encoder is the writer for the format that name's extension gives.
-func encoder(name string) (func(io.Writer, *image.NRGBA) error, error) {
+// parseColor reads a colour as ImageMagick's options take one: a name, or #rgb or #rrggbb.
+func parseColor(s string) (color.Color, error) {
+	name := strings.ToLower(s)
+	if c, ok := colornames.Map[name]; ok {
+		return c, nil
+	}
+	if name == "none" || name == "transparent" {
+		return color.Transparent, nil
+	}
+	var r, g, b uint8
+	if n, _ := fmt.Sscanf(name, "#%02x%02x%02x", &r, &g, &b); n == 3 && len(name) == 7 {
+		return color.NRGBA{r, g, b, 255}, nil
+	}
+	if n, _ := fmt.Sscanf(name, "#%1x%1x%1x", &r, &g, &b); n == 3 && len(name) == 4 {
+		return color.NRGBA{r * 17, g * 17, b * 17, 255}, nil
+	}
+	return nil, usagef("unknown colour %q: use a name such as white, or #rrggbb", s)
+}
+
+// encoder writes an image in the format name's extension asks for. JPEG has no transparency, so there the image
+// is put on the background first, or it would show as black.
+func encoder(name string, quality int, background color.Color) (func(io.Writer, *image.NRGBA) error, error) {
 	switch ext := strings.ToLower(path.Ext(name)); ext {
 	case ".png":
 		return func(w io.Writer, m *image.NRGBA) error { return png.Encode(w, m) }, nil
 	case ".jpg", ".jpeg":
 		return func(w io.Writer, m *image.NRGBA) error {
-			return jpeg.Encode(w, flatten(m), &jpeg.Options{Quality: 90})
+			return jpeg.Encode(w, flatten(m, background), &jpeg.Options{Quality: quality})
 		}, nil
 	case ".gif":
 		return func(w io.Writer, m *image.NRGBA) error { return gif.Encode(w, m, nil) }, nil
@@ -372,10 +422,10 @@ func encoder(name string) (func(io.Writer, *image.NRGBA) error, error) {
 	}
 }
 
-// flatten puts m on white, since JPEG has no transparency and would show it as black.
-func flatten(m *image.NRGBA) image.Image {
-	dst := image.NewRGBA(m.Bounds())
-	draw.Draw(dst, dst.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
+// flatten is m drawn over the colour over, which leaves no transparency unless the colour has some.
+func flatten(m *image.NRGBA, over color.Color) *image.NRGBA {
+	dst := image.NewNRGBA(m.Bounds())
+	draw.Draw(dst, dst.Bounds(), image.NewUniform(over), image.Point{}, draw.Src)
 	draw.Draw(dst, dst.Bounds(), m, m.Bounds().Min, draw.Over)
 	return dst
 }

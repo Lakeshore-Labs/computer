@@ -575,3 +575,44 @@ func TestExtraPdfCommandsHelp(t *testing.T) {
 		}
 	}
 }
+
+func TestExtraMagickFlattensOntoTheBackgroundAndWritesTheQualityAsked(t *testing.T) {
+	c := newExtra(t)
+	clear := image.NewNRGBA(image.Rect(0, 0, 8, 8)) // fully transparent
+	var b bytes.Buffer
+	if err := png.Encode(&b, clear); err != nil {
+		t.Fatal(err)
+	}
+	writeHome(t, c, "clear.png", b.Bytes())
+	for options, want := range map[string]color.NRGBA{
+		"-background red -flatten":      {255, 0, 0, 255},
+		"-flatten":                      {255, 255, 255, 255}, // ImageMagick's default background is white
+		"-background '#0000ff' -flatten": {0, 0, 255, 255},
+		"-background black -alpha remove": {0, 0, 0, 255},
+	} {
+		run(t, c, "convert clear.png "+options+" flat.png")
+		f, err := os.Open(filepath.Join(hostHome(c), "flat.png"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		img, err := png.Decode(f)
+		f.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := color.NRGBAModel.Convert(img.At(3, 3)); got != want {
+			t.Errorf("%s: the pixel is %v, want %v", options, got, want)
+		}
+	}
+	if stderr, code := fail(t, c, "convert clear.png -background nosuchcolour -flatten x.png"); code != 2 || !strings.Contains(stderr, "nosuchcolour") {
+		t.Errorf("an unknown colour: exit %d, %q", code, stderr)
+	}
+
+	writeHome(t, c, "a.png", testPNG(t, 200, 200))
+	run(t, c, "convert a.png -quality 20 low.jpg; convert a.png -quality 95 high.jpg")
+	low, _ := os.Stat(filepath.Join(hostHome(c), "low.jpg"))
+	high, _ := os.Stat(filepath.Join(hostHome(c), "high.jpg"))
+	if low == nil || high == nil || low.Size() >= high.Size() {
+		t.Errorf("-quality 20 wrote %v bytes and -quality 95 %v", low, high)
+	}
+}
