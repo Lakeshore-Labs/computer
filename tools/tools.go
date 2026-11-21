@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"mime"
 	"path"
 	"slices"
 	"sort"
@@ -152,22 +151,13 @@ func Call(ctx context.Context, src Source, name string, arguments json.RawMessag
 	return json.Marshal(object)
 }
 
-// extensions are the usual ones of the media types tools return. The system's own table is sorted, so its first
-// for audio/mpeg is .m2a and for text/plain .conf.
-var extensions = map[string]string{"image/png": ".png", "image/jpeg": ".jpg", "image/gif": ".gif", "image/webp": ".webp",
-	"image/svg+xml": ".svg", "audio/mpeg": ".mp3", "audio/wav": ".wav", "audio/ogg": ".ogg", "application/pdf": ".pdf",
-	"text/plain": ".txt", "text/csv": ".csv", "application/json": ".json"}
-
-// extension is the file extension of a media type, "" when none is known.
+// extension is the file extension of a media type, its subtype: .png for image/png. Only letters, digits and
+// hyphens of it are kept, so nothing a server sends can name another file.
 func extension(mimeType string) string {
-	if parsed, _, err := mime.ParseMediaType(mimeType); err == nil {
-		mimeType = parsed // lower case, without parameters
-	}
-	if ext, ok := extensions[mimeType]; ok {
-		return ext
-	}
-	if exts, _ := mime.ExtensionsByType(mimeType); len(exts) > 0 {
-		return exts[0]
+	mimeType, _, _ = strings.Cut(mimeType, ";")
+	_, subtype, _ := strings.Cut(mimeType, "/")
+	if subtype = Kebab(strings.ToLower(subtype)); subtype != "" { // lowered first: Kebab splits a name at its capitals
+		return "." + subtype
 	}
 	return ""
 }
