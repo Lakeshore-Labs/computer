@@ -361,7 +361,7 @@ var limits = policy.Limits{MaxFileBytes: 256 << 20, MaxCommandCount: 1_000_000, 
 // Python, as ToolCommands and ToolModules name them.
 func (c *Computer) About(toolCommands, toolModules []string) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "You work on a computer through a shell. Your files are under %s; a folder of the machine you were started on is not here under its own path.", c.cfg.WorkDir)
+	fmt.Fprintf(&b, "You work on a computer through a shell. Your files are under %s.", c.cfg.WorkDir)
 	var opts gbash.Config // what the embedder's options make of the shell, to see whether curl has a network
 	for _, option := range c.cfg.Options {
 		_ = option(&opts)
@@ -373,7 +373,7 @@ func (c *Computer) About(toolCommands, toolModules []string) string {
 		b.WriteString(" There is no network.")
 	}
 	b.WriteString("\n")
-	b.WriteString("The shell has the usual commands, and jq, yq, awk and sqlite3")
+	b.WriteString("The shell has the usual commands, and also: jq, yq, awk, sqlite3")
 	for _, command := range c.cfg.Commands {
 		b.WriteString(", " + command.Name())
 	}
