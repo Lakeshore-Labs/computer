@@ -31,7 +31,6 @@ import (
 
 	"github.com/ewhauser/gbash"
 	"github.com/ewhauser/gbash/cli"
-	"github.com/ewhauser/gbash/contrib/bashtool"
 	"github.com/ewhauser/gbash/contrib/codingtools"
 	gbfs "github.com/ewhauser/gbash/fs"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -352,8 +351,15 @@ func writable(c *computer.Computer, workDir, p string) error {
 	return fmt.Errorf("%s is outside the writable folders", p)
 }
 
+// bashInput is the input of the bash tool, the same as gbash's bash tool takes.
+type bashInput struct {
+	Commands  string `json:"commands,omitempty" jsonschema:"Bash commands to execute."`
+	Script    string `json:"script,omitempty" jsonschema:"The same as commands, for callers that send script."`
+	TimeoutMS int64  `json:"timeout_ms,omitempty" jsonschema:"Per-call timeout in milliseconds."`
+}
+
 // serve offers the computer to an agent as an MCP server on stdin and stdout. The tools and their wording are
-// gbash's: bashtool's bash, and codingtools' read, edit and write.
+// gbash's: the input of its bash tool, and codingtools' read, edit and write.
 func serve(ctx context.Context, c *computer.Computer, cfg computer.Config, limit time.Duration) error {
 	server := mcp.NewServer(&mcp.Implementation{Name: "computer"}, nil)
 	text := func(s string, failed bool) (*mcp.CallToolResult, error) {
@@ -374,24 +380,41 @@ func serve(ctx context.Context, c *computer.Computer, cfg computer.Config, limit
 			description += ". In Python the same tools are the package `tools`, with the modules " + strings.Join(modules, ", ") + ": from tools import " + modules[0]
 		}
 	}
-	bash := bashtool.New(bashtool.Config{})
-	server.AddTool(&mcp.Tool{Name: bash.Name(), Description: description + ".", InputSchema: bash.InputSchema()},
-		func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			var input map[string]any
-			_ = json.Unmarshal(req.Params.Arguments, &input)
-			in, err := bashtool.ParseRequest(input)
-			if err != nil {
-				return text(err.Error(), true)
+	mcp.AddTool(server, &mcp.Tool{Name: "bash", Description: description + "."},
+		func(ctx context.Context, _ *mcp.CallToolRequest, in bashInput) (*mcp.CallToolResult, any, error) {
+			script := in.Commands
+			if script == "" {
+				script = in.Script
+			}
+			if script == "" {
+				result, err := text("`commands` or `script` is required", true)
+				return result, nil, err
 			}
 			timeout := limit
-			if t := in.Timeout(); t > 0 && t < limit {
+			if t := time.Duration(in.TimeoutMS) * time.Millisecond; t > 0 && t < limit {
 				timeout = t
 			}
-			res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: in.ResolvedCommands(), Timeout: timeout})
+			res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: script, Timeout: timeout})
 			if err != nil {
-				return text(err.Error(), true)
+				result, err := text(err.Error(), true)
+				return result, nil, err
 			}
-			return text(bashtool.FormatToolResult(bashtool.Response{Stdout: res.Stdout, Stderr: res.Stderr, ExitCode: res.ExitCode}), false)
+			// The result is worded as gbash's bash tool words it.
+			var out []string
+			if res.Stdout != "" {
+				out = append(out, res.Stdout)
+			}
+			if res.Stderr != "" {
+				out = append(out, "STDERR: "+res.Stderr)
+			}
+			if res.ExitCode != 0 {
+				out = append(out, fmt.Sprintf("Exit code: %d", res.ExitCode))
+			}
+			if len(out) == 0 {
+				out = append(out, "(no output)")
+			}
+			result, err := text(strings.Join(out, "\n"), false)
+			return result, nil, err
 		})
 
 	for _, def := range codingtools.New(codingtools.Config{}).ToolDefinitions() {

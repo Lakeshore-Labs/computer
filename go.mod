@@ -5,7 +5,6 @@ go 1.26.0
 require (
 	github.com/ewhauser/gbash v0.0.41
 	github.com/ewhauser/gbash/contrib/awk v0.0.41
-	github.com/ewhauser/gbash/contrib/bashtool v0.0.41
 	github.com/ewhauser/gbash/contrib/codingtools v0.0.41
 	github.com/ewhauser/gbash/contrib/htmltomarkdown v0.0.41
 	github.com/ewhauser/gbash/contrib/jq v0.0.41
@@ -26,11 +25,7 @@ require (
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
-	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/elliotchance/orderedmap v1.8.0 // indirect
-	github.com/ewhauser/gbash/contrib/extras v0.0.41 // indirect
-	github.com/ewhauser/gbash/contrib/python v0.0.41 // indirect
-	github.com/ewhauser/gomonty v0.0.13 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
@@ -50,8 +45,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/segmentio/asm v1.1.3 // indirect
 	github.com/segmentio/encoding v0.5.4 // indirect
-	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
-	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	github.com/zclconf/go-cty v1.17.0 // indirect
@@ -65,4 +58,5 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.49.0 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

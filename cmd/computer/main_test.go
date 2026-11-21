@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -85,6 +87,20 @@ func TestTheConfigFileIsReadAsClaudeCodesIs(t *testing.T) {
 		}
 		if _, _, err := readConfig(path); err == nil {
 			t.Errorf("%s was accepted", name)
+		}
+	}
+}
+
+// gbash's bash tool imports its contrib python, which embeds a native library and a loader for it. The binary must
+// not carry either, though neither is ever called.
+func TestTheBinaryLinksNoNativeLibrary(t *testing.T) {
+	out, err := exec.Command("go", "list", "-deps", ".").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, pkg := range strings.Fields(string(out)) {
+		if strings.Contains(pkg, "purego") || strings.Contains(pkg, "gomonty") {
+			t.Errorf("the binary links %s", pkg)
 		}
 	}
 }
