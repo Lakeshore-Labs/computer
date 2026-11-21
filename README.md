@@ -100,6 +100,19 @@ A command prints a text result as it is and anything else as JSON, ready for `jq
 A server given without a name, as a bare URL, has its tools grouped by the part of their name before the first
 underscore: a tool `notes_addNote` is `notes add-note`. This suits one server that fronts several applications.
 
+## More commands
+
+The `extra` package holds commands for everyday data and document work. `cmd/computer` includes them; the library
+does not, so an embedder passes `extra.Commands()` in `Config.Commands`. Each command reads and writes files only
+inside the mounts, and `NAME --help` lists its options.
+
+```
+image resize photo.jpg small.webp --width 800      # also info, convert, thumbnail, crop and rotate
+```
+
+Build with `-tags nodynamic`: without it the WebP package loads the host's `libwebp` if there is one, and `image`
+then refuses WebP rather than run code that is not part of the build.
+
 ## What it is made of
 
 | Part | What it does |
@@ -109,6 +122,8 @@ underscore: a tool `notes_addNote` is `notes add-note`. This suits one server th
 | [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Talks to the MCP servers |
 | `wasm/` | Runs a WASI program like a command: memory cap, deadline, and directories that are afero filesystems |
 | `files/` | A host directory as an afero filesystem that cannot be left |
+| `wasm/` | Runs a WASI program like a command: memory cap, deadline, and mounts it cannot leave |
+| `extra/` | Commands the shell lacks, such as `image`, one file each |
 | `tools/` | Turns MCP tools into commands and a Python package |
 | `agent/` | The command `agent`: runs the agent and answers its requests for the shell, files and the model |
 | `computer.go` | Assembles the above |
