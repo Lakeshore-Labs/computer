@@ -106,3 +106,25 @@ func TestTheBinaryLinksNoNativeLibrary(t *testing.T) {
 		}
 	}
 }
+
+func TestAMountWithoutAGuestPathIsSeenAtItsHostPath(t *testing.T) {
+	dir := t.TempDir()
+	for value, want := range map[string]computer.Mount{
+		dir:                 {Host: dir, Guest: dir},
+		dir + ":ro":         {Host: dir, Guest: dir, ReadOnly: true},
+		dir + ":/home/user": {Host: dir, Guest: "/home/user"},
+		dir + ":/ref:ro":    {Host: dir, Guest: "/ref", ReadOnly: true},
+	} {
+		if got, err := parseMount(value); err != nil || got != want {
+			t.Errorf("%s: %+v, %v", value, got, err)
+		}
+	}
+	if got, err := parseMount("work"); err != nil || !filepath.IsAbs(got.Guest) || got.Host != "work" {
+		t.Errorf("a relative directory: %+v, %v", got, err)
+	}
+	for _, bad := range []string{"", "a:b:c", "a:b:c:ro"} {
+		if _, err := parseMount(bad); err == nil {
+			t.Errorf("%q was accepted", bad)
+		}
+	}
+}

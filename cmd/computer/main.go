@@ -122,7 +122,7 @@ func main() {
 
 func run(ctx context.Context) error {
 	var mounts, allow, servers list
-	flag.Var(&mounts, "mount", "a host directory and where the computer sees it, as host:guest; add :ro for read-only; repeatable")
+	flag.Var(&mounts, "mount", "a host directory, seen in the computer at the same path, or host:guest to name another; add :ro for read-only; repeatable")
 	flag.Var(&allow, "allow-url", "a URL prefix curl may fetch; repeatable; none gives the computer no network")
 	workDir := flag.String("workdir", "", "where commands start; the first mount when empty")
 	flag.Var(&servers, "mcp", "an MCP server whose tools become commands: name=URL, or name='command arguments' for a server started as a program and spoken to on its standard streams, each one command of that name; or a bare URL, to group its tools by the prefix of their names; repeatable; a bearer token for a URL is read from COMPUTER_MCP_TOKEN_<NAME>, with a hyphen as an underscore, or COMPUTER_MCP_TOKEN for a bare URL")
@@ -158,11 +158,11 @@ func run(ctx context.Context) error {
 		cfg.Options = append(cfg.Options, gbash.WithNetwork(&gbash.NetworkConfig{AllowedURLPrefixes: allow, DenyPrivateRanges: true}))
 	}
 	for _, m := range mounts {
-		parts := strings.Split(m, ":")
-		if len(parts) < 2 || len(parts) > 3 || len(parts) == 3 && parts[2] != "ro" {
-			return fmt.Errorf("-mount %q is not host:guest or host:guest:ro", m)
+		mount, err := parseMount(m)
+		if err != nil {
+			return err
 		}
-		cfg.Mounts = append(cfg.Mounts, computer.Mount{Host: parts[0], Guest: parts[1], ReadOnly: len(parts) == 3})
+		cfg.Mounts = append(cfg.Mounts, mount)
 	}
 	if cfg.WorkDir == "" && len(cfg.Mounts) > 0 {
 		cfg.WorkDir = cfg.Mounts[0].Guest
@@ -294,6 +294,27 @@ func run(ctx context.Context) error {
 		os.Exit(code)
 	}
 	return nil
+}
+
+// parseMount reads a -mount value: host:guest, with :ro for read-only. A host directory alone is seen in the
+// computer at the path it has on the host, which is the path an agent started in that directory will use.
+func parseMount(m string) (computer.Mount, error) {
+	parts := strings.Split(m, ":")
+	readOnly := len(parts) > 1 && parts[len(parts)-1] == "ro"
+	if readOnly {
+		parts = parts[:len(parts)-1]
+	}
+	switch {
+	case len(parts) == 1 && parts[0] != "":
+		guest, err := filepath.Abs(parts[0])
+		if err != nil {
+			return computer.Mount{}, err
+		}
+		return computer.Mount{Host: parts[0], Guest: filepath.ToSlash(guest), ReadOnly: readOnly}, nil
+	case len(parts) == 2:
+		return computer.Mount{Host: parts[0], Guest: parts[1], ReadOnly: readOnly}, nil
+	}
+	return computer.Mount{}, fmt.Errorf("-mount %q is not host, host:guest, or either with :ro", m)
 }
 
 // cacheDir is where compiled programs and, by default, the agent's conversation are kept. What is compiled there

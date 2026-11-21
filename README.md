@@ -69,11 +69,11 @@ sandbox, like any other program you start; it inherits the environment except `C
 For Claude Code:
 
 ```
-claude mcp add computer -- /path/to/computer -mount /path/to/work:/path/to/work -mcp wiki=https://mcp.deepwiki.com/mcp mcp
+claude mcp add computer -- /path/to/computer -mount /path/to/work -mcp wiki=https://mcp.deepwiki.com/mcp mcp
 ```
 
-Mount the folder at the path it has on your machine, as here. Claude Code tells the model where it is working, and
-the model will use that path inside the computer.
+A folder given alone is seen in the computer at the path it has on your machine. Claude Code tells the model where
+it is working, and the model will use that path inside the computer. `-mount host:guest` names another path.
 
 From Go:
 
