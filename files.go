@@ -14,11 +14,17 @@ import (
 // files is the computer's files for what acts on them outside a command, under the rules the shell's own commands
 // are held to: the same policy decides what may be read and written, so a write lands only in a writable mount,
 // where every program sees it, and a file may grow no larger than the shell lets one. A relative name is taken
-// from the computer's WorkDir. It is asked for again at each use, since the session is a new one when the tools change.
-func (c *Computer) files(ctx context.Context) (gbfs.FileSystem, error) {
-	s, err := c.Session(ctx)
-	if err != nil {
-		return nil, err
+// from the computer's WorkDir. It is asked for again at each use, since the session is a new one when the tools
+// change; the tools are listed only when there is no session yet, so a file is not kept waiting on an MCP server.
+func (c *Computer) files(ctx context.Context) (*ruled, error) {
+	c.mu.Lock()
+	s := c.session
+	c.mu.Unlock()
+	if s == nil {
+		var err error
+		if s, err = c.Session(ctx); err != nil {
+			return nil, err
+		}
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -70,33 +76,57 @@ func (r *ruled) OpenFile(ctx context.Context, name string, flag int, perm fs.Fil
 		}
 	}
 	abs := gbfs.Resolve(r.dir, name)
-	if flag&os.O_TRUNC == 0 || r.maxFileBytes <= 0 {
+	anew, adding := flag&os.O_TRUNC != 0, flag&os.O_APPEND != 0
+	if !anew && !adding || r.maxFileBytes <= 0 {
 		f, err := r.FileSystem.OpenFile(ctx, abs, flag, perm)
 		if err != nil {
 			return nil, err
 		}
 		return gbfs.LimitFileSize(f, flag, r.maxFileBytes), nil
 	}
-	// A file written anew is emptied only once all of it is known to fit: emptied first, one too large would be
-	// left cut off at the limit, and what it held before lost.
+	// A file written anew, or added to, is changed only once all of what is written is known to fit: changed as it
+	// is written, one too large would be left cut off at the limit, and what a file written anew held before lost.
 	f, err := r.FileSystem.OpenFile(ctx, abs, flag&^os.O_TRUNC, perm)
 	if err != nil {
 		return nil, err
 	}
-	return &whole{File: f, anew: func() (gbfs.File, error) { return r.FileSystem.OpenFile(ctx, abs, flag&^(os.O_CREATE|os.O_EXCL), perm) }, max: r.maxFileBytes}, nil
+	w := &whole{File: f, room: r.maxFileBytes}
+	if anew {
+		w.put = func(content []byte) error { // emptied now; it is there by now, so nothing is created
+			if err := f.Close(); err != nil {
+				return err
+			}
+			again, err := r.FileSystem.OpenFile(ctx, abs, flag&^(os.O_CREATE|os.O_EXCL), perm)
+			if err != nil {
+				return err
+			}
+			_, err = again.Write(content)
+			return errors.Join(err, again.Close())
+		}
+		return w, nil
+	}
+	if info, err := f.Stat(); err == nil {
+		w.room -= info.Size()
+	}
+	w.put = func(content []byte) error {
+		_, err := f.Write(content)
+		return errors.Join(err, f.Close())
+	}
+	return w, nil
 }
 
-// whole is a file being written anew, kept in memory until it is closed and written then, if it fits.
+// whole is a file being written anew or added to, whose writes are kept in memory until it is closed and made
+// then, if they fit.
 type whole struct {
 	gbfs.File
-	anew    func() (gbfs.File, error) // opens the file again, emptied; it is there by then, so nothing is created
-	max     int64
+	put     func(content []byte) error // makes the writes and closes the file
+	room    int64                      // how much may be written
 	content []byte
 	tooMuch bool
 }
 
 func (w *whole) Write(p []byte) (int, error) {
-	if w.tooMuch || int64(len(w.content)+len(p)) > w.max {
+	if w.tooMuch || int64(len(w.content)+len(p)) > w.room {
 		w.tooMuch, w.content = true, nil
 		return 0, gbfs.ErrFileTooLarge
 	}
@@ -105,15 +135,10 @@ func (w *whole) Write(p []byte) (int, error) {
 }
 
 func (w *whole) Close() error {
-	if err := w.File.Close(); err != nil || w.tooMuch {
-		return err
+	if w.tooMuch {
+		return w.File.Close()
 	}
-	f, err := w.anew()
-	if err != nil {
-		return err
-	}
-	_, err = f.Write(w.content)
-	return errors.Join(err, f.Close())
+	return w.put(w.content)
 }
 
 func (r *ruled) Stat(ctx context.Context, name string) (info fs.FileInfo, err error) {

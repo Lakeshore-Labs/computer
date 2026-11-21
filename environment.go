@@ -21,7 +21,9 @@ import (
 //
 // A name is an absolute path in the computer. An error is a *fs.PathError naming that path and never the host's,
 // and errors.Is tells fs.ErrNotExist, fs.ErrPermission (also a write the rules refuse), fs.ErrExist, fs.ErrInvalid
-// (also a file past the size limit), syscall.ENOTDIR, syscall.EISDIR and syscall.ENOTEMPTY apart.
+// (also a file past the size limit), syscall.ENOTDIR, syscall.EISDIR and syscall.ENOTEMPTY apart. Which of them a
+// misuse gets is the mount's to say: a host directory answers as a file system does, and a mount that is another
+// afero.Fs as that one does, which for afero's memory filesystem is to allow a file made under a file.
 type Environment struct{ c *Computer }
 
 // Environment is the computer as an Environment. Every method may be called from any goroutine.
@@ -36,12 +38,19 @@ func (c *Computer) Describe(ctx context.Context) (string, error) {
 }
 
 // Run runs script in the computer's shell with dir as its working directory, and returns its exit code. env is
-// added to the shell's environment, or is the whole of it when replaceEnv is set; nothing is carried from one Run
-// to the next. Output is written to stdout and stderr while the command runs, and a pipeline's commands may write
-// at the same time. When ctx ends the command is stopped and ctx's error returned. A command that ran and failed,
-// or that the shell does not have (127), is an exit code and no error.
+// added to the shell's environment, or is the whole of it when replaceEnv is set. Each Run has a shell of its own
+// over the computer's files: nothing is carried from one to the next, and one neither waits for another nor for
+// the computer's own Exec. Output is written to stdout and stderr while the command runs, and a pipeline's
+// commands may write at the same time. When ctx ends the command is stopped and ctx's error returned. A command
+// that ran and failed, or that the shell does not have (127), is an exit code and no error.
 func (e *Environment) Run(ctx context.Context, script, dir string, env map[string]string, replaceEnv bool, stdout, stderr io.Writer) (int, error) {
-	s, err := e.c.Session(ctx)
+	if _, err := e.c.Session(ctx); err != nil { // the tools as they are now
+		return 0, err
+	}
+	e.c.mu.Lock()
+	rt := e.c.runtime
+	e.c.mu.Unlock()
+	s, err := rt.NewSession(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -72,6 +81,8 @@ func told(op, name string, err error) error {
 		kind = fs.ErrPermission
 	case errors.Is(err, gbfs.ErrFileTooLarge):
 		kind = tooLarge{}
+	case errors.Is(err, syscall.EINVAL):
+		kind = fs.ErrInvalid
 	case errors.As(err, &errno):
 		kind = errno
 	case errors.As(err, &path):
@@ -113,6 +124,9 @@ func (e *Environment) Read(ctx context.Context, name string, offset, length int6
 	files, err := e.c.files(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if offset < 0 {
+		return nil, told("read", name, fs.ErrInvalid)
 	}
 	if info, err := files.Stat(ctx, name); err == nil && info.IsDir() {
 		return nil, told("read", name, syscall.EISDIR)
@@ -160,6 +174,15 @@ func (e *Environment) Write(ctx context.Context, name string, content []byte, ap
 func (e *Environment) Truncate(ctx context.Context, name string, size int64) error {
 	// ponytail: the filesystem has no truncate, so the kept part is read and written back; a truncate of its own
 	// when files too large to hold twice are cut.
+	files, err := e.c.files(ctx)
+	switch {
+	case err != nil:
+		return err
+	case size < 0:
+		return told("truncate", name, fs.ErrInvalid)
+	case files.maxFileBytes > 0 && size > files.maxFileBytes: // before that much memory is asked for
+		return told("truncate", name, gbfs.ErrFileTooLarge)
+	}
 	kept, err := e.Read(ctx, name, 0, size)
 	if err != nil {
 		return err

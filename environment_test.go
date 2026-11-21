@@ -114,6 +114,33 @@ func TestAnEnvironmentRunsCommandsAndKeepsFilesUnderTheShellsRules(t *testing.T)
 			t.Errorf("%s: the error does not name the computer's path: %v", what, c.got)
 		}
 	}
+	out = new(arrivals) // a command's own shell is over the same files
+	if code, err := e.Run(ctx, "head -c 4 d/b.txt", "/home/user", nil, false, out, out); err != nil || code != 0 || out.text.String() != "0123" {
+		t.Errorf("a command read %q, %d, %v", out.text.String(), code, err)
+	}
+	// A write refused for its size changes nothing, and a size or an offset below zero is refused.
+	if err := e.Write(ctx, "/home/user/d/b.txt", bytes.Repeat([]byte("x"), 100), true); !errors.Is(err, fs.ErrInvalid) {
+		t.Errorf("adding past the limit: %v", err)
+	}
+	if b, err := e.Read(ctx, "/home/user/d/b.txt", 0, -1); err != nil || string(b) != "0123" {
+		t.Errorf("after a write that was refused the file holds %q, %v", b, err)
+	}
+	for what, err := range map[string]error{"a size below zero": e.Truncate(ctx, "/home/user/d/b.txt", -1), "a size past the limit": e.Truncate(ctx, "/home/user/d/b.txt", 1<<40),
+		"an offset below zero": second(e.Read(ctx, "/home/user/d/b.txt", -3, 5))} {
+		if !errors.Is(err, fs.ErrInvalid) {
+			t.Errorf("%s: %v", what, err)
+		}
+	}
+	// One command does not wait for another.
+	began = time.Now()
+	var running sync.WaitGroup
+	for range 4 {
+		running.Go(func() { _, _ = e.Run(ctx, "sleep 0.3", "/home/user", nil, false, io.Discard, io.Discard) })
+	}
+	running.Wait()
+	if took := time.Since(began); took > 900*time.Millisecond {
+		t.Errorf("four commands of 0.3 s took %v together", took)
+	}
 	if err := e.Remove(ctx, "/home/user/d", true); err != nil {
 		t.Fatal(err)
 	}

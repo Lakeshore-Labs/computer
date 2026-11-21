@@ -94,6 +94,7 @@ type Computer struct {
 	listed  [sha256.Size]byte // the tools the session was built from
 	written [sha256.Size]byte // the tools the Python package was last written from
 	session *gbash.Session
+	runtime *gbash.Runtime    // the session's, from which an Environment's command is given a session of its own
 	policy  policy.Policy     // the session's, by which files decides as the shell does
 	calling []string          // the commands that call tools, as the session names them
 	modules []string          // the same tools' modules in the Python package, in the same order
@@ -226,7 +227,7 @@ func (c *Computer) Session(ctx context.Context) (*gbash.Session, error) {
 		if err != nil {
 			return nil, err
 		}
-		c.session, c.listed = s, sum
+		c.session, c.runtime, c.listed = s, rt, sum
 	}
 	return c.session, nil
 }
