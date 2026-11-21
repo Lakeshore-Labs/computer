@@ -11,7 +11,6 @@ require (
 	github.com/ewhauser/gbash/contrib/jq v0.0.41
 	github.com/ewhauser/gbash/contrib/sqlite3 v0.0.41
 	github.com/ewhauser/gbash/contrib/yq v0.0.41
-	github.com/gen2brain/webp v0.6.4
 	github.com/go-analyze/charts v0.6.4
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/spf13/afero v1.15.0

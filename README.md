@@ -107,12 +107,10 @@ does not, so an embedder passes `extra.Commands()` in `Config.Commands`. Each co
 inside the mounts, and `NAME --help` lists its options.
 
 ```
-image resize photo.jpg small.webp --width 800      # also info, convert, thumbnail, crop and rotate
+image resize photo.jpg small.png --width 800      # also info, convert, thumbnail, crop and rotate
 chart bar --x month --y north,south sales.csv --out sales.png    # or line, pie, scatter; SVG or PNG
 ```
 
-Build with `-tags nodynamic`: without it the WebP package loads the host's `libwebp` if there is one, and `image`
-then refuses WebP rather than run code that is not part of the build.
 
 ## What it is made of
 

@@ -13,7 +13,6 @@ import (
 	"testing"
 
 	"github.com/ewhauser/gbash"
-	"github.com/gen2brain/webp"
 
 	"github.com/Lakeshore-Labs/computer/extra"
 )
@@ -83,9 +82,6 @@ func TestExtraImageConvert(t *testing.T) {
 	c := newExtra(t)
 	writeHome(t, c, "a.png", testPNG(t, 40, 20))
 	formats := []string{"jpg", "jpeg", "gif", "bmp", "tiff", "png"}
-	if webp.Dynamic() != nil { // otherwise the command refuses webp, as the host's libwebp is not part of the build
-		formats = append(formats, "webp")
-	}
 	for _, ext := range formats {
 		run(t, c, "image convert a.png out."+ext)
 		want := map[string]string{"jpg": "jpeg", "jpeg": "jpeg"}[ext]

@@ -21,9 +21,9 @@ import (
 	"github.com/ewhauser/gbash/commands"
 	xdraw "golang.org/x/image/draw"
 
-	"github.com/gen2brain/webp" // registers the WebP decoder
 	"golang.org/x/image/bmp"
 	"golang.org/x/image/tiff"
+	_ "golang.org/x/image/webp" // registers the WebP decoder
 )
 
 // maxPixels bounds the size of an image to decode and of one to make. A small file can declare billions of
@@ -39,7 +39,7 @@ const imageUsage = `usage: image COMMAND [ARGUMENTS]
   image crop IN OUT --x N --y N --width N --height N   cut out a rectangle
   image rotate IN OUT --degrees 90|180|270         turn clockwise
 
-Reads png, jpeg, gif, bmp, tiff and webp. Writes png, jpg, jpeg, gif, bmp, tiff and webp, by the extension of OUT.
+Reads png, jpeg, gif, bmp, tiff and webp. Writes png, jpg, jpeg, gif, bmp and tiff, by the extension of OUT.
 Options:
   --json        info: print JSON
   --width N     resize, crop: the width in pixels
@@ -173,10 +173,7 @@ func runImage(ctx context.Context, inv *commands.Invocation) error {
 	if err != nil {
 		return err
 	}
-	cfg, format, err := image.DecodeConfig(bytes.NewReader(data))
-	if err == nil {
-		err = hostLibrary(format)
-	}
+	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
 	if err != nil {
 		return fmt.Errorf("%s: %w", files[0], err)
 	}
@@ -203,15 +200,6 @@ func runImage(ctx context.Context, inv *commands.Invocation) error {
 	}
 	_, err = f.Write(buf.Bytes())
 	return errors.Join(err, f.Close())
-}
-
-// hostLibrary refuses WebP when the webp package has loaded the host's libwebp, which it does unless the program
-// is built with -tags nodynamic. The computer runs only code that is compiled into it.
-func hostLibrary(format string) error {
-	if format == "webp" && webp.Dynamic() == nil {
-		return errors.New("webp is refused: this program loads the host's libwebp; build it with -tags nodynamic")
-	}
-	return nil
 }
 
 func checkSize(w, h int) error {
@@ -277,13 +265,6 @@ func encoder(name string) (func(io.Writer, *image.NRGBA) error, error) {
 		return func(w io.Writer, m *image.NRGBA) error { return gif.Encode(w, m, nil) }, nil
 	case ".bmp":
 		return func(w io.Writer, m *image.NRGBA) error { return bmp.Encode(w, m) }, nil
-	case ".webp":
-		return func(w io.Writer, m *image.NRGBA) error {
-			if err := hostLibrary("webp"); err != nil {
-				return err
-			}
-			return webp.Encode(w, m, webp.Options{Quality: 90})
-		}, nil
 	case ".tif", ".tiff":
 		return func(w io.Writer, m *image.NRGBA) error { return tiff.Encode(w, m, nil) }, nil
 	default:
