@@ -370,7 +370,8 @@ func serve(ctx context.Context, c *computer.Computer, cfg computer.Config, limit
 		}
 		description += ". These commands call tools; run one with --help to see what it does: " + strings.Join(c.ToolCommands(), ", ")
 		if cfg.Python != nil {
-			description += ". In Python the same tools are the package `tools`: from tools import <command>"
+			modules := c.ToolModules()
+			description += ". In Python the same tools are the package `tools`, with the modules " + strings.Join(modules, ", ") + ": from tools import " + modules[0]
 		}
 	}
 	bash := bashtool.New(bashtool.Config{})

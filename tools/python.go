@@ -14,7 +14,7 @@ const pythonInit = `%s
 import json as _json
 import _host
 
-GROUPS = %s
+MODULES = %s
 
 
 class ToolError(Exception):
@@ -54,6 +54,17 @@ func identifier(s string, taken map[string]bool) string {
 	return unique(name, "_", taken)
 }
 
+// Modules is the Python module of each group, in the order given: the group's name as Python spells it, so that
+// my-server is my_server, made unique.
+func Modules(groups []string) []string {
+	taken := map[string]bool{"call": true} // a group's module must not hide the package's own call
+	out := make([]string, len(groups))
+	for i, group := range groups {
+		out[i] = identifier(group, taken)
+	}
+	return out
+}
+
 // WritePython writes the tools as a Python package in the directory dir, replacing what is there: a module per
 // group and a function per tool, with the tool's description and arguments as the function's own. A script that
 // has dir's parent on its path writes `from <dir's name> import notes; notes.list_notes()`.
@@ -66,14 +77,14 @@ func WritePython(dir string, tools []Tool) error {
 	}
 	groups := Groups(tools)
 	names := sortedKeys(groups)
-	modules := map[string]bool{"call": true} // a group's module must not hide the package's own call
-	list, _ := json.Marshal(names)
-	doc := "The tools, a module per group: `from " + filepath.Base(dir) + " import <group>`, then help(<group>).\n\nGroups: " + strings.Join(names, ", ")
+	modules := Modules(names)
+	list, _ := json.Marshal(modules)
+	doc := "The tools, a module per group: `from " + filepath.Base(dir) + " import <module>`, then help(<module>).\n\nModules: " + strings.Join(modules, ", ")
 	init := fmt.Sprintf(pythonInit, literal(doc), list)
 	if err := os.WriteFile(filepath.Join(dir, "__init__.py"), []byte(init), 0o600); err != nil {
 		return err
 	}
-	for _, group := range names {
+	for i, group := range names {
 		var m strings.Builder
 		fmt.Fprintf(&m, "%s\nfrom . import call as _call\n", literal("The "+group+" tools."))
 		functions := map[string]bool{"_call": true}
@@ -119,7 +130,7 @@ func WritePython(dir string, tools []Tool) error {
 			fmt.Fprintf(&m, "\n\ndef %s(%s%s):\n    %s\n    return _call(%d, %s, **{k: v for k, v in {%s}.items() if v is not None})\n",
 				identifier(t.Short, functions), star, strings.Join(signature, ", "), literal(text), t.Source, name, strings.Join(pass, ", "))
 		}
-		if err := os.WriteFile(filepath.Join(dir, identifier(group, modules)+".py"), []byte(m.String()), 0o600); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, modules[i]+".py"), []byte(m.String()), 0o600); err != nil {
 			return err
 		}
 	}

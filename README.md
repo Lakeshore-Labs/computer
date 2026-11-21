@@ -114,7 +114,8 @@ help(wiki.read_wiki_structure)
 wiki.read_wiki_structure(repo_name="wazero/wazero")
 ```
 
-A command prints a text result as it is and anything else as JSON, ready for `jq`.
+A command prints a text result as it is and anything else as JSON, ready for `jq`. The Python module is the name
+as Python spells it: a server named `my-wiki` is the command `my-wiki` and the module `my_wiki`.
 
 A server given without a name, as a bare URL, has its tools grouped by the part of their name before the first
 underscore: a tool `notes_addNote` is `notes add-note`. This suits one server that fronts several applications.

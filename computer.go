@@ -93,6 +93,7 @@ type Computer struct {
 	listed  [sha256.Size]byte // the tools the session was built from
 	session *gbash.Session
 	calling []string          // the commands that call tools, as the session names them
+	modules []string          // the same tools' modules in the Python package, in the same order
 	env     map[string]string // the shell's exported variables and working directory after the last Exec
 }
 
@@ -231,6 +232,13 @@ func (c *Computer) ToolCommands() []string {
 	return c.calling
 }
 
+// ToolModules are the modules of the Python package tools, one per command of ToolCommands, in its order.
+func (c *Computer) ToolModules() []string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.modules
+}
+
 // Options is the computer as gbash options, with the tools as they are now, for gbash's own front ends: its
 // command-line program, its server and its tool for a model.
 func (c *Computer) Options(ctx context.Context) ([]gbash.Option, error) {
@@ -263,8 +271,9 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 		}
 	}
 	groups := tools.Groups(listed)
+	sorted := slices.Sorted(maps.Keys(groups))
 	var names []string // the commands that call tools
-	for _, group := range slices.Sorted(maps.Keys(groups)) {
+	for _, group := range sorted {
 		name := tools.Kebab(group)
 		if name == "" { // a group whose name has no letter or digit a command can be spelled with
 			name = "tools"
@@ -278,12 +287,12 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 		}
 		names = append(names, name)
 	}
-	c.calling = names
+	c.calling, c.modules = names, tools.Modules(sorted)
 	if c.cfg.Agent != nil {
 		a := *c.cfg.Agent
 		a.Mounts, a.Home, a.State = mounts, c.cfg.WorkDir, c.state
 		if a.Instructions == "" {
-			a.Instructions = c.About(names)
+			a.Instructions = c.About(names, c.modules)
 		}
 		if err := registry.Register(agent.Command("agent", a)); err != nil {
 			return nil, err
@@ -314,8 +323,9 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 // them with gbash.WithLimitOverrides in Config.Options.
 var limits = policy.Limits{MaxFileBytes: 256 << 20, MaxCommandCount: 1_000_000, MaxLoopIterations: 1_000_000}
 
-// About is what an agent is told about this computer, given the commands that call tools.
-func (c *Computer) About(toolCommands []string) string {
+// About is what an agent is told about this computer, given the commands that call tools and their modules in
+// Python, as ToolCommands and ToolModules name them.
+func (c *Computer) About(toolCommands, toolModules []string) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "You work on a computer through a shell. Your files are under %s. There is no network.\n", c.cfg.WorkDir)
 	b.WriteString("The shell has the usual commands, and jq, yq, awk and sqlite3.")
@@ -325,7 +335,7 @@ func (c *Computer) About(toolCommands []string) string {
 	if len(toolCommands) > 0 {
 		fmt.Fprintf(&b, "\nThese commands call tools: %s. Run one with --help to see its tools, and `<command> <tool> --help` for a tool's arguments. A tool prints its result as text or JSON.", strings.Join(toolCommands, ", "))
 		if c.cfg.Python != nil {
-			b.WriteString(" In Python the same tools are the package tools: `from tools import <command>`, then help(<command>).")
+			fmt.Fprintf(&b, " In Python the same tools are the package tools, with a module per command, in the same order: %s. Import one as `from tools import %s`, then help(%s).", strings.Join(toolModules, ", "), toolModules[0], toolModules[0])
 		}
 	}
 	b.WriteString("\nWhen data is to be filtered, counted, combined or stored, pipe it or process it in a script; do not copy data into a command by hand, and do not print large results.")

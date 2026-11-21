@@ -287,3 +287,13 @@ func TestTheShellHandlesAFileAndALoopLargerThanGbashsDefaults(t *testing.T) {
 		t.Errorf("got %q", got)
 	}
 }
+
+func TestTheAgentIsToldEachToolModuleByItsPythonName(t *testing.T) {
+	c := newComputer(t, Config{Python: &Python{lib: t.TempDir()}, Tools: []tools.Source{{Name: "my-server", Session: testSession(t, listNotes)}}})
+	if _, err := c.Session(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if got := c.About(c.ToolCommands(), c.ToolModules()); !strings.Contains(got, "my-server") || !strings.Contains(got, "`from tools import my_server`") {
+		t.Errorf("got %q", got)
+	}
+}
