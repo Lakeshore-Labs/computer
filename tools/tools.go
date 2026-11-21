@@ -75,6 +75,9 @@ func Call(ctx context.Context, src Source, name string, arguments json.RawMessag
 	var text strings.Builder
 	var files []string
 	save := func(data []byte, mimeType string) error {
+		if res.IsError {
+			return nil
+		}
 		if src.Tmp == nil {
 			return fmt.Errorf("the tool returned a file (%s), and there is nowhere to save it", mimeType)
 		}
@@ -84,6 +87,7 @@ func Call(ctx context.Context, src Source, name string, arguments json.RawMessag
 		}
 		_, err = f.Write(data)
 		if err = errors.Join(err, f.Close()); err != nil {
+			_ = src.Tmp.Remove(f.Name()) // not left half written
 			return err
 		}
 		files = append(files, "/tmp/"+path.Base(f.Name())) // a host directory's file is named by its host path
@@ -148,10 +152,19 @@ func Call(ctx context.Context, src Source, name string, arguments json.RawMessag
 	return json.Marshal(object)
 }
 
-// extension is the file extension of a media type, "" when the system knows none.
+// extensions are the usual ones of the media types tools return. The system's own table is sorted, so its first
+// for audio/mpeg is .m2a and for text/plain .conf.
+var extensions = map[string]string{"image/png": ".png", "image/jpeg": ".jpg", "image/gif": ".gif", "image/webp": ".webp",
+	"image/svg+xml": ".svg", "audio/mpeg": ".mp3", "audio/wav": ".wav", "audio/ogg": ".ogg", "application/pdf": ".pdf",
+	"text/plain": ".txt", "text/csv": ".csv", "application/json": ".json"}
+
+// extension is the file extension of a media type, "" when none is known.
 func extension(mimeType string) string {
-	if mimeType == "image/jpeg" { // of which the system's first is .jfif or .jpe
-		return ".jpg"
+	if parsed, _, err := mime.ParseMediaType(mimeType); err == nil {
+		mimeType = parsed // lower case, without parameters
+	}
+	if ext, ok := extensions[mimeType]; ok {
+		return ext
 	}
 	if exts, _ := mime.ExtensionsByType(mimeType); len(exts) > 0 {
 		return exts[0]

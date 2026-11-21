@@ -353,3 +353,19 @@ func TestAFileBesideAStructuredResultIsNamedUnderFiles(t *testing.T) {
 		t.Fatalf("got %q", got)
 	}
 }
+
+func TestAFailedCallLeavesNoFileBehind(t *testing.T) {
+	tmp := afero.NewMemMapFs()
+	c := newComputer(t, Config{Mounts: []Mount{{Guest: "/tmp", FS: tmp}}, Tools: testTools(t, func(s *mcp.Server) {
+		mcp.AddTool(s, &mcp.Tool{Name: "notes_drawNote"}, func(context.Context, *mcp.CallToolRequest, struct{}) (*mcp.CallToolResult, any, error) {
+			return &mcp.CallToolResult{IsError: true, Content: []mcp.Content{&mcp.TextContent{Text: "boom"}, &mcp.ImageContent{Data: []byte("png"), MIMEType: "IMAGE/JPEG; q=1"}}}, nil, nil
+		})
+	})})
+	res, err := c.Exec(context.Background(), &gbash.ExecutionRequest{Script: "notes draw-note"})
+	if err != nil || res.ExitCode != 1 || !strings.Contains(res.Stderr, "boom") {
+		t.Fatalf("got %v, %+v", err, res)
+	}
+	if left, _ := afero.ReadDir(tmp, "/"); len(left) != 0 {
+		t.Fatalf("%d files were left in /tmp", len(left))
+	}
+}

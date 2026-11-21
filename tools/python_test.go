@@ -81,3 +81,11 @@ func TestThePackageIsNeverMissingWhileItIsRewritten(t *testing.T) {
 		}
 	}
 }
+
+func TestExtensionIsTheUsualOneWhateverTheSystemLists(t *testing.T) {
+	for mimeType, want := range map[string]string{"IMAGE/JPEG; q=1": ".jpg", "audio/mpeg": ".mp3", "text/plain": ".txt", "../../x": ""} {
+		if got := extension(mimeType); got != want {
+			t.Errorf("extension(%q) = %q, want %q", mimeType, got, want)
+		}
+	}
+}
