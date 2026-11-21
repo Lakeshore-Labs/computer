@@ -13,6 +13,7 @@ import (
 
 	"github.com/ewhauser/gbash"
 	"github.com/ewhauser/gbash/commands"
+	"github.com/ewhauser/gbash/policy"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/spf13/afero"
 	"github.com/tetratelabs/wazero/api"
@@ -367,5 +368,18 @@ func TestAFailedCallLeavesNoFileBehind(t *testing.T) {
 	}
 	if left, _ := afero.ReadDir(tmp, "/"); len(left) != 0 {
 		t.Fatalf("%d files were left in /tmp", len(left))
+	}
+}
+
+func TestARefusedWriteOfAToolsFileIsSaidOnce(t *testing.T) {
+	onlyHome := gbash.WithPolicy(policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: []string{"/home/user"}}))
+	c := newComputer(t, Config{Options: []gbash.Option{onlyHome}, Tools: testTools(t, func(s *mcp.Server) {
+		mcp.AddTool(s, &mcp.Tool{Name: "notes_drawNote"}, func(context.Context, *mcp.CallToolRequest, struct{}) (*mcp.CallToolResult, any, error) {
+			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.ImageContent{Data: []byte("png"), MIMEType: "image/png"}}}, nil, nil
+		})
+	})})
+	res, err := c.Exec(context.Background(), &gbash.ExecutionRequest{Script: "notes draw-note"})
+	if err != nil || res.ExitCode == 0 || strings.Count(res.Stderr, "denied") != 1 {
+		t.Fatalf("got %v, exit %d, stderr %q", err, res.ExitCode, res.Stderr)
 	}
 }

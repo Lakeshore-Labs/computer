@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/ewhauser/gbash/commands"
+	"github.com/ewhauser/gbash/policy"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -440,6 +441,9 @@ func Command(name string, sources []Source, group []Tool) commands.Command {
 		}
 		arguments, _ := json.Marshal(values)
 		result, err := Call(ctx, sources[tool.Source].Session, inv.FS, tool.Name, arguments)
+		if policy.IsDenied(err) { // the shell has already said which write it refused
+			return &commands.ExitError{Code: 1}
+		}
 		if err != nil {
 			return commands.Exitf(inv, 1, "%s %s: %v", name, args[0], err)
 		}
