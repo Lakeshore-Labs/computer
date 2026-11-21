@@ -383,3 +383,35 @@ func TestARefusedWriteOfAToolsFileIsSaidOnce(t *testing.T) {
 		t.Fatalf("got %v, exit %d, stderr %q", err, res.ExitCode, res.Stderr)
 	}
 }
+
+func TestTheComputerIsAnMCPServerForAnAgentInThisProcess(t *testing.T) {
+	ctx := context.Background()
+	c := newComputer(t, Config{})
+	server, err := c.MCPServer(ctx, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clientT, serverT := mcp.NewInMemoryTransports()
+	if _, err := server.Connect(ctx, serverT, nil); err != nil {
+		t.Fatal(err)
+	}
+	agent, err := mcp.NewClient(&mcp.Implementation{Name: "agent"}, nil).Connect(ctx, clientT, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer agent.Close()
+	call := func(tool string, args map[string]any) string {
+		res, err := agent.CallTool(ctx, &mcp.CallToolParams{Name: tool, Arguments: args})
+		if err != nil || res.IsError || len(res.Content) == 0 {
+			t.Fatalf("%s: %v %+v", tool, err, res)
+		}
+		return res.Content[0].(*mcp.TextContent).Text
+	}
+	call("write", map[string]any{"path": "/home/user/note.txt", "content": "kept"})
+	if got := strings.TrimSpace(call("bash", map[string]any{"commands": "cat note.txt"})); got != "kept" {
+		t.Fatalf("bash read %q", got)
+	}
+	if res, _ := agent.CallTool(ctx, &mcp.CallToolParams{Name: "write", Arguments: map[string]any{"path": "/etc/x", "content": "no"}}); res == nil || !res.IsError {
+		t.Fatalf("a write outside the folders was not refused: %+v", res)
+	}
+}
