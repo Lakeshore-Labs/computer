@@ -83,13 +83,13 @@ func (r *ruled) OpenFile(ctx context.Context, name string, flag int, perm fs.Fil
 	if err != nil {
 		return nil, err
 	}
-	return &whole{File: f, anew: func() (gbfs.File, error) { return r.FileSystem.OpenFile(ctx, abs, flag, perm) }, max: r.maxFileBytes}, nil
+	return &whole{File: f, anew: func() (gbfs.File, error) { return r.FileSystem.OpenFile(ctx, abs, flag&^(os.O_CREATE|os.O_EXCL), perm) }, max: r.maxFileBytes}, nil
 }
 
 // whole is a file being written anew, kept in memory until it is closed and written then, if it fits.
 type whole struct {
 	gbfs.File
-	anew    func() (gbfs.File, error) // opens the file again, emptied
+	anew    func() (gbfs.File, error) // opens the file again, emptied; it is there by then, so nothing is created
 	max     int64
 	content []byte
 	tooMuch bool
