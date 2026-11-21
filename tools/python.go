@@ -8,7 +8,8 @@ import (
 	"strings"
 )
 
-// pythonInit is the package's own module. _host is the built-in module of the Python build that makes the host call.
+// pythonInit is the package's own module. call takes source and tool positionally only, so that a tool with an
+// argument named source or tool can still be called. _host is the built-in module of the Python build that makes the host call.
 const pythonInit = `%s
 import json as _json
 import _host
@@ -20,7 +21,7 @@ class ToolError(Exception):
     pass
 
 
-def call(source, tool, **arguments):
+def call(source, tool, /, **arguments):
     """Call a tool of the numbered source by its full name and return its result as Python data."""
     reply = _json.loads(_host.call(_json.dumps({"source": source, "tool": tool, "arguments": arguments}).encode()))
     if not reply.get("ok"):
