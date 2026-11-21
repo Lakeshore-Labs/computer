@@ -12,15 +12,12 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 	"sync"
 	"time"
@@ -33,7 +30,8 @@ import (
 // Config is one agent command.
 type Config struct {
 	Engine *wasm.Module // QuickJS built as a WASI command, compiled once
-	Script string       // the host directory holding the agent's bundle, pi.js, built from agent/js
+	Script string       // the host directory holding the agent's bundle, built from agent/js
+	Entry  string       // the bundle's file to run; agent.js when empty
 	Mounts []wasm.Dir   // the computer's directories
 
 	ModelURL string // an OpenAI-compatible address, up to and not including /chat/completions
@@ -41,7 +39,7 @@ type Config struct {
 	Model    string // the model's name
 
 	Instructions string // what the agent is told about this computer
-	Home         string // the agent's working directory, where it keeps its conversation under .pi
+	Home         string // the agent's working directory, where it keeps its conversation under .agent
 }
 
 const (
@@ -52,6 +50,10 @@ const (
 // Command is the agent as the command name: `name "message"` answers one message, continuing the conversation.
 func Command(name string, cfg Config) commands.Command {
 	return commands.DefineCommand(name, func(ctx context.Context, inv *commands.Invocation) error {
+		entry := cfg.Entry
+		if entry == "" {
+			entry = "agent.js"
+		}
 		toAgent, replies, err := os.Pipe()
 		if err != nil {
 			return err
@@ -89,8 +91,8 @@ func Command(name string, cfg Config) commands.Command {
 		exit := make(chan int, 1)
 		go func() {
 			code, _ := cfg.Engine.Run(context.WithoutCancel(ctx), wasm.Run{
-				Args:  append([]string{"qjs", scripts + "/pi.js"}, inv.Args...),
-				Env:   map[string]string{"HOME": cfg.Home, "PI_MODEL": cfg.Model, "PI_INSTRUCTIONS": cfg.Instructions},
+				Args:  append([]string{"qjs", scripts + "/" + entry}, inv.Args...),
+				Env:   map[string]string{"HOME": cfg.Home, "AGENT_MODEL": cfg.Model, "AGENT_INSTRUCTIONS": cfg.Instructions},
 				Stdin: toAgent, Stdout: fromAgent, Stderr: inv.Stderr,
 				Dirs: append(cfg.Mounts[:len(cfg.Mounts):len(cfg.Mounts)], wasm.Dir{Guest: scripts, Host: cfg.Script, ReadOnly: true}),
 			})
@@ -100,16 +102,24 @@ func Command(name string, cfg Config) commands.Command {
 		}()
 
 		var running sync.WaitGroup
+		var inFlight sync.Map // a request's id to what stops it
 		lines := bufio.NewScanner(requests)
 		lines.Buffer(nil, 64<<20)
 		for lines.Scan() {
 			var m struct {
-				ID    int
-				Op    string
-				Arg   json.RawMessage
-				Event json.RawMessage
+				ID     int
+				Op     string
+				Arg    json.RawMessage
+				Event  json.RawMessage
+				Cancel int
 			}
 			if json.Unmarshal(lines.Bytes(), &m) != nil {
+				continue
+			}
+			if m.Cancel != 0 { // the agent gives up one request, as when a person stops a command
+				if stop, ok := inFlight.Load(m.Cancel); ok {
+					stop.(context.CancelFunc)()
+				}
 				continue
 			}
 			if m.Op == "" {
@@ -119,15 +129,17 @@ func Command(name string, cfg Config) commands.Command {
 				continue
 			}
 			running.Add(1)
+			ctx, done := context.WithCancel(ctx)
+			inFlight.Store(m.ID, done)
 			go func() {
 				defer running.Done()
+				defer inFlight.Delete(m.ID)
+				defer done()
 				var result any
 				var err error
 				switch m.Op {
 				case "sh":
 					result, err = shell(ctx, inv, m.Arg)
-				case "file":
-					result = files(ctx, inv, m.Arg)
 				case "model":
 					err = model(ctx, cfg, m.Arg, func(event json.RawMessage) { reply(map[string]any{"id": m.ID, "event": event}) })
 				default:
@@ -148,64 +160,34 @@ func Command(name string, cfg Config) commands.Command {
 	})
 }
 
-// shell runs one command line of the agent's in the computer the agent command is running in.
+// shell runs one command of the agent's in the computer the agent command is running in: a command line through
+// the shell, or a program and its arguments as they are.
 func shell(ctx context.Context, inv *commands.Invocation, arg json.RawMessage) (any, error) {
-	var in struct{ Command, Cwd string }
+	var in struct {
+		Command    string
+		Argv       []string
+		Cwd        string
+		Env        map[string]string
+		InheritEnv bool
+		TimeoutMs  int64
+	}
 	_ = json.Unmarshal(arg, &in)
-	res, err := inv.Exec(ctx, &commands.ExecutionRequest{Script: in.Command, WorkDir: in.Cwd})
-	if err != nil {
+	if in.TimeoutMs > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, time.Duration(in.TimeoutMs)*time.Millisecond)
+		defer cancel()
+	}
+	res, err := inv.Exec(ctx, &commands.ExecutionRequest{Script: in.Command, Command: in.Argv, WorkDir: in.Cwd, Env: in.Env, ReplaceEnv: !in.InheritEnv})
+	timedOut := errors.Is(ctx.Err(), context.DeadlineExceeded)
+	if res == nil {
+		if timedOut {
+			return map[string]any{"exitCode": 124, "stdout": "", "stderr": "", "timedOut": true}, nil
+		}
 		return nil, err
 	}
-	return map[string]any{"exitCode": res.ExitCode, "stdout": res.Stdout, "stderr": res.Stderr}, nil
-}
-
-// files is one file request of the agent's, answered {"out": ...} or {"err": "ENOENT" or a message}.
-func files(ctx context.Context, inv *commands.Invocation, arg json.RawMessage) any {
-	var in struct {
-		Op, Path, Data string
-		Text           *string
-	}
-	_ = json.Unmarshal(arg, &in)
-	var out any
-	var err error
-	switch p := path.Clean("/" + in.Path); in.Op {
-	case "read":
-		var b []byte
-		if b, err = inv.FS.ReadFile(ctx, p); err == nil {
-			out = base64.StdEncoding.EncodeToString(b)
-		}
-	case "write":
-		b := []byte{}
-		if in.Text != nil {
-			b = []byte(*in.Text)
-		} else if b, err = base64.StdEncoding.DecodeString(in.Data); err != nil {
-			break
-		}
-		if err = inv.FS.MkdirAll(ctx, path.Dir(p), 0o755); err != nil {
-			break
-		}
-		var f io.WriteCloser
-		if f, err = inv.FS.OpenFile(ctx, p, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644); err == nil {
-			_, err = f.Write(b)
-			err = errors.Join(err, f.Close())
-		}
-	case "mkdir":
-		err = inv.FS.MkdirAll(ctx, p, 0o755)
-	case "stat":
-		var i fs.FileInfo
-		if i, err = inv.FS.Stat(ctx, p); err == nil {
-			out = map[string]any{"name": i.Name(), "isDirectory": i.IsDir(), "size": i.Size(), "mtimeMs": i.ModTime().UnixMilli()}
-		}
-	default:
-		err = errors.New("no such file request: " + in.Op)
-	}
-	switch {
-	case errors.Is(err, fs.ErrNotExist):
-		return map[string]any{"err": "ENOENT"}
-	case err != nil:
-		return map[string]any{"err": err.Error()}
-	}
-	return map[string]any{"out": out}
+	return map[string]any{"exitCode": res.ExitCode, "stdout": res.Stdout, "stderr": res.Stderr, "timedOut": timedOut,
+		// A program given as arguments that the shell does not have is reported, not run to a status of 127.
+		"notFound": res.CommandNotFound || len(in.Argv) > 0 && res.ExitCode == 127 && strings.Contains(res.Stderr, "not found")}, nil
 }
 
 // model makes one chat-completions request for the agent and tells it the response's status, then each chunk of

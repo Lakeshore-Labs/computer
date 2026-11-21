@@ -71,7 +71,7 @@ func run(ctx context.Context) error {
 	pythonHost := flag.String("python-host", "computer", "the module name the Python build imports its host call from")
 	pythonFast := flag.Bool("python-unstoppable", false, "run Python three to four times faster, and give up stopping a script that does not end")
 	timeout := flag.Duration("timeout", 2*time.Minute, "in the mcp mode, how long a bash call may run when the agent sets no limit")
-	agentDir := flag.String("agent", "", "a directory holding the agent's bundle, pi.js, for the command pi")
+	agentDir := flag.String("agent", "", "a directory holding the agent's bundle, agent.js, for the command agent")
 	agentEngine := flag.String("agent-engine", "", "QuickJS built as a WASI command, which runs the agent")
 	modelURL := flag.String("model-url", "", "the agent's model: an OpenAI-compatible address, without /chat/completions; its key is read from COMPUTER_MODEL_KEY")
 	modelName := flag.String("model", "", "the agent's model's name")

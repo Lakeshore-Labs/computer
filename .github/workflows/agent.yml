@@ -1,4 +1,4 @@
-# Bundles the agent from agent/js, tests the command pi with it on the pinned QuickJS, and, for a tag named
+# Bundles the agent from agent/js, tests the command agent with it on the pinned QuickJS, and, for a tag named
 # agent-*, attaches both files to a release.
 name: agent
 on:
@@ -29,14 +29,14 @@ jobs:
       - name: Fetch QuickJS
         run: |
           mkdir out
-          cp agent/js/dist/pi.js out/pi.js
+          cp agent/js/dist/*.js out/
           curl -fsSL -o out/qjs-wasi.wasm "$QUICKJS_URL"
           echo "$QUICKJS_SHA256  out/qjs-wasi.wasm" | sha256sum -c
       - name: Test
-        run: AGENT_ENGINE="$PWD/out/qjs-wasi.wasm" AGENT_BUNDLE="$PWD/out" go test -count=1 -timeout 600s -run Pi -v . | grep -E '^(--- |ok|FAIL|PASS)' ; exit "${PIPESTATUS[0]}"
+        run: AGENT_ENGINE="$PWD/out/qjs-wasi.wasm" AGENT_BUNDLE="$PWD/out" go test -count=1 -timeout 600s -run Agent -v . | grep -E '^(--- |ok|FAIL|PASS)' ; exit "${PIPESTATUS[0]}"
       - name: Package
         run: |
-          tar -C out -czf agent.tar.gz pi.js qjs-wasi.wasm
+          tar -C out -czf agent.tar.gz agent.js qjs-wasi.wasm
           sha256sum agent.tar.gz | tee agent.tar.gz.sha256
       - name: Release
         if: startsWith(github.ref, 'refs/tags/agent-')
@@ -44,5 +44,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: >
           gh release create "$GITHUB_REF_NAME" agent.tar.gz agent.tar.gz.sha256
-          --title "The agent pi ($GITHUB_REF_NAME)"
+          --title "The agent ($GITHUB_REF_NAME)"
           --notes "Pi Durable bundled for QuickJS, and QuickJS v0.18.0 built for WASI. Built by this workflow from agent/js at $GITHUB_SHA."

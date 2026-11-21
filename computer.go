@@ -40,7 +40,7 @@ type Config struct {
 	Commands []commands.Command // commands beyond the shell's own
 	Tools    []tools.Source     // the MCP servers whose tools become commands and the Python package `tools`
 	Python   *Python            // python3; nil for none
-	Agent    *agent.Config      // the command pi, an agent that works in this computer; nil for none
+	Agent    *agent.Config      // the command agent, an agent that works in this computer; nil for none
 	// Options are further gbash options, applied last: gbash.WithHTTPAccess or WithNetwork for curl, which the
 	// computer otherwise lacks, WithLimitOverrides, WithTracing, WithPolicy.
 	Options []gbash.Option
@@ -228,7 +228,7 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 		if a.Instructions == "" {
 			a.Instructions = c.About(names)
 		}
-		if err := registry.Register(agent.Command("pi", a)); err != nil {
+		if err := registry.Register(agent.Command("agent", a)); err != nil {
 			return nil, err
 		}
 	}

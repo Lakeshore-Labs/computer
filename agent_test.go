@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/ewhauser/gbash"
+	"github.com/ewhauser/gbash/commands"
 
 	"github.com/Lakeshore-Labs/computer/agent"
 	"github.com/Lakeshore-Labs/computer/wasm"
@@ -75,9 +76,9 @@ var engine struct {
 	err    error
 }
 
-// piComputer is a computer with the command pi, over the model, and the host directory that is its home. The tests
-// that use it are skipped unless AGENT_ENGINE names QuickJS built for WASI and AGENT_BUNDLE the directory of pi.js.
-func piComputer(t *testing.T, m *model) (*Computer, string) {
+// agentComputer is a computer with the command agent, over the model, and the host directory that is its home. The tests
+// that use it are skipped unless AGENT_ENGINE names QuickJS built for WASI and AGENT_BUNDLE the directory of agent.js.
+func agentComputer(t *testing.T, m *model) (*Computer, string) {
 	t.Helper()
 	binary, bundle := os.Getenv("AGENT_ENGINE"), os.Getenv("AGENT_BUNDLE")
 	if binary == "" || bundle == "" {
@@ -102,7 +103,7 @@ func piComputer(t *testing.T, m *model) (*Computer, string) {
 	return c, home
 }
 
-// lastLine is the last JSON line a run of pi printed.
+// lastLine is the last JSON line a run of the agent printed.
 func lastLine(t *testing.T, out string) map[string]any {
 	t.Helper()
 	lines := strings.Split(strings.TrimSpace(out), "\n")
@@ -113,10 +114,10 @@ func lastLine(t *testing.T, out string) map[string]any {
 	return last
 }
 
-func TestPiAnswersByWorkingInTheComputer(t *testing.T) {
+func TestTheAgentAnswersByWorkingInTheComputer(t *testing.T) {
 	m := newModel(t, "$ echo made by the agent > made.txt; cat made.txt", "It is done.")
-	c, home := piComputer(t, m)
-	res := exec(t, c, `pi "make a file"`, time.Minute)
+	c, home := agentComputer(t, m)
+	res := exec(t, c, `agent "make a file"`, time.Minute)
 	if got := lastLine(t, res.Stdout)["answer"]; res.ExitCode != 0 || got != "It is done." {
 		t.Fatalf("exit %d, answer %v, stderr %q", res.ExitCode, got, res.Stderr)
 	}
@@ -138,11 +139,11 @@ func TestPiAnswersByWorkingInTheComputer(t *testing.T) {
 	}
 }
 
-func TestPiContinuesItsConversation(t *testing.T) {
+func TestTheAgentContinuesItsConversation(t *testing.T) {
 	m := newModel(t, "Noted.", "You said the word was heliotrope.")
-	c, _ := piComputer(t, m)
-	exec(t, c, `pi "remember the word heliotrope"`, time.Minute)
-	res := exec(t, c, `pi "what was the word?"`, time.Minute)
+	c, _ := agentComputer(t, m)
+	exec(t, c, `agent "remember the word heliotrope"`, time.Minute)
+	res := exec(t, c, `agent "what was the word?"`, time.Minute)
 	if got := lastLine(t, res.Stdout)["answer"]; got != "You said the word was heliotrope." {
 		t.Fatalf("answer %v, stderr %q", got, res.Stderr)
 	}
@@ -151,22 +152,59 @@ func TestPiContinuesItsConversation(t *testing.T) {
 	}
 }
 
-func TestAStoppedPiEndsItsRunAndTakesTheNextMessage(t *testing.T) {
+func TestAStoppedAgentEndsItsRunAndTakesTheNextMessage(t *testing.T) {
 	m := newModel(t, "hang", "Back again.")
-	c, _ := piComputer(t, m)
+	c, _ := agentComputer(t, m)
 	start := time.Now()
-	res, err := c.Exec(context.Background(), &gbash.ExecutionRequest{Script: `pi "this one is stopped"`, Timeout: 2 * time.Second})
+	res, err := c.Exec(context.Background(), &gbash.ExecutionRequest{Script: `agent "this one is stopped"`, Timeout: 2 * time.Second})
 	if took := time.Since(start); took > 6*time.Second {
 		t.Fatalf("a stopped run took %v to end (%v)", took, err)
 	}
 	if res != nil && res.ExitCode == 0 {
 		t.Error("a stopped run exited 0")
 	}
-	res = exec(t, c, `pi "and this one is answered"`, time.Minute)
+	res = exec(t, c, `agent "and this one is answered"`, time.Minute)
 	if got := lastLine(t, res.Stdout)["answer"]; got != "Back again." {
 		t.Fatalf("answer %v, stdout %q, stderr %q", got, res.Stdout, res.Stderr)
 	}
 	if sent := m.sent(); len(sent) != 2 {
 		t.Errorf("the model was asked %d times; the stopped run should not have been taken up again", len(sent))
+	}
+}
+
+// Pi Durable ships a conformance suite for an environment its tools run in. It is bundled with the agent and run
+// here against the computer's, as a command that prints a JSON line a case.
+func TestTheAgentsEnvironmentConformsToPiDurable(t *testing.T) {
+	m := newModel(t)
+	_, _ = agentComputer(t, m) // compiles the engine, or skips
+	home := t.TempDir()
+	mounts := []Mount{{Guest: "/home/user", Host: home}, {Guest: "/tmp", Host: t.TempDir()}}
+	c, err := New(Config{Mounts: mounts, WorkDir: "/home/user", Commands: []commands.Command{agent.Command("conformance", agent.Config{
+		Engine: engine.module, Script: os.Getenv("AGENT_BUNDLE"), Entry: "conformance.js", Mounts: mounts, Home: "/home/user"})}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = c.Close() })
+	res := exec(t, c, "conformance /home/user", 2*time.Minute)
+	passed, unsupported := 0, 0
+	for _, line := range strings.Split(strings.TrimSpace(res.Stdout), "\n") {
+		var r struct {
+			Case, Error string
+			OK          bool
+		}
+		if json.Unmarshal([]byte(line), &r) != nil || r.Case == "" {
+			t.Errorf("not a case: %q", line)
+		} else if strings.HasPrefix(r.Case, "watch ") {
+			// Not implemented: the environment reports no file changes. Pi Durable's tools do not use it; a host
+			// that reloads resources from the environment would.
+			unsupported++
+		} else if !r.OK {
+			t.Errorf("%s: %s", r.Case, r.Error)
+		} else {
+			passed++
+		}
+	}
+	if passed != 14 || unsupported != 8 {
+		t.Errorf("%d cases passed and %d are unsupported, where 14 and 8 are expected; stderr %q", passed, unsupported, res.Stderr)
 	}
 }
