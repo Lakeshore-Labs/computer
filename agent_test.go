@@ -148,12 +148,40 @@ func TestTheAgentContinuesItsConversation(t *testing.T) {
 	m := newModel(t, "Noted.", "You said the word was heliotrope.")
 	c, _ := agentComputer(t, m)
 	exec(t, c, `agent --json "remember the word heliotrope"`, time.Minute)
-	res := exec(t, c, `agent --json "what was the word?"`, time.Minute)
+	res := exec(t, c, `agent -c --json "what was the word?"`, time.Minute)
 	if got := lastLine(t, res.Stdout)["answer"]; got != "You said the word was heliotrope." {
 		t.Fatalf("answer %v, stderr %q", got, res.Stderr)
 	}
 	if sent := m.sent(); len(sent) != 2 || !strings.Contains(sent[1], "remember the word heliotrope") || !strings.Contains(sent[1], "Noted.") {
 		t.Error("the second message was not sent with the first and its answer")
+	}
+}
+
+func TestAnAgentStartsANewConversationUnlessToldWhichToContinue(t *testing.T) {
+	m := newModel(t, "First.", "Second.", "Third.", "Fourth.")
+	c, _ := agentComputer(t, m)
+	exec(t, c, `agent -q "the word is heliotrope"`, time.Minute)
+	exec(t, c, `agent -q "the word is vermilion"`, time.Minute)
+	if sent := m.sent(); len(sent) != 2 || strings.Contains(sent[1], "heliotrope") {
+		t.Fatalf("a plain agent was sent an earlier conversation")
+	}
+	listed := strings.Fields(exec(t, c, `agent --list`, time.Minute).Stdout)
+	if len(listed) != 2 {
+		t.Fatalf("agent --list printed %q, not two conversations", listed)
+	}
+	// The newest is listed first, and is the one -c continues; -r continues the one named.
+	exec(t, c, `agent -q -c "which word?"`, time.Minute)
+	if last := m.sent()[2]; !strings.Contains(last, "vermilion") || strings.Contains(last, "heliotrope") {
+		t.Error("-c did not continue the latest conversation alone")
+	}
+	exec(t, c, `agent -q -r `+listed[1]+` "which word?"`, time.Minute)
+	if last := m.sent()[3]; !strings.Contains(last, "heliotrope") || strings.Contains(last, "vermilion") {
+		t.Error("-r did not continue the conversation it named")
+	}
+	for _, refused := range []string{`agent -r ../.. "x"`, `agent -r nothing-by-this-name "x"`} {
+		if res := exec(t, c, refused, time.Minute); res.ExitCode == 0 {
+			t.Errorf("%s was accepted", refused)
+		}
 	}
 }
 
@@ -178,7 +206,7 @@ func TestAStoppedAgentEndsItsRunAndTakesTheNextMessage(t *testing.T) {
 	if res != nil && res.ExitCode == 0 {
 		t.Error("a stopped run exited 0")
 	}
-	res = exec(t, c, `agent --json "and this one is answered"`, time.Minute)
+	res = exec(t, c, `agent -c --json "and this one is answered"`, time.Minute)
 	if got := lastLine(t, res.Stdout)["answer"]; got != "Back again." {
 		t.Fatalf("answer %v, stdout %q, stderr %q", got, res.Stdout, res.Stderr)
 	}

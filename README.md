@@ -167,11 +167,14 @@ export COMPUTER_MODEL_KEY=...
   run and `agent "..." > answer.txt` keeps the answer alone. `-q` shows no steps. `--json` prints the whole run as
   JSON lines for a program, as Pi Durable's own JSON mode does: the transcript entries as they are added and the
   live state, then `{"answer": ...}` or `{"unanswered": reason}`.
-- The conversation is stored at every step, in a directory outside every mount (`-agent-state`, by default one
-  under your cache directory named for the first mount). The next `agent` continues it, and a run a crash cut off
-  goes on where it stopped. No command and none of the agent's tools can reach that directory, so the model cannot
-  rewrite what the next run is told.
-- One agent runs at a time over a conversation; a second, such as one the agent starts itself, is refused.
+- `agent "..."` starts a new conversation. `agent -c "..."` continues the latest one, `agent -r NAME "..."` the
+  one named, and `agent --list` prints their names, newest first. Continuing a conversation whose run a crash cut
+  off goes on where it stopped.
+- Each conversation is stored at every step in a directory of its own, outside every mount (under `-agent-state`,
+  by default a directory under your cache directory named for the first mount). No command and none of the
+  agent's tools can reach it, so the model cannot rewrite what a later run is told.
+- One agent runs at a time in a computer; a second, such as one the agent starts itself, is refused. A
+  conversation is held by one process at a time.
 - The model is any OpenAI-compatible chat-completions address. The command makes the request; the agent never
   holds the key or the address.
 - Stopping the command asks the agent to abort its run, which it records, so the next message starts a new one. An

@@ -22,6 +22,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -47,7 +48,7 @@ type Config struct {
 	// Cache is a host directory in which the bundle is kept compiled to the engine's bytecode, so that a run does
 	// not parse it again; empty keeps it in a temporary directory for the life of the process.
 	Cache string
-	// State is a host directory in which the conversation is kept. It is the agent program's alone: no command
+	// State is a host directory in which the conversations are kept, each in a directory of its own. It is the agent program's alone: no command
 	// and none of the agent's own tools can read or change it, so what the model does cannot alter the instructions
 	// and tools the next run starts with.
 	State string
@@ -59,15 +60,64 @@ const (
 	stopGrace = 5 * time.Second  // how long a stopped agent has to record its run as aborted
 )
 
-// Command is the agent as the command name: `name "message"` answers one message, continuing the conversation.
+// conversations are the names of the conversations kept in state, oldest first: each is a directory named for
+// the time it began.
+func conversations(state string) []string {
+	entries, _ := os.ReadDir(state) // sorted by name
+	var names []string
+	for _, e := range entries {
+		if e.IsDir() {
+			names = append(names, e.Name())
+		}
+	}
+	return names
+}
+
+// Command is the agent as the command name: `name "message"` answers one message in a new conversation, and
+// `name -c "message"` in the latest one, as the agents people run at a terminal do.
 func Command(name string, cfg Config) commands.Command {
 	return commands.DefineCommand(name, func(ctx context.Context, inv *commands.Invocation) error {
 		// The answer goes to standard output and the steps taken to standard error, so a person watches the run
 		// and a pipe receives the answer alone. -q shows no steps. --json prints the whole run as JSON lines, for
 		// a program: the transcript entries as they are added and the live state, as Pi Durable's JSON mode does.
-		args, quiet, asJSON := inv.Args, false, false
-		for ; len(args) > 0 && (args[0] == "-q" || args[0] == "--json"); args = args[1:] {
-			quiet, asJSON = quiet || args[0] == "-q", asJSON || args[0] == "--json"
+		args, quiet, asJSON, conversation := inv.Args, false, false, ""
+	flags:
+		for ; len(args) > 0; args = args[1:] {
+			kept := conversations(cfg.State)
+			switch args[0] {
+			case "-q":
+				quiet = true
+			case "--json":
+				asJSON = true
+			case "--list":
+				for _, c := range slices.Backward(kept) {
+					fmt.Fprintln(inv.Stdout, c)
+				}
+				return nil
+			case "-c", "--continue":
+				if len(kept) == 0 {
+					return commands.Exitf(inv, 1, "%s: there is no conversation to continue", name)
+				}
+				conversation = kept[len(kept)-1]
+			case "-r", "--resume":
+				if len(args) < 2 || !slices.Contains(kept, args[1]) {
+					return commands.Exitf(inv, 1, "%s: -r needs the name of a conversation; %s --list prints them", name, name)
+				}
+				conversation, args = args[1], args[1:]
+			default:
+				break flags
+			}
+		}
+		// A conversation is a directory of State, made here for a new one.
+		dir := cfg.State
+		if cfg.State != "" {
+			if conversation == "" {
+				conversation = time.Now().UTC().Format("20060102T150405.000000")
+			}
+			dir = filepath.Join(cfg.State, conversation)
+			if err := os.MkdirAll(dir, 0o700); err != nil {
+				return commands.Exitf(inv, 1, "%s: %v", name, err)
+			}
 		}
 		// One agent at a time over one conversation: a second would write the same files, and a run that starts
 		// agents without end would take the host's memory.
@@ -76,8 +126,8 @@ func Command(name string, cfg Config) commands.Command {
 			return commands.Exitf(inv, 1, "%s: an agent is already running in this computer", name)
 		}
 		defer busy.(*sync.Mutex).Unlock()
-		if cfg.State != "" { // and one at a time among the processes given this conversation
-			release, err := lock(cfg.State)
+		if dir != "" { // and one at a time among the processes given this conversation
+			release, err := lock(dir)
 			if err != nil {
 				return commands.Exitf(inv, 1, "%s: an agent is already running over this conversation, in another process", name)
 			}
@@ -131,8 +181,8 @@ func Command(name string, cfg Config) commands.Command {
 		}()
 
 		dirs := append(cfg.Mounts[:len(cfg.Mounts):len(cfg.Mounts)], wasm.Dir{Guest: scripts, Host: compiled, ReadOnly: true})
-		if cfg.State != "" {
-			dirs = append(dirs, wasm.Dir{Guest: state, Host: cfg.State})
+		if dir != "" {
+			dirs = append(dirs, wasm.Dir{Guest: state, Host: dir})
 		}
 		exit := make(chan int, 1)
 		go func() {
