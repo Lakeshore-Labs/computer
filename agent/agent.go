@@ -12,13 +12,16 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -41,6 +44,9 @@ type Config struct {
 
 	Instructions string // what the agent is told about this computer
 	Home         string // the agent's working directory
+	// Cache is a host directory in which the bundle is kept compiled to the engine's bytecode, so that a run does
+	// not parse it again; empty keeps it in a temporary directory for the life of the process.
+	Cache string
 	// State is a host directory in which the conversation is kept. It is the agent program's alone: no command
 	// and none of the agent's own tools can read or change it, so what the model does cannot alter the instructions
 	// and tools the next run starts with.
@@ -112,14 +118,18 @@ func Command(name string, cfg Config) commands.Command {
 			kill()
 		}()
 
-		dirs := append(cfg.Mounts[:len(cfg.Mounts):len(cfg.Mounts)], wasm.Dir{Guest: scripts, Host: cfg.Script, ReadOnly: true})
+		compiled, err := bytecode(ctx, cfg, entry)
+		if err != nil {
+			return commands.Exitf(inv, 1, "%s: %v", name, err)
+		}
+		dirs := append(cfg.Mounts[:len(cfg.Mounts):len(cfg.Mounts)], wasm.Dir{Guest: scripts, Host: compiled, ReadOnly: true})
 		if cfg.State != "" {
 			dirs = append(dirs, wasm.Dir{Guest: state, Host: cfg.State})
 		}
 		exit := make(chan int, 1)
 		go func() {
 			code, _ := cfg.Engine.Run(run, wasm.Run{
-				Args:  append([]string{"qjs", scripts + "/" + entry}, args...),
+				Args:  append([]string{"qjs", scripts + "/load.js", scripts + "/" + entry}, args...),
 				Env:   map[string]string{"HOME": cfg.Home, "AGENT_STATE": state, "AGENT_MODEL": cfg.Model, "AGENT_INSTRUCTIONS": cfg.Instructions},
 				Stdin: toAgent, Stdout: fromAgent, Stderr: inv.Stderr,
 				Dirs: dirs,
@@ -203,6 +213,79 @@ func Command(name string, cfg Config) commands.Command {
 		return nil
 	})
 }
+
+// compileJS compiles the module at its first argument to bytecode at its second. loadJS runs such a module: it is
+// what the engine is started with, and it takes itself out of the arguments so the module sees its own as before.
+const (
+	compileJS = `import * as std from "qjs:std";
+import * as bjson from "qjs:bjson";
+const module = std.evalScript(std.loadFile(scriptArgs[1]), { compile_only: true, compile_module: true });
+const bytes = bjson.write(module, bjson.WRITE_OBJ_BYTECODE | bjson.WRITE_OBJ_STRIP_SOURCE);
+const out = std.open(scriptArgs[2], "wb");
+out.write(bytes, 0, bytes.byteLength);
+out.close();
+`
+	loadJS = `import * as std from "qjs:std";
+import * as bjson from "qjs:bjson";
+const bytes = std.loadFile(scriptArgs[1] + ".bc", { binary: true });
+scriptArgs.splice(0, 1);
+std.evalScript(bjson.read(bytes.buffer, 0, bytes.byteLength, bjson.READ_OBJ_BYTECODE), { eval_module: true });
+`
+)
+
+var compiling sync.Mutex
+
+// bytecode is a host directory holding entry compiled to the engine's bytecode, and the loader that runs it.
+// Parsing the bundle's two megabytes of source took a run 0.4 s, and 2 s on an engine that can be stopped; loading
+// the bytecode takes a tenth of that. Bytecode is good only for the engine that wrote it, so it is made by the
+// engine given and kept under the engine's and the bundle's sum.
+func bytecode(ctx context.Context, cfg Config, entry string) (string, error) {
+	source, err := os.ReadFile(filepath.Join(cfg.Script, entry))
+	if err != nil {
+		return "", err
+	}
+	compiling.Lock()
+	defer compiling.Unlock()
+	cache := cfg.Cache
+	if cache == "" { // ponytail: left behind when the process ends; an embedder that minds names a Cache
+		if temporary == "" {
+			if temporary, err = os.MkdirTemp("", "computer-agent-bytecode"); err != nil {
+				return "", err
+			}
+		}
+		cache = temporary
+	}
+	engine := cfg.Engine.Sum()
+	dir := filepath.Join(cache, fmt.Sprintf("%x", sha256.Sum256(append(engine[:], source...))))
+	if _, err := os.Stat(filepath.Join(dir, entry+".bc")); err == nil {
+		return dir, nil
+	}
+	work, err := os.MkdirTemp(cache, "compiling")
+	if err != nil {
+		return "", err
+	}
+	defer os.RemoveAll(work)
+	for file, text := range map[string]string{"compile.js": compileJS, "load.js": loadJS} {
+		if err := os.WriteFile(filepath.Join(work, file), []byte(text), 0o600); err != nil {
+			return "", err
+		}
+	}
+	var failed strings.Builder
+	code, err := cfg.Engine.Run(ctx, wasm.Run{Args: []string{"qjs", "/out/compile.js", "/in/" + entry, "/out/" + entry + ".bc"},
+		Stdin: strings.NewReader(""), Stdout: io.Discard, Stderr: &failed,
+		Dirs: []wasm.Dir{{Guest: "/in", Host: cfg.Script, ReadOnly: true}, {Guest: "/out", Host: work}}})
+	if err != nil || code != 0 {
+		return "", fmt.Errorf("the agent's bundle could not be compiled: %s %v", strings.TrimSpace(failed.String()), err)
+	}
+	_ = os.Remove(filepath.Join(work, "compile.js"))
+	if err := os.Rename(work, dir); err != nil && !errors.Is(err, fs.ErrExist) {
+		return "", err
+	}
+	return dir, nil
+}
+
+// temporary is the directory bytecode is kept in when an agent names no Cache.
+var temporary string
 
 // running holds, for each State directory, the lock of the agent at work over it.
 var running sync.Map

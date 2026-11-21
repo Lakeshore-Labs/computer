@@ -6,6 +6,7 @@ package wasm
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"errors"
 	"io"
 	"sync"
@@ -42,7 +43,12 @@ type Module struct {
 	runtime wazero.Runtime
 	code    wazero.CompiledModule
 	replies sync.Map // a running instance to the reply it has not read yet
+	sum     [sha256.Size]byte
 }
+
+// Sum identifies the program the module was compiled from, and how: what one module writes for itself to read
+// later, such as an engine's bytecode, is good only for a module with the same sum.
+func (m *Module) Sum() [sha256.Size]byte { return m.sum }
 
 // Compile compiles p once, for every run of it.
 func Compile(ctx context.Context, p Program) (*Module, error) {
@@ -60,7 +66,7 @@ func Compile(ctx context.Context, p Program) (*Module, error) {
 		}
 		cfg = cfg.WithCompilationCache(cache)
 	}
-	m := &Module{runtime: wazero.NewRuntimeWithConfig(ctx, cfg)}
+	m := &Module{runtime: wazero.NewRuntimeWithConfig(ctx, cfg), sum: sha256.Sum256(append(p.Binary, byte(p.Features), b2i(p.Unstoppable)))}
 	if _, err := wasi_snapshot_preview1.Instantiate(ctx, m.runtime); err != nil {
 		return nil, errors.Join(err, m.Close(ctx))
 	}
@@ -91,6 +97,13 @@ func Compile(ctx context.Context, p Program) (*Module, error) {
 		return nil, errors.Join(err, m.Close(ctx))
 	}
 	return m, nil
+}
+
+func b2i(b bool) byte {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 // Close frees the compiled code.

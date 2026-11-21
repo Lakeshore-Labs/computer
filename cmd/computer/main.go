@@ -155,7 +155,7 @@ func run(ctx context.Context) error {
 				return fmt.Errorf("-agent-state: %w", err)
 			}
 		}
-		cfg.Agent = &agent.Config{Engine: module, Script: *agentDir, State: stateDir, ModelURL: *modelURL, ModelKey: os.Getenv("COMPUTER_MODEL_KEY"), Model: *modelName}
+		cfg.Agent = &agent.Config{Engine: module, Script: *agentDir, Cache: cache + "/computer/agent-bytecode", State: stateDir, ModelURL: *modelURL, ModelKey: os.Getenv("COMPUTER_MODEL_KEY"), Model: *modelName}
 	}
 	c, err := computer.New(cfg)
 	if err != nil {

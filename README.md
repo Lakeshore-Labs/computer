@@ -119,7 +119,7 @@ as one more WebAssembly program. Its tools are the computer's shell and files, s
 SQLite the way a person at the shell would.
 
 ```
-gh release download agent-1.5.2-4 --repo Lakeshore-Labs/computer --pattern agent.tar.gz
+gh release download agent-1.5.2-5 --repo Lakeshore-Labs/computer --pattern agent.tar.gz
 mkdir agent-wasi && tar -xzf agent.tar.gz -C agent-wasi
 export COMPUTER_MODEL_KEY=...
 ./computer -mount ./work:/home/user -mcp wiki=https://mcp.deepwiki.com/mcp \
@@ -140,7 +140,8 @@ export COMPUTER_MODEL_KEY=...
 - The model is any OpenAI-compatible chat-completions address. The command makes the request; the agent never
   holds the key or the address.
 - Stopping the command asks the agent to abort its run, which it records, so the next message starts a new one. An
-  agent that does not stop is stopped where it stands. Being stoppable makes it slower to start: about 2 s a run.
+  agent that does not stop is stopped where it stands.
+- The bundle is compiled to the engine's bytecode once and loaded from there, so a run starts in about 0.15 s.
 
 One `agent` is one message and its answer. A message cannot yet be given to a run that is under way, and nothing
 asks a person to approve a step.
