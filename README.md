@@ -121,7 +121,6 @@ chart bar --x month --y north,south sales.csv --out sales.png    # or line, pie,
 | [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Talks to the MCP servers |
 | `wasm/` | Runs a WASI program like a command: memory cap, deadline, and directories that are afero filesystems |
 | `files/` | A host directory as an afero filesystem that cannot be left |
-| `wasm/` | Runs a WASI program like a command: memory cap, deadline, and mounts it cannot leave |
 | `extra/` | Commands the shell lacks: `image` and `chart`, one file each |
 | `tools/` | Turns MCP tools into commands and a Python package |
 | `agent/` | The command `agent`: runs the agent and answers its requests for the shell, files and the model |
