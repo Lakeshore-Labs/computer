@@ -12,6 +12,7 @@ require (
 	github.com/ewhauser/gbash/contrib/sqlite3 v0.0.41
 	github.com/ewhauser/gbash/contrib/yq v0.0.41
 	github.com/modelcontextprotocol/go-sdk v1.8.0
+	github.com/spf13/afero v1.15.0
 	github.com/tetratelabs/wazero v1.12.0
 	golang.org/x/sys v0.50.0
 	golang.org/x/term v0.48.0

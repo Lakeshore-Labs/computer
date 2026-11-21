@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"maps"
 	"os"
 	"path/filepath"
@@ -17,6 +18,7 @@ import (
 	"sync"
 
 	"github.com/Lakeshore-Labs/computer/agent"
+	"github.com/Lakeshore-Labs/computer/files"
 	"github.com/Lakeshore-Labs/computer/tools"
 	"github.com/Lakeshore-Labs/computer/wasm"
 	"github.com/ewhauser/gbash"
@@ -30,7 +32,8 @@ import (
 	"github.com/ewhauser/gbash/policy"
 )
 
-// A Mount is a host directory the shell and every program see at the path Guest.
+// A Mount is a directory the shell and every program see at the path Guest: the filesystem FS, which can be
+// anything that implements afero.Fs, or, when FS is nil, the host directory Host (see files.Dir).
 type Mount = wasm.Dir
 
 // Config is what one computer is made of. Only Mounts is needed for a working shell.
@@ -79,6 +82,8 @@ type Computer struct {
 	cfg  Config
 	site string // a host directory: the generated Python package, rewritten when the tools change
 	tmp  string // a host directory mounted at /tmp when the caller mounts none, removed by Close
+	// opened are the host directories among the mounts, opened by New and closed by Close.
+	opened []io.Closer
 	// state is where the agent keeps its conversation: the caller's directory, or one made here and removed by
 	// Close, with which the conversation ends.
 	state, ownState string
@@ -99,11 +104,26 @@ func New(cfg Config) (*Computer, error) {
 		return nil, err
 	}
 	c := &Computer{cfg: cfg, site: site}
+	c.cfg.Mounts = slices.Clone(cfg.Mounts)
 	if !slices.ContainsFunc(cfg.Mounts, func(m Mount) bool { return m.Guest == "/tmp" }) {
 		if c.tmp, err = os.MkdirTemp("", "computer-tmp"); err != nil {
 			return nil, err
 		}
-		c.cfg.Mounts = append(cfg.Mounts[:len(cfg.Mounts):len(cfg.Mounts)], Mount{Guest: "/tmp", Host: c.tmp})
+		c.cfg.Mounts = append(c.cfg.Mounts, Mount{Guest: "/tmp", Host: c.tmp})
+	}
+	if cfg.Python != nil {
+		c.cfg.Mounts = append(c.cfg.Mounts, Mount{Guest: pythonLib, Host: cfg.Python.lib, ReadOnly: true}, Mount{Guest: pythonSite, Host: site, ReadOnly: true})
+	}
+	// Each host directory is opened once, so that the shell and every program are given the one filesystem.
+	for i, m := range c.cfg.Mounts {
+		if m.FS != nil {
+			continue
+		}
+		dir, err := files.Dir(m.Host)
+		if err != nil {
+			return nil, errors.Join(err, c.Close())
+		}
+		c.cfg.Mounts[i].FS, c.opened = dir, append(c.opened, dir)
 	}
 	if cfg.Agent != nil {
 		if c.state = cfg.Agent.State; c.state == "" {
@@ -121,7 +141,11 @@ func (c *Computer) Mounts() []Mount { return c.cfg.Mounts }
 
 // Close removes what the computer keeps on the host. The caller's mounts are the caller's and stay.
 func (c *Computer) Close() error {
-	err := os.RemoveAll(c.site)
+	var err error
+	for _, dir := range c.opened {
+		err = errors.Join(err, dir.Close())
+	}
+	err = errors.Join(err, os.RemoveAll(c.site))
 	if c.tmp != "" {
 		err = errors.Join(err, os.RemoveAll(c.tmp))
 	}
@@ -215,8 +239,6 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 		if err := tools.WritePython(filepath.Join(c.site, "tools"), listed); err != nil {
 			return nil, err
 		}
-		mounts = append(mounts[:len(mounts):len(mounts)],
-			Mount{Guest: pythonLib, Host: c.cfg.Python.lib, ReadOnly: true}, Mount{Guest: pythonSite, Host: c.site, ReadOnly: true})
 		custom = append(custom[:len(custom):len(custom)], c.python("python3", mounts), c.python("python", mounts))
 	}
 	for _, cmd := range custom {
@@ -253,10 +275,10 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	var table []gbfs.MountConfig
 	writable := []string{"/dev/null"} // gbash's own device, which a redirect to nowhere writes
 	for _, m := range mounts {
-		factory := noLinks(gbfs.ReadWrite(gbfs.ReadWriteOptions{Root: m.Host}))
-		if m.ReadOnly {
-			factory = gbfs.Host(gbfs.HostOptions{Root: m.Host, VirtualRoot: "/"})
-		} else {
+		factory := gbfs.FactoryFunc(func(context.Context) (gbfs.FileSystem, error) {
+			return &shellFS{fs: m.FS, readOnly: m.ReadOnly, cwd: "/"}, nil
+		})
+		if !m.ReadOnly {
 			writable = append(writable, m.Guest)
 		}
 		table = append(table, gbfs.MountConfig{MountPoint: m.Guest, Factory: factory})
@@ -284,21 +306,6 @@ func (c *Computer) About(toolCommands []string) string {
 	}
 	b.WriteString("\nWhen data is to be filtered, counted, combined or stored, pipe it or process it in a script; do not copy data into a command by hand, and do not print large results.")
 	return b.String()
-}
-
-// noLinks is a filesystem in which a symbolic link cannot be made. gbash refuses to follow one, but would make one
-// on the host, where whatever else reads the directory follows it.
-func noLinks(f gbfs.Factory) gbfs.Factory {
-	return gbfs.FactoryFunc(func(ctx context.Context) (gbfs.FileSystem, error) {
-		fsys, err := f.New(ctx)
-		return linkless{fsys}, err
-	})
-}
-
-type linkless struct{ gbfs.FileSystem }
-
-func (linkless) Symlink(_ context.Context, target, link string) error {
-	return &os.LinkError{Op: "symlink", Old: target, New: link, Err: os.ErrPermission}
 }
 
 // python is CPython as the command name.

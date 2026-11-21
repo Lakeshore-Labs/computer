@@ -63,6 +63,21 @@ defer c.Close()
 res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: "wiki read-wiki-structure --repo-name wazero/wazero | wc -l"})
 ```
 
+## Mounts
+
+A mount is a directory of the computer. The shell and every program are given the same one, so a file one writes
+another reads. It is a host directory, or anything that implements [afero](https://github.com/spf13/afero)'s
+filesystem interface: memory, a database, an object store.
+
+```go
+computer.Mount{Guest: "/home/user", Host: dir}                     // a host directory
+computer.Mount{Guest: "/scratch", FS: afero.NewMemMapFs()}         // kept in memory
+computer.Mount{Guest: "/reference", Host: docs, ReadOnly: true}
+```
+
+A host directory is opened with `files.Dir`, which goes through Go's `os.Root` and cannot be left by `..` or by a
+symbolic link. A filesystem of your own decides for itself what a name may reach.
+
 ## Tools as commands and as Python
 
 A server named `wiki` with a tool `read_wiki_structure` that takes `repoName` is:
@@ -92,7 +107,8 @@ underscore: a tool `notes_addNote` is `notes add-note`. This suits one server th
 | [gbash](https://github.com/ewhauser/gbash) | The shell and its commands, in Go, with `jq`, `yq`, `awk`, `sqlite3`, `html-to-markdown` |
 | [wazero](https://github.com/wazero/wazero) | Runs CPython as WebAssembly |
 | [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Talks to the MCP servers |
-| `wasm/` | Runs a WASI program like a command: memory cap, deadline, and mounts it cannot leave |
+| `wasm/` | Runs a WASI program like a command: memory cap, deadline, and directories that are afero filesystems |
+| `files/` | A host directory as an afero filesystem that cannot be left |
 | `tools/` | Turns MCP tools into commands and a Python package |
 | `agent/` | The command `agent`: runs the agent and answers its requests for the shell, files and the model |
 | `computer.go` | Assembles the above |
@@ -166,7 +182,6 @@ other 8 are for reporting file changes, which this environment does not do.
 - Stopping a WebAssembly run at its deadline makes Python three to four times slower. `wasm.Program.Unstoppable`
   trades that away for trusted scripts.
 - In our Python build `asyncio` and thread timeouts do not work, and there is no numpy or pandas.
-- A mount is a host folder. In-memory and other filesystems are not supported yet.
 - Tested on macOS and Linux. It compiles for Windows and has not been run there.
 
 ## Tests

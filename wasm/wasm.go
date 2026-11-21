@@ -12,7 +12,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/spf13/afero"
 	"github.com/tetratelabs/wazero"
+
+	"github.com/Lakeshore-Labs/computer/files"
 	"github.com/tetratelabs/wazero/api"
 	"github.com/tetratelabs/wazero/experimental/sysfs"
 	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
@@ -109,9 +112,11 @@ func b2i(b bool) byte {
 // Close frees the compiled code.
 func (m *Module) Close(ctx context.Context) error { return m.runtime.Close(ctx) }
 
-// A Dir is a host directory the program sees at the path Guest.
+// A Dir is a directory the program sees at the path Guest: the filesystem FS, or, when FS is nil, the host
+// directory Host.
 type Dir struct {
 	Guest, Host string
+	FS          afero.Fs
 	ReadOnly    bool
 }
 
@@ -129,16 +134,16 @@ type Run struct {
 func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 	fs := wazero.NewFSConfig()
 	for _, d := range r.Dirs {
-		dir, err := newRooted(d.Host, d.ReadOnly)
-		if err != nil {
-			return 70, err
+		dir := d.FS
+		if dir == nil {
+			host, err := files.Dir(d.Host)
+			if err != nil {
+				return 70, err
+			}
+			defer host.Close()
+			dir = host
 		}
-		defer dir.root.Close()
-		if d.ReadOnly {
-			fs = fs.(sysfs.FSConfig).WithSysFSMount(&sysfs.ReadFS{FS: dir}, d.Guest)
-		} else {
-			fs = fs.(sysfs.FSConfig).WithSysFSMount(dir, d.Guest)
-		}
+		fs = fs.(sysfs.FSConfig).WithSysFSMount(&dirFS{fs: dir, readOnly: d.ReadOnly}, d.Guest)
 	}
 	// The empty name lets any number of instances of the one module run at once.
 	cfg := wazero.NewModuleConfig().WithName("").WithArgs(r.Args...).WithFSConfig(fs).

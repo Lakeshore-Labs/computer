@@ -6,11 +6,13 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/ewhauser/gbash"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/spf13/afero"
 	"github.com/tetratelabs/wazero/api"
 
 	"github.com/Lakeshore-Labs/computer/tools"
@@ -101,20 +103,29 @@ func TestAToolAddedLaterIsACommand(t *testing.T) {
 	}
 }
 
-// python is the CPython build named by PYTHON_WASM and PYTHON_LIB; the tests that need it are skipped without it.
+var cpython struct {
+	once   sync.Once
+	python *Python
+	err    error
+}
+
+// python is the CPython build named by PYTHON_WASM and PYTHON_LIB, compiled once for all the tests; those that
+// need it are skipped without it.
 func python(t *testing.T) *Python {
 	t.Helper()
 	binary, lib := os.Getenv("PYTHON_WASM"), os.Getenv("PYTHON_LIB")
 	if binary == "" || lib == "" {
 		t.Skip("PYTHON_WASM and PYTHON_LIB are not set")
 	}
-	p, err := LoadPython(context.Background(), binary, lib, wasm.Program{
-		MemoryPages: 8192, CacheDir: os.Getenv("PYTHON_CACHE"), HostModule: os.Getenv("PYTHON_HOST_MODULE"), Features: api.CoreFeaturesV2,
+	cpython.once.Do(func() {
+		cpython.python, cpython.err = LoadPython(context.Background(), binary, lib, wasm.Program{
+			MemoryPages: 8192, CacheDir: os.Getenv("PYTHON_CACHE"), HostModule: os.Getenv("PYTHON_HOST_MODULE"), Features: api.CoreFeaturesV2,
+		})
 	})
-	if err != nil {
-		t.Fatal(err)
+	if cpython.err != nil {
+		t.Fatal(cpython.err)
 	}
-	return p
+	return cpython.python
 }
 
 func TestPythonCallsAToolAndSharesTheShellsFiles(t *testing.T) {
@@ -240,5 +251,25 @@ func TestTheShellWritesOnlyWhereProgramsSeeTheResult(t *testing.T) {
 	}
 	if res.ExitCode == 0 {
 		t.Error("the shell wrote outside every mount")
+	}
+}
+
+func TestAMountCanBeAnyFilesystem(t *testing.T) {
+	memory := afero.NewMemMapFs()
+	if err := afero.WriteFile(memory, "/given.txt", []byte("from the host"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	c := newComputer(t, Config{Python: python(t), Mounts: []Mount{{Guest: "/mem", FS: memory}}})
+	got := run(t, c, `cd /mem && cat given.txt && echo && echo from the shell > shell.txt &&
+python3 -c "
+print(open('shell.txt').read().strip())
+open('python.txt', 'w').write('from python')
+" && cat python.txt && echo &&
+sqlite3 t.db "create table n(x); insert into n values (1),(2),(3)" && sqlite3 t.db "select sum(x) from n" && ls | tr '\n' ' '`)
+	if got != "from the host\nfrom the shell\nfrom python\n6\ngiven.txt python.txt shell.txt t.db" {
+		t.Errorf("got %q", got)
+	}
+	if b, _ := afero.ReadFile(memory, "/python.txt"); string(b) != "from python" {
+		t.Errorf("the host does not see what the program wrote: %q", b)
 	}
 }
