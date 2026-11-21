@@ -16,6 +16,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Lakeshore-Labs/computer/agent"
 	"github.com/Lakeshore-Labs/computer/files"
@@ -184,13 +185,20 @@ func (c *Computer) Exec(ctx context.Context, req *gbash.ExecutionRequest) (*gbas
 	return res, err
 }
 
+// listTimeout is how long the MCP servers have to list their tools before a command runs with the tools it had.
+const listTimeout = 5 * time.Second
+
 // Session is the computer's shell session, for its filesystem and for interactive use. The tools are listed on
 // every call: when they have changed, the commands and the Python package are made again and the session is a new
 // one over the same files.
 func (c *Computer) Session(ctx context.Context) (*gbash.Session, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	listed, err := tools.List(ctx, c.cfg.Tools)
+	// ponytail: the tools are listed before every command, so a slow server costs each command up to listTimeout;
+	// list once and refresh on the MCP client's tools-changed notification if that cost shows.
+	listing, cancel := context.WithTimeout(ctx, listTimeout)
+	defer cancel()
+	listed, err := tools.List(listing, c.cfg.Tools)
 	if err != nil {
 		if c.session != nil { // a server that stops answering takes its own commands down, not the shell
 			return c.session, nil

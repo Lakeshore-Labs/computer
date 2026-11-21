@@ -71,12 +71,18 @@ func Command(name string, cfg Config) commands.Command {
 		}
 		// One agent at a time over one conversation: a second would write the same files, and a run that starts
 		// agents without end would take the host's memory.
-		// ponytail: held within this process; two processes given one State directory are not kept apart.
 		busy, _ := running.LoadOrStore(cfg.State, new(sync.Mutex))
 		if !busy.(*sync.Mutex).TryLock() {
 			return commands.Exitf(inv, 1, "%s: an agent is already running in this computer", name)
 		}
 		defer busy.(*sync.Mutex).Unlock()
+		if cfg.State != "" { // and one at a time among the processes given this conversation
+			release, err := lock(cfg.State)
+			if err != nil {
+				return commands.Exitf(inv, 1, "%s: an agent is already running over this conversation, in another process", name)
+			}
+			defer release()
+		}
 		entry := cfg.Entry
 		if entry == "" {
 			entry = "agent.js"
@@ -113,7 +119,9 @@ func Command(name string, cfg Config) commands.Command {
 		ended := make(chan struct{})
 		go func() {
 			<-ctx.Done()
-			reply(map[string]any{"stop": true})
+			// The request is written beside the wait, not before it: an agent that is not reading, with a reply
+			// already owed to it, would otherwise hold this up for ever.
+			go reply(map[string]any{"stop": true})
 			select {
 			case <-ended:
 			case <-time.After(stopGrace):
@@ -206,6 +214,10 @@ func Command(name string, cfg Config) commands.Command {
 			kill()
 			go func() { _, _ = io.Copy(io.Discard, requests) }()
 		}
+		// Nothing reads what is still being written to the agent, which has ended or is being stopped. Closing
+		// the pipe releases a reply that is waiting for room in it.
+		_ = toAgent.Close()
+		_ = replies.Close()
 		requested.Wait()
 		if code := <-exit; code != 0 {
 			return &commands.ExitError{Code: code}

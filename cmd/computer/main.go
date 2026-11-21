@@ -22,9 +22,11 @@ import (
 	neturl "net/url"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"slices"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/ewhauser/gbash"
@@ -256,6 +258,13 @@ func run(ctx context.Context) error {
 	}
 	defer c.Close()
 
+	if *script == "" && flag.NArg() == 0 && term.IsTerminal(int(os.Stdin.Fd())) {
+		return prompt(ctx, c, cfg.WorkDir) // which gives an interrupt to the command that is running, and goes on
+	}
+	// An interrupt ends what is running as a deadline would: the agent records its run as aborted, and the
+	// computer removes its temporary directories.
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
 	if flag.Arg(0) == "mcp" {
 		return serve(ctx, c, cfg, *timeout)
 	}
@@ -264,9 +273,6 @@ func run(ctx context.Context) error {
 		return err
 	}
 	args := flag.Args()
-	if *script == "" && len(args) == 0 && term.IsTerminal(int(os.Stdin.Fd())) {
-		return prompt(ctx, c, cfg.WorkDir)
-	}
 	if *script != "" {
 		args = append([]string{"-c", *script}, args...)
 	}
