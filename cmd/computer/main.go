@@ -376,21 +376,12 @@ func serve(ctx context.Context, c *computer.Computer, cfg computer.Config, limit
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: s}}, IsError: failed}, nil
 	}
 
-	description := "Run bash commands in a sandboxed computer. It has the usual commands, jq, yq, awk and sqlite3"
-	if cfg.Python != nil {
-		description += ", and python3"
+	// The agent is told what the agent in the computer is told, so the two cannot differ.
+	if _, err := c.Session(ctx); err != nil {
+		return err
 	}
-	if len(cfg.Tools) > 0 {
-		if _, err := c.Session(ctx); err != nil {
-			return err
-		}
-		description += ". These commands call tools; run one with --help to see what it does: " + strings.Join(c.ToolCommands(), ", ")
-		if cfg.Python != nil {
-			modules := c.ToolModules()
-			description += ". In Python the same tools are the package `tools`, with the modules " + strings.Join(modules, ", ") + ": from tools import " + modules[0]
-		}
-	}
-	mcp.AddTool(server, &mcp.Tool{Name: "bash", Description: description + "."},
+	description := "Run bash commands in a sandboxed computer. " + c.About(c.ToolCommands(), c.ToolModules())
+	mcp.AddTool(server, &mcp.Tool{Name: "bash", Description: description},
 		func(ctx context.Context, _ *mcp.CallToolRequest, in bashInput) (*mcp.CallToolResult, any, error) {
 			script := in.Commands
 			if script == "" {

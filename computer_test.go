@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ewhauser/gbash"
+	"github.com/ewhauser/gbash/commands"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/spf13/afero"
 	"github.com/tetratelabs/wazero/api"
@@ -313,5 +314,16 @@ func TestThePythonPackageIsNotRewrittenWhenTheToolsAreUnchanged(t *testing.T) {
 	}
 	if info, err := os.Stat(init); err != nil || !info.ModTime().Equal(past) {
 		t.Errorf("the package was written again for the same tools: %v %v", info.ModTime(), err)
+	}
+}
+
+func TestTheComputerDescribesItsFolderAndItsOwnCommands(t *testing.T) {
+	frob := commands.DefineCommand("frob", func(context.Context, *commands.Invocation) error { return nil })
+	c := newComputer(t, Config{Commands: []commands.Command{frob}})
+	about := c.About(nil, nil)
+	for _, want := range []string{"Your files are under " + c.cfg.WorkDir, "frob"} {
+		if !strings.Contains(about, want) {
+			t.Errorf("the description lacks %q: %s", want, about)
+		}
 	}
 }
