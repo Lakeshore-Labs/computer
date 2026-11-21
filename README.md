@@ -42,6 +42,25 @@ go build -o computer ./cmd/computer
 ./computer -mount ./work:/home/user -mcp wiki=https://mcp.deepwiki.com/mcp mcp
 ```
 
+With more than a few of either, put them in a file. `mcpServers` is the format Claude Code and Claude Desktop
+read, so a `.mcp.json` you already have works as it is; `mounts` are as `-mount` takes them.
+
+```json
+{
+  "mounts": ["./work:/home/user", "./docs:/reference:ro"],
+  "mcpServers": {
+    "wiki": {"type": "http", "url": "https://mcp.deepwiki.com/mcp", "headers": {"Authorization": "Bearer ${WIKI_TOKEN}"}},
+    "everything": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-everything"]}
+  }
+}
+```
+
+```
+./computer -config computer.json
+```
+
+`${NAME}` in a header or an `env` value is read from the environment. Flags add to the file.
+
 A server that needs a bearer token reads it from the environment: `COMPUTER_MCP_TOKEN_WIKI` for a server named
 `wiki`. A server started as a program runs on the host, outside the sandbox, like any other program you start.
 

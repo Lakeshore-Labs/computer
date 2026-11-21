@@ -50,3 +50,41 @@ func TestTabRunsOnlyACommandThatCallsTools(t *testing.T) {
 		t.Errorf("completing a line ran a command: %s exists", e.Name())
 	}
 }
+
+func TestTheConfigFileIsReadAsClaudeCodesIs(t *testing.T) {
+	t.Setenv("WIKI_TOKEN", "secret")
+	path := filepath.Join(t.TempDir(), "computer.json")
+	if err := os.WriteFile(path, []byte(`{
+		"mounts": ["./work:/home/user", "./docs:/reference:ro"],
+		"mcpServers": {
+			"wiki": {"type": "http", "url": "https://example.com/mcp", "headers": {"Authorization": "Bearer ${WIKI_TOKEN}"}},
+			"everything": {"command": "npx", "args": ["-y", "a package"], "env": {"KEY": "$WIKI_TOKEN"}}
+		}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	mounts, servers, err := readConfig(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(mounts) != 2 || mounts[1] != "./docs:/reference:ro" {
+		t.Errorf("mounts: %q", mounts)
+	}
+	if len(servers) != 2 || servers[0].name != "everything" || servers[1].name != "wiki" {
+		t.Fatalf("servers: %+v", servers)
+	}
+	if e := servers[0]; e.Command != "npx" || len(e.Args) != 2 || e.Args[1] != "a package" || e.Env["KEY"] != "secret" {
+		t.Errorf("the program: %+v", e)
+	}
+	if w := servers[1]; w.URL != "https://example.com/mcp" || w.Headers["Authorization"] != "Bearer secret" {
+		t.Errorf("the URL: %+v", w)
+	}
+
+	for name, text := range map[string]string{"a misspelt key": `{"mcpServer": {}}`, "a name that is not a command's": `{"mcpServers": {"a b": {"url": "https://example.com"}}}`} {
+		if err := os.WriteFile(path, []byte(text), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if _, _, err := readConfig(path); err == nil {
+			t.Errorf("%s was accepted", name)
+		}
+	}
+}

@@ -10,17 +10,20 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"maps"
 	nethttp "net/http"
 	neturl "net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -43,14 +46,67 @@ type list []string
 func (l *list) String() string     { return strings.Join(*l, ",") }
 func (l *list) Set(v string) error { *l = append(*l, v); return nil }
 
-// bearer adds an MCP server's token to the requests sent to that server's own host, and to no host a redirect
-// leads to.
-type bearer struct{ scheme, host, token string }
+// server is one MCP server: a URL, or a program started and spoken to on its standard streams. The fields are
+// those of the mcpServers entries that Claude Code and Claude Desktop read.
+type server struct {
+	name    string
+	Type    string            `json:"type"` // read so that such a file is accepted; the url or the command says which it is
+	URL     string            `json:"url"`
+	Headers map[string]string `json:"headers"`
+	Command string            `json:"command"`
+	Args    []string          `json:"args"`
+	Env     map[string]string `json:"env"`
+}
 
-func (b bearer) RoundTrip(r *nethttp.Request) (*nethttp.Response, error) {
-	if r.URL.Scheme == b.scheme && r.URL.Host == b.host {
+// file is the -config file: what the flags -mount and -mcp say, for a computer with more of them than a command
+// line reads well with.
+type file struct {
+	Mounts     []string          `json:"mounts"` // each as -mount takes it: host:guest or host:guest:ro
+	MCPServers map[string]server `json:"mcpServers"`
+}
+
+// readConfig is the mounts and the servers, by name, of the -config file at path.
+func readConfig(path string) ([]string, []server, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	var f file
+	decoder := json.NewDecoder(bytes.NewReader(b))
+	decoder.DisallowUnknownFields() // a misspelt key is an error, not a server silently left out
+	if err := decoder.Decode(&f); err != nil {
+		return nil, nil, err
+	}
+	var servers []server
+	for _, name := range slices.Sorted(maps.Keys(f.MCPServers)) {
+		s := f.MCPServers[name]
+		if !isName(name) {
+			return nil, nil, fmt.Errorf("the server name %q must be letters, digits, hyphens and underscores", name)
+		}
+		for _, values := range []map[string]string{s.Headers, s.Env} {
+			for k, v := range values {
+				values[k] = os.ExpandEnv(v)
+			}
+		}
+		s.name = name
+		servers = append(servers, s)
+	}
+	return f.Mounts, servers, nil
+}
+
+// headers adds an MCP server's headers, such as its token, to the requests sent to that server's own host, and to
+// no host a redirect leads to.
+type headers struct {
+	scheme, host string
+	set          map[string]string
+}
+
+func (h headers) RoundTrip(r *nethttp.Request) (*nethttp.Response, error) {
+	if r.URL.Scheme == h.scheme && r.URL.Host == h.host {
 		r = r.Clone(r.Context())
-		r.Header.Set("Authorization", "Bearer "+b.token)
+		for name, value := range h.set {
+			r.Header.Set(name, value)
+		}
 	}
 	return nethttp.DefaultTransport.RoundTrip(r)
 }
@@ -79,7 +135,17 @@ func run(ctx context.Context) error {
 	modelURL := flag.String("model-url", "", "the agent's model: an OpenAI-compatible address, without /chat/completions; its key is read from COMPUTER_MODEL_KEY")
 	modelName := flag.String("model", "", "the agent's model's name")
 	script := flag.String("c", "", "run this command and exit")
+	config := flag.String("config", "", `a JSON file of mounts and MCP servers, added to those the flags give: {"mounts": ["host:guest"], "mcpServers": {"name": {"url": "..."} or {"command": "...", "args": [...]}}}; mcpServers is as in Claude Code's .mcp.json, and ${NAME} in a header or an env value is read from the environment`)
 	flag.Parse()
+
+	var listed []server // in the order given: the file's by name, then the flags'
+	if *config != "" {
+		f, named, err := readConfig(*config)
+		if err != nil {
+			return fmt.Errorf("-config %s: %w", *config, err)
+		}
+		mounts, listed = append(mounts, f...), named
+	}
 
 	cfg := computer.Config{WorkDir: *workDir}
 	if len(allow) > 0 {
@@ -95,29 +161,51 @@ func run(ctx context.Context) error {
 	if cfg.WorkDir == "" && len(cfg.Mounts) > 0 {
 		cfg.WorkDir = cfg.Mounts[0].Guest
 	}
-	for _, server := range servers {
-		name, url, named := strings.Cut(server, "=")
+	for _, flagged := range servers {
+		name, url, named := strings.Cut(flagged, "=")
 		token := "COMPUTER_MCP_TOKEN_" + strings.ToUpper(name)
 		if !named || !isName(name) { // a bare URL or program, which may itself hold an equals sign
-			name, url, token = "", server, "COMPUTER_MCP_TOKEN"
+			name, url, token = "", flagged, "COMPUTER_MCP_TOKEN"
 		}
-		var transport mcp.Transport
+		if name != "" && slices.ContainsFunc(listed, func(s server) bool { return s.name == name }) {
+			return fmt.Errorf("the MCP server %q is given twice", name)
+		}
+		s := server{URL: url}
 		if program := strings.Fields(url); !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") && len(program) > 0 {
-			transport = &mcp.CommandTransport{Command: exec.CommandContext(ctx, program[0], program[1:]...)}
-		} else {
-			endpoint, err := neturl.Parse(url)
-			if err != nil {
-				return fmt.Errorf("-mcp %s: %w", server, err)
+			s = server{Command: program[0], Args: program[1:]}
+		} else if t := os.Getenv(token); t != "" {
+			s.Headers = map[string]string{"Authorization": "Bearer " + t}
+		}
+		s.name = name
+		listed = append(listed, s)
+	}
+	for _, s := range listed {
+		name := s.name
+		var transport mcp.Transport
+		switch {
+		case s.Command != "" && s.URL == "":
+			command := exec.CommandContext(ctx, s.Command, s.Args...)
+			command.Env = os.Environ()
+			for k, v := range s.Env {
+				command.Env = append(command.Env, k+"="+v)
 			}
-			http := &mcp.StreamableClientTransport{Endpoint: url}
-			if t := os.Getenv(token); t != "" {
-				http.HTTPClient = &nethttp.Client{Transport: bearer{scheme: endpoint.Scheme, host: endpoint.Host, token: t}}
+			transport = &mcp.CommandTransport{Command: command}
+		case s.URL != "" && s.Command == "":
+			endpoint, err := neturl.Parse(s.URL)
+			if err != nil {
+				return fmt.Errorf("the MCP server %q: %w", name, err)
+			}
+			http := &mcp.StreamableClientTransport{Endpoint: s.URL}
+			if len(s.Headers) > 0 {
+				http.HTTPClient = &nethttp.Client{Transport: headers{scheme: endpoint.Scheme, host: endpoint.Host, set: s.Headers}}
 			}
 			transport = http
+		default:
+			return fmt.Errorf("the MCP server %q needs a url or a command, and not both", name)
 		}
 		cs, err := mcp.NewClient(&mcp.Implementation{Name: "computer"}, nil).Connect(ctx, transport, nil)
 		if err != nil {
-			return fmt.Errorf("-mcp %s: %w", server, err)
+			return fmt.Errorf("the MCP server %q: %w", name, err)
 		}
 		defer cs.Close()
 		cfg.Tools = append(cfg.Tools, tools.Source{Name: name, Session: cs})
