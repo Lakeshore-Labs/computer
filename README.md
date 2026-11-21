@@ -94,6 +94,7 @@ underscore: a tool `notes_addNote` is `notes add-note`. This suits one server th
 | [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Talks to the MCP servers |
 | `wasm/` | Runs a WASI program like a command: memory cap, deadline, and mounts it cannot leave |
 | `tools/` | Turns MCP tools into commands and a Python package |
+| `agent/` | The command `pi`: runs the agent and answers its requests for the shell, files and the model |
 | `computer.go` | Assembles the above |
 | `cmd/computer` | The command-line program and the MCP server mode |
 
@@ -110,6 +111,33 @@ mkdir python-wasi && tar -xzf python-3.15.2-wasi.tar.gz -C python-wasi
 
 The build is made by a workflow in this repository from [`python/build.sh`](python/build.sh). See
 [`python/README.md`](python/README.md) for what is in it and how to build it yourself.
+
+## An agent in the computer
+
+`pi` is an agent as a command: [Pi Durable](https://github.com/earendil-works/pi), unmodified, running on QuickJS as
+one more WebAssembly program. Its tools are the computer's shell and files, so it uses MCP tools, Python and SQLite
+the way a person at the shell would.
+
+```
+gh release download agent-1.5.2-1 --repo Lakeshore-Labs/computer --pattern agent.tar.gz
+mkdir agent-wasi && tar -xzf agent.tar.gz -C agent-wasi
+export COMPUTER_MODEL_KEY=...
+./computer -mount ./work:/home/user -mcp wiki=https://mcp.deepwiki.com/mcp \
+    -agent agent-wasi -agent-engine agent-wasi/qjs-wasi.wasm \
+    -model-url https://api.openai.com/v1 -model gpt-6-sol \
+    -c 'pi "What is wazero? Ask the wiki, and answer in two sentences."'
+```
+
+- It prints the run as JSON lines, as Pi Durable's own JSON mode does: the transcript entries as they are added and
+  the live state, then `{"answer": ...}` or `{"unanswered": reason}`.
+- The conversation is stored under `.pi` in the working directory at every step. The next `pi` continues it.
+- The model is any OpenAI-compatible chat-completions address. The command makes the request; the agent never
+  holds the key or the address.
+- Stopping the command asks the agent to abort its run, which it records, so the next message starts a new one.
+
+One `pi` is one message and its answer. A message cannot yet be given to a run that is under way, and nothing asks
+a person to approve a step. The sources are in [`agent/js`](agent/js); `npm ci && npm run build` there makes
+`dist/pi.js`.
 
 ## The boundary
 

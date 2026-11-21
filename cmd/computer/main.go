@@ -31,6 +31,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"github.com/Lakeshore-Labs/computer"
+	"github.com/Lakeshore-Labs/computer/agent"
 	"github.com/Lakeshore-Labs/computer/tools"
 	"github.com/Lakeshore-Labs/computer/wasm"
 )
@@ -70,6 +71,10 @@ func run(ctx context.Context) error {
 	pythonHost := flag.String("python-host", "computer", "the module name the Python build imports its host call from")
 	pythonFast := flag.Bool("python-unstoppable", false, "run Python three to four times faster, and give up stopping a script that does not end")
 	timeout := flag.Duration("timeout", 2*time.Minute, "in the mcp mode, how long a bash call may run when the agent sets no limit")
+	agentDir := flag.String("agent", "", "a directory holding the agent's bundle, pi.js, for the command pi")
+	agentEngine := flag.String("agent-engine", "", "QuickJS built as a WASI command, which runs the agent")
+	modelURL := flag.String("model-url", "", "the agent's model: an OpenAI-compatible address, without /chat/completions; its key is read from COMPUTER_MODEL_KEY")
+	modelName := flag.String("model", "", "the agent's model's name")
 	script := flag.String("c", "", "run this command and exit")
 	flag.Parse()
 
@@ -121,6 +126,20 @@ func run(ctx context.Context) error {
 			return fmt.Errorf("-python: %w", err)
 		}
 		cfg.Python = p
+	}
+	if *agentDir != "" {
+		engine, err := os.ReadFile(*agentEngine)
+		if err != nil {
+			return fmt.Errorf("-agent-engine: %w", err)
+		}
+		cache, _ := os.UserCacheDir()
+		// The agent is our own program and spends its time waiting on this one, which stops it by ending its
+		// input; it need not pay for being stopped mid-computation.
+		module, err := wasm.Compile(ctx, wasm.Program{Binary: engine, MemoryPages: 8192, CacheDir: cache + "/computer", Unstoppable: true})
+		if err != nil {
+			return fmt.Errorf("-agent-engine: %w", err)
+		}
+		cfg.Agent = &agent.Config{Engine: module, Script: *agentDir, ModelURL: *modelURL, ModelKey: os.Getenv("COMPUTER_MODEL_KEY"), Model: *modelName}
 	}
 	c, err := computer.New(cfg)
 	if err != nil {

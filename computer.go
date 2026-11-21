@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"maps"
 	"os"
 	"path/filepath"
@@ -15,6 +16,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Lakeshore-Labs/computer/agent"
 	"github.com/Lakeshore-Labs/computer/tools"
 	"github.com/Lakeshore-Labs/computer/wasm"
 	"github.com/ewhauser/gbash"
@@ -38,6 +40,7 @@ type Config struct {
 	Commands []commands.Command // commands beyond the shell's own
 	Tools    []tools.Source     // the MCP servers whose tools become commands and the Python package `tools`
 	Python   *Python            // python3; nil for none
+	Agent    *agent.Config      // the command pi, an agent that works in this computer; nil for none
 	// Options are further gbash options, applied last: gbash.WithHTTPAccess or WithNetwork for curl, which the
 	// computer otherwise lacks, WithLimitOverrides, WithTracing, WithPolicy.
 	Options []gbash.Option
@@ -208,12 +211,24 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 		}
 	}
 	groups := tools.Groups(listed)
+	var names []string // the commands that call tools
 	for _, group := range slices.Sorted(maps.Keys(groups)) {
 		name := tools.Kebab(group)
 		for _, taken := registry.Lookup(name); taken; _, taken = registry.Lookup(name) {
 			name += "-tools" // the shell's command, or a group whose name spells the same, keeps the name
 		}
 		if err := registry.Register(tools.Command(name, c.cfg.Tools, groups[group])); err != nil {
+			return nil, err
+		}
+		names = append(names, name)
+	}
+	if c.cfg.Agent != nil {
+		a := *c.cfg.Agent
+		a.Mounts, a.Home = mounts, c.cfg.WorkDir
+		if a.Instructions == "" {
+			a.Instructions = c.About(names)
+		}
+		if err := registry.Register(agent.Command("pi", a)); err != nil {
 			return nil, err
 		}
 	}
@@ -231,8 +246,26 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	// Outside the mounts gbash keeps files in memory, where a program run as WebAssembly cannot see them. The
 	// shell may write only where every program sees the result.
 	writes := policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny})
-	opts := []gbash.Option{gbash.WithPolicy(writes), gbash.WithRegistry(registry), gbash.WithFileSystem(gbash.MountableFileSystem(gbash.MountableFileSystemOptions{Mounts: table, WorkingDir: c.cfg.WorkDir}))}
+	opts := []gbash.Option{gbash.WithPolicy(writes), gbash.WithRegistry(registry), gbash.WithBaseEnv(map[string]string{"HOME": c.cfg.WorkDir}), gbash.WithFileSystem(gbash.MountableFileSystem(gbash.MountableFileSystemOptions{Mounts: table, WorkingDir: c.cfg.WorkDir}))}
 	return append(opts, c.cfg.Options...), nil
+}
+
+// About is what an agent is told about this computer, given the commands that call tools.
+func (c *Computer) About(toolCommands []string) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "You work on a computer through a shell. Your files are under %s. There is no network.\n", c.cfg.WorkDir)
+	b.WriteString("The shell has the usual commands, and jq, yq, awk and sqlite3.")
+	if c.cfg.Python != nil {
+		b.WriteString(" python3 has the standard library.")
+	}
+	if len(toolCommands) > 0 {
+		fmt.Fprintf(&b, "\nThese commands call tools: %s. Run one with --help to see its tools, and `<command> <tool> --help` for a tool's arguments. A tool prints its result as text or JSON.", strings.Join(toolCommands, ", "))
+		if c.cfg.Python != nil {
+			b.WriteString(" In Python the same tools are the package tools: `from tools import <command>`, then help(<command>).")
+		}
+	}
+	b.WriteString("\nWhen data is to be filtered, counted, combined or stored, pipe it or process it in a script; do not copy data into a command by hand, and do not print large results.")
+	return b.String()
 }
 
 // noLinks is a filesystem in which a symbolic link cannot be made. gbash refuses to follow one, but would make one
