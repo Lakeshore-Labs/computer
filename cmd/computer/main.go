@@ -129,6 +129,7 @@ func run(ctx context.Context) error {
 	python := flag.String("python", "", "a CPython built for WASI, for python3")
 	pythonLib := flag.String("python-lib", "", "the directory holding that build's lib/python3.x")
 	pythonHost := flag.String("python-host", "computer", "the module name the Python build imports its host call from")
+	pythonRuns := flag.Int("python-runs", 8, "how many python3 may run at once, each with up to 512 MiB; a further one waits; 0 is no limit")
 	pythonFast := flag.Bool("python-unstoppable", false, "run Python three to four times faster, and give up stopping a script that does not end")
 	timeout := flag.Duration("timeout", 2*time.Minute, "in the mcp mode, how long a bash call may run when the agent sets no limit")
 	agentDir := flag.String("agent", "", "a directory holding the agent's bundle, agent.js, for the command agent")
@@ -224,7 +225,7 @@ func run(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		p, err := computer.LoadPython(ctx, *python, *pythonLib, wasm.Program{MemoryPages: 8192, CacheDir: cache, HostModule: *pythonHost, Unstoppable: *pythonFast})
+		p, err := computer.LoadPython(ctx, *python, *pythonLib, wasm.Program{MemoryPages: 8192, MaxRuns: *pythonRuns, CacheDir: cache, HostModule: *pythonHost, Unstoppable: *pythonFast})
 		if err != nil {
 			return fmt.Errorf("-python: %w", err)
 		}

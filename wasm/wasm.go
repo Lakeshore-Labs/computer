@@ -36,6 +36,10 @@ type Program struct {
 	// such as CPython three to four times. Set it only for a program trusted to end.
 	Unstoppable bool
 
+	// MaxRuns is how many runs there may be at once; a further one waits for its turn until its context ends. Each
+	// run may take MemoryPages of memory, so this is what bounds the memory of all of them. Zero is no limit.
+	MaxRuns int
+
 	// Host answers the program's host call, and HostModule is the module name the binary imports it from. The
 	// module exports call(ptr, len) -> replyLen, which hands Host a message from the program's memory, and
 	// read(ptr), which copies the reply into it. Nil gives the program no host call.
@@ -47,7 +51,8 @@ type Program struct {
 type Module struct {
 	runtime wazero.Runtime
 	code    wazero.CompiledModule
-	replies sync.Map // a running instance to the reply it has not read yet
+	replies sync.Map      // a running instance to the reply it has not read yet
+	turns   chan struct{} // one place for each run allowed at once; nil when there is no limit
 	sum     [sha256.Size]byte
 }
 
@@ -72,6 +77,9 @@ func Compile(ctx context.Context, p Program) (*Module, error) {
 		cfg = cfg.WithCompilationCache(cache)
 	}
 	m := &Module{runtime: wazero.NewRuntimeWithConfig(ctx, cfg), sum: sha256.Sum256(slices.Concat(p.Binary, []byte{byte(p.Features), b2i(p.Unstoppable)}))}
+	if p.MaxRuns > 0 {
+		m.turns = make(chan struct{}, p.MaxRuns)
+	}
 	if _, err := wasi_snapshot_preview1.Instantiate(ctx, m.runtime); err != nil {
 		return nil, errors.Join(err, m.Close(ctx))
 	}
@@ -134,6 +142,14 @@ type Run struct {
 // Run runs the program to its end and returns its exit code. When ctx ends first the program is stopped and the
 // error is ctx's.
 func (m *Module) Run(ctx context.Context, r Run) (int, error) {
+	if m.turns != nil {
+		select {
+		case m.turns <- struct{}{}:
+			defer func() { <-m.turns }()
+		case <-ctx.Done():
+			return 124, ctx.Err()
+		}
+	}
 	fs := wazero.NewFSConfig()
 	for _, d := range r.Dirs {
 		dir := d.FS

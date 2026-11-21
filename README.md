@@ -211,8 +211,8 @@ other 8 are for reporting file changes, which this environment does not do.
 - **Files.** The shell and programs see only the mounted folders. Programs reach them through Go's `os.Root`.
   Neither can create a symbolic link. The shell may write only inside writable mounts.
 - **Network.** None, unless the embedder passes gbash's network options, which allow `curl` to listed URL prefixes.
-- **Python and SQLite** run as WebAssembly with their own memory. Python has a memory cap, applied to each run
-  and not to all runs together, and stops at the request's deadline. The shell's `sqlite3` also runs as
+- **Python and SQLite** run as WebAssembly with their own memory. Python has a memory cap for each run, and
+  a limit on how many run at once (`-python-runs`, 8 by default), and stops at the request's deadline. The shell's `sqlite3` also runs as
   WebAssembly, and we set no memory cap on it.
 - **The shell and its Go commands run in the host process.** gbash limits them, but it does not claim to be a
   hardened sandbox. Put the process in a container with CPU and memory limits if runaway scripts matter.

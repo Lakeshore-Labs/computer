@@ -120,7 +120,7 @@ func python(t *testing.T) *Python {
 	}
 	cpython.once.Do(func() {
 		cpython.python, cpython.err = LoadPython(context.Background(), binary, lib, wasm.Program{
-			MemoryPages: 8192, CacheDir: os.Getenv("PYTHON_CACHE"), HostModule: os.Getenv("PYTHON_HOST_MODULE"), Features: api.CoreFeaturesV2,
+			MemoryPages: 8192, MaxRuns: 2, CacheDir: os.Getenv("PYTHON_CACHE"), HostModule: os.Getenv("PYTHON_HOST_MODULE"), Features: api.CoreFeaturesV2,
 		})
 	})
 	if cpython.err != nil {
