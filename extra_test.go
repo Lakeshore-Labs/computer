@@ -229,3 +229,89 @@ func TestExtraCommandsCannotReadTheHost(t *testing.T) {
 		t.Errorf("image info /etc/passwd: %d %q", code, msg)
 	}
 }
+
+const sales = "month,north,south\njan,10,4\nfeb,12,9\nmar,7,15\n"
+
+func TestExtraChartDrawsEveryKindAsSVG(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "sales.csv", []byte(sales))
+	for _, kind := range []string{"bar", "line", "pie", "scatter"} {
+		y := "north,south"
+		if kind == "pie" {
+			y = "north"
+		}
+		got := run(t, c, "chart "+kind+" --x month --y "+y+" --title 'Sales "+kind+"' sales.csv --out "+kind+".svg && cat "+kind+".svg")
+		if !strings.HasPrefix(got, "<svg") || !strings.Contains(got, "Sales "+kind) || !strings.Contains(got, "feb") {
+			t.Errorf("%s: not an SVG with the title and the categories: %.300s", kind, got)
+		}
+	}
+}
+
+func TestExtraChartSeriesAreNamedByTheirColumns(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "sales.csv", []byte(sales))
+	got := run(t, c, "chart bar --x month --y north,south --out a.svg sales.csv && cat a.svg")
+	if !strings.Contains(got, "north") || !strings.Contains(got, "south") {
+		t.Error("the legend lacks the column names")
+	}
+}
+
+func TestExtraChartWritesPNGFromStandardInput(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "sales.csv", []byte(sales))
+	run(t, c, "cat sales.csv | chart line --x month --y north --out l.png")
+	b, err := os.ReadFile(filepath.Join(hostHome(c), "l.png"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := png.Decode(bytes.NewReader(b)); err != nil {
+		t.Errorf("not a PNG: %v", err)
+	}
+}
+
+func TestExtraChartWritesSVGToStandardOutputByDefault(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "sales.csv", []byte(sales))
+	if got := run(t, c, "chart bar --x month --y north sales.csv"); !strings.HasPrefix(got, "<svg") {
+		t.Errorf("got %.100q", got)
+	}
+}
+
+func TestExtraChartErrors(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "sales.csv", []byte(sales))
+	writeHome(t, c, "bad.csv", []byte("month,north\njan,many\n"))
+	for script, want := range map[string]int{
+		"chart sales.csv": 2, // no kind
+		"chart donut --x month --y north sales.csv":           2,
+		"chart bar --y north sales.csv":                       2, // no --x
+		"chart bar --x month sales.csv":                       2, // no --y
+		"chart bar --x month --y north --out a.gif sales.csv": 2,
+		"chart pie --x month --y north,south sales.csv":       2, // a pie has one series
+		"chart bar --x nosuch --y north sales.csv":            1,
+		"chart bar --x month --y north bad.csv":               1,
+		"chart bar --x month --y north missing.csv":           1,
+		"chart bar --x month --y north /etc/passwd":           1,
+		"echo 'a,b' | chart bar --x a --y b":                  1, // no rows
+	} {
+		if msg, code := fail(t, c, script); code != want || !strings.HasPrefix(msg, "chart: ") {
+			t.Errorf("%s: exit %d, want %d: %q", script, code, want, msg)
+		}
+	}
+	if msg, _ := fail(t, c, "chart bar --x month --y north bad.csv"); !strings.Contains(msg, "many") {
+		t.Errorf("the message does not show the bad value: %q", msg)
+	}
+	if msg, _ := fail(t, c, "chart bar --x month --y north /etc/passwd"); !strings.Contains(msg, "does not exist") {
+		t.Errorf("the host's file was not refused: %q", msg)
+	}
+}
+
+func TestExtraChartHelp(t *testing.T) {
+	c := newExtra(t)
+	help := run(t, c, "chart --help")
+	for _, want := range []string{"bar", "line", "pie", "scatter", "--x", "--y", "--title", "--out", "INPUT"} {
+		if !strings.Contains(help, want) {
+			t.Errorf("--help lacks %q", want)
+		}
+	}
+}

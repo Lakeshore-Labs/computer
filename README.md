@@ -108,6 +108,7 @@ inside the mounts, and `NAME --help` lists its options.
 
 ```
 image resize photo.jpg small.webp --width 800      # also info, convert, thumbnail, crop and rotate
+chart bar --x month --y north,south sales.csv --out sales.png    # or line, pie, scatter; SVG or PNG
 ```
 
 Build with `-tags nodynamic`: without it the WebP package loads the host's `libwebp` if there is one, and `image`
@@ -123,7 +124,7 @@ then refuses WebP rather than run code that is not part of the build.
 | `wasm/` | Runs a WASI program like a command: memory cap, deadline, and directories that are afero filesystems |
 | `files/` | A host directory as an afero filesystem that cannot be left |
 | `wasm/` | Runs a WASI program like a command: memory cap, deadline, and mounts it cannot leave |
-| `extra/` | Commands the shell lacks, such as `image`, one file each |
+| `extra/` | Commands the shell lacks: `image` and `chart`, one file each |
 | `tools/` | Turns MCP tools into commands and a Python package |
 | `agent/` | The command `agent`: runs the agent and answers its requests for the shell, files and the model |
 | `computer.go` | Assembles the above |
