@@ -27,20 +27,28 @@ go build -o computer ./cmd/computer
 # one command
 ./computer -mount ./work:/home/user -c 'ls | wc -l'
 
-# an MCP server's tools as commands (bearer token from COMPUTER_MCP_TOKEN)
-./computer -mount ./work:/home/user -mcp https://example.com/mcp -c 'stores list-stores --help'
+# a public MCP server by URL: DeepWiki, which answers questions about GitHub repositories
+./computer -mount ./work:/home/user -mcp wiki=https://mcp.deepwiki.com/mcp \
+    -c 'wiki --help; wiki read-wiki-structure --repo-name wazero/wazero | head'
 
-# several servers: name=URL makes one command per server
-./computer -mount ./work:/home/user -mcp notes=https://a.example/mcp -mcp crm=https://b.example/mcp
+# an MCP server started as a program: the reference "everything" server
+./computer -mount ./work:/home/user -mcp 'everything=npx -y @modelcontextprotocol/server-everything' \
+    -c 'everything echo --message hello'
+
+# several servers at once, each its own command
+./computer -mount ./work:/home/user -mcp wiki=https://mcp.deepwiki.com/mcp -mcp docs=https://mcp.context7.com/mcp
 
 # as an MCP server for an agent: its tools are bash, read, edit and write
-./computer -mount ./work:/home/user -mcp https://example.com/mcp mcp
+./computer -mount ./work:/home/user -mcp wiki=https://mcp.deepwiki.com/mcp mcp
 ```
+
+A server that needs a bearer token reads it from the environment: `COMPUTER_MCP_TOKEN_WIKI` for a server named
+`wiki`. A server started as a program runs on the host, outside the sandbox, like any other program you start.
 
 For Claude Code:
 
 ```
-claude mcp add computer -- /path/to/computer -mount /path/to/work:/home/user -mcp https://example.com/mcp mcp
+claude mcp add computer -- /path/to/computer -mount /path/to/work:/home/user -mcp wiki=https://mcp.deepwiki.com/mcp mcp
 ```
 
 From Go:
@@ -48,31 +56,34 @@ From Go:
 ```go
 c, err := computer.New(computer.Config{
     Mounts: []computer.Mount{{Guest: "/home/user", Host: dir}},
-    Tools:  []tools.Source{{Session: session}}, // an MCP client session
-    Python: python,                             // from computer.LoadPython, shared by every computer
+    Tools:  []tools.Source{{Name: "wiki", Session: session}}, // an MCP client session
+    Python: python,                                           // from computer.LoadPython, shared by every computer
 })
 defer c.Close()
-res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: "stores list-stores | jq length"})
+res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: "wiki read-wiki-structure --repo-name wazero/wazero | wc -l"})
 ```
 
 ## Tools as commands and as Python
 
-A tool named `stores_listStores` with an argument `minId` is:
+A server named `wiki` with a tool `read_wiki_structure` that takes `repoName` is:
 
 ```
-stores --help
-stores list-stores --help
-stores list-stores --min-id 2
-stores list-stores --json '{"minId": 2}'
+wiki --help                                          # the server's tools
+wiki read-wiki-structure --help                      # one tool's arguments
+wiki read-wiki-structure --repo-name wazero/wazero
+wiki read-wiki-structure --json '{"repoName": "wazero/wazero"}'
 ```
 
 ```python
-from tools import stores
-stores.list_stores(min_id=2)
+from tools import wiki
+help(wiki.read_wiki_structure)
+wiki.read_wiki_structure(repo_name="wazero/wazero")
 ```
 
-A server given as `name=URL` is one command and one module of that name. A server given as a bare URL has its tools
-grouped by the part of their name before the first underscore.
+A command prints a text result as it is and anything else as JSON, ready for `jq`.
+
+A server given without a name, as a bare URL, has its tools grouped by the part of their name before the first
+underscore: a tool `notes_addNote` is `notes add-note`. This suits one server that fronts several applications.
 
 ## What it is made of
 
@@ -89,8 +100,7 @@ grouped by the part of their name before the first underscore.
 ## Python
 
 `python3` needs a CPython built for WASI, passed with `-python` and `-python-lib`. The build must include a small
-module, `_host`, through which scripts call tools. It is not in this repository. Without it the shell, SQLite and
-the tool commands still work.
+module, `_host`, through which scripts call tools. Without it the shell, SQLite and the tool commands still work.
 
 ## The boundary
 
@@ -109,7 +119,7 @@ the tool commands still work.
   trades that away for trusted scripts.
 - In our Python build `asyncio` and thread timeouts do not work, and there is no numpy or pandas.
 - A mount is a host folder. In-memory and other filesystems are not supported yet.
-- Tested on macOS only.
+- Tested on macOS and Linux. It compiles for Windows and has not been run there.
 
 ## Tests
 
@@ -118,3 +128,7 @@ go test .
 ```
 
 The tests that need Python are skipped unless `PYTHON_WASM`, `PYTHON_LIB` and `PYTHON_HOST_MODULE` are set.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).

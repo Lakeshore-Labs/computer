@@ -224,7 +224,8 @@ func sortedKeys[V any](m map[string]V) []string {
 func oneLine(s string) string { return strings.Join(strings.Fields(s), " ") }
 
 // Command is one group of tools as a command called name: `name --help` lists its tools, `name tool --help` a
-// tool's arguments, and `name tool --argument value` calls the tool and prints its result as JSON.
+// tool's arguments, and `name tool --argument value` calls the tool and prints its result: text as it is, anything
+// else as JSON.
 func Command(name string, sources []Source, group []Tool) commands.Command {
 	subs, taken := map[string]Tool{}, map[string]bool{}
 	for _, t := range byName(group) {
@@ -320,7 +321,9 @@ func Command(name string, sources []Source, group []Tool) commands.Command {
 			return commands.Exitf(inv, 1, "%s %s: %v", name, args[0], err)
 		}
 		var pretty bytes.Buffer
-		if json.Indent(&pretty, result, "", "  ") != nil {
+		if text := ""; json.Unmarshal(result, &text) == nil {
+			pretty.WriteString(strings.TrimSuffix(text, "\n"))
+		} else if json.Indent(&pretty, result, "", "  ") != nil {
 			pretty.Write(result)
 		}
 		pretty.WriteByte('\n')

@@ -267,7 +267,7 @@ func TestToolsWhoseNamesSpellTheSameAllStayReachable(t *testing.T) {
 		s.AddTool(&mcp.Tool{Name: "crm_both", InputSchema: map[string]any{"type": "object",
 			"properties": map[string]any{"a_b": map[string]any{"type": "string"}, "aB": map[string]any{"type": "string"}, "class": map[string]any{"type": "string"}}}}, answer("both"))
 	})})
-	if got := run(t, c, "crm list-stores; crm list-stores-2"); got != "\"camel\"\n\"snake\"" {
+	if got := run(t, c, "crm list-stores; crm list-stores-2"); got != "camel\nsnake" {
 		t.Errorf("shell: got %q", got)
 	}
 	got := run(t, c, `python3 -c "

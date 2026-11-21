@@ -15,9 +15,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"net/http"
+	nethttp "net/http"
 	neturl "net/url"
 	"os"
+	"os/exec"
 	"sort"
 	"strings"
 	"time"
@@ -43,12 +44,12 @@ func (l *list) Set(v string) error { *l = append(*l, v); return nil }
 // leads to.
 type bearer struct{ scheme, host, token string }
 
-func (b bearer) RoundTrip(r *http.Request) (*http.Response, error) {
+func (b bearer) RoundTrip(r *nethttp.Request) (*nethttp.Response, error) {
 	if r.URL.Scheme == b.scheme && r.URL.Host == b.host {
 		r = r.Clone(r.Context())
 		r.Header.Set("Authorization", "Bearer "+b.token)
 	}
-	return http.DefaultTransport.RoundTrip(r)
+	return nethttp.DefaultTransport.RoundTrip(r)
 }
 
 func main() {
@@ -63,7 +64,7 @@ func run(ctx context.Context) error {
 	flag.Var(&mounts, "mount", "a host directory and where the computer sees it, as host:guest; add :ro for read-only; repeatable")
 	flag.Var(&allow, "allow-url", "a URL prefix curl may fetch; repeatable; none gives the computer no network")
 	workDir := flag.String("workdir", "", "where commands start; the first mount when empty")
-	flag.Var(&servers, "mcp", "an MCP server whose tools become commands, as name=URL for one command of that name, or as a bare URL to group its tools by the prefix of their names; repeatable; a bearer token is read from COMPUTER_MCP_TOKEN_<NAME>, or COMPUTER_MCP_TOKEN for a bare URL")
+	flag.Var(&servers, "mcp", "an MCP server whose tools become commands: name=URL, or name='command arguments' for a server started as a program and spoken to on its standard streams, each one command of that name; or a bare URL, to group its tools by the prefix of their names; repeatable; a bearer token for a URL is read from COMPUTER_MCP_TOKEN_<NAME>, or COMPUTER_MCP_TOKEN for a bare URL")
 	python := flag.String("python", "", "a CPython built for WASI, for python3")
 	pythonLib := flag.String("python-lib", "", "the directory holding that build's lib/python3.x")
 	pythonHost := flag.String("python-host", "computer", "the module name the Python build imports its host call from")
@@ -92,13 +93,19 @@ func run(ctx context.Context) error {
 		if !named || strings.Contains(name, "/") { // a bare URL, which may itself hold an equals sign
 			name, url, token = "", server, "COMPUTER_MCP_TOKEN"
 		}
-		endpoint, err := neturl.Parse(url)
-		if err != nil {
-			return fmt.Errorf("-mcp %s: %w", server, err)
-		}
-		transport := &mcp.StreamableClientTransport{Endpoint: url}
-		if t := os.Getenv(token); t != "" {
-			transport.HTTPClient = &http.Client{Transport: bearer{scheme: endpoint.Scheme, host: endpoint.Host, token: t}}
+		var transport mcp.Transport
+		if program := strings.Fields(url); !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") && len(program) > 0 {
+			transport = &mcp.CommandTransport{Command: exec.CommandContext(ctx, program[0], program[1:]...)}
+		} else {
+			endpoint, err := neturl.Parse(url)
+			if err != nil {
+				return fmt.Errorf("-mcp %s: %w", server, err)
+			}
+			http := &mcp.StreamableClientTransport{Endpoint: url}
+			if t := os.Getenv(token); t != "" {
+				http.HTTPClient = &nethttp.Client{Transport: bearer{scheme: endpoint.Scheme, host: endpoint.Host, token: t}}
+			}
+			transport = http
 		}
 		cs, err := mcp.NewClient(&mcp.Implementation{Name: "computer"}, nil).Connect(ctx, transport, nil)
 		if err != nil {
