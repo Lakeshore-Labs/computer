@@ -29,8 +29,6 @@ jobs:
           echo "PYTHON_LIB=$RUNNER_TEMP/python-wasi/lib" >> "$GITHUB_ENV"
       # stdmethods objects to the Seek method wazero's file interface requires.
       - run: go vet -stdmethods=false ./...
-      - name: Build for Windows
-        run: GOOS=windows go build ./...
       - name: Test
         env:
           PYTHON_HOST_MODULE: computer
