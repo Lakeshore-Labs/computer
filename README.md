@@ -99,8 +99,17 @@ underscore: a tool `notes_addNote` is `notes add-note`. This suits one server th
 
 ## Python
 
-`python3` needs a CPython built for WASI, passed with `-python` and `-python-lib`. The build must include a small
-module, `_host`, through which scripts call tools. Without it the shell, SQLite and the tool commands still work.
+`python3` needs a CPython built for WASI, passed with `-python` and `-python-lib`. Without it the shell, SQLite and
+the tool commands still work.
+
+```
+gh release download python-3.15.2-1 --repo Lakeshore-Labs/computer --pattern '*.tar.gz'
+mkdir python-wasi && tar -xzf python-3.15.2-wasi.tar.gz -C python-wasi
+./computer -mount ./work:/home/user -python python-wasi/python.wasm -python-lib python-wasi/lib
+```
+
+The build is made by a workflow in this repository from [`python/build.sh`](python/build.sh). See
+[`python/README.md`](python/README.md) for what is in it and how to build it yourself.
 
 ## The boundary
 
