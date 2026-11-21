@@ -2,6 +2,7 @@ package computer
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -413,5 +414,34 @@ func TestTheComputerIsAnMCPServerForAnAgentInThisProcess(t *testing.T) {
 	}
 	if res, _ := agent.CallTool(ctx, &mcp.CallToolParams{Name: "write", Arguments: map[string]any{"path": "/etc/x", "content": "no"}}); res == nil || !res.IsError {
 		t.Fatalf("a write outside the folders was not refused: %+v", res)
+	}
+}
+
+func TestAnEmbeddersFilesAreUnderTheShellsRules(t *testing.T) {
+	ctx := context.Background()
+	c := newComputer(t, Config{Options: []gbash.Option{gbash.WithLimitOverrides(policy.Limits{MaxFileBytes: 8})}})
+	files, err := c.files(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	write := func(name, text string) error {
+		f, err := files.OpenFile(ctx, name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
+		if err != nil {
+			return err
+		}
+		_, err = f.Write([]byte(text))
+		return errors.Join(err, f.Close())
+	}
+	if err := write("/etc/x", "no"); !policy.IsDenied(err) {
+		t.Fatalf("a write outside the mounts: %v", err)
+	}
+	if err := write("big.txt", "more than eight bytes"); err == nil {
+		t.Fatal("a file past the shell's limit was written")
+	}
+	if err := write("note.txt", "kept"); err != nil {
+		t.Fatal(err)
+	}
+	if got := run(t, c, "cat /home/user/note.txt"); got != "kept" {
+		t.Fatalf("the shell read %q", got)
 	}
 }
