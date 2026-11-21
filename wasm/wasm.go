@@ -192,6 +192,8 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 type stdin struct {
 	ctx     context.Context
 	chunks  chan chunk
+	wanted  chan struct{} // the program is waiting for input
+	reading bool          // a read asked for has not yet been taken
 	pending []byte
 	err     error // what the reader returned after pending, or the context's error
 }
@@ -202,13 +204,20 @@ type chunk struct {
 }
 
 func newStdin(ctx context.Context, r io.Reader) *stdin {
-	s := &stdin{ctx: ctx, chunks: make(chan chunk)}
+	s := &stdin{ctx: ctx, chunks: make(chan chunk), wanted: make(chan struct{}, 1)}
 	go func() {
 		for {
+			// The reader is read only when the program asks for input. Reading ahead would take, from a terminal
+			// or a pipe the program shares, what was meant for whoever reads it after this program has ended.
+			select {
+			case <-s.wanted:
+			case <-ctx.Done():
+				return
+			}
 			b := make([]byte, 32<<10)
 			n, err := r.Read(b)
-			if n == 0 && err == nil {
-				continue
+			for n == 0 && err == nil {
+				n, err = r.Read(b)
 			}
 			select {
 			case s.chunks <- chunk{b[:n], err}:
@@ -228,9 +237,13 @@ func (s *stdin) fill(timeout <-chan time.Time) bool {
 	if len(s.pending) > 0 || s.err != nil {
 		return true
 	}
+	if !s.reading { // one read at a time: a wait that timed out left its read under way
+		s.reading = true
+		s.wanted <- struct{}{}
+	}
 	select {
 	case c := <-s.chunks:
-		s.pending, s.err = c.b, c.err
+		s.pending, s.err, s.reading = c.b, c.err, false
 	case <-s.ctx.Done():
 		s.err = s.ctx.Err()
 	case <-timeout:

@@ -127,7 +127,6 @@ func Command(name string, cfg Config) commands.Command {
 				return commands.Exitf(inv, 1, "%s: %v", name, err)
 			}
 		}
-		// Help is answered here, since the agent program would take it for a message to the model.
 		// One agent at a time over one conversation: a second would write the same files, and a run that starts
 		// agents without end would take the host's memory.
 		busy, _ := running.LoadOrStore(cfg.State, new(sync.Mutex))

@@ -347,7 +347,7 @@ func TestTheAgentIsGivenTheModelsLimits(t *testing.T) {
 func TestAgentHelpIsPrintedWithoutStartingTheAgent(t *testing.T) {
 	c := newComputer(t, Config{Agent: &agent.Config{}})
 	for _, flag := range []string{"--help", "-h"} {
-		if got := run(t, c, "agent "+flag); !strings.Contains(got, `usage: agent [-q] [--json] "message"`) {
+		if got := run(t, c, "agent "+flag); !strings.Contains(got, `usage: agent [-q] [--json] [-c | -r NAME] "message"`) {
 			t.Errorf("agent %s: %q", flag, got)
 		}
 	}
