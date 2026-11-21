@@ -2,6 +2,7 @@ package computer
 
 import (
 	"context"
+	"errors"
 	"io/fs"
 	"os"
 	"time"
@@ -68,11 +69,51 @@ func (r *ruled) OpenFile(ctx context.Context, name string, flag int, perm fs.Fil
 			return nil, err
 		}
 	}
-	f, err := r.FileSystem.OpenFile(ctx, gbfs.Resolve(r.dir, name), flag, perm)
+	abs := gbfs.Resolve(r.dir, name)
+	if flag&os.O_TRUNC == 0 || r.maxFileBytes <= 0 {
+		f, err := r.FileSystem.OpenFile(ctx, abs, flag, perm)
+		if err != nil {
+			return nil, err
+		}
+		return gbfs.LimitFileSize(f, flag, r.maxFileBytes), nil
+	}
+	// A file written anew is emptied only once all of it is known to fit: emptied first, one too large would be
+	// left cut off at the limit, and what it held before lost.
+	f, err := r.FileSystem.OpenFile(ctx, abs, flag&^os.O_TRUNC, perm)
 	if err != nil {
 		return nil, err
 	}
-	return gbfs.LimitFileSize(f, flag, r.maxFileBytes), nil
+	return &whole{File: f, anew: func() (gbfs.File, error) { return r.FileSystem.OpenFile(ctx, abs, flag, perm) }, max: r.maxFileBytes}, nil
+}
+
+// whole is a file being written anew, kept in memory until it is closed and written then, if it fits.
+type whole struct {
+	gbfs.File
+	anew    func() (gbfs.File, error) // opens the file again, emptied
+	max     int64
+	content []byte
+	tooMuch bool
+}
+
+func (w *whole) Write(p []byte) (int, error) {
+	if w.tooMuch || int64(len(w.content)+len(p)) > w.max {
+		w.tooMuch, w.content = true, nil
+		return 0, gbfs.ErrFileTooLarge
+	}
+	w.content = append(w.content, p...)
+	return len(p), nil
+}
+
+func (w *whole) Close() error {
+	if err := w.File.Close(); err != nil || w.tooMuch {
+		return err
+	}
+	f, err := w.anew()
+	if err != nil {
+		return err
+	}
+	_, err = f.Write(w.content)
+	return errors.Join(err, f.Close())
 }
 
 func (r *ruled) Stat(ctx context.Context, name string) (info fs.FileInfo, err error) {
@@ -96,6 +137,9 @@ func (r *ruled) Symlink(ctx context.Context, target, link string) error {
 }
 
 func (r *ruled) Link(ctx context.Context, from, to string) error {
+	if _, err := r.allowed(ctx, policy.FileActionRead, from); err != nil {
+		return err
+	}
 	return r.do(ctx, policy.FileActionWrite, func(n ...string) error { return r.FileSystem.Link(ctx, n[0], n[1]) }, from, to)
 }
 

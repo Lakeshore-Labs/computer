@@ -435,11 +435,11 @@ func TestAnEmbeddersFilesAreUnderTheShellsRules(t *testing.T) {
 	if err := write("/etc/x", "no"); !policy.IsDenied(err) {
 		t.Fatalf("a write outside the mounts: %v", err)
 	}
-	if err := write("big.txt", "more than eight bytes"); err == nil {
-		t.Fatal("a file past the shell's limit was written")
-	}
 	if err := write("note.txt", "kept"); err != nil {
 		t.Fatal(err)
+	}
+	if err := write("note.txt", "more than eight bytes"); err == nil {
+		t.Fatal("a file past the shell's limit was written")
 	}
 	if got := run(t, c, "cat /home/user/note.txt"); got != "kept" {
 		t.Fatalf("the shell read %q", got)
