@@ -276,3 +276,14 @@ sqlite3 t.db "create table n(x); insert into n values (1),(2),(3)" && sqlite3 t.
 		t.Errorf("the host does not see what the program wrote: %q", b)
 	}
 }
+
+func TestTheShellHandlesAFileAndALoopLargerThanGbashsDefaults(t *testing.T) {
+	data := t.TempDir()
+	if err := os.WriteFile(data+"/big.csv", []byte(strings.Repeat("a,b,c,d,e,f,g,h,i\n", 1<<20)), 0o600); err != nil { // 18 MiB
+		t.Fatal(err)
+	}
+	c := newComputer(t, Config{Mounts: []Mount{{Guest: "/data", Host: data}}})
+	if got := run(t, c, "wc -l < /data/big.csv; grep -c a /data/big.csv; n=0; for i in $(seq 1 20000); do n=$((n+1)); done; echo $n"); got != "1048576\n1048576\n20000" {
+		t.Errorf("got %q", got)
+	}
+}

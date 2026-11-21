@@ -302,10 +302,17 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	}
 	// Outside the mounts gbash keeps files in memory, where a program run as WebAssembly cannot see them. The
 	// shell may write only where every program sees the result.
-	writes := policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny})
+	writes := policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny, Limits: limits})
 	opts := []gbash.Option{gbash.WithPolicy(writes), gbash.WithRegistry(registry), gbash.WithBaseEnv(map[string]string{"HOME": c.cfg.WorkDir}), gbash.WithFileSystem(gbash.MountableFileSystem(gbash.MountableFileSystemOptions{Mounts: table, WorkingDir: c.cfg.WorkDir}))}
 	return append(opts, c.cfg.Options...), nil
 }
+
+// limits are the shell's, chosen for data work: gbash's defaults stop a command at a file of 8 MiB and a script at
+// 10,000 commands or loop iterations, which a CSV export or a loop over its lines passes. A command reads a whole
+// file into the host's memory, so the file limit is also what one command may hold. Limits left at zero keep gbash's
+// defaults, among them 1 MiB of captured output, which is what a model can be shown. An embedder changes any of
+// them with gbash.WithLimitOverrides in Config.Options.
+var limits = policy.Limits{MaxFileBytes: 256 << 20, MaxCommandCount: 1_000_000, MaxLoopIterations: 1_000_000}
 
 // About is what an agent is told about this computer, given the commands that call tools.
 func (c *Computer) About(toolCommands []string) string {

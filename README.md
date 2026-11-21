@@ -205,8 +205,9 @@ other 8 are for reporting file changes, which this environment does not do.
 - Stopping a WebAssembly run at its deadline makes Python three to four times slower. `wasm.Program.Unstoppable`
   trades that away for trusted scripts.
 - In our Python build `asyncio` and thread timeouts do not work, and there is no numpy or pandas.
-- A shell command works under gbash's default limits, which we do not change: it reads a file of at most 8 MiB,
-  and a script runs at most 10,000 commands. A larger file has to be handled in Python.
+- A shell command reads a file of at most 256 MiB, and a script runs at most 1,000,000 commands and as many loop
+  iterations; a command's captured output is cut at gbash's default of 1 MiB. A larger file has to be handled in
+  Python. An embedder changes these with `gbash.WithLimitOverrides` in `Config.Options`.
 - Developed on macOS; the tests run on Linux in CI.
 
 ## Tests
