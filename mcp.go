@@ -10,25 +10,8 @@ import (
 
 	"github.com/ewhauser/gbash"
 	"github.com/ewhauser/gbash/contrib/codingtools"
-	gbfs "github.com/ewhauser/gbash/fs"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
-
-// writable reports, as an error, a path the file tools may not write: one outside every writable mount. The shell
-// is held to the same rule by the computer; the file tools reach the filesystem directly.
-func (c *Computer) writable(p string) error {
-	workDir := c.cfg.WorkDir
-	if p == "~" || strings.HasPrefix(p, "~/") { // the file tools read a leading ~ as the working directory
-		p = workDir + p[1:]
-	}
-	p = gbfs.Resolve(workDir, p)
-	for _, m := range c.cfg.Mounts {
-		if !m.ReadOnly && (p == m.Guest || strings.HasPrefix(p, strings.TrimSuffix(m.Guest, "/")+"/")) {
-			return nil
-		}
-	}
-	return fmt.Errorf("%s is outside the writable folders", p)
-}
 
 // bashInput is the input of the bash tool, the same as gbash's bash tool takes.
 type bashInput struct {
@@ -98,11 +81,11 @@ func (c *Computer) MCPServer(ctx context.Context, limit time.Duration) (*mcp.Ser
 	for _, def := range codingtools.New(codingtools.Config{}).ToolDefinitions() {
 		server.AddTool(&mcp.Tool{Name: def.Name, Description: def.Description, InputSchema: def.InputSchema},
 			func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-				s, err := c.Session(ctx)
+				held, err := c.files(ctx) // under the shell's rules, so a write lands only in a writable mount
 				if err != nil {
 					return text(err.Error(), true)
 				}
-				files := codingtools.New(codingtools.Config{FS: s.FileSystem(), WorkingDir: workDir, HomeDir: workDir})
+				files := codingtools.New(codingtools.Config{FS: held, WorkingDir: workDir, HomeDir: workDir})
 				var input map[string]any
 				_ = json.Unmarshal(req.Params.Arguments, &input)
 				var blocks []codingtools.ContentBlock
@@ -118,18 +101,14 @@ func (c *Computer) MCPServer(ctx context.Context, limit time.Duration) (*mcp.Ser
 					var in codingtools.EditRequest
 					var out codingtools.EditResponse
 					if in, err = codingtools.ParseEditRequest(input); err == nil {
-						if err = c.writable(in.Path); err == nil {
-							out, err = files.Edit(ctx, in)
-						}
+						out, err = files.Edit(ctx, in)
 					}
 					blocks = out.Content
 				default:
 					var in codingtools.WriteRequest
 					var out codingtools.WriteResponse
 					if in, err = codingtools.ParseWriteRequest(input); err == nil {
-						if err = c.writable(in.Path); err == nil {
-							out, err = files.Write(ctx, in)
-						}
+						out, err = files.Write(ctx, in)
 					}
 					blocks = out.Content
 				}

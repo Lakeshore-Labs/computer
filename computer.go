@@ -94,6 +94,7 @@ type Computer struct {
 	listed  [sha256.Size]byte // the tools the session was built from
 	written [sha256.Size]byte // the tools the Python package was last written from
 	session *gbash.Session
+	policy  policy.Policy     // the session's, by which files decides as the shell does
 	calling []string          // the commands that call tools, as the session names them
 	modules []string          // the same tools' modules in the Python package, in the same order
 	env     map[string]string // the shell's exported variables and working directory after the last Exec
@@ -347,7 +348,13 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	// shell may write only where every program sees the result.
 	writes := policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny, Limits: limits})
 	opts := []gbash.Option{gbash.WithPolicy(writes), gbash.WithRegistry(registry), gbash.WithBaseEnv(map[string]string{"HOME": c.cfg.WorkDir}), gbash.WithFileSystem(gbash.MountableFileSystem(gbash.MountableFileSystemOptions{Mounts: table, WorkingDir: c.cfg.WorkDir}))}
-	return append(opts, c.cfg.Options...), nil
+	opts = append(opts, c.cfg.Options...)
+	var built gbash.Config // what the embedder's options leave as the policy
+	for _, option := range opts {
+		_ = option(&built)
+	}
+	c.policy = built.Policy
+	return opts, nil
 }
 
 // limits are the shell's, chosen for data work: gbash's defaults stop a command at a file of 8 MiB and a script at
