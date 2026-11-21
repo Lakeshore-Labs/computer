@@ -327,3 +327,29 @@ func TestTheComputerDescribesItsFolderAndItsOwnCommands(t *testing.T) {
 		}
 	}
 }
+
+func TestAToolsImageIsSavedAndNamedByItsPath(t *testing.T) {
+	c := newComputer(t, Config{Tools: testTools(t, func(s *mcp.Server) {
+		mcp.AddTool(s, &mcp.Tool{Name: "notes_drawNote"}, func(context.Context, *mcp.CallToolRequest, struct{}) (*mcp.CallToolResult, any, error) {
+			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "drawn"}, &mcp.ImageContent{Data: []byte("\x89PNG"), MIMEType: "image/png"}}}, nil, nil
+		})
+	})})
+	lines := strings.Split(run(t, c, "notes draw-note"), "\n")
+	if len(lines) != 2 || lines[0] != "drawn" || !strings.HasPrefix(lines[1], "/tmp/notes-draw-note-") || !strings.HasSuffix(lines[1], ".png") {
+		t.Fatalf("got %q", lines)
+	}
+	if got := run(t, c, "cat "+lines[1]); got != "\x89PNG" {
+		t.Fatalf("the saved file holds %q", got)
+	}
+}
+
+func TestAFileBesideAStructuredResultIsNamedUnderFiles(t *testing.T) {
+	c := newComputer(t, Config{Tools: testTools(t, func(s *mcp.Server) {
+		mcp.AddTool(s, &mcp.Tool{Name: "notes_drawNote"}, func(context.Context, *mcp.CallToolRequest, struct{}) (*mcp.CallToolResult, map[string]note, error) {
+			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.ImageContent{Data: []byte("png"), MIMEType: "image/png"}}}, map[string]note{"result": {ID: 7}}, nil
+		})
+	})})
+	if got := run(t, c, `notes draw-note | jq -r '"\(.id) \(._files | length) \(._files[0] | startswith("/tmp/"))"'`); got != "7 1 true" {
+		t.Fatalf("got %q", got)
+	}
+}

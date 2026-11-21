@@ -11,6 +11,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
+	"path"
 	"slices"
 	"sort"
 	"strconv"
@@ -18,6 +20,7 @@ import (
 
 	"github.com/ewhauser/gbash/commands"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/spf13/afero"
 )
 
 // A Source is one MCP server. With a Name, the server is one command and one Python module of that name, and
@@ -26,6 +29,8 @@ import (
 type Source struct {
 	Name    string
 	Session *mcp.ClientSession
+	// Tmp is where a result that is a file is saved, the computer's /tmp, which the computer sets when it is nil.
+	Tmp afero.Fs
 }
 
 // A Tool is a listed tool: the group it is in, its name within the group, and which source serves it.
@@ -56,37 +61,102 @@ func List(ctx context.Context, sources []Source) ([]Tool, error) {
 	return tools, nil
 }
 
-// Call calls one tool and returns its result as JSON: the structured result when the tool gives one, else its text.
-func Call(ctx context.Context, cs *mcp.ClientSession, name string, arguments json.RawMessage) (json.RawMessage, error) {
+// Call calls one tool of src and returns its result as JSON: the structured result when the tool gives one, else
+// its text. A result that is a file, such as an image, is saved in src.Tmp and named by its path in the computer,
+// a line each after the text, or under "_files" in a structured result; a link to a resource is named by its URI.
+func Call(ctx context.Context, src Source, name string, arguments json.RawMessage) (json.RawMessage, error) {
 	if len(arguments) == 0 {
 		arguments = json.RawMessage("{}")
 	}
-	res, err := cs.CallTool(ctx, &mcp.CallToolParams{Name: name, Arguments: arguments})
+	res, err := src.Session.CallTool(ctx, &mcp.CallToolParams{Name: name, Arguments: arguments})
 	if err != nil {
 		return nil, err
 	}
 	var text strings.Builder
+	var files []string
+	save := func(data []byte, mimeType string) error {
+		if src.Tmp == nil {
+			return fmt.Errorf("the tool returned a file (%s), and there is nowhere to save it", mimeType)
+		}
+		f, err := afero.TempFile(src.Tmp, "/", Kebab(name)+"-*"+extension(mimeType))
+		if err != nil {
+			return err
+		}
+		_, err = f.Write(data)
+		if err = errors.Join(err, f.Close()); err != nil {
+			return err
+		}
+		files = append(files, "/tmp/"+path.Base(f.Name())) // a host directory's file is named by its host path
+		return nil
+	}
 	for _, c := range res.Content {
-		if t, ok := c.(*mcp.TextContent); ok {
-			text.WriteString(t.Text)
+		var err error
+		switch c := c.(type) {
+		case *mcp.TextContent:
+			text.WriteString(c.Text)
+		case *mcp.ImageContent:
+			err = save(c.Data, c.MIMEType)
+		case *mcp.AudioContent:
+			err = save(c.Data, c.MIMEType)
+		case *mcp.ResourceLink:
+			files = append(files, c.URI)
+		case *mcp.EmbeddedResource:
+			if c.Resource == nil {
+				continue
+			}
+			if text.WriteString(c.Resource.Text); len(c.Resource.Blob) > 0 {
+				err = save(c.Resource.Blob, c.Resource.MIMEType)
+			}
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
 	if res.IsError {
 		return nil, errors.New(text.String())
 	}
 	if res.StructuredContent == nil {
-		return json.Marshal(text.String())
+		out := text.String()
+		if len(files) > 0 {
+			if out != "" && !strings.HasSuffix(out, "\n") {
+				out += "\n"
+			}
+			out += strings.Join(files, "\n")
+		}
+		return json.Marshal(out)
 	}
 	structured, err := json.Marshal(res.StructuredContent)
 	if err != nil {
 		return nil, err
 	}
 	// MCP requires a structured result to be an object, so servers wrap a list or a scalar as {"result": ...}.
+	result := json.RawMessage(structured)
 	var wrapped map[string]json.RawMessage
 	if json.Unmarshal(structured, &wrapped) == nil && len(wrapped) == 1 && wrapped["result"] != nil {
-		return wrapped["result"], nil
+		result = wrapped["result"]
 	}
-	return structured, nil
+	if len(files) == 0 {
+		return result, nil
+	}
+	// The files are named under _files, a key no tool's own result is expected to have: in the result when it is
+	// an object, else beside it, in the object the server wrapped it in.
+	var object map[string]any
+	if json.Unmarshal(result, &object) != nil || object == nil {
+		object = map[string]any{"result": result}
+	}
+	object["_files"] = files
+	return json.Marshal(object)
+}
+
+// extension is the file extension of a media type, "" when the system knows none.
+func extension(mimeType string) string {
+	if mimeType == "image/jpeg" { // of which the system's first is .jfif or .jpe
+		return ".jpg"
+	}
+	if exts, _ := mime.ExtensionsByType(mimeType); len(exts) > 0 {
+		return exts[0]
+	}
+	return ""
 }
 
 type sessionKey struct{}
@@ -110,7 +180,7 @@ func Host(ctx context.Context, request []byte) []byte {
 	if err := json.Unmarshal(request, &in); err != nil || in.Tool == "" || in.Source < 0 || in.Source >= len(sources) {
 		return reply(map[string]any{"ok": false, "error": "no tool to call"})
 	}
-	result, err := Call(ctx, sources[in.Source].Session, in.Tool, in.Arguments)
+	result, err := Call(ctx, sources[in.Source], in.Tool, in.Arguments)
 	if err != nil {
 		return reply(map[string]any{"ok": false, "error": err.Error()})
 	}
@@ -360,7 +430,7 @@ func Command(name string, sources []Source, group []Tool) commands.Command {
 			}
 		}
 		arguments, _ := json.Marshal(values)
-		result, err := Call(ctx, sources[tool.Source].Session, tool.Name, arguments)
+		result, err := Call(ctx, sources[tool.Source], tool.Name, arguments)
 		if err != nil {
 			return commands.Exitf(inv, 1, "%s %s: %v", name, args[0], err)
 		}

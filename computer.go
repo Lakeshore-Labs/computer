@@ -134,6 +134,14 @@ func New(cfg Config) (_ *Computer, err error) {
 		}
 		c.cfg.Mounts[i].FS, c.opened = dir, append(c.opened, dir)
 	}
+	// A tool's result that is a file is saved in /tmp, where the shell and every program find it.
+	c.cfg.Tools = slices.Clone(cfg.Tools)
+	tmp := c.cfg.Mounts[slices.IndexFunc(c.cfg.Mounts, func(m Mount) bool { return m.Guest == "/tmp" })].FS
+	for i := range c.cfg.Tools {
+		if c.cfg.Tools[i].Tmp == nil {
+			c.cfg.Tools[i].Tmp = tmp
+		}
+	}
 	if cfg.Agent != nil {
 		if c.state = cfg.Agent.State; c.state == "" {
 			if c.ownState, err = os.MkdirTemp("", "computer-agent"); err != nil {
