@@ -217,6 +217,9 @@ func TestARunawayScriptIsStoppedAtItsDeadline(t *testing.T) {
 	if took := time.Since(start); took > 6*time.Second {
 		t.Errorf("the script ran %v past a 2s deadline", took)
 	}
+	if res == nil || res.ExitCode != 124 {
+		t.Errorf("a script stopped at its deadline should exit 124: %+v", res)
+	}
 	if got := run(t, c, "echo still here"); got != "still here" {
 		t.Errorf("the computer is not usable after a stop: %q", got)
 	}
