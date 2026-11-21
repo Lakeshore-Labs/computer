@@ -15,15 +15,16 @@ import (
 	"github.com/ewhauser/gbash/policy"
 )
 
-// An Environment is the computer as the place an agent harness's own tools act: one shell command at a time, and
-// files, under the rules the shell's commands are held to. Its methods use only the standard library's types, so a
+// An Environment is the computer as the place an agent harness's own tools act: shell commands, and files, under
+// the rules the shell's commands are held to. Its methods use only the standard library's types, so a
 // harness can declare the interface it needs and be given this without either importing the other.
 //
 // A name is an absolute path in the computer. An error is a *fs.PathError naming that path and never the host's,
 // and errors.Is tells fs.ErrNotExist, fs.ErrPermission (also a write the rules refuse), fs.ErrExist, fs.ErrInvalid
 // (also a file past the size limit), syscall.ENOTDIR, syscall.EISDIR and syscall.ENOTEMPTY apart. Which of them a
 // misuse gets is the mount's to say: a host directory answers as a file system does, and a mount that is another
-// afero.Fs as that one does, which for afero's memory filesystem is to allow a file made under a file.
+// afero.Fs as that one does: afero's memory filesystem allows a file made under a file, which turns that file
+// into a directory and loses what it held.
 type Environment struct{ c *Computer }
 
 // Environment is the computer as an Environment. Every method may be called from any goroutine.
