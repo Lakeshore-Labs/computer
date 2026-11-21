@@ -1,6 +1,6 @@
 // Command computer runs a sandboxed computer from the command line.
 //
-//	computer -mount ./work:/home/user                      an interactive shell
+//	computer -mount ./work:/home/user                      a shell with history and Tab completion
 //	computer -mount ./work:/home/user -c 'ls | wc -l'      one command
 //	computer -mount ./work:/home/user -mcp URL             the same, with the MCP server's tools as commands
 //	computer -mount ./work:/home/user -mcp URL mcp         an MCP server on stdin and stdout, for an agent: its
@@ -11,6 +11,7 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"flag"
@@ -19,6 +20,7 @@ import (
 	neturl "net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -29,6 +31,7 @@ import (
 	"github.com/ewhauser/gbash/contrib/codingtools"
 	gbfs "github.com/ewhauser/gbash/fs"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"golang.org/x/term"
 
 	"github.com/Lakeshore-Labs/computer"
 	"github.com/Lakeshore-Labs/computer/agent"
@@ -73,6 +76,7 @@ func run(ctx context.Context) error {
 	timeout := flag.Duration("timeout", 2*time.Minute, "in the mcp mode, how long a bash call may run when the agent sets no limit")
 	agentDir := flag.String("agent", "", "a directory holding the agent's bundle, agent.js, for the command agent")
 	agentEngine := flag.String("agent-engine", "", "QuickJS built as a WASI command, which runs the agent")
+	agentState := flag.String("agent-state", "", "a directory in which the agent keeps its conversation, outside every mount; by default one under the user's cache directory, named for the first mount")
 	modelURL := flag.String("model-url", "", "the agent's model: an OpenAI-compatible address, without /chat/completions; its key is read from COMPUTER_MODEL_KEY")
 	modelName := flag.String("model", "", "the agent's model's name")
 	script := flag.String("c", "", "run this command and exit")
@@ -95,7 +99,7 @@ func run(ctx context.Context) error {
 	for _, server := range servers {
 		name, url, named := strings.Cut(server, "=")
 		token := "COMPUTER_MCP_TOKEN_" + strings.ToUpper(name)
-		if !named || strings.Contains(name, "/") { // a bare URL, which may itself hold an equals sign
+		if !named || !isName(name) { // a bare URL or program, which may itself hold an equals sign
 			name, url, token = "", server, "COMPUTER_MCP_TOKEN"
 		}
 		var transport mcp.Transport
@@ -133,13 +137,25 @@ func run(ctx context.Context) error {
 			return fmt.Errorf("-agent-engine: %w", err)
 		}
 		cache, _ := os.UserCacheDir()
-		// The agent is our own program and spends its time waiting on this one, which stops it by ending its
-		// input; it need not pay for being stopped mid-computation.
-		module, err := wasm.Compile(ctx, wasm.Program{Binary: engine, MemoryPages: 8192, CacheDir: cache + "/computer", Unstoppable: true})
+		// The agent can be stopped where it stands: what the model asks of it, such as many edits of a large
+		// file, can keep it computing long past the time a caller allows.
+		module, err := wasm.Compile(ctx, wasm.Program{Binary: engine, MemoryPages: 8192, CacheDir: cache + "/computer"})
 		if err != nil {
 			return fmt.Errorf("-agent-engine: %w", err)
 		}
-		cfg.Agent = &agent.Config{Engine: module, Script: *agentDir, ModelURL: *modelURL, ModelKey: os.Getenv("COMPUTER_MODEL_KEY"), Model: *modelName}
+		// The conversation is kept outside every mount, by default in a directory named for the first one, so
+		// that it goes on from one invocation to the next over the same folder.
+		stateDir := *agentState
+		if stateDir == "" && len(cfg.Mounts) > 0 {
+			folder, _ := filepath.Abs(cfg.Mounts[0].Host)
+			stateDir = fmt.Sprintf("%s/computer/agent/%x", cache, sha256.Sum256([]byte(folder)))
+		}
+		if stateDir != "" {
+			if err := os.MkdirAll(stateDir, 0o700); err != nil {
+				return fmt.Errorf("-agent-state: %w", err)
+			}
+		}
+		cfg.Agent = &agent.Config{Engine: module, Script: *agentDir, State: stateDir, ModelURL: *modelURL, ModelKey: os.Getenv("COMPUTER_MODEL_KEY"), Model: *modelName}
 	}
 	c, err := computer.New(cfg)
 	if err != nil {
@@ -155,6 +171,9 @@ func run(ctx context.Context) error {
 		return err
 	}
 	args := flag.Args()
+	if *script == "" && len(args) == 0 && term.IsTerminal(int(os.Stdin.Fd())) {
+		return prompt(ctx, c, cfg.WorkDir)
+	}
 	if *script != "" {
 		args = append([]string{"-c", *script}, args...)
 	}
@@ -169,9 +188,17 @@ func run(ctx context.Context) error {
 	return nil
 }
 
+// isName reports whether s can name an MCP server: letters, digits, hyphens and underscores.
+func isName(s string) bool {
+	return s != "" && strings.Trim(s, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_") == ""
+}
+
 // writable reports, as an error, a path the file tools may not write: one outside every writable mount. The shell
 // is held to the same rule by the computer; the file tools reach the filesystem directly.
 func writable(c *computer.Computer, workDir, p string) error {
+	if p == "~" || strings.HasPrefix(p, "~/") { // the file tools read a leading ~ as the working directory
+		p = workDir + p[1:]
+	}
 	p = gbfs.Resolve(workDir, p)
 	for _, m := range c.Mounts() {
 		if !m.ReadOnly && (p == m.Guest || strings.HasPrefix(p, strings.TrimSuffix(m.Guest, "/")+"/")) {

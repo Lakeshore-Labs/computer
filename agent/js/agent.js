@@ -3,7 +3,7 @@
 // entries added since the last and the live state, `pi.live`, which is what a view of the conversation draws. The
 // last line is {answer} or {unanswered}.
 //
-// The conversation is kept in Pi Durable's JSONL storage under AGENT_STATE and written at every commit, so the next
+// The conversation is kept in Pi Durable's JSONL storage in AGENT_STATE and written at every commit, so the next
 // `agent` continues it, and a run cut off by a crash goes on where it stopped.
 import { env, exit, run, tell, whenStopped } from "./host.js";
 import { BACKGROUND_CONTEXT as ctx } from "@earendil-works/chord/context";
@@ -18,7 +18,7 @@ run(async () => {
   const message = scriptArgs.slice(1).join(" ").trim();
   if (!message) { console.log('usage: agent "message"'); exit(2); }
 
-  const home = env("HOME", "/home/user"), state = env("AGENT_STATE", `${home}/.agent/conversation`);
+  const home = env("HOME", "/home/user"), state = env("AGENT_STATE", "/var/lib/agent");
   const modelId = env("AGENT_MODEL", "default"), instructions = env("AGENT_INSTRUCTIONS", "");
 
   // The host knows the model's address and holds its key; the address here only names the provider.
@@ -33,12 +33,17 @@ run(async () => {
   // Untagged and first, so the model reads the computer's own description as written.
   if (instructions) registry.install({ name: "computer", sections: [{ key: "computer", tag: false, render: () => instructions }] });
 
-  const computer = computerEnv({ cwd: home });
-  await computer.createDir(state, { recursive: true }, ctx);
-  const storage = await JsonlStorage.open(state, computer, ctx);
+  // The conversation is in a directory of the agent program's own. The tools' environment refuses it, and no
+  // command of the computer has it, so the model cannot rewrite what the next run reads.
+  const storage = await JsonlStorage.open(state, computerEnv({ cwd: "/" }), ctx);
+  const computer = computerEnv({ cwd: home, hidden: [state] });
   const harness = await Harness.open(storage, { models, registry, env: () => computer,
     onReport: (report) => console.log("agent:", report.kind, String(report.error?.message ?? report.error ?? "")) }, ctx);
-  const root = await harness.root(ctx, { agent: { model: { provider: "host", modelId }, cwd: home, maxTurns: Number(env("AGENT_MAX_TURNS", "50")) } });
+  // A conversation keeps the agent it was made with, so each run sets it again: what this run was started with
+  // holds, whatever the store says, and a model or limit the embedder has since changed takes effect.
+  const root = await harness.root(ctx);
+  await root.configure({ model: { provider: "host", modelId }, cwd: home, maxTurns: Number(env("AGENT_MAX_TURNS", "50")),
+    instructions: null, extensions: null, tools: null, modelTools: null, compaction: null, thinkingLevel: null }, ctx);
   harness.resume(); // a run an earlier process was cut off in goes on
   whenStopped(() => void root.abort(ctx)); // the host's stop: queued input is withdrawn and the run's work aborted
 

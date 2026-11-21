@@ -278,3 +278,19 @@ print(crm.list_notes(), crm.list_notes_2(), crm.x(), crm.both(a_b='1', a_b_2='2'
 		t.Errorf("python: got %q", got)
 	}
 }
+
+// The third review.
+
+func TestTwoProgramsAppendingToOneFileLoseNothing(t *testing.T) {
+	c := newComputer(t, Config{Python: python(t)})
+	script := `python3 -c "
+import os, sys
+fd = os.open('log.txt', os.O_WRONLY | os.O_CREAT | os.O_APPEND)
+for i in range(3000):
+    os.write(fd, (sys.argv[1] + '\\n').encode())
+" `
+	run(t, c, script+"A & "+script+"B & wait")
+	if got := run(t, c, "wc -l < log.txt"); got != "6000" {
+		t.Errorf("%s lines of 6000 were kept", got)
+	}
+}

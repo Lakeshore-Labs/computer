@@ -17,8 +17,14 @@ const quote = (word) => `'${word.replaceAll("'", `'\\''`)}'`;
 // followed only inside the mount, so stat serves for both.
 const lstat = os.lstat ?? os.stat;
 
-export function computerEnv({ cwd = "/home/user", id = "computer" } = {}) {
-  const at = (path) => normalize(path.startsWith("/") ? path : `${cwd}/${path}`);
+// `hidden` are directories this environment refuses: the agent program has them, and the tools that work through
+// this environment are not to.
+export function computerEnv({ cwd = "/home/user", id = "computer", hidden = [] } = {}) {
+  const at = (path) => {
+    const p = normalize(path.startsWith("/") ? path : `${cwd}/${path}`);
+    if (hidden.some((dir) => p === dir || p.startsWith(dir + "/"))) throw new FileError("permission_denied", `${p} is not for this environment`, p);
+    return p;
+  };
   const stat = (path, follow = true) => { const [s, e] = (follow ? os.stat : lstat)(path); if (e) refuse(e, path); return s; };
   const kind = (s) => ((s.mode & os.S_IFMT) === os.S_IFDIR ? "directory" : (s.mode & os.S_IFMT) === os.S_IFLNK ? "symlink" : (s.mode & os.S_IFMT) === os.S_IFREG ? "file" : undefined);
   const info = (path, s) => ({ name: path.slice(path.lastIndexOf("/") + 1), path, kind: kind(s), size: s.size, mtimeMs: s.mtime });
@@ -96,7 +102,9 @@ export function computerEnv({ cwd = "/home/user", id = "computer" } = {}) {
     if (aborted(context)) return err(new ExecutionError("aborted", "aborted"));
     const argv = typeof command === "string" ? undefined : [...command];
     if (argv && !argv.length) return err(new ExecutionError("spawn_error", "no program to run"));
-    const call = hostCall("sh", { command: argv ? undefined : command, argv, cwd: at(options?.cwd ?? "."), env: options?.env, inheritEnv: options?.inheritEnv ?? true, timeoutMs: options?.timeout ? options.timeout * 1000 : undefined });
+    let dir;
+    try { dir = at(options?.cwd ?? "."); } catch (e) { return err(new ExecutionError("spawn_error", e.message)); }
+    const call = hostCall("sh", { command: argv ? undefined : command, argv, cwd: dir, env: options?.env, inheritEnv: options?.inheritEnv ?? true, timeoutMs: options?.timeout ? options.timeout * 1000 : undefined });
     const stop = () => __cancel(call.id);
     context?.abortSignal?.addEventListener("abort", stop);
     let r;

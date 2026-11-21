@@ -79,6 +79,9 @@ type Computer struct {
 	cfg  Config
 	site string // a host directory: the generated Python package, rewritten when the tools change
 	tmp  string // a host directory mounted at /tmp when the caller mounts none, removed by Close
+	// state is where the agent keeps its conversation: the caller's directory, or one made here and removed by
+	// Close, with which the conversation ends.
+	state, ownState string
 
 	mu      sync.Mutex
 	listed  [sha256.Size]byte // the tools the session was built from
@@ -102,6 +105,14 @@ func New(cfg Config) (*Computer, error) {
 		}
 		c.cfg.Mounts = append(cfg.Mounts[:len(cfg.Mounts):len(cfg.Mounts)], Mount{Guest: "/tmp", Host: c.tmp})
 	}
+	if cfg.Agent != nil {
+		if c.state = cfg.Agent.State; c.state == "" {
+			if c.ownState, err = os.MkdirTemp("", "computer-agent"); err != nil {
+				return nil, err
+			}
+			c.state = c.ownState
+		}
+	}
 	return c, nil
 }
 
@@ -113,6 +124,9 @@ func (c *Computer) Close() error {
 	err := os.RemoveAll(c.site)
 	if c.tmp != "" {
 		err = errors.Join(err, os.RemoveAll(c.tmp))
+	}
+	if c.ownState != "" {
+		err = errors.Join(err, os.RemoveAll(c.ownState))
 	}
 	return err
 }
@@ -214,8 +228,12 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	var names []string // the commands that call tools
 	for _, group := range slices.Sorted(maps.Keys(groups)) {
 		name := tools.Kebab(group)
-		for _, taken := registry.Lookup(name); taken; _, taken = registry.Lookup(name) {
-			name += "-tools" // the shell's command, or a group whose name spells the same, keeps the name
+		if name == "" { // a group whose name has no letter or digit a command can be spelled with
+			name = "tools"
+		}
+		// The shell's command, the agent, or a group whose name spells the same, keeps the name.
+		for _, taken := registry.Lookup(name); taken || c.cfg.Agent != nil && name == "agent"; _, taken = registry.Lookup(name) {
+			name += "-tools"
 		}
 		if err := registry.Register(tools.Command(name, c.cfg.Tools, groups[group])); err != nil {
 			return nil, err
@@ -224,7 +242,7 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	}
 	if c.cfg.Agent != nil {
 		a := *c.cfg.Agent
-		a.Mounts, a.Home = mounts, c.cfg.WorkDir
+		a.Mounts, a.Home, a.State = mounts, c.cfg.WorkDir, c.state
 		if a.Instructions == "" {
 			a.Instructions = c.About(names)
 		}

@@ -92,7 +92,7 @@ func agentComputer(t *testing.T, m *model) (*Computer, string) {
 	engine.once.Do(func() {
 		var b []byte
 		if b, engine.err = os.ReadFile(binary); engine.err == nil {
-			engine.module, engine.err = wasm.Compile(context.Background(), wasm.Program{Binary: b, MemoryPages: 8192, Unstoppable: true})
+			engine.module, engine.err = wasm.Compile(context.Background(), wasm.Program{Binary: b, MemoryPages: 8192})
 		}
 	})
 	if engine.err != nil {
@@ -122,7 +122,7 @@ func lastLine(t *testing.T, out string) map[string]any {
 func TestTheAgentAnswersByWorkingInTheComputer(t *testing.T) {
 	m := newModel(t, "$ echo made by the agent > made.txt; cat made.txt", "It is done.")
 	c, home := agentComputer(t, m)
-	res := exec(t, c, `agent "make a file"`, time.Minute)
+	res := exec(t, c, `agent --json "make a file"`, time.Minute)
 	if got := lastLine(t, res.Stdout)["answer"]; res.ExitCode != 0 || got != "It is done." {
 		t.Fatalf("exit %d, answer %v, stderr %q", res.ExitCode, got, res.Stderr)
 	}
@@ -147,8 +147,8 @@ func TestTheAgentAnswersByWorkingInTheComputer(t *testing.T) {
 func TestTheAgentContinuesItsConversation(t *testing.T) {
 	m := newModel(t, "Noted.", "You said the word was heliotrope.")
 	c, _ := agentComputer(t, m)
-	exec(t, c, `agent "remember the word heliotrope"`, time.Minute)
-	res := exec(t, c, `agent "what was the word?"`, time.Minute)
+	exec(t, c, `agent --json "remember the word heliotrope"`, time.Minute)
+	res := exec(t, c, `agent --json "what was the word?"`, time.Minute)
 	if got := lastLine(t, res.Stdout)["answer"]; got != "You said the word was heliotrope." {
 		t.Fatalf("answer %v, stderr %q", got, res.Stderr)
 	}
@@ -160,15 +160,25 @@ func TestTheAgentContinuesItsConversation(t *testing.T) {
 func TestAStoppedAgentEndsItsRunAndTakesTheNextMessage(t *testing.T) {
 	m := newModel(t, "hang", "Back again.")
 	c, _ := agentComputer(t, m)
-	start := time.Now()
-	res, err := c.Exec(context.Background(), &gbash.ExecutionRequest{Script: `agent "this one is stopped"`, Timeout: 2 * time.Second})
-	if took := time.Since(start); took > 6*time.Second {
+	// The run is stopped once its request has reached the model, which then never answers.
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+	var stopped time.Time
+	go func() {
+		for len(m.sent()) == 0 {
+			time.Sleep(10 * time.Millisecond)
+		}
+		stopped = time.Now()
+		stop()
+	}()
+	res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: `agent --json "this one is stopped"`})
+	if took := time.Since(stopped); took > 4*time.Second {
 		t.Fatalf("a stopped run took %v to end (%v)", took, err)
 	}
 	if res != nil && res.ExitCode == 0 {
 		t.Error("a stopped run exited 0")
 	}
-	res = exec(t, c, `agent "and this one is answered"`, time.Minute)
+	res = exec(t, c, `agent --json "and this one is answered"`, time.Minute)
 	if got := lastLine(t, res.Stdout)["answer"]; got != "Back again." {
 		t.Fatalf("answer %v, stdout %q, stderr %q", got, res.Stdout, res.Stderr)
 	}
@@ -190,7 +200,7 @@ func TestTheAgentsEnvironmentConformsToPiDurable(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = c.Close() })
-	res := exec(t, c, "conformance /home/user", 2*time.Minute)
+	res := exec(t, c, "conformance --json /home/user", 2*time.Minute)
 	passed, unsupported := 0, 0
 	for _, line := range strings.Split(strings.TrimSpace(res.Stdout), "\n") {
 		var r struct {
@@ -218,11 +228,78 @@ func TestTheAgentTriesAnOverloadedModelAgain(t *testing.T) {
 	m := newModel(t, "overloaded", "Here now.")
 	c, _ := agentComputer(t, m)
 	start := time.Now()
-	res := exec(t, c, `agent "are you there?"`, time.Minute)
+	res := exec(t, c, `agent --json "are you there?"`, time.Minute)
 	if got := lastLine(t, res.Stdout)["answer"]; got != "Here now." {
 		t.Fatalf("answer %v, stdout %q, stderr %q", got, res.Stdout, res.Stderr)
 	}
 	if took := time.Since(start); len(m.sent()) != 2 || took < time.Second {
 		t.Errorf("%d requests in %v; the second should come a second after the first was refused", len(m.sent()), took.Round(100*time.Millisecond))
+	}
+}
+
+func TestTheAgentPrintsItsAnswerAndShowsItsStepsApart(t *testing.T) {
+	m := newModel(t, "$ echo working", "All done.")
+	c, _ := agentComputer(t, m)
+	res := exec(t, c, `agent "do it" > answer.txt; cat answer.txt`, time.Minute)
+	if res.Stdout != "All done.\n" {
+		t.Errorf("standard output holds %q, not the answer alone", res.Stdout)
+	}
+	if !strings.Contains(res.Stderr, "$ echo working") || !strings.Contains(res.Stderr, "working") {
+		t.Errorf("the steps were not shown: %q", res.Stderr)
+	}
+	m.replies = []string{"Quietly."}
+	if res := exec(t, c, `agent -q "again"`, time.Minute); res.Stdout != "Quietly.\n" || res.Stderr != "" {
+		t.Errorf("-q printed %q and showed %q", res.Stdout, res.Stderr)
+	}
+}
+
+// The third review.
+
+func TestTheModelCannotChangeWhatTheNextRunIsToldOrFindItsConversation(t *testing.T) {
+	m := newModel(t, "$ find / -name '*.jsonl' 2>/dev/null | head -5; ls -a /var/lib/agent /home/user 2>&1", "Looked.", "Second.")
+	c, home := agentComputer(t, m)
+	exec(t, c, `agent -q "look for your own conversation"`, time.Minute)
+	sent := m.sent()
+	if len(sent) < 2 || strings.Contains(sent[1], "main.jsonl") || !strings.Contains(sent[1], "/var/lib/agent") {
+		t.Errorf("the model's command found the conversation's files")
+	}
+	if entries, _ := os.ReadDir(home); len(entries) != 0 {
+		t.Errorf("the conversation was kept in the working directory: %v", entries)
+	}
+	exec(t, c, `agent -q "again"`, time.Minute)
+	if sent = m.sent(); !strings.Contains(sent[len(sent)-1], "You work on a computer through a shell") {
+		t.Error("the second run was not told about the computer")
+	}
+}
+
+func TestOneAgentRunsAtATime(t *testing.T) {
+	m := newModel(t, "$ agent -q nested; echo status $?", "Outer done.")
+	c, _ := agentComputer(t, m)
+	res := exec(t, c, `agent --json "start another agent"`, time.Minute)
+	if got := lastLine(t, res.Stdout)["answer"]; got != "Outer done." {
+		t.Fatalf("answer %v, stderr %q", got, res.Stderr)
+	}
+	sent := m.sent()
+	if len(sent) != 2 || !strings.Contains(sent[1], "already running") || !strings.Contains(sent[1], "status 1") {
+		t.Errorf("the nested agent was not refused: %d requests", len(sent))
+	}
+}
+
+func TestTheModelsKeyIsNotSentWhereAReplyRedirects(t *testing.T) {
+	var got string
+	other := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) { got = r.Header.Get("Authorization") }))
+	t.Cleanup(other.Close)
+	redirecting := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, other.URL+"/elsewhere", http.StatusTemporaryRedirect)
+	}))
+	t.Cleanup(redirecting.Close)
+	m := &model{Server: redirecting}
+	c, _ := agentComputer(t, m)
+	res := exec(t, c, `agent -q "hello"`, time.Minute)
+	if got != "" {
+		t.Errorf("the key followed the redirect: %q", got)
+	}
+	if strings.Contains(res.Stdout+res.Stderr, "127.0.0.1") {
+		t.Errorf("the model's address reached the agent's output: %q", res.Stderr)
 	}
 }

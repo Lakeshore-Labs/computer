@@ -11,6 +11,7 @@ import (
 
 	"github.com/tetratelabs/wazero/experimental/sys"
 	wsys "github.com/tetratelabs/wazero/sys"
+	"golang.org/x/sys/unix"
 )
 
 // rooted is a host directory as a program sees it. Every operation goes through os.Root, which resolves a path
@@ -93,13 +94,18 @@ func (r *rooted) OpenFile(p string, flag sys.Oflag, perm fs.FileMode) (sys.File,
 	case sys.O_WRONLY:
 		mode |= os.O_WRONLY
 	}
-	for bit, osFlag := range map[sys.Oflag]int{sys.O_CREAT: os.O_CREATE, sys.O_EXCL: os.O_EXCL, sys.O_TRUNC: os.O_TRUNC,
+	for bit, osFlag := range map[sys.Oflag]int{sys.O_APPEND: os.O_APPEND, sys.O_CREAT: os.O_CREATE, sys.O_EXCL: os.O_EXCL, sys.O_TRUNC: os.O_TRUNC,
 		sys.O_SYNC: os.O_SYNC, sys.O_DSYNC: os.O_SYNC, sys.O_RSYNC: os.O_SYNC} {
 		if flag&bit != 0 {
 			mode |= osFlag
 		}
 	}
 	f, err := r.root.OpenFile(p, mode, perm)
+	// On macOS, when two programs create one file at the same moment, os.Root reports to one of them that the file
+	// does not exist. It does by then, so the open is tried again.
+	for try := 0; try < 3 && mode&os.O_CREATE != 0 && errors.Is(err, fs.ErrNotExist); try++ {
+		f, err = r.root.OpenFile(p, mode, perm)
+	}
 	if err != nil {
 		return nil, errno(err)
 	}
@@ -115,7 +121,7 @@ func (r *rooted) OpenFile(p string, flag sys.Oflag, perm fs.FileMode) (sys.File,
 		_ = f.Close()
 		return nil, sys.ENOTDIR
 	}
-	return &file{f: f, appends: flag&sys.O_APPEND != 0}, 0
+	return &file{f: f}, 0
 }
 
 func (r *rooted) Stat(p string) (wsys.Stat_t, sys.Errno) {
@@ -238,8 +244,7 @@ func (r *rooted) Symlink(string, string) sys.Errno { return sys.EPERM }
 // file that was opened whatever happens to the name it was opened by.
 type file struct {
 	sys.UnimplementedFile
-	f       *os.File
-	appends bool // every write goes to the end; kept here because an open file's append mode cannot be changed
+	f *os.File
 }
 
 func (f *file) stat() (wsys.Stat_t, sys.Errno) {
@@ -254,8 +259,28 @@ func (f *file) Stat() (wsys.Stat_t, sys.Errno) { return f.stat() }
 func (f *file) Dev() (uint64, sys.Errno)       { st, e := f.stat(); return st.Dev, e }
 func (f *file) Ino() (wsys.Inode, sys.Errno)   { st, e := f.stat(); return st.Ino, e }
 func (f *file) IsDir() (bool, sys.Errno)       { st, e := f.stat(); return st.Mode.IsDir(), e }
-func (f *file) IsAppend() bool                 { return f.appends }
-func (f *file) SetAppend(on bool) sys.Errno    { f.appends = on; return 0 }
+
+// flags is the open file's status flags, and the error of asking for them.
+func (f *file) flags() (int, error) { return unix.FcntlInt(f.f.Fd(), unix.F_GETFL, 0) }
+
+func (f *file) IsAppend() bool {
+	flags, err := f.flags()
+	return err == nil && flags&unix.O_APPEND != 0
+}
+
+// SetAppend changes the open file's own append mode, so that the system places each write at the end, also when
+// another program is appending to the same file.
+func (f *file) SetAppend(on bool) sys.Errno {
+	flags, err := f.flags()
+	if err != nil {
+		return errno(err)
+	}
+	if flags &^= unix.O_APPEND; on {
+		flags |= unix.O_APPEND
+	}
+	_, err = unix.FcntlInt(f.f.Fd(), unix.F_SETFL, flags)
+	return errno(err)
+}
 
 // read is a read's result as WASI reports it: the end of the file is no bytes and no error.
 func read(n int, err error) (int, sys.Errno) {
@@ -268,15 +293,7 @@ func read(n int, err error) (int, sys.Errno) {
 func (f *file) Read(b []byte) (int, sys.Errno)             { return read(f.f.Read(b)) }
 func (f *file) Pread(b []byte, off int64) (int, sys.Errno) { return read(f.f.ReadAt(b, off)) }
 
-func (f *file) Write(b []byte) (int, sys.Errno) {
-	if f.appends {
-		if _, err := f.f.Seek(0, io.SeekEnd); err != nil {
-			return 0, errno(err)
-		}
-	}
-	n, err := f.f.Write(b)
-	return n, errno(err)
-}
+func (f *file) Write(b []byte) (int, sys.Errno) { n, err := f.f.Write(b); return n, errno(err) }
 
 func (f *file) Pwrite(b []byte, off int64) (int, sys.Errno) {
 	n, err := f.f.WriteAt(b, off)

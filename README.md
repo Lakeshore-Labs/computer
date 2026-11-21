@@ -119,7 +119,7 @@ as one more WebAssembly program. Its tools are the computer's shell and files, s
 SQLite the way a person at the shell would.
 
 ```
-gh release download agent-1.5.2-3 --repo Lakeshore-Labs/computer --pattern agent.tar.gz
+gh release download agent-1.5.2-4 --repo Lakeshore-Labs/computer --pattern agent.tar.gz
 mkdir agent-wasi && tar -xzf agent.tar.gz -C agent-wasi
 export COMPUTER_MODEL_KEY=...
 ./computer -mount ./work:/home/user -mcp wiki=https://mcp.deepwiki.com/mcp \
@@ -128,13 +128,19 @@ export COMPUTER_MODEL_KEY=...
     -c 'agent "What is wazero? Ask the wiki, and answer in two sentences."'
 ```
 
-- It prints the run as JSON lines, as Pi Durable's own JSON mode does: the transcript entries as they are added and
-  the live state, then `{"answer": ...}` or `{"unanswered": reason}`.
-- The conversation is stored under `.agent` in the working directory at every step. The next `agent` continues it,
-  and a run a crash cut off goes on where it stopped.
+- It prints its answer on standard output and shows each step it takes on standard error, so a person watches the
+  run and `agent "..." > answer.txt` keeps the answer alone. `-q` shows no steps. `--json` prints the whole run as
+  JSON lines for a program, as Pi Durable's own JSON mode does: the transcript entries as they are added and the
+  live state, then `{"answer": ...}` or `{"unanswered": reason}`.
+- The conversation is stored at every step, in a directory outside every mount (`-agent-state`, by default one
+  under your cache directory named for the first mount). The next `agent` continues it, and a run a crash cut off
+  goes on where it stopped. No command and none of the agent's tools can reach that directory, so the model cannot
+  rewrite what the next run is told.
+- One agent runs at a time over a conversation; a second, such as one the agent starts itself, is refused.
 - The model is any OpenAI-compatible chat-completions address. The command makes the request; the agent never
   holds the key or the address.
-- Stopping the command asks the agent to abort its run, which it records, so the next message starts a new one.
+- Stopping the command asks the agent to abort its run, which it records, so the next message starts a new one. An
+  agent that does not stop is stopped where it stands. Being stoppable makes it slower to start: about 2 s a run.
 
 One `agent` is one message and its answer. A message cannot yet be given to a run that is under way, and nothing
 asks a person to approve a step.
