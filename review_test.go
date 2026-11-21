@@ -4,6 +4,7 @@ package computer
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -148,6 +149,33 @@ func TestAToolCommandSurvivesOddArguments(t *testing.T) {
 	c := newComputer(t, Config{Tools: testTools(t, listNotes)})
 	if got := run(t, c, "notes list-notes --json null --min-id 2 | jq length; echo after"); got != "2\nafter" {
 		t.Errorf("got %q", got)
+	}
+}
+
+func TestAToolCommandReadsFlagsAsTheSchemaAllows(t *testing.T) {
+	str := map[string]any{"type": "string"}
+	c := newComputer(t, Config{Tools: testTools(t, func(s *mcp.Server) {
+		s.AddTool(&mcp.Tool{Name: "t_echo", InputSchema: map[string]any{"type": "object", "properties": map[string]any{
+			"title":   map[string]any{"anyOf": []any{str, map[string]any{"type": "null"}}},
+			"name":    map[string]any{"type": []any{"string", "null"}},
+			"free":    map[string]any{},
+			"verbose": map[string]any{"type": "boolean"},
+			"quiet":   map[string]any{"type": "boolean"},
+			"count":   map[string]any{"type": "integer"},
+			"json":    str, "help": str, "h": str, "noteId": str, "note_id": str,
+		}}}, func(_ context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			var arguments map[string]any
+			_ = json.Unmarshal(req.Params.Arguments, &arguments)
+			b, _ := json.Marshal(arguments) // with its keys sorted
+			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: string(b)}}}, nil
+		})
+	})})
+	got := run(t, c, "t echo --title 2024 --name true --free null --verbose --quiet=false --count=3 --json text --help x --h y --note-id a --note-id-2 b")
+	if want := `{"count":3,"free":"null","h":"y","help":"x","json":"text","name":"true","noteId":"a","note_id":"b","quiet":false,"title":"2024","verbose":true}`; got != want {
+		t.Errorf("got  %s\nwant %s", got, want)
+	}
+	if got := run(t, c, "t echo -h"); !strings.Contains(got, "--note-id-2") || strings.Contains(got, "every argument as one JSON object") {
+		t.Errorf("help: %s", got)
 	}
 }
 

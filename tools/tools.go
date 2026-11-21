@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -119,11 +120,41 @@ func Host(ctx context.Context, request []byte) []byte {
 // schema is the part of a tool's input schema a command line and a function signature are made from.
 type schema struct {
 	Properties map[string]struct {
-		Type        any
+		Type        any // a name or a list of names
+		AnyOf       []struct{ Type any }
 		Description string
 		Enum        []any
 	}
 	Required []string
+}
+
+// types is what property p may be, from its type and its anyOf; none means anything.
+func (s schema) types(p string) []string {
+	var out []string
+	add := func(t any) {
+		switch t := t.(type) {
+		case string:
+			out = append(out, t)
+		case []any:
+			for _, name := range t {
+				if name, ok := name.(string); ok {
+					out = append(out, name)
+				}
+			}
+		}
+	}
+	prop := s.Properties[p]
+	add(prop.Type)
+	for _, a := range prop.AnyOf {
+		add(a.Type)
+	}
+	return out
+}
+
+// boolean is whether p is a boolean, or a boolean or null, which a command line sets by naming it alone.
+func (s schema) boolean(p string) bool {
+	types := s.types(p)
+	return slices.Contains(types, "boolean") && !slices.ContainsFunc(types, func(t string) bool { return t != "boolean" && t != "null" })
 }
 
 func schemaOf(t Tool) (s schema) {
@@ -246,17 +277,27 @@ func Command(name string, sources []Source, group []Tool) commands.Command {
 			return commands.Exitf(inv, 2, "%s: no tool %q; run `%s --help`", name, args[0], name)
 		}
 		s := schemaOf(tool)
-		flags := map[string]string{} // --note-id and --noteId both name noteId
+		// Each property has a flag spelled as a command line spells it, made unique the same way on every run, and
+		// can also be named as the schema spells it. A property's flag comes before --json and --help.
+		flags, flagOf, taken := map[string]string{}, map[string]string{}, map[string]bool{}
+		for _, p := range sortedKeys(s.Properties) {
+			flagOf[p] = unique(Kebab(p), "-", taken)
+			flags[flagOf[p]] = p
+		}
 		for p := range s.Properties {
-			flags[Kebab(p)], flags[p] = p, p
+			if _, ok := flags[p]; !ok {
+				flags[p] = p
+			}
 		}
 		values := map[string]any{}
 		for i := 1; i < len(args); i++ {
-			if args[i] == "--help" || args[i] == "-h" {
+			flag, value, inline := strings.Cut(strings.TrimPrefix(args[i], "--"), "=")
+			p, known := flags[flag]
+			known = known && strings.HasPrefix(args[i], "--")
+			if !known && (args[i] == "--help" || args[i] == "-h") {
 				fmt.Fprintf(inv.Stdout, "%s %s: %s\n\narguments:\n", name, args[0], strings.TrimSpace(tool.Description))
 				for _, p := range s.params() {
 					prop := s.Properties[p]
-					typ, _ := prop.Type.(string)
 					note := ""
 					if s.required(p) {
 						note = " (required)"
@@ -265,14 +306,18 @@ func Command(name string, sources []Source, group []Tool) commands.Command {
 						enum, _ := json.Marshal(prop.Enum)
 						note += " one of " + string(enum)
 					}
-					fmt.Fprintf(inv.Stdout, "  --%-24s %s%s %s\n", Kebab(p), typ, note, oneLine(prop.Description))
+					fmt.Fprintf(inv.Stdout, "  --%-24s %s%s %s\n", flagOf[p], strings.Join(s.types(p), "|"), note, oneLine(prop.Description))
 				}
-				fmt.Fprintln(inv.Stdout, "  --json '{...}'             every argument as one JSON object")
+				if _, ok := flags["json"]; !ok {
+					fmt.Fprintln(inv.Stdout, "  --json '{...}'             every argument as one JSON object")
+				}
 				return nil
 			}
-			flag, value, inline := strings.Cut(strings.TrimPrefix(args[i], "--"), "=")
 			if !strings.HasPrefix(args[i], "--") {
 				return commands.Exitf(inv, 2, "%s %s: unexpected %q; arguments are --name value", name, args[0], args[i])
+			}
+			if known && !inline && s.boolean(p) {
+				value, inline = "true", true
 			}
 			if !inline {
 				if i++; i >= len(args) {
@@ -280,7 +325,7 @@ func Command(name string, sources []Source, group []Tool) commands.Command {
 				}
 				value = args[i]
 			}
-			if flag == "json" {
+			if !known && flag == "json" {
 				var object map[string]any
 				if err := json.Unmarshal([]byte(value), &object); err != nil {
 					return commands.Exitf(inv, 2, "%s %s: --json: %v", name, args[0], err)
@@ -290,20 +335,19 @@ func Command(name string, sources []Source, group []Tool) commands.Command {
 				}
 				continue
 			}
-			p, ok := flags[flag]
-			if !ok {
+			if !known {
 				return commands.Exitf(inv, 2, "%s %s: no argument --%s; run `%s %s --help`", name, args[0], flag, name, args[0])
 			}
 			var err error
-			switch typ, _ := s.Properties[p].Type.(string); typ {
-			case "string":
+			switch types := s.types(p); {
+			case len(types) == 0 || slices.Contains(types, "string"): // text whenever text is allowed
 				values[p] = value
-			case "integer":
-				values[p], err = strconv.ParseInt(value, 10, 64)
-			case "number":
-				values[p], err = strconv.ParseFloat(value, 64)
-			case "boolean":
+			case s.boolean(p):
 				values[p], err = strconv.ParseBool(value)
+			case len(types) == 1 && types[0] == "integer":
+				values[p], err = strconv.ParseInt(value, 10, 64)
+			case len(types) == 1 && types[0] == "number":
+				values[p], err = strconv.ParseFloat(value, 64)
 			default: // an object, a list or a value of several types: JSON when it parses, else the text
 				var v any
 				if json.Unmarshal([]byte(value), &v) != nil {
@@ -312,7 +356,7 @@ func Command(name string, sources []Source, group []Tool) commands.Command {
 				values[p] = v
 			}
 			if err != nil {
-				return commands.Exitf(inv, 2, "%s %s: --%s: %q is not a %v", name, args[0], flag, value, s.Properties[p].Type)
+				return commands.Exitf(inv, 2, "%s %s: --%s: %q is not a %s", name, args[0], flag, value, strings.Join(s.types(p), " or "))
 			}
 		}
 		arguments, _ := json.Marshal(values)
