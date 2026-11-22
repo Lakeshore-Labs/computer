@@ -30,7 +30,7 @@ Extract the ZIP and open `index.html` in a browser. Search for a tool, file stor
 
 ## What the numbers count
 
-The November 22, 2026 edition contains 226 exhibits. There are 34 featured stories, 12 runtime chapters, 48 command recipes, 30 storage exhibits, 12 local MCP workflows and 90 successful hosted cases. Several exhibits can exercise the same client, API or filesystem.
+The November 22, 2026 edition contains 242 exhibits. There are 37 featured stories, 12 runtime chapters, 48 command recipes, 30 storage exhibits, 12 local MCP workflows and 103 successful hosted cases. Several exhibits can exercise the same client, API or filesystem.
 
 The hosted survey contains 94 final cases, of which 90 passed across 86 distinct endpoint URLs. Thirty-three passing cases share a documentation search-and-read pattern. Repeated tools or shared operators do not establish independent protocol implementations. The archive’s scope page and the [hosted fieldwork](../hosted-fieldwork/) describe the checks, four final misses and capture times. The catalog also records the editor’s native confirmation prompt and partial storage results.
 

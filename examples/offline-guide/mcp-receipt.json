@@ -13,7 +13,7 @@
     "guide://observations/pacific-listening-room"
   ],
   "exhibit_template": "guide://exhibits/{id}",
-  "exact_exhibit_receipts": 226,
+  "exact_exhibit_receipts": 242,
   "documents": {
     "guide://festival/original": {
       "bytes": 679,
