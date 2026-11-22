@@ -157,3 +157,7 @@ The [hosted fieldwork reader](hosted-fieldwork/) records 81 passing cases across
 ### Build a designer’s palette from satellite pixels
 
 The [Venetian Lagoon palette](lagoon-palette/) uses the official Swift MCP client and all four Computer tools. Inspect six sampled pixels and take the colors into a native macOS list, GIMP, Adobe Swatch Exchange or CSS.
+
+### Recover last week’s library opening hours
+
+The [restored reading room](restored-library/) compares two actual encrypted restic snapshots. Computer generated the editions, then a fresh guest read the restored files and published a comparison with both schedules available to download.
