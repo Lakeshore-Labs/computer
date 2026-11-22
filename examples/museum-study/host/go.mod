@@ -102,3 +102,5 @@ require (
 )
 
 replace github.com/Lakeshore-Labs/computer => ../../..
+
+replace github.com/ewhauser/gbash => github.com/Lakeshore-Labs/gbash v0.0.42-0.20261122055728-7fee782ad31b

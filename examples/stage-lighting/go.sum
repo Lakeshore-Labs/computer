@@ -4,6 +4,8 @@ github.com/JohannesKaufmann/dom v0.2.0 h1:1bragmEb19K8lHAqgFgqCpiPCFEZMTXzOIEjux
 github.com/JohannesKaufmann/dom v0.2.0/go.mod h1:57iSUl5RKric4bUkgos4zu6Xt5LMHUnw3TF1l5CbGZo=
 github.com/JohannesKaufmann/html-to-markdown/v2 v2.5.0 h1:mklaPbT4f/EiDr1Q+zPrEt9lgKAkVrIBtWf33d9GpVA=
 github.com/JohannesKaufmann/html-to-markdown/v2 v2.5.0/go.mod h1:D56Cl9r8M5i3UwAchE+LlLc5hPN3kJtdZNVJn06lSHU=
+github.com/Lakeshore-Labs/gbash v0.0.42-0.20261122055728-7fee782ad31b h1:29ff1xtWkzAJgW1FRO1oTjg9opS/toKF1yGEbAA/qEk=
+github.com/Lakeshore-Labs/gbash v0.0.42-0.20261122055728-7fee782ad31b/go.mod h1:p7qtRdObPk/XkjsXus06muq4uv2I/1glY2CyOozUke0=
 github.com/Microsoft/go-winio v0.5.2/go.mod h1:WpS1mjBmmwHBEWmogvA2mj8546UReBk4v8QkMxJ6pZY=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
@@ -43,8 +45,6 @@ github.com/elliotchance/orderedmap v1.8.0 h1:TrOREecvh3JbS+NCgwposXG5ZTFHtEsQiCG
 github.com/elliotchance/orderedmap v1.8.0/go.mod h1:wsDwEaX5jEoyhbs7x93zk2H/qv0zwuhg4inXhDkYqys=
 github.com/emirpasic/gods v1.18.1 h1:FXtiHYKDGKCW2KzwZKx0iC0PQmdlorYgdFG9jPXJ1Bc=
 github.com/emirpasic/gods v1.18.1/go.mod h1:8tpGGwCnJ5H4r6BWwaV6OrWmMoPhUl5jm/FMNAnJvWQ=
-github.com/ewhauser/gbash v0.0.41 h1:LTBgRQ6BVS7FpWbv1H79V6qG1sEpkknJQp6+QFtDffk=
-github.com/ewhauser/gbash v0.0.41/go.mod h1:p7qtRdObPk/XkjsXus06muq4uv2I/1glY2CyOozUke0=
 github.com/ewhauser/gbash/contrib/awk v0.0.41 h1:YuH6ZucmsXLsgLRmWQc0DIH20gcWjXMmcKkAV9aj2tc=
 github.com/ewhauser/gbash/contrib/awk v0.0.41/go.mod h1:7D5BaNR9qL0M54kQkG9RK3Ke+4mzQIHEnuY1gzX8PZI=
 github.com/ewhauser/gbash/contrib/codingtools v0.0.41 h1:na8g+t1CO/ceiq8zGKjYzgYwoc6HeytClumOAQ4F6VM=
