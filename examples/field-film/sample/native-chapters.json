@@ -1,0 +1,38 @@
+{
+  "chapter_count": 6,
+  "chapters": [
+    {
+      "start": "0.000000",
+      "end": "15.042000",
+      "title": "The ferry ledger"
+    },
+    {
+      "start": "15.042000",
+      "end": "26.000000",
+      "title": "Windows over Venice"
+    },
+    {
+      "start": "26.000000",
+      "end": "39.375000",
+      "title": "A designer\u2019s palette"
+    },
+    {
+      "start": "39.375000",
+      "end": "50.042000",
+      "title": "Oslofjord in relief"
+    },
+    {
+      "start": "50.042000",
+      "end": "63.583000",
+      "title": "Sunday\u2019s fitting"
+    },
+    {
+      "start": "63.583000",
+      "end": "78.667000",
+      "title": "Last Boat Home"
+    }
+  ],
+  "video_stream_sha256": "SHA256=dbe8cdf93ab1fed7edea64435ff4095dacf53ef1517506831301b45b040b8f41",
+  "audio_stream_sha256": "SHA256=e8e1db3675dc052af328fa7a9fd77be1ea9b9694af1f1fa718f9cf4d2594c2fe",
+  "audio_language": "eng"
+}

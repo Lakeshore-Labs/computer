@@ -4,7 +4,7 @@
 
 [![The opening frame of the Computer field film](sample/poster.jpg)](sample/computer.mp4?raw=true)
 
-The 79-second film uses original captures from six runnable examples. Download the sample directory and open [the chapter player](sample/index.html) to watch or jump between chapters offline. The MP4 includes English narration, open captions, a selectable English subtitle track and the synthesized opening of the original rehearsal score.
+The 79-second film uses original captures from six runnable examples. Download the sample directory and open [the chapter player](sample/index.html) to watch or jump between chapters offline. The MP4 carries six named chapters, English narration, open captions, a selectable English subtitle track and the synthesized opening of the original rehearsal score. [Embedded chapter times](sample/native-chapters.json)
 
 | Chapter | Open the original exhibit |
 | --- | --- |

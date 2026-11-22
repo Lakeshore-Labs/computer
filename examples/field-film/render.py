@@ -10,6 +10,7 @@ import wave
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
+from chapters import chapter_metadata
 from piper import PiperVoice, SynthesisConfig
 
 HERE = Path(__file__).resolve().parent
@@ -124,9 +125,11 @@ def render(args, tmp):
     (tmp / 'clips').write_text(''.join("file '" + str(p) + "'\n" for p in clips))
     vtt = args.out / 'captions.vtt'
     vtt.write_text('\n'.join(captions))
-    ffmpeg('-f', 'concat', '-safe', 0, '-i', tmp / 'clips', '-i', vtt, '-map', '0:v', '-map', '0:a',
+    metadata = tmp / 'chapters.ffmeta'
+    metadata.write_text(chapter_metadata(chapters, FPS))
+    ffmpeg('-f', 'concat', '-safe', 0, '-i', tmp / 'clips', '-i', vtt, '-f', 'ffmetadata', '-i', metadata, '-map_metadata', 2, '-map_chapters', 2, '-map', '0:v', '-map', '0:a',
            '-map', '1:s', '-c:v', 'copy', '-c:a', 'copy', '-c:s', 'mov_text', '-metadata:s:s:0',
-           'language=eng', '-movflags', '+faststart', args.out / 'computer.mp4')
+           'language=eng', '-metadata:s:a:0', 'language=eng', '-movflags', '+faststart', args.out / 'computer.mp4')
     ffmpeg('-ss', 1, '-i', args.out / 'computer.mp4', '-frames:v', 1, args.out / 'poster.jpg')
     (args.out / 'chapters.json').write_text(json.dumps(chapters, indent=2) + '\n')
     (args.out / 'transcript.md').write_text('# Computer field guide\n\n' + '\n'.join(transcript))
