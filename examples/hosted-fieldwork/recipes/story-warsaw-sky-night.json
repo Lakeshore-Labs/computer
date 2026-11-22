@@ -12,11 +12,11 @@
       "ok": true
     },
     {
-      "desc": "output contains 'USNO sun:'",
+      "desc": "output contains '[provider] time.memoryapi.org sun'",
       "ok": true
     },
     {
-      "desc": "output contains 'synodic model:'",
+      "desc": "output contains '[own arithmetic] synodic model:'",
       "ok": true
     },
     {
@@ -40,6 +40,6 @@
       "ok": true
     }
   ],
-  "stdout_sha256": "0f0579b9add026c71613cce1dd1611470bcd5c20bff55bb164326bf8c4ab0da7",
-  "observed_utc": "2026-11-22T21:31:07.135272+00:00"
+  "stdout_sha256": "ff4a0be3a53369a6b62ca649fe9cfbae62ae9cd0680f4a98aced9349cf72183b",
+  "observed_utc": "2026-11-22T22:38:14.109750+00:00"
 }

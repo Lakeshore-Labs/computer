@@ -1,11 +1,12 @@
 run date (host clock, UTC): 2026-11-22
-kosmos verdict: no | Not worth it
-kosmos night window: 22:48 -> 05:53 (Polish time)
-kosmos moon: waxing gibbous 96 % illuminated
-USNO sun: sunset 15:35 | civil twilight ends 16:14
-NOAA formula sunset: 15:36 | USNO minus NOAA: -2 min
-synodic model: moon age 12.9 d, 96% illuminated | kosmos says 96%
-Geminids peak 2026-12-14 in 22 days | model moon then: 22% illuminated
+legend: [provider] = data returned by a hosted MCP server; [own arithmetic] = computed here in WASI Python
+[provider] kosmos verdict: no | Not worth it
+[provider] kosmos night window: 23:38 -> 05:53 (Polish time)
+[provider] kosmos moon: waxing gibbous 96 % illuminated
+[provider] time.memoryapi.org sun (tool text claims USNO; not verified here): sunset 15:35 | civil twilight ends 16:14
+[own arithmetic] NOAA-style solar equations, sunset to nearest minute: 15:37 (936.96 min after midnight) | provider minus own: -2 min
+[own arithmetic] synodic model: moon age 12.9 d, 96% illuminated | kosmos says 96%
+[provider] Geminids peak 2026-12-14 in 22 days | [own arithmetic] model moon then: 22% illuminated
 CHECK sunset agrees within 5 min: True
 CHECK dark window starts after civil twilight: True
 CHECK kosmos moon within 6 points of model: True
