@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Oslo by bike · station atlas</title>
+<style>{{LEAFLET_CSS}}</style>
+<style>
+:root{font:16px/1.45 system-ui,sans-serif;color:#162d2d;background:#f6f3e8}*{box-sizing:border-box}body{margin:0}
+header{padding:18px 4vw 14px;background:#143438;color:#fbf6e9;display:flex;justify-content:space-between;align-items:center;gap:12px}
+header h1{font:clamp(28px,4vw,56px)/1 Georgia,serif;margin:0}header p{font-size:13px;color:#c2d7cc;margin:6px 0 0}header a{color:inherit;font-size:14px}
+main{display:grid;grid-template-columns:minmax(250px,28%) 1fr;min-height:540px;height:calc(100dvh - 109px)}aside{overflow:auto;padding:20px 23px;border-right:1px solid #c8c6b6}label{display:block;font-weight:600;font-size:13px;margin:0 0 5px}
+select,button,a{font:inherit}select{width:100%;padding:8px;background:white;border:1px solid #a0aea3;color:#193d3b}fieldset{display:flex;margin:17px 0;padding:0;border:0;gap:4px}legend{font-weight:600;font-size:13px;margin-bottom:5px}
+button{border:1px solid #acb4a0;background:#fffef7;color:#1b403a;border-radius:3px;cursor:pointer}fieldset button{flex:1;padding:7px 3px}button[aria-pressed="true"]{background:#1c574c;color:white;border-color:#1c574c}
+.summary{font:22px/1.16 Georgia,serif;margin:12px 0}.station{display:block;width:100%;padding:9px 3px;border:0;border-bottom:1px solid #d0d1be;background:transparent;text-align:left;font-size:14px}.station[aria-current="true"]{color:#076146;font-weight:750}#detail{background:#e4ebd9;border-left:3px solid #287257;padding:9px 11px;min-height:52px;font-size:14px}#stations{max-height:45vh;overflow:auto}
+#map{height:100%;width:100%;background-color:#ebeddd;background-image:linear-gradient(#a8c4b237 1px,transparent 1px),linear-gradient(90deg,#a8c4b237 1px,transparent 1px);background-size:50px 50px}
+.map-note{background:#fffef5e8;border:1px solid #c9c9b1;padding:7px 10px;font-size:12px;line-height:1.5;color:#204341}
+small{display:block;font-size:11px;margin-top:12px;color:#53615c}a{color:#18524e}
+@media(max-width:680px){header{padding:12px 14px}header a{font-size:12px}main{display:flex;flex-direction:column-reverse;height:auto;min-height:0}#map{height:42dvh;min-height:260px}aside{padding:12px 16px;border:0}fieldset{margin:9px 0}#stations{max-height:180px}.summary{font-size:19px}}
+</style><header><div><h1>Oslo by bike</h1><p>Recorded station availability</p></div><a id="download" download="oslo-stations.zip">Download GIS files</a></header>
+<main><aside><label for="time">Observation time</label><select id="time"></select>
+<fieldset><legend>Show availability</legend><button id="borrow" aria-pressed="true">Borrow a bike</button><button id="return" aria-pressed="false">Return a bike</button></fieldset>
+<p id="summary" class="summary"></p><p id="detail" aria-live="polite">Select a station on the map or in the list.</p><div id="stations" aria-label="Stations in alphabetical order"></div>
+<small>Station data from <a href="https://oslobysykkel.no/en/open-data/realtime">Oslo City Bike</a>, NLOD 2.0. Grayscale map © <a href="https://www.kartverket.no/en/api-and-data/terms-of-use">Kartverket</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, shown at reduced opacity. Relief from <a href="https://registry.opendata.aws/terrain-tiles/">Mapzen Terrain Tiles</a>. Norway terrain © Kartverket. Europe terrain uses Copernicus data funded by the European Union, EU-DEM layers. Coastline from Natural Earth. Counts are recorded snapshots.</small></aside><div id="map" aria-label="Map of recorded station availability in Oslo"></div></main>
+<script>{{LEAFLET_JS}}</script><script>{{SHAPEFILE_JS}}</script><script>
+(async()=>{
+ const decode=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));const data=JSON.parse(new TextDecoder().decode(decode('{{DATA}}')));
+ const stations=await shapefile.read(decode(data.shp).buffer,decode(data.dbf).buffer,{encoding:'utf-8'});
+ const map=L.map('map',{attributionControl:false,scrollWheelZoom:false,zoomSnap:.25});L.control.scale({imperial:false}).addTo(map);
+ L.imageOverlay("data:image/jpeg;base64,"+data.terrain,data.bounds,{opacity:.9,interactive:false}).addTo(map);
+ const topo=L.layerGroup(data.tiles.map(t=>L.imageOverlay("data:image/png;base64,"+t.image,t.bounds,{opacity:.74,interactive:false}))).addTo(map);
+ L.control.layers(null,{"Street map":topo},{collapsed:false,position:"topright"}).addTo(map);
+ for(const line of data.shore)L.polyline(line,{color:'#698e9b',weight:3,opacity:.76,interactive:false}).addTo(map);
+ const markers=L.layerGroup().addTo(map);const note=L.control({position:'bottomright'});note.onAdd=()=>{const d=L.DomUtil.create('div','map-note');d.textContent='● Available   ○ Empty or closed';return d};note.addTo(map);
+ const time=document.getElementById('time'),detail=document.getElementById('detail'),list=document.getElementById('stations');let mode=0,active=null;
+ const features=stations.features.sort((a,b)=>a.properties.NAME.localeCompare(b.properties.NAME,'nb'));
+ const bounds=L.latLngBounds(features.map(f=>[f.geometry.coordinates[1],f.geometry.coordinates[0]]));
+ map.fitBounds(bounds,{padding:[16,16]});
+ data.history.forEach((h,i)=>time.add(new Option(h.source_time,String(i))));time.value=String(data.history.length-1);
+ const blob=new Blob([decode(data.zip)],{type:'application/zip'});document.getElementById('download').href=URL.createObjectURL(blob);
+ function render(){
+  markers.clearLayers();list.replaceChildren();
+  const h=data.history[Number(time.value)],seen=features.filter(f=>h.stations[f.properties.ID]);let available=0;
+  for(const f of seen){
+   const {ID,NAME}=f.properties,s=h.stations[ID],open=Boolean(s[mode+2]),value=s[mode],enabled=open&&value>0;if(enabled)available++;
+   const point=[f.geometry.coordinates[1],f.geometry.coordinates[0]];
+   const dot=L.circleMarker(point,{radius:enabled?Math.min(8,4+Math.sqrt(value)*.5):3.5,color:enabled?'#124e43':'#77766a',weight:1,fillColor:enabled?'#58a97e':'#f6f3e6',fillOpacity:.9}).addTo(markers);
+   const b=document.createElement('button');b.className='station';b.textContent=NAME;b.dataset.id=ID;b.setAttribute('aria-current',String(ID===active));
+   function show(){active=ID;detail.textContent=NAME+' · '+s[0]+' bikes · '+s[1]+' return spaces'+(open?'':' · unavailable in this mode');for(const x of list.children)x.setAttribute('aria-current',String(x.dataset.id===ID));}
+   if(ID===active){detail.textContent=NAME+' · '+s[0]+' bikes · '+s[1]+' return spaces'+(open?'':' · unavailable in this mode');}
+   const text=document.createElement('span');text.textContent=NAME;dot.bindTooltip(text);dot.on('click',show);
+   b.addEventListener('click',()=>{show();map.setView(point,Math.max(13,map.getZoom()));dot.openTooltip()});list.append(b);
+  }
+  document.getElementById('summary').textContent=available+' of '+seen.length+' stations '+(mode?'can accept a bike.':'have a bike to borrow.');
+ }
+ for(const [id,n] of [['borrow',0],['return',1]])document.getElementById(id).addEventListener('click',()=>{mode=n;for(const [j,k] of [['borrow',0],['return',1]])document.getElementById(j).setAttribute('aria-pressed',String(n===k));render()});
+ time.addEventListener('change',render);render();
+})().catch(e=>document.getElementById('detail').textContent=e.message);
+</script></html>

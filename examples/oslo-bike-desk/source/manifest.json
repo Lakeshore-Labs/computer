@@ -1,0 +1,126 @@
+{
+  "archive_sha256": "b9bbca7c533dd0837b232bf1865d1a12c3c44288b5e1a2c3f6446534c320c907",
+  "members": {
+    "licenses/Leaflet.txt": "53e8dc25862014e4324741ca18fbe3611e11d42ef69f59f86ea8c5389647d4cb",
+    "licenses/PyShp.txt": "6cfcbf778f6ff3a4dc29e864f5729828c3cfc0ad8140f3e9951a68c4e6dbbdfa",
+    "licenses/shapefile.txt": "c16529a9d5b8802982abd714a6823344e24b0cb5131596bc343927ead605d708",
+    "observations/20261122T202104Z/receipt.json": "2e8c6717f18cf306ff9cd2fecc75516fa529b5d4e1bd6b19df7acc82964acfc1",
+    "observations/20261122T202104Z/station_status.json": "739e0232dc3773b5b467c6c09bbe27bdc56cb496b404e720fc1a44e0bd01cbcd",
+    "observations/20261122T204104Z/receipt.json": "7e5970d638419f5af390789c1938aa8db1a5910d9a68c26146a4a19faed2f2dc",
+    "observations/20261122T204104Z/station_status.json": "cc7d75faeb9c301d2358d359614ab4d623d471ea25d14f9e479cb714861a4b12",
+    "observations/20261122T210104Z/receipt.json": "82d83cd5858899c513c93f2d6c95267a3b5e6a1a0300bb17db7f3afe7ee99fa9",
+    "observations/20261122T210104Z/station_status.json": "82cd499153fb2ca40d19fbe4c449a7a101aced3f4ba693cc940172c9c74c525a",
+    "observations/station_information.json": "8662c2e5ccb073abc316797a68ac43aabf257e75b0e1d3a9d36978f8dfcd44c0",
+    "static/leaflet.css": "a7837102824184820dfa198d1ebcd109ff6d0ff9a2672a074b9a1b4d147d04c6",
+    "static/leaflet.js": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a",
+    "static/shapefile.js": "bc69e418301d1f89b3a9d3323ae663afb6096601ebe7bd1f572b5793801365b7",
+    "static/terrain.jpg": "61c05c96e20f8cb7771da6804016ea74a96bebc7fd390784c50b51bd1307e3cb",
+    "static/terrain.json": "348c1fc4d72b3dcacb542752d48ef2498b7ac174ed87f9c72c2bb04ded846296",
+    "vendor/pyshp-2.3.1-py2.py3-none-any.whl": "67024c0ccdc352ba5db777c4e968483782dfa78f8e200672a90d2d30fd8b7b49",
+    "vendor/shore.json": "c056ac14139ce8bf2bb6a0850b53d9def5a88905c214a7c69eb9874461edfbae",
+    "vendor/topo-z11/11-1084-595.png": "691a37caa6e91cb4529610e52757cf4bac3754f5eb88aa4e462091d8ebd29130",
+    "vendor/topo-z11/11-1084-596.png": "a757a9c0daee1ac9f5f85c186a6fab6b0aecba02c637cf03c6425567db80daee",
+    "vendor/topo-z11/11-1085-595.png": "cc62722acf6b7dcd138144f63cad8fa57090fe933d289f454a1e8eca46378fad",
+    "vendor/topo-z11/11-1085-596.png": "642e7012ef81ee74571cec281d67c7d7c3f966eba03859d8b313d5dd6021981d",
+    "vendor/topo-z11/sources.json": "a8ad21797b7c0e980540a74d199d9d12bb5577b784b9c14015a4bfff632304ee"
+  },
+  "sources": {
+    "stations": "https://oslobysykkel.no/en/open-data/realtime",
+    "station_license": "https://data.norge.no/en/nlod",
+    "basemap_terms": "https://www.kartverket.no/en/api-and-data/terms-of-use",
+    "basemap_zoom": 11,
+    "basemap_tiles": [
+      {
+        "name": "11-1084-595.png",
+        "url": "https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/11/595/1084.png",
+        "sha256": "691a37caa6e91cb4529610e52757cf4bac3754f5eb88aa4e462091d8ebd29130",
+        "bounds": [
+          [
+            59.88893689676585,
+            10.546875
+          ],
+          [
+            59.977005492196,
+            10.72265625
+          ]
+        ]
+      },
+      {
+        "name": "11-1085-595.png",
+        "url": "https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/11/595/1085.png",
+        "sha256": "cc62722acf6b7dcd138144f63cad8fa57090fe933d289f454a1e8eca46378fad",
+        "bounds": [
+          [
+            59.88893689676585,
+            10.72265625
+          ],
+          [
+            59.977005492196,
+            10.8984375
+          ]
+        ]
+      },
+      {
+        "name": "11-1084-596.png",
+        "url": "https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/11/596/1084.png",
+        "sha256": "a757a9c0daee1ac9f5f85c186a6fab6b0aecba02c637cf03c6425567db80daee",
+        "bounds": [
+          [
+            59.80063426102869,
+            10.546875
+          ],
+          [
+            59.88893689676585,
+            10.72265625
+          ]
+        ]
+      },
+      {
+        "name": "11-1085-596.png",
+        "url": "https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/11/596/1085.png",
+        "sha256": "642e7012ef81ee74571cec281d67c7d7c3f966eba03859d8b313d5dd6021981d",
+        "bounds": [
+          [
+            59.80063426102869,
+            10.72265625
+          ],
+          [
+            59.88893689676585,
+            10.8984375
+          ]
+        ]
+      }
+    ],
+    "terrain": {
+      "source": "https://s3.amazonaws.com/elevation-tiles-prod/skadi/N59/N59E010.hgt.gz",
+      "source_sha256": "9ef36408ada5a1e3195954320fa844474023584e08f46d190c5295b6b7f69911",
+      "decompressed_side": 3601,
+      "bounds": [
+        [
+          59.82,
+          10.49
+        ],
+        [
+          59.985,
+          10.98
+        ]
+      ],
+      "pixel_size": [
+        750,
+        510
+      ],
+      "min_height": -38,
+      "max_height": 534,
+      "sha256": "cbdfbd9d44b3312e12ded5955987190a498524ae2ae6fee645d5c702f18a03d4"
+    },
+    "coastline": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_coastline.geojson",
+    "full_coastline_sha256": "271f1c4c1908312bac6b29d158ea1356544beafc129f260005300913aa5ea283",
+    "pyshp": {
+      "name": "pyshp-2.3.1-py2.py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/98/2f/68116db5b36b895c0450e3072b8cb6c2fac0359279b182ea97014d3c8ac0/pyshp-2.3.1-py2.py3-none-any.whl",
+      "sha256": "67024c0ccdc352ba5db777c4e968483782dfa78f8e200672a90d2d30fd8b7b49"
+    },
+    "leaflet": "https://registry.npmjs.org/leaflet/-/leaflet-1.9.4.tgz",
+    "shapefile_js": "https://registry.npmjs.org/shapefile/-/shapefile-0.6.6.tgz"
+  }
+}

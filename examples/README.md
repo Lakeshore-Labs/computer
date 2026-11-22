@@ -137,3 +137,9 @@ A library reschedules its reading group. Computer publishes both program edition
 Rotate two solids made from the same real elevation grid, then move through their outer walls at the same height. The stock Computer guest creates the STL files and both offline readers. [Download and explore the workshop](terrain-workshop/README.md)
 
 [![Oslofjord terrain open in the 3D reader](terrain-workshop/sample/desktop.png)](terrain-workshop/README.md)
+
+## Find ten bikes in Oslo
+
+Explore three observed Oslo City Bike feeds, open the GIS files, or change the size of a group meeting at Jernbanetorget. Computer writes a shapefile, reads back a GDAL-projected GeoPackage and calculates which nearby station could serve everyone. [Open the two offline readers](oslo-bike-desk/README.md)
+
+[![Three sites with enough bikes for the group](oslo-bike-desk/sample/meeting.png)](oslo-bike-desk/README.md)

@@ -1,0 +1,17 @@
+{
+  "station_features": 261,
+  "latest_installed": 259,
+  "rounds": 3,
+  "feed_time": "2026-11-22 21:01 UTC",
+  "coastline_segments": 1,
+  "attribution": "Station data: Oslo City Bike, NLOD 2.0. https://oslobysykkel.no/en/open-data/realtime\nTopographic map: \u00a9 Kartverket, CC BY 4.0, zoom 11 grayscale tiles displayed at reduced opacity. https://www.kartverket.no/en/api-and-data/terms-of-use . Terrain Tiles: Mapzen. Norway terrain \u00a9 Kartverket. Europe terrain produced using Copernicus data funded by the European Union, EU-DEM layers. https://registry.opendata.aws/terrain-tiles/ . Coastline: Natural Earth, public domain. https://www.naturalearthdata.com/\n",
+  "files": {
+    "oslo.shp": "7c68354cf6849581678c20ae18fe0ddc882b6c56d0b723dc849c00502ae3775c",
+    "oslo.shx": "111342298f1410d0a940ed10595a96eda14c5214ff819f3032ba1e53b649a997",
+    "oslo.dbf": "c519110ef5c3d040f6f065806185e991cbb6582d94422d597c1dd4cbc379fa9f",
+    "oslo.prj": "376dcf413a767b95a866417c3fb04fdda9166c93235738283bb9117c6c415665",
+    "oslo.cpg": "146d6789ffe033a5297c1ad046e6a62ee35319b86b021444f05b6ea2aa8a1f4a",
+    "SOURCES.txt": "68912fc91e1ebe7d38e20d0127e43d93d32225a46e7aa3857e726c6deb1f0501",
+    "oslo-stations.zip": "5585d79db647ffda6fd9da0bf69908d1c2b6875ac12a53baf4a55b04cb1c7c7d"
+  }
+}

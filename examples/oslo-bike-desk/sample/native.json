@@ -1,0 +1,8 @@
+{
+  "fiona": "1.10.1",
+  "gdal": "3.9.2",
+  "read_driver": "ESRI Shapefile",
+  "written_driver": "GPKG",
+  "crs": "EPSG:25832",
+  "points_checked_against_feed": 261
+}
