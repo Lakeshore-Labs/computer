@@ -9,6 +9,7 @@ import (
 
 	gbfs "github.com/ewhauser/gbash/fs"
 	"github.com/ewhauser/gbash/policy"
+	"github.com/spf13/afero/mem"
 )
 
 // files is the computer's files for what acts on them outside a command, under the rules the shell's own commands
@@ -106,7 +107,7 @@ func (r *ruled) OpenFile(ctx context.Context, name string, flag int, perm fs.Fil
 		w.made = func() error {
 			made, errMade := f.Stat()
 			now, errNow := r.FileSystem.Lstat(ctx, abs)
-			if errMade != nil || errNow != nil || !os.SameFile(made, now) || now.Size() != 0 {
+			if errMade != nil || errNow != nil || !same(made, now) || now.Size() != 0 {
 				return nil // no longer only what this open made
 			}
 			return r.FileSystem.Remove(ctx, abs, false)
@@ -216,4 +217,15 @@ func (r *ruled) Remove(ctx context.Context, name string, recursive bool) error {
 
 func (r *ruled) Rename(ctx context.Context, from, to string) error {
 	return r.do(ctx, policy.FileActionRename, func(n ...string) error { return r.FileSystem.Rename(ctx, n[0], n[1]) }, from, to)
+}
+
+// same reports whether a and b describe one file. ponytail: kinds of mount other than the host's directories and
+// memory report false, so a refused write leaves their new file; add a case for one that matters.
+func same(a, b fs.FileInfo) bool {
+	ma, okA := a.(*mem.FileInfo)
+	mb, okB := b.(*mem.FileInfo)
+	if okA && okB {
+		return ma.FileData == mb.FileData
+	}
+	return os.SameFile(a, b)
 }
