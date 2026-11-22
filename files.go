@@ -9,6 +9,7 @@ import (
 
 	gbfs "github.com/ewhauser/gbash/fs"
 	"github.com/ewhauser/gbash/policy"
+	"github.com/spf13/afero/mem"
 )
 
 // files is the computer's files for what acts on them outside a command, under the rules the shell's own commands
@@ -86,11 +87,32 @@ func (r *ruled) OpenFile(ctx context.Context, name string, flag int, perm fs.Fil
 	}
 	// A file written anew, or added to, is changed only once all of what is written is known to fit: changed as it
 	// is written, one too large would be left cut off at the limit, and what a file written anew held before lost.
-	f, err := r.FileSystem.OpenFile(ctx, abs, flag&^os.O_TRUNC, perm)
+	// A file this open makes is taken away again if the write is refused. Only an exclusive open proves the file is
+	// this one's; one another command made meanwhile is opened as it is. ponytail: a name that is a dangling
+	// symlink is not followed here, so a refused write through one leaves its target made and empty.
+	open, mine := flag&^os.O_TRUNC, false
+	if _, err := r.FileSystem.Lstat(ctx, abs); errors.Is(err, fs.ErrNotExist) && flag&os.O_CREATE != 0 {
+		open, mine = open|os.O_EXCL, true
+	}
+	f, err := r.FileSystem.OpenFile(ctx, abs, open, perm)
+	if mine && errors.Is(err, fs.ErrExist) && flag&os.O_EXCL == 0 {
+		mine = false
+		f, err = r.FileSystem.OpenFile(ctx, abs, flag&^os.O_TRUNC, perm)
+	}
 	if err != nil {
 		return nil, err
 	}
 	w := &whole{File: f, room: r.maxFileBytes}
+	if mine {
+		w.made = func() error {
+			made, errMade := f.Stat()
+			now, errNow := r.FileSystem.Lstat(ctx, abs)
+			if errMade != nil || errNow != nil || !same(made, now) || now.Size() != 0 {
+				return nil // no longer only what this open made
+			}
+			return r.FileSystem.Remove(ctx, abs, false)
+		}
+	}
 	if anew {
 		w.put = func(content []byte) error { // emptied now; it is there by now, so nothing is created
 			if err := f.Close(); err != nil {
@@ -120,6 +142,7 @@ func (r *ruled) OpenFile(ctx context.Context, name string, flag int, perm fs.Fil
 type whole struct {
 	gbfs.File
 	put     func(content []byte) error // makes the writes and closes the file
+	made    func() error               // removes the file, when opening it made it; nil when it was there before
 	room    int64                      // how much may be written
 	content []byte
 	tooMuch bool
@@ -136,7 +159,11 @@ func (w *whole) Write(p []byte) (int, error) {
 
 func (w *whole) Close() error {
 	if w.tooMuch {
-		return w.File.Close()
+		var err error
+		if w.made != nil {
+			err = w.made() // while the file is open, to know it is still the one made
+		}
+		return errors.Join(err, w.File.Close())
 	}
 	return w.put(w.content)
 }
@@ -190,4 +217,15 @@ func (r *ruled) Remove(ctx context.Context, name string, recursive bool) error {
 
 func (r *ruled) Rename(ctx context.Context, from, to string) error {
 	return r.do(ctx, policy.FileActionRename, func(n ...string) error { return r.FileSystem.Rename(ctx, n[0], n[1]) }, from, to)
+}
+
+// same reports whether a and b describe one file. ponytail: kinds of mount other than the host's directories and
+// memory report false, so a refused write leaves their new file; add a case for one that matters.
+func same(a, b fs.FileInfo) bool {
+	ma, okA := a.(*mem.FileInfo)
+	mb, okB := b.(*mem.FileInfo)
+	if okA && okB {
+		return ma.FileData == mb.FileData
+	}
+	return os.SameFile(a, b)
 }
