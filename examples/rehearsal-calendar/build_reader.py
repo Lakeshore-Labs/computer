@@ -11,6 +11,9 @@ payload = {
     "booking": json.loads((out / "booking.json").read_text()),
     "events": checks["verified_events"],
     "agenda": checks["native_agenda"]["agenda"],
+    "portable": base64.b64encode(
+        (out / "rehearsal-portable.ics").read_bytes()
+    ).decode(),
     "ics": base64.b64encode((out / "rehearsal.ics").read_bytes()).decode(),
 }
 template = Path(__file__).with_name("reader.html").read_text()

@@ -9,7 +9,8 @@
       "11:15–12:00 was also available before the booking."
     ],
     "agendaRows": 4,
-    "downloadSHA256": "a8aae5b632a543064201fb8e1de5a11374fad7e97352caf96f1fe705c51a0544"
+    "portableSHA256": "0a9a3a3c61d8612279aae7bae280af1a580ec39393b826f62ac9e23d32eb75f7",
+    "downloadSHA256": "3821d0c3730e3880de7a35f6e56b86102965d28bbe056eb4c4e7f55dae825cc7"
   },
   {
     "screen": "phone",
@@ -21,6 +22,7 @@
       "11:15–12:00 was also available before the booking."
     ],
     "agendaRows": 4,
-    "downloadSHA256": "a8aae5b632a543064201fb8e1de5a11374fad7e97352caf96f1fe705c51a0544"
+    "portableSHA256": "0a9a3a3c61d8612279aae7bae280af1a580ec39393b826f62ac9e23d32eb75f7",
+    "downloadSHA256": "3821d0c3730e3880de7a35f6e56b86102965d28bbe056eb4c4e7f55dae825cc7"
   }
 ]

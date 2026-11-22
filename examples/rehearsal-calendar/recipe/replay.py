@@ -20,6 +20,7 @@ import xml.etree.ElementTree as ET
 import icalendar
 
 from agenda import verify as verify_agenda
+from transfer import portable_event
 
 HERE = Path(__file__).resolve().parent
 # A day in a fictional rehearsal studio. Both players and the room must be free.
@@ -180,9 +181,12 @@ def main(args):
                         **{"Content-Type": "application/xml"},
                     )
                 )
-                for data in root.findall(
-                    ".//{urn:ietf:params:xml:ns:caldav}calendar-data"
-                ):
+                for response in root.findall("{DAV:}response"):
+                    data = response.find(
+                        ".//{urn:ietf:params:xml:ns:caldav}calendar-data"
+                    )
+                    if data is None:
+                        continue
                     cal = icalendar.Calendar.from_ical(data.text)
                     event = cal.walk("VEVENT")[0]
                     record = {
@@ -193,6 +197,13 @@ def main(args):
                         "uid": str(event["uid"]),
                     }
                     verified.append(record)
+                    if record["uid"] == result["uid"]:
+                        path = response.findtext("{DAV:}href")
+                        if not path or not path.startswith("/ensemble/room/"):
+                            raise ValueError(
+                                "The room event has an unexpected CalDAV URL."
+                            )
+                        (args.out / "room-get.ics").write_bytes(request("GET", path))
             matches = [v for v in verified if v["uid"] == result["uid"]]
             assert (
                 len(matches) == 1
@@ -211,11 +222,23 @@ def main(args):
                 (k, t, at(a).isoformat(), at(b).isoformat()) for k, t, a, b in SEED
             }
             agenda = verify_agenda(work, url, password, args, result)
+            synced = (args.out / "rehearsal.ics").read_bytes()
+            (args.out / "rehearsal-portable.ics").write_bytes(portable_event(synced))
+            wire = {}
+            for filename in ("room-get.ics", "rehearsal.ics", "rehearsal-portable.ics"):
+                raw = (args.out / filename).read_bytes()
+                wire[filename] = {
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                    "LF": raw.count(b"\n"),
+                    "CRLF": raw.count(b"\r\n"),
+                    "TZID_UTC": raw.count(b";TZID=UTC:"),
+                }
             (args.out / "calendar-check.json").write_text(
                 json.dumps(
                     {
                         "verified_events": verified,
                         "native_agenda": agenda,
+                        "transfer": wire,
                         "file_sha256": hashlib.sha256(
                             (args.out / "rehearsal.ics").read_bytes()
                         ).hexdigest(),

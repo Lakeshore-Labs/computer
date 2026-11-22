@@ -26,7 +26,7 @@ footer{border-top:1px solid #aab7ad;margin-top:1.3rem;padding-top:.65rem;color:#
 <div class="tracks" id="tracks"></div><p class="key">Solid blocks show earlier commitments. The gold outline marks the 45 minutes you selected.</p>
 <p id="decision" aria-live="polite"></p></section>
 <div class="cols"><section><h2>Room agenda</h2><p>khal read these four entries after vdirsyncer copied the room calendar to a fresh local directory.</p><ul id="agenda"></ul></section>
-<section><h2>The booked rehearsal</h2><p id="booking"></p><a class="download" id="keep" download="rehearsal.ics">Save the synced calendar entry</a></section></div>
+<section><h2>The booked rehearsal</h2><p id="booking"></p><a class="download" id="portable" download="rehearsal-portable.ics">Save portable calendar</a> <a class="download" id="keep" download="rehearsal.ics">Save exact synced entry</a></section></div>
 <footer>Recorded against a local Radicale server with three fictional calendars. Changing the selection explores the saved availability.</footer></main>
 <script type="application/json" id="receipt">__PAYLOAD__</script>
 <script>
@@ -52,6 +52,6 @@ function update(){const m=Number(select.value);for(const b of document.querySele
 }
 for(const line of data.agenda){const li=document.createElement('li');li.textContent=line;document.querySelector('#agenda').append(li)}
 document.querySelector('#booking').textContent=data.booking.subject+' · '+time(booked)+'–'+time(mins(data.booking.end))+' UTC · '+data.booking.room+'. Computer checked all five existing commitments through the CalDAV MCP.';
-document.querySelector('#keep').href=URL.createObjectURL(new Blob([Uint8Array.from(atob(data.ics),c=>c.charCodeAt(0))],{type:'text/calendar'}));
+for(const [id,encoded] of [['keep',data.ics],['portable',data.portable]]) document.getElementById(id).href=URL.createObjectURL(new Blob([Uint8Array.from(atob(encoded),c=>c.charCodeAt(0))],{type:'text/calendar'}));
 select.value=String(booked);select.onchange=update;document.querySelector('#first').onclick=()=>{select.value=String(booked);update()};update();
 </script></html>

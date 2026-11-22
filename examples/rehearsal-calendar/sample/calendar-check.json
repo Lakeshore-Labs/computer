@@ -12,7 +12,7 @@
       "title": "Last Boat Home rehearsal",
       "start": "2026-11-29T11:00:00+00:00",
       "end": "2026-11-29T11:45:00+00:00",
-      "uid": "3ae9b931-ae86-4126-a486-a59ad63743ec@caldav-mcp"
+      "uid": "40bf5437-78dd-42bf-9d50-7734224f4ebe@caldav-mcp"
     },
     {
       "calendar": "room",
@@ -53,6 +53,26 @@
       "12:15\u201313:00 Afternoon class"
     ]
   },
-  "file_sha256": "a8aae5b632a543064201fb8e1de5a11374fad7e97352caf96f1fe705c51a0544",
+  "transfer": {
+    "room-get.ics": {
+      "sha256": "183e49d86e03beb1bb19cd4ada86b4a07e0e9bfbe861bea0eabb4cb5c60a2934",
+      "LF": 13,
+      "CRLF": 13,
+      "TZID_UTC": 2
+    },
+    "rehearsal.ics": {
+      "sha256": "3821d0c3730e3880de7a35f6e56b86102965d28bbe056eb4c4e7f55dae825cc7",
+      "LF": 13,
+      "CRLF": 0,
+      "TZID_UTC": 2
+    },
+    "rehearsal-portable.ics": {
+      "sha256": "0a9a3a3c61d8612279aae7bae280af1a580ec39393b826f62ac9e23d32eb75f7",
+      "LF": 13,
+      "CRLF": 13,
+      "TZID_UTC": 0
+    }
+  },
+  "file_sha256": "3821d0c3730e3880de7a35f6e56b86102965d28bbe056eb4c4e7f55dae825cc7",
   "reader": "CalDAV REPORT and native Python icalendar"
 }
