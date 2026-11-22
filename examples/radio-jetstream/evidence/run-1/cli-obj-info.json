@@ -1,0 +1,10 @@
+{
+  "name": "stinger-v2.wav.b64",
+  "description": "encoding=base64(ascii) of audio/wav pcm16 8000Hz mono",
+  "bucket": "CUES",
+  "size": 32060,
+  "chunks": 1,
+  "digest": "SHA-256=DCj2uGjvOnuWIgNOf2Z-d-qIQmYOf3jLymLXB64jyfM=",
+  "mtime": "2026-11-22T23:03:40.545Z",
+  "revision": 2
+}

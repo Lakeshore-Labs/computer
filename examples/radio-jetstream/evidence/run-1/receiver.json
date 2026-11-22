@@ -1,0 +1,27 @@
+{
+ "T1_amendment_published": "2026-11-22T23:03:40.546Z",
+ "T2_receiver_connected": "2026-11-22T23:03:45.939Z",
+ "T3_decision_acked": "2026-11-22T23:03:45.954Z",
+ "seq": 1,
+ "rev": 2,
+ "stored_chars": 32060,
+ "decoded_bytes": 24044,
+ "sha256": "85dc11e4486cc68a7702d8888ac5a4c9054709361317170701a5f6056646cfdf",
+ "expected_sha256": "85dc11e4486cc68a7702d8888ac5a4c9054709361317170701a5f6056646cfdf",
+ "duration_ms": 1500,
+ "checks": {
+  "hash": true,
+  "bytes": true,
+  "duration": true,
+  "fits_slot": true,
+  "matches_guest_wav": true
+ },
+ "decision": "ON AIR: rev 2 - play STINGER-v2 at 18:29:58.000 (1500 ms), news-top at 18:30:00.000",
+ "onair": true,
+ "pending_before": 1,
+ "consumer_after": {
+  "ack_floor": 1,
+  "num_pending": 0,
+  "num_ack_pending": 0
+ }
+}
