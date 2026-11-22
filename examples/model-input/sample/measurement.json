@@ -1,0 +1,92 @@
+{
+  "measured_at": "2026-11-22T18:09:06.742407+00:00",
+  "model": "gemini-3.5-flash-lite",
+  "question": "The records below are CSV with columns trip,route,riders. Find the last row whose route is Pier. Return just its trip and riders as two comma-separated integers.\n\n",
+  "filter": "set -eo pipefail\ntimetable read-text-file --path trips.csv | jq -r '.content' | awk -F, 'NR==1 {header=$0} $2==\"Pier\" {last=$0} END {print header; print last}'",
+  "cases": [
+    {
+      "rows": 72,
+      "expected": [
+        70,
+        36
+      ],
+      "sha256": "18481570171bde19e476cfb5a5820b241bd2065d4e775082da47c4d1dc5c7452",
+      "results": {
+        "direct": {
+          "forwarded_utf8_bytes": 873,
+          "count_tokens": 612
+        },
+        "computer": {
+          "forwarded_utf8_bytes": 29,
+          "count_tokens": 53
+        }
+      }
+    },
+    {
+      "rows": 720,
+      "expected": [
+        718,
+        28
+      ],
+      "sha256": "7ed3f048f99cf9bae5083ea34c628f1d4c8a102a48fd16cccaf0dec7ec5819ba",
+      "results": {
+        "direct": {
+          "forwarded_utf8_bytes": 9270,
+          "count_tokens": 6417
+        },
+        "computer": {
+          "forwarded_utf8_bytes": 30,
+          "count_tokens": 54
+        }
+      }
+    },
+    {
+      "rows": 1440,
+      "expected": [
+        1438,
+        25
+      ],
+      "sha256": "e0bef2769cdc5df3b9a49d600c49828d87419efd8ab098847e1b91a4e6286507",
+      "results": {
+        "direct": {
+          "forwarded_utf8_bytes": 19071,
+          "count_tokens": 13338,
+          "answer": "1438,25",
+          "usage": {
+            "promptTokenCount": 13338,
+            "candidatesTokenCount": 7,
+            "totalTokenCount": 13345,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 13338
+              }
+            ],
+            "serviceTier": "standard"
+          },
+          "model_version": "gemini-3.5-flash-lite",
+          "checked": true
+        },
+        "computer": {
+          "forwarded_utf8_bytes": 31,
+          "count_tokens": 55,
+          "answer": "1438,25",
+          "usage": {
+            "promptTokenCount": 55,
+            "candidatesTokenCount": 7,
+            "totalTokenCount": 62,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 55
+              }
+            ],
+            "serviceTier": "standard"
+          },
+          "model_version": "gemini-3.5-flash-lite",
+          "checked": true
+        }
+      }
+    }
+  ]
+}

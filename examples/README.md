@@ -55,3 +55,11 @@ Three Computer instances start from one read-only timetable. Two make independen
 [![Timetables in separate copy-on-write workspaces](what-if-workspaces/sample/comparison.png)](what-if-workspaces/README.md)
 
 [Run the Go embedding example](what-if-workspaces/README.md)
+
+## How much of the data reaches Gemini?
+
+A full-file prompt and a Computer-filtered prompt answered the same question about 1,440 trips. Compare the actual provider-reported input tokens and inspect the fixed-query experimental design.
+
+[![Prompt tokens before and after selecting the row in Computer](model-input/sample/tokens.png)](model-input/README.md)
+
+[Inspect the measurements or replay the experiment](model-input/README.md)
