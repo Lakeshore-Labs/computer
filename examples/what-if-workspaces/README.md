@@ -1,6 +1,6 @@
 # Try two timetables on the same files
 
-![Computer's line chart comparing the published, matinee and evening timetables](sample/comparison.png)
+![Computer's grouped bars comparing the published, matinee and evening timetables](sample/comparison.png)
 
 There is room for four extra ferry sailings. One dispatcher puts them at noon. Another puts them in the evening. Each edits the same filename in their own Computer.
 

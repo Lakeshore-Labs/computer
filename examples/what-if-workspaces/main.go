@@ -22,6 +22,12 @@ import (
 var schedule embed.FS
 
 func compare(output string) error {
+	if err := os.MkdirAll(filepath.Dir(output), 0o755); err != nil {
+		return err
+	}
+	if err := os.Mkdir(output, 0o755); err != nil {
+		return fmt.Errorf("choose a fresh output directory: %w", err)
+	}
 	ctx := context.Background()
 	original, err := schedule.ReadFile("schedule.csv")
 	if err != nil {
@@ -80,12 +86,6 @@ func compare(output string) error {
 		fmt.Printf("%-10s %d sailings\n", plan.name, plan.total)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(output), 0o755); err != nil {
-		return err
-	}
-	if err := os.Mkdir(output, 0o755); err != nil {
-		return fmt.Errorf("choose a fresh output directory: %w", err)
-	}
 	// Read every workspace again after both edits. Export exactly what each environment sees.
 	for i, c := range computers {
 		data, err := c.Environment().Read(ctx, "schedule.csv", 0, -1)
@@ -110,7 +110,7 @@ func compare(output string) error {
 	defer c.Close()
 	result, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: `set -eo pipefail
 paste -d, published.csv matinee.csv evening.csv | awk -F, 'BEGIN {print "time,published,matinee,evening"} NR>1 {print $1 "," $2 "," $4 "," $6}' > comparison.csv
-chart line --x time --y published,matinee,evening --title 'Two ways to add four sailings' comparison.csv --out comparison.png
+chart bar --x time --y published,matinee,evening comparison.csv --out comparison.png
 identify comparison.png`})
 	if err != nil {
 		return err

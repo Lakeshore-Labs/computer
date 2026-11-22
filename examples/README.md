@@ -50,7 +50,7 @@ MCP Inspector writes a notice, mcporter edits it, and a Python client reads and 
 
 ## What if two dispatchers edit the same timetable?
 
-Two Computer instances start from a shared read-only base. They can make independent changes to the same path and run the same shell command over their own version.
+Three Computer instances start from one read-only timetable. Two make independent changes to the same path and run the same shell command over their own version.
 
 [![Timetables in separate copy-on-write workspaces](what-if-workspaces/sample/comparison.png)](what-if-workspaces/README.md)
 
