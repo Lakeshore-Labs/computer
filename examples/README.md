@@ -125,3 +125,9 @@ Computer issues a PDF and QR for a fictional library desk. A Rust MCP client rea
 A Wikidata MCP query, a JPL measurement table and a credited spacecraft image become an offline e-book. Open the actual EPUB, compare the moon sizes and follow the chapter navigation on a phone.
 
 [![Four moons of Jupiter open in an EPUB reader](moon-almanac/sample/cover.png)](moon-almanac/README.md)
+
+## Deliver two editions from a registry
+
+A library reschedules its reading group. Computer publishes both program editions into an OCI layout. ORAS pulls two distinct calendars and one shared book from a real local registry.
+
+[![The reading-room program with its amended time](reading-registry/sample/program.png)](reading-registry/README.md)
