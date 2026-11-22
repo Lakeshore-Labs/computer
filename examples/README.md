@@ -39,3 +39,11 @@ Two public data sources become a map inside Computer. Each point opens a locatio
 [![Global earthquake atlas drawn from the USGS weekly feed](earthquake-atlas/media/atlas.png)](earthquake-atlas/README.md)
 
 [Open the atlas and draw a fresh one](earthquake-atlas/README.md)
+
+## Pass a file between MCP clients
+
+MCP Inspector writes a notice, mcporter edits it, and a Python client reads and checks it. Three separate Computer processes share one mounted folder.
+
+[![Inspector reading the updated notice](client-handoff/media/inspector-read.png)](client-handoff/README.md)
+
+[Replay the client handoff](client-handoff/README.md)
