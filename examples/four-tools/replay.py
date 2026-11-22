@@ -16,13 +16,14 @@ def make_input(directory):
     source = directory / "trips.csv"
     totals = {}
     routes = ("Pier", "Museum", "North")
+    minimum_riders = {"Pier": 38, "Museum": 22, "North": 12}
     count = 50_000
     with source.open("w", newline="") as stream:
         writer = csv.writer(stream, lineterminator="\n")
         writer.writerow(("trip", "route", "riders"))
         for i in range(count):
             route = routes[i % len(routes)]
-            riders = 10 + (i * 17) % 61
+            riders = minimum_riders[route] + (i * 17) % 31
             writer.writerow((i + 1, route, riders))
             totals[route] = totals.get(route, 0) + riders
     return source, count, totals

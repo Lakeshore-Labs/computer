@@ -1,24 +1,24 @@
 
-[Filesystem] Count the departures served by the tool.
+=== Filesystem server · command: files · tool: read-text-file ===
 24
 
-[Git] Read the synthetic fixture commit.
+=== Git server · command: historybook · tool: git-log ===
 Message: Add the synthetic timetable.
 
-[Time] Convert 08:00 UTC to Tokyo time.
-Asia/Tokyo	2026-11-22T17:00:00+09:00
+=== Time server · command: clock · tool: convert-time ===
+Asia/Tokyo	17:00:00+09:00
 
-[Memory] Store a route observation and read it back.
+=== Memory server · command: memory · tool: create-entities, search-nodes ===
 Pier: 310 boardings
 
-[Sequential Thinking] Record two planning milestones.
+=== Sequential Thinking server · command: steps · tool: sequentialthinking ===
 {
   "nextThoughtNeeded": false,
   "thoughtHistoryLength": 2
 }
 
-[Fetch] Read the title of the public example page.
+=== Fetch server · command: webpage · tool: fetch ===
 # Example Domain
 
-[Everything] Save the image content returned by the tool.
+=== Everything server · command: everything · tool: get-tiny-image ===
 logo.png PNG 20x20
