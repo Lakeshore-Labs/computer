@@ -165,3 +165,7 @@ The [restored reading room](restored-library/) compares two actual encrypted res
 ### Publish parts for a flute and a B-flat clarinet
 
 [Last Boat Home](rehearsal-room/) registers a custom WASI command in Computer. Two shells turn one concert-pitch score into four files. Switch instruments in the offline stand, play the 20-second tune or open the parts in a music editor.
+
+### Fit seven ushers after an offline wardrobe recount
+
+The [browser wardrobe](browser-wardrobe/) keeps its files in Chrome’s origin-private file system. Computer reads them through MCP, calculates the fitting list and writes it back. The example checks the saved files after a complete browser restart.
