@@ -1,0 +1,42 @@
+{
+  "source": "Mapzen Terrain Tiles, Norway terrain © Kartverket. Europe terrain uses Copernicus data funded by the European Union, EU-DEM layers.",
+  "bounds": [
+    10.57,
+    59.84,
+    10.86,
+    59.997
+  ],
+  "grid": [
+    81,
+    79
+  ],
+  "source_height_range_m": [
+    -31,
+    529
+  ],
+  "below_zero_clamped": true,
+  "models": [
+    {
+      "file": "oslo-1x.stl",
+      "vertical_exaggeration": 1,
+      "triangles": 13428,
+      "unique_vertices": 6716,
+      "width_mm": 110.0,
+      "depth_mm": 118.81084903955951,
+      "height_mm": 6.100204300803786,
+      "base_mm": 2.5,
+      "sha256": "d5a2e1216e30fb7bb31d6401c6aea23240e951c1518c2ef82987e07c7e3f339c"
+    },
+    {
+      "file": "oslo-4x.stl",
+      "vertical_exaggeration": 4,
+      "triangles": 13428,
+      "unique_vertices": 6716,
+      "width_mm": 110.0,
+      "depth_mm": 118.81084903955951,
+      "height_mm": 16.900817203215144,
+      "base_mm": 2.5,
+      "sha256": "093f26eda22a29979a96527d350ddd18177de82018200b59ee08734fb6be3dfa"
+    }
+  ]
+}

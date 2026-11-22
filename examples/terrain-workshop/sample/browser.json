@@ -1,0 +1,58 @@
+{
+  "desktop": {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "external": [],
+    "errors": [],
+    "before": "54ee02f85eee0f778b9ff6445c8507d32c22bc016a96a24ca0dde3e60b92e8aa",
+    "rotated": "11bee23ddb72c7fb5edde96cbc45018df29724173c216df0cc24eda5c5c56006",
+    "reset": "54ee02f85eee0f778b9ff6445c8507d32c22bc016a96a24ca0dde3e60b92e8aa",
+    "downloads": [
+      {
+        "name": "oslo-1x.stl",
+        "metric": "110 × 118.8 × 6.1 mm",
+        "triangles": 13428,
+        "sha256": "d5a2e1216e30fb7bb31d6401c6aea23240e951c1518c2ef82987e07c7e3f339c",
+        "frame": "c41834da147416a59f082e976b7edd10475c6ffb6b6f46694e6bff59a2816ee5"
+      },
+      {
+        "name": "oslo-4x.stl",
+        "metric": "110 × 118.8 × 16.9 mm",
+        "triangles": 13428,
+        "sha256": "093f26eda22a29979a96527d350ddd18177de82018200b59ee08734fb6be3dfa",
+        "frame": "54ee02f85eee0f778b9ff6445c8507d32c22bc016a96a24ca0dde3e60b92e8aa"
+      }
+    ],
+    "layer_reader": true
+  },
+  "phone": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "external": [],
+    "errors": [],
+    "before": "dafb4bb006066da217e7c984edb5752ca3ba57e59950db8cd34dfc615246e62a",
+    "rotated": "1170012a8bb2a24b727ec4f755434cd58eaecf2b4736fd7b0020d0a402fcee53",
+    "reset": "dafb4bb006066da217e7c984edb5752ca3ba57e59950db8cd34dfc615246e62a",
+    "downloads": [
+      {
+        "name": "oslo-1x.stl",
+        "metric": "110 × 118.8 × 6.1 mm",
+        "triangles": 13428,
+        "sha256": "d5a2e1216e30fb7bb31d6401c6aea23240e951c1518c2ef82987e07c7e3f339c",
+        "frame": "6a3755f70dbc66f7a0c416a36df8fc29a4087a565610d7c4b2ed8b312f466cf5"
+      },
+      {
+        "name": "oslo-4x.stl",
+        "metric": "110 × 118.8 × 16.9 mm",
+        "triangles": 13428,
+        "sha256": "093f26eda22a29979a96527d350ddd18177de82018200b59ee08734fb6be3dfa",
+        "frame": "dafb4bb006066da217e7c984edb5752ca3ba57e59950db8cd34dfc615246e62a"
+      }
+    ],
+    "layer_reader": true
+  }
+}

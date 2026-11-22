@@ -131,3 +131,9 @@ A Wikidata MCP query, a JPL measurement table and a credited spacecraft image be
 A library reschedules its reading group. Computer publishes both program editions into an OCI layout. ORAS pulls two distinct calendars and one shared book from a real local registry.
 
 [![The reading-room program with its amended time](reading-registry/sample/program.png)](reading-registry/README.md)
+
+## Explore the Oslofjord in relief
+
+Rotate two solids made from the same real elevation grid, then move through their outer walls at the same height. The stock Computer guest creates the STL files and both offline readers. [Download and explore the workshop](terrain-workshop/README.md)
+
+[![Oslofjord terrain open in the 3D reader](terrain-workshop/sample/desktop.png)](terrain-workshop/README.md)

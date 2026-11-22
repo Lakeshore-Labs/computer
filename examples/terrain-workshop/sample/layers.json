@@ -1,0 +1,16 @@
+{
+  "1": {
+    "slicer_layer_markers": 31,
+    "layers_depositing_material": 30,
+    "layers_with_outer_wall_paths": 30,
+    "highest_deposition_mm": 6.0,
+    "extrusion_moves": 23539
+  },
+  "4": {
+    "slicer_layer_markers": 85,
+    "layers_depositing_material": 84,
+    "layers_with_outer_wall_paths": 84,
+    "highest_deposition_mm": 16.8,
+    "extrusion_moves": 83186
+  }
+}
