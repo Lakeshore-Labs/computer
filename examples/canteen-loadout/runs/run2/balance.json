@@ -1,0 +1,106 @@
+{
+ "lines": [
+  {
+   "hall": "Hill",
+   "service": "Lunch",
+   "meal": "Herb pasta",
+   "ordered": 12,
+   "loaded": 14,
+   "delta": 2,
+   "transfer_out": 2,
+   "transfer_in": 0,
+   "final": 12,
+   "short_after": 0
+  },
+  {
+   "hall": "Hill",
+   "service": "Lunch",
+   "meal": "Roast vegetables",
+   "ordered": 18,
+   "loaded": 21,
+   "delta": 3,
+   "transfer_out": 3,
+   "transfer_in": 0,
+   "final": 18,
+   "short_after": 0
+  },
+  {
+   "hall": "Orchard",
+   "service": "Lunch",
+   "meal": "Herb pasta",
+   "ordered": 36,
+   "loaded": 31,
+   "delta": -5,
+   "transfer_out": 0,
+   "transfer_in": 5,
+   "final": 36,
+   "short_after": 0
+  },
+  {
+   "hall": "Orchard",
+   "service": "Lunch",
+   "meal": "Roast vegetables",
+   "ordered": 24,
+   "loaded": 29,
+   "delta": 5,
+   "transfer_out": 5,
+   "transfer_in": 0,
+   "final": 24,
+   "short_after": 0
+  },
+  {
+   "hall": "Quay",
+   "service": "Lunch",
+   "meal": "Herb pasta",
+   "ordered": 22,
+   "loaded": 25,
+   "delta": 3,
+   "transfer_out": 3,
+   "transfer_in": 0,
+   "final": 22,
+   "short_after": 0
+  },
+  {
+   "hall": "Quay",
+   "service": "Lunch",
+   "meal": "Roast vegetables",
+   "ordered": 38,
+   "loaded": 30,
+   "delta": -8,
+   "transfer_out": 0,
+   "transfer_in": 8,
+   "final": 38,
+   "short_after": 0
+  }
+ ],
+ "transfers": [
+  {
+   "service": "Lunch",
+   "meal": "Herb pasta",
+   "from_hall": "Quay",
+   "to_hall": "Orchard",
+   "units": 3
+  },
+  {
+   "service": "Lunch",
+   "meal": "Herb pasta",
+   "from_hall": "Hill",
+   "to_hall": "Orchard",
+   "units": 2
+  },
+  {
+   "service": "Lunch",
+   "meal": "Roast vegetables",
+   "from_hall": "Orchard",
+   "to_hall": "Quay",
+   "units": 5
+  },
+  {
+   "service": "Lunch",
+   "meal": "Roast vegetables",
+   "from_hall": "Hill",
+   "to_hall": "Quay",
+   "units": 3
+  }
+ ]
+}
