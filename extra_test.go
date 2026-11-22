@@ -339,6 +339,22 @@ func TestExtraChartDrawsEveryKindAsSVG(t *testing.T) {
 	}
 }
 
+func TestExtraBarChartIncludesZero(t *testing.T) {
+	c := newExtra(t)
+	for _, test := range []struct{ name, data string }{
+		{"positive", "route,x,y\na,184,225\nb,310,270\n"},
+		{"negative", "route,x,y\na,-184,-225\nb,-310,-270\n"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			writeHome(t, c, "values.csv", []byte(test.data))
+			svg := run(t, c, "chart bar --x route --y x,y values.csv")
+			if !strings.Contains(svg, ">0</text>") {
+				t.Error("the value axis omits the zero baseline")
+			}
+		})
+	}
+}
+
 func TestExtraChartSeriesAreNamedByTheirColumns(t *testing.T) {
 	c := newExtra(t)
 	writeHome(t, c, "sales.csv", []byte(sales))
@@ -585,9 +601,9 @@ func TestExtraMagickFlattensOntoTheBackgroundAndWritesTheQualityAsked(t *testing
 	}
 	writeHome(t, c, "clear.png", b.Bytes())
 	for options, want := range map[string]color.NRGBA{
-		"-background red -flatten":      {255, 0, 0, 255},
-		"-flatten":                      {255, 255, 255, 255}, // ImageMagick's default background is white
-		"-background '#0000ff' -flatten": {0, 0, 255, 255},
+		"-background red -flatten":        {255, 0, 0, 255},
+		"-flatten":                        {255, 255, 255, 255}, // ImageMagick's default background is white
+		"-background '#0000ff' -flatten":  {0, 0, 255, 255},
 		"-background black -alpha remove": {0, 0, 0, 255},
 	} {
 		run(t, c, "convert clear.png "+options+" flat.png")

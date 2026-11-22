@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -106,6 +107,18 @@ func runChart(ctx context.Context, inv *commands.Invocation) error {
 	case "bar":
 		opt := charts.NewBarChartOptionWithSeries(charts.NewSeriesListBar(series, charts.BarSeriesOption{Names: ys}))
 		opt.CategoryAxis.Labels, opt.Title, opt.Legend = labels, heading, legend
+		// Bar lengths measure distance from zero, even when the observations are close together.
+		low, high := series[0][0], series[0][0]
+		for _, column := range series {
+			low = min(low, slices.Min(column))
+			high = max(high, slices.Max(column))
+		}
+		switch {
+		case low > 0:
+			opt.ValueAxis[0].Min = charts.Ptr(0.0)
+		case high < 0:
+			opt.ValueAxis[0].Max = charts.Ptr(0.0)
+		}
 		err = p.BarChart(opt)
 	case "line":
 		opt := charts.NewLineChartOptionWithSeries(charts.NewSeriesListLine(series, charts.LineSeriesOption{Names: ys}))
