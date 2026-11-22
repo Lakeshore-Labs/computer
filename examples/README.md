@@ -1,5 +1,7 @@
 # Computer field guide
 
+[Download the visual guide for offline use](offline-guide/README.md) · [Browse all 154 exhibits](offline-guide/catalog.md)
+
 ## What crosses the MCP connection?
 
 A client lists four tools, runs a program beside a 50,000-row upstream timetable, then retrieves the chart. Follow the outer calls, the generated Python bindings and the shared filesystem in one measured run.
