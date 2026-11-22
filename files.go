@@ -86,11 +86,15 @@ func (r *ruled) OpenFile(ctx context.Context, name string, flag int, perm fs.Fil
 	}
 	// A file written anew, or added to, is changed only once all of what is written is known to fit: changed as it
 	// is written, one too large would be left cut off at the limit, and what a file written anew held before lost.
+	_, statErr := r.FileSystem.Lstat(ctx, abs)
 	f, err := r.FileSystem.OpenFile(ctx, abs, flag&^os.O_TRUNC, perm)
 	if err != nil {
 		return nil, err
 	}
 	w := &whole{File: f, room: r.maxFileBytes}
+	if errors.Is(statErr, fs.ErrNotExist) { // made by this open, so a refused write takes it away again
+		w.made = func() error { return r.FileSystem.Remove(ctx, abs, false) }
+	}
 	if anew {
 		w.put = func(content []byte) error { // emptied now; it is there by now, so nothing is created
 			if err := f.Close(); err != nil {
@@ -120,6 +124,7 @@ func (r *ruled) OpenFile(ctx context.Context, name string, flag int, perm fs.Fil
 type whole struct {
 	gbfs.File
 	put     func(content []byte) error // makes the writes and closes the file
+	made    func() error               // removes the file, when opening it made it; nil when it was there before
 	room    int64                      // how much may be written
 	content []byte
 	tooMuch bool
@@ -136,7 +141,11 @@ func (w *whole) Write(p []byte) (int, error) {
 
 func (w *whole) Close() error {
 	if w.tooMuch {
-		return w.File.Close()
+		err := w.File.Close()
+		if w.made != nil {
+			err = errors.Join(err, w.made())
+		}
+		return err
 	}
 	return w.put(w.content)
 }

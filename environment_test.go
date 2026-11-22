@@ -125,6 +125,12 @@ func TestAnEnvironmentRunsCommandsAndKeepsFilesUnderTheShellsRules(t *testing.T)
 	if b, err := e.Read(ctx, "/home/user/d/b.txt", 0, -1); err != nil || string(b) != "0123" {
 		t.Errorf("after a write that was refused the file holds %q, %v", b, err)
 	}
+	if err := e.Write(ctx, "/home/user/d/new.txt", bytes.Repeat([]byte("x"), 100), false); !errors.Is(err, fs.ErrInvalid) {
+		t.Errorf("writing a new file past the limit: %v", err)
+	}
+	if _, err := e.Stat(ctx, "/home/user/d/new.txt", false); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("a new file whose write was refused is there: %v", err)
+	}
 	for what, err := range map[string]error{"a size below zero": e.Truncate(ctx, "/home/user/d/b.txt", -1), "a size past the limit": e.Truncate(ctx, "/home/user/d/b.txt", 1<<40),
 		"an offset below zero": second(e.Read(ctx, "/home/user/d/b.txt", -3, 5))} {
 		if !errors.Is(err, fs.ErrInvalid) {
