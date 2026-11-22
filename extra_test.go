@@ -149,9 +149,41 @@ func TestExtraMagickRotate(t *testing.T) {
 	if p := pixel(t, c, "l.png", 0, 39); p.R != 0 || p.G != 0 {
 		t.Errorf("bottom left after -90 degrees: %v", p)
 	}
-	msg, code := fail(t, c, "magick a.png -rotate 45 r.png")
-	if code != 2 || !strings.Contains(msg, "multiples of 90") {
-		t.Errorf("45 degrees: exit %d, %q", code, msg)
+}
+
+func TestExtraMagickRotateFractional(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 40, 20))
+	run(t, c, "magick a.png -background red -rotate 32.5 -background blue r.png")
+	if got := size(t, c, "r.png"); got != "45x39" {
+		t.Fatalf("rotated size = %s", got)
+	}
+	if got := pixel(t, c, "r.png", 0, 0); got != (color.NRGBA{R: 255, A: 255}) {
+		t.Errorf("outside corner has color %v", got)
+	}
+	// This sample lies right and below center for a clockwise turn. In the source it is right of center.
+	got := pixel(t, c, "r.png", 31, 24)
+	if got.R < 28 || got.R > 31 || got.G < 8 || got.G > 11 || got.A != 255 {
+		t.Errorf("rotated gradient sample = %v", got)
+	}
+}
+
+func TestExtraMagickRotateChecksExpandedCanvas(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "strip.png", testPNG(t, 20000, 1))
+	msg, code := fail(t, c, "magick strip.png -rotate 45 expanded.png")
+	if code == 0 || !strings.Contains(msg, "megapixels") {
+		t.Fatalf("expanded canvas: exit %d, %q", code, msg)
+	}
+}
+
+func TestExtraMagickRotateRejectsNonFiniteAngle(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "a.png", testPNG(t, 4, 2))
+	for _, angle := range []string{"NaN", "+Inf", "-Inf", "sideways"} {
+		if _, code := fail(t, c, "magick a.png -rotate "+angle+" r.png"); code != 2 {
+			t.Errorf("angle %s returned %d", angle, code)
+		}
 	}
 }
 
