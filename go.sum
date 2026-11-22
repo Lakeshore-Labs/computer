@@ -2,6 +2,8 @@ github.com/JohannesKaufmann/dom v0.2.0 h1:1bragmEb19K8lHAqgFgqCpiPCFEZMTXzOIEjux
 github.com/JohannesKaufmann/dom v0.2.0/go.mod h1:57iSUl5RKric4bUkgos4zu6Xt5LMHUnw3TF1l5CbGZo=
 github.com/JohannesKaufmann/html-to-markdown/v2 v2.5.0 h1:mklaPbT4f/EiDr1Q+zPrEt9lgKAkVrIBtWf33d9GpVA=
 github.com/JohannesKaufmann/html-to-markdown/v2 v2.5.0/go.mod h1:D56Cl9r8M5i3UwAchE+LlLc5hPN3kJtdZNVJn06lSHU=
+github.com/Lakeshore-Labs/gbash v0.0.42-0.20261122043934-58176192a7d5 h1:WscunN97qXxHPcxmqTO9NMLasI9zS9czKqm25xd+jD0=
+github.com/Lakeshore-Labs/gbash v0.0.42-0.20261122043934-58176192a7d5/go.mod h1:p7qtRdObPk/XkjsXus06muq4uv2I/1glY2CyOozUke0=
 github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1Xbatp0=
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/a8m/envsubst v1.4.3 h1:kDF7paGK8QACWYaQo6KtyYBozY2jhQrTuNNuUxQkhJY=
@@ -25,8 +27,6 @@ github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkp
 github.com/dustin/go-humanize v1.0.1/go.mod h1:Mu1zIs6XwVuF/gI1OepvI0qD18qycQx+mFykh5fBlto=
 github.com/elliotchance/orderedmap v1.8.0 h1:TrOREecvh3JbS+NCgwposXG5ZTFHtEsQiCGOhPElnMw=
 github.com/elliotchance/orderedmap v1.8.0/go.mod h1:wsDwEaX5jEoyhbs7x93zk2H/qv0zwuhg4inXhDkYqys=
-github.com/ewhauser/gbash v0.0.41 h1:LTBgRQ6BVS7FpWbv1H79V6qG1sEpkknJQp6+QFtDffk=
-github.com/ewhauser/gbash v0.0.41/go.mod h1:p7qtRdObPk/XkjsXus06muq4uv2I/1glY2CyOozUke0=
 github.com/ewhauser/gbash/contrib/awk v0.0.41 h1:YuH6ZucmsXLsgLRmWQc0DIH20gcWjXMmcKkAV9aj2tc=
 github.com/ewhauser/gbash/contrib/awk v0.0.41/go.mod h1:7D5BaNR9qL0M54kQkG9RK3Ke+4mzQIHEnuY1gzX8PZI=
 github.com/ewhauser/gbash/contrib/codingtools v0.0.41 h1:na8g+t1CO/ceiq8zGKjYzgYwoc6HeytClumOAQ4F6VM=
