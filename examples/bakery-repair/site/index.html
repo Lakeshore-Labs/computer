@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Meridian Bakeries · synthetic sales board</title>
+<style>
+body{margin:0;font:15px/1.4 -apple-system,Helvetica,Arial,sans-serif;background:#f6f1e7;color:#2b2118}
+header{padding:22px 36px;background:#2b2118;color:#f6f1e7;display:flex;justify-content:space-between;align-items:baseline}
+h1{margin:0;font-size:26px}header span{opacity:.7}
+main{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:24px 36px}
+.card{background:#fffaf0;border:1px solid #e0d3bb;border-radius:10px;padding:14px 18px}
+.kpi b{display:block;font-size:34px;color:#8a3b12}.wide{grid-column:span 3}.half{grid-column:span 2}
+h2{font-size:14px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px;color:#7a6a55}
+svg text{font-size:12px;fill:#2b2118}
+</style></head><body>
+<header><h1>Meridian Bakeries — synthetic sales board</h1><span id="stamp">loading…</span></header>
+<main id="m"><div class="card kpi"><h2>Revenue</h2><b id="rev">…</b></div><div class="card kpi"><h2>Units</h2><b id="units">…</b></div><div class="card kpi"><h2>Orders</h2><b id="orders">…</b></div>
+<div class="card half"><h2>Monthly revenue</h2><svg id="monthly" width="720" height="280"></svg></div>
+<div class="card"><h2>Revenue by region</h2><svg id="region" width="340" height="280"></svg></div></main>
+<script>
+const NS="http://www.w3.org/2000/svg";
+function el(p,n,a,t){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(t)e.textContent=t;p.appendChild(e);return e}
+fetch("data.json").then(r=>r.json()).then(d=>{
+ const fmt=n=>n.toLocaleString("en-US",{maximumFractionDigits:0});
+ document.getElementById("rev").textContent="$"+fmt(d.kpi.revenue);document.getElementById("units").textContent=fmt(d.kpi.units);document.getElementById("orders").textContent=fmt(d.kpi.orders);
+ document.getElementById("stamp").textContent="source: DuckDB via MCP · "+d.kpi.orders+" synthetic orders";
+ const s=document.getElementById("monthly"),mx=Math.max(...d.monthly.map(x=>x.revenue)),w=720/d.monthly.length;
+ d.monthly.forEach((x,i)=>{const h=x.revenue/mx*220;el(s,"rect",{x:i*w+8,y:250-h,width:w-14,height:h,fill:"#c4622d",class:"bar","data-month":x.month,"data-revenue":x.revenue});el(s,"text",{x:i*w+w/2,y:268,"text-anchor":"middle"},x.month.slice(5))});
+ const r=document.getElementById("region"),rm=Math.max(...d.region.map(x=>x.revenue));
+ d.region.forEach((x,i)=>{el(r,"rect",{x:90,y:i*50+10,width:x.revenue/rm*230,height:32,fill:"#4f7a5a",class:"rbar","data-region":x.region});el(r,"text",{x:84,y:i*50+31,"text-anchor":"end"},x.region)});
+ document.body.dataset.ready="1"});
+</script></body></html>

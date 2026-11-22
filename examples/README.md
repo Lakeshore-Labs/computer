@@ -63,3 +63,11 @@ A full-file prompt and a Computer-filtered prompt answered the same question abo
 [![Prompt tokens before and after selecting the row in Computer](model-input/sample/tokens.png)](model-input/README.md)
 
 [Inspect the measurements or replay the experiment](model-input/README.md)
+
+## Repair the bakery sales board
+
+Computer reads a mobile browser audit, repairs the page in a mounted directory and sends Chrome to the new URL. Both original findings clear on the second audit.
+
+[![Chrome's mobile audit before and after the guest edits the bakery page](bakery-repair/sample/audit.png)](bakery-repair/README.md)
+
+[Replay the edit and inspect both reports](bakery-repair/README.md)
