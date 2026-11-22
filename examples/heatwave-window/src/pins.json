@@ -1,0 +1,145 @@
+{
+ "schema": 1,
+ "origin": "https://storage.googleapis.com/gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+ "gs": "gs://gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3",
+ "snapshot_note": "Only root .zattrs (last_updated etc.) is a global mutable object: it is rewritten whenever the store is refreshed, so its old generation can disappear. Its exact bytes at snapshot time ship in snapshot/root.zattrs (176 B) and are verified by sha256. Every other object is read with ?generation=N and checked by sha256, md5 and X-Goog-Generation. The store-level .zmetadata (consolidated, ~133 KB, also mutable) is never downloaded.",
+ "snapshot_taken_utc": "2026-11-22",
+ "objects": [
+  {
+   "key": ".zgroup",
+   "bytes": 24,
+   "sha256": "2383746e67b4bcc2762b3f100f06c3fa2d5f149ab5a8e5da5d33521464a01959",
+   "md5": "e20297935e73dd0154104d4ea53040ab",
+   "generation": "1695105246219391",
+   "role": "metadata",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": ".zattrs",
+   "bytes": 176,
+   "sha256": "4abfc064d1b98c38b751ea5d485a0ae71a54f272ed2521cbd266474377e91867",
+   "md5": "9b40da8f4984d30fd17ef62e4eefb90f",
+   "generation": "1795337849146828",
+   "role": "metadata",
+   "pinning": "mutable-snapshot",
+   "snapshot_file": "snapshot/root.zattrs"
+  },
+  {
+   "key": "2m_temperature/.zarray",
+   "bytes": 373,
+   "sha256": "1e97549514364c3270a42a3af331173226d8f23a57c2378be9db14b924580800",
+   "md5": "5dce91b288b22808b961baac7568605c",
+   "generation": "1724221386921857",
+   "role": "metadata",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "2m_temperature/.zattrs",
+   "bytes": 175,
+   "sha256": "643f8f6f05dd0a0bff51bb6d0d8904514eaa4d19833077e4fabde1fe9d0df404",
+   "md5": "1978fc0254bbb2f7dd5013f78936242f",
+   "generation": "1695105956544439",
+   "role": "metadata",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "latitude/.zarray",
+   "bytes": 317,
+   "sha256": "aad0eee7c8a71375b715bf39cc2372e6e5f329ce0199f39ae82571a383aea41d",
+   "md5": "623586115d5c37e85a0a0ad5c320fd46",
+   "generation": "1695106089356351",
+   "role": "metadata",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "latitude/.zattrs",
+   "bytes": 114,
+   "sha256": "a2fdfd5ffee6de34b664b9f1a83b053d362388553e93060b747cf8da872ccdfb",
+   "md5": "d7ba760afd5e4e07965aae7bca426772",
+   "generation": "1695106090611276",
+   "role": "metadata",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "longitude/.zarray",
+   "bytes": 319,
+   "sha256": "c5337a85069fa0fc78a930ecd2c9596325fabaa4df4b291f9b387639198baf56",
+   "md5": "705863d7afd14171562de95839f4e635",
+   "generation": "1695107130251608",
+   "role": "metadata",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "longitude/.zattrs",
+   "bytes": 115,
+   "sha256": "52e4e24692ad6658e99892bb3f46aabbfde9e035fccf78ecd5e4270361a89f4f",
+   "md5": "2fb9942fc2c15144a93eb0779dc1d952",
+   "generation": "1695107131468806",
+   "role": "metadata",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "time/.zarray",
+   "bytes": 322,
+   "sha256": "78fbb0c14db1c7084fe8572fcb75de5f26457df949b66c4b825d0ca63f27d8e8",
+   "md5": "9d1871befc11019184ccfaeae14983fd",
+   "generation": "1724220934797593",
+   "role": "metadata",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "time/.zattrs",
+   "bytes": 138,
+   "sha256": "4eabfc6fc738ca3b3a2fb72aa93ec42e18746a98e063bc72aa18a721a93c1fd6",
+   "md5": "e2ed903e16a6e6881140aca6644523b0",
+   "generation": "1695107260438784",
+   "role": "metadata",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "latitude/0",
+   "bytes": 844,
+   "sha256": "ad2559188f8603a7a136eb4b81c1e96a4a78549a184b6e09def2a60a78631c25",
+   "md5": "257e9f46cc602109e9bf8b5cf23b7a7c",
+   "generation": "1695106090869994",
+   "role": "coordinate-chunk",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "longitude/0",
+   "bytes": 1587,
+   "sha256": "7942ebac63ba4e69e05575019aaebe2b2ebb927b316590cac1dcfc7eb08f09ee",
+   "md5": "901e23559c0d9ea8de7e60ac380c7924",
+   "generation": "1695107131734434",
+   "role": "coordinate-chunk",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "time/15",
+   "bytes": 3577,
+   "sha256": "253cab9fea3ca06ae53e47ebb0b4bc23f8d94f50525b5730585e3a2e31f16daf",
+   "md5": "b1446e2df81233fe6ff205b52a1c254e",
+   "generation": "1699598530107612",
+   "role": "coordinate-chunk",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "2m_temperature/1074222.0.0",
+   "bytes": 2324295,
+   "sha256": "0f85946c0d36e31645dea436be722120092f3a63573ef0393cd737b2e74197fc",
+   "md5": "809302ac25ab6863c14a25d018c915e3",
+   "generation": "1695414772326240",
+   "role": "data-chunk",
+   "pinning": "immutable-generation"
+  },
+  {
+   "key": "2m_temperature/1074231.0.0",
+   "bytes": 2329827,
+   "sha256": "2598344521734af2ae0bd96396f7dcf29a880bc343324eaca0d3e69cf6c50750",
+   "md5": "4f7857f6de8e1c2f0f0610a1eeeda5bb",
+   "generation": "1695414772277552",
+   "role": "data-chunk",
+   "pinning": "immutable-generation"
+  }
+ ]
+}

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modelled 2 m air temperature · southern Britain · 19 July 2022 (ERA5 grid cells)</title>
+<style>
+:root{--bg:#faf8f4;--card:#fff;--ink:#1d2433;--ink2:#4a5468;--mute:#6b7488;--line:#e3ddd2;--acc:#a8381a;--teal:#12625c}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Georgia,"Iowan Old Style","Times New Roman",serif}
+.sans,button,table,.tag,figcaption,.read,footer,.legend{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:28px 20px 48px}
+h1{font-size:clamp(26px,4.2vw,42px);line-height:1.1;margin:0 0 10px;letter-spacing:-.01em}
+.lede{max-width:70ch;color:var(--ink2);margin:0 0 14px}
+.tag{display:inline-block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+.notice{border-left:4px solid var(--teal);background:#eef6f4;padding:10px 14px;font-size:14px;max-width:80ch;margin:14px 0 22px}
+.panels{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:1000px){.panels{grid-template-columns:1fr}}
+figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 12px 8px}
+figcaption{font-size:14px;color:var(--ink2);margin-bottom:6px}figcaption b{display:block;color:var(--ink);font-size:16px}
+svg{width:100%;height:auto;display:block;touch-action:manipulation}
+svg text{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;font-size:13px;fill:#4a5468}
+.cell{stroke:#fff;stroke-width:.6;cursor:pointer}.cell:hover{stroke:#1d2433;stroke-width:1.2}
+.sel{fill:none;stroke:#1d2433;stroke-width:2;pointer-events:none}
+.halo{paint-order:stroke;stroke:#fff;stroke-width:3.4px;fill:#1d2433!important;font-weight:600;font-size:14px}
+.pin{fill:#1d2433;stroke:#fff;stroke-width:1.5}
+.legend{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);margin:4px 2px}
+.ramp{height:10px;flex:1;border-radius:5px;border:1px solid var(--line)}
+.read{margin:18px 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:1.2fr repeat(3,1fr);gap:12px;align-items:end;font-size:14px}
+@media(max-width:700px){.read{grid-template-columns:1fr 1fr}}
+.read .big{font-size:28px;font-weight:600;line-height:1.1;color:var(--ink)}.read .k{color:var(--mute);font-size:12px}
+.read .loc{font-size:15px;color:var(--ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer;color:var(--ink);min-height:36px}
+button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}button:focus-visible,svg:focus-visible{outline:3px solid #2b6fd6;outline-offset:2px}
+table{border-collapse:collapse;width:100%;font-size:13px;background:#fff}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:right}th:first-child,td:first-child{text-align:left}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+h2{font-size:20px;margin:30px 0 8px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:800px){.cols{grid-template-columns:1fr}}
+footer{font-size:13px;color:var(--ink2);margin-top:30px;border-top:1px solid var(--line);padding-top:16px}
+code{font-size:.88em;background:#f0ebe2;padding:1px 4px;border-radius:4px;word-break:break-all}
+p,li{max-width:80ch}.hide{display:none}
+</style></head><body><main>
+<span class="tag">Model reanalysis · not thermometer readings</span>
+<h1>Morning and afternoon, 19 July 2022: modelled air temperature over southern Britain</h1>
+<p class="lede">Each coloured block is one ~0.25° cell of the ERA5 reanalysis grid (about 28 km north–south), showing the model's 2 m air temperature at one instant. Compare 06:00 UTC (07:00 British Summer Time) with 15:00 UTC (16:00 BST), and the change between them. Select a block, or use the arrow keys.</p>
+<div class="notice sans"><b>Read this as a model grid, not a weather station.</b> A cell value is a spatial estimate for a ~28 km box that blends observations with a physics model. It is not a reading from a thermometer at the named town, and a town marker is only where the town lies inside its cell.</div>
+<div class="row" role="group" aria-label="Colour scale for the two temperature maps"><button id="sh" aria-pressed="true">Same colour scale for 06:00 and 15:00</button><button id="tv" aria-pressed="false">Show table</button></div>
+<div class="panels" id="panels"></div>
+<div class="read" id="read" aria-live="polite"></div>
+<div id="tablewrap" class="hide"><div class="scroll"><table id="tbl"></table></div></div>
+<h2>The three named grid locations</h2>
+<div class="scroll"><table id="ct"></table></div>
+<p class="sans" style="font-size:13px;color:var(--mute)">City coordinates are approximate public city-centre values rounded to 0.01°, entered by hand (not fetched). “Cell” is the nearest ERA5 grid point to them, at 0.25° spacing.</p>
+<div class="cols"><section><h2>Where the numbers came from</h2><div id="receipts" class="sans" style="font-size:14px"></div></section>
+<section><h2>What this does not show</h2><ul class="sans" style="font-size:14px;color:var(--ink2)"><li>Not station thermometer records, and no station comparison is made.</li><li>One day, two instants; not a trend, climate statement or ranking.</li><li>Cells over the sea and coast are model cells too. No coastline is drawn; none was available from a tiny public-domain source here.</li><li>Colours are scaled to this window only. The change map is centred on zero (blue = cooler at 15:00 than 06:00, purple = warmer).</li></ul></section></div>
+<footer>
+<p><b>Data:</b> ERA5 hourly data on single levels, <code>2m_temperature</code>, from ECMWF's ERA5 reanalysis, produced by the Copernicus Climate Change Service (C3S). Generated using modified Copernicus Climate Change Service information 2022. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains. Hersbach, H. et al. (2017): Complete ERA5: Fifth generation of ECMWF atmospheric reanalyses of the global climate. C3S Climate Data Store.</p>
+<p><b>Cloud copy:</b> ARCO-ERA5 (Analysis-Ready, Cloud-Optimized ERA5) by Google Research, <code>gs://gcp-public-data-arco-era5/ar/full_37-1h-0p25deg-chunk-1.zarr-v3</code>, read over its public HTTPS endpoint. Carver, R. W. and Merose, A. (2023): ARCO-ERA5: An Analysis-Ready Cloud-Optimized Reanalysis Dataset, 22nd Conf. on AI for Environmental Science, AMS. Source code: github.com/google-research/arco-era5. This is not an official Google, ECMWF or Copernicus product.</p>
+</footer></main>
+<script>
+const D=/*DATA*/null,$=s=>document.querySelector(s),NS='http://www.w3.org/2000/svg';
+const nR=D.lat.length,nC=D.lon.length,CW=15,CH=24,M={l:50,t:8,r:8,b:52},W=M.l+nC*CW+M.r,H=M.t+nR*CH+M.b;
+const C=k=>k-273.15,T=[['am','Morning','06:00 UTC · 07:00 BST'],['pm','Afternoon','15:00 UTC · 16:00 BST']];
+const am=D.K.am.map(r=>r.map(C)),pm=D.K.pm.map(r=>r.map(C)),df=pm.map((r,i)=>r.map((v,j)=>v-am[i][j]));
+const flat=g=>g.flat(),ext=g=>[Math.min(...flat(g)),Math.max(...flat(g))];
+const RT=['#fff1d6','#f7b267','#d9582b','#7a1d0e'],RD=['#1f5f8b','#a9c9de','#f1f0ee','#cfa9db','#6a2c8a'];
+function col(st,t){t=Math.max(0,Math.min(1,t));const p=t*(st.length-1),i=Math.min(st.length-2,Math.floor(p)),f=p-i,h=s=>[1,3,5].map(k=>parseInt(s.substr(k,2),16));const a=h(st[i]),b=h(st[i+1]);return'rgb('+a.map((x,k)=>Math.round(x+(b[k]-x)*f)).join()+')'}
+let shared=true,sel=[D.cities[0].row,D.cities[0].col];
+const P=[{id:'am',g:am,st:RT,u:'°C',t:'Morning',s:T[0][2]},{id:'pm',g:pm,st:RT,u:'°C',t:'Afternoon',s:T[1][2]},{id:'df',g:df,st:RD,u:'°C',t:'Afternoon minus morning',s:'15:00 − 06:00 UTC'}];
+const sg=v=>(v>=0?'+':'')+f1(v),f1=v=>v.toFixed(1).replace('-','−'),f2=v=>v.toFixed(2).replace('-','−');
+const lonT=v=>Math.abs(v).toFixed(v%1?2:0)+'°'+(v<0?'W':v>0?'E':''),latT=v=>v.toFixed(2)+'°N';
+function el(n,a,p){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+const X=lo=>M.l+(lo-(D.lon[0]-.125))/.25*CW,Y=la=>M.t+((D.lat[0]+.125)-la)/.25*CH;
+function range(p){if(p.id==='df'){const m=Math.max(...flat(df).map(Math.abs));return[-m,m]}return shared?ext([...am,...pm]):ext(p.g)}
+function build(){const host=$('#panels');host.innerHTML='';P.forEach(p=>{const fg=document.createElement('figure'),cap=document.createElement('figcaption');cap.innerHTML='<b>'+p.t+'</b>'+p.s;fg.appendChild(cap);
+const s=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'application',tabindex:0,'aria-label':p.t+' modelled 2 m temperature grid, '+nR+' by '+nC+' cells. Arrow keys move.'},fg);p.svg=s;p.cells=[];
+p.g.forEach((r,i)=>r.forEach((v,j)=>{const c=el('rect',{class:'cell',x:M.l+j*CW,y:M.t+i*CH,width:CW,height:CH},s);c.onclick=()=>{sel=[i,j];paint();s.focus()};p.cells.push(c)}));
+for(let j=0;j<nC;j++){const lo=D.lon[j];if(Math.abs(lo-Math.round(lo))<1e-6){el('text',{x:M.l+(j+.5)*CW,y:M.t+nR*CH+16,'text-anchor':'middle'},s).textContent=lonT(lo)}}
+for(let i=0;i<nR;i++){const la=D.lat[i];if(Math.abs(la*2-Math.round(la*2))<1e-6){el('text',{x:M.l-4,y:M.t+(i+.5)*CH+4,'text-anchor':'end'},s).textContent=la.toFixed(1)+'°N'}}
+const kmpx=CH/27.83,sb=100*kmpx,y0=M.t+nR*CH+38;el('line',{x1:M.l,x2:M.l+sb,y1:y0,y2:y0,stroke:'#1d2433','stroke-width':2},s);el('text',{x:M.l+sb+5,y:y0+4},s).textContent='100 km, to scale';
+D.cities.forEach(c=>{const x=X(c.lon),y=Y(c.lat);el('circle',{cx:x,cy:y,r:3.4,class:'pin'},s);const t=el('text',{x:x+(c.name==='Bristol'?-6:6),y:y-5,class:'halo','text-anchor':c.name==='Bristol'?'end':'start'},s);t.textContent=c.name});
+p.selr=el('rect',{class:'sel',width:CW,height:CH},s);
+s.onkeydown=e=>{const d={ArrowLeft:[0,-1],ArrowRight:[0,1],ArrowUp:[-1,0],ArrowDown:[1,0]}[e.key];if(!d)return;e.preventDefault();sel=[Math.max(0,Math.min(nR-1,sel[0]+d[0])),Math.max(0,Math.min(nC-1,sel[1]+d[1]))];paint()};
+const lg=document.createElement('div');lg.className='legend';p.lo=document.createElement('span');p.hi=document.createElement('span');const rp=document.createElement('div');rp.className='ramp';rp.style.background='linear-gradient(90deg,'+p.st.join()+')';lg.append(p.lo,rp,p.hi);fg.appendChild(lg);host.appendChild(fg)});}
+function paint(){P.forEach(p=>{const[lo,hi]=range(p);p.lo.textContent=(p.id==='df'?sg(lo):f1(lo))+' °C';p.hi.textContent=(p.id==='df'?sg(hi):f1(hi))+' °C';p.g.forEach((r,i)=>r.forEach((v,j)=>{const c=p.cells[i*nC+j];c.setAttribute('fill',col(p.st,(v-lo)/(hi-lo||1)));c.setAttribute('aria-label',latT(D.lat[i])+' '+lonT(D.lon[j])+' '+f2(v)+' °C')}));p.selr.setAttribute('x',M.l+sel[1]*CW);p.selr.setAttribute('y',M.t+sel[0]*CH)});
+const[i,j]=sel;$('#read').innerHTML=`<div><div class="k">Selected model cell (centre)</div><div class="loc">${latT(D.lat[i])}, ${lonT(D.lon[j])}</div></div>
+<div><div class="k">06:00 UTC · 07:00 BST</div><div class="big">${f1(am[i][j])} °C</div><div class="k">${D.K.am[i][j].toFixed(2)} K</div></div>
+<div><div class="k">15:00 UTC · 16:00 BST</div><div class="big">${f1(pm[i][j])} °C</div><div class="k">${D.K.pm[i][j].toFixed(2)} K</div></div>
+<div><div class="k">Afternoon − morning</div><div class="big">${sg(df[i][j])} °C</div><div class="k">model cell, one day</div></div>`;}
+function tables(){const h='<tr><th>Location</th><th>Requested lat, lon</th><th>Cell centre</th><th>06:00 UTC °C</th><th>15:00 UTC °C</th><th>Change °C</th></tr>';
+$('#ct').innerHTML=h+D.cities.map(c=>`<tr><td>${c.name}</td><td>${c.lat.toFixed(2)}, ${c.lon.toFixed(2)}</td><td>${c.cell_lat.toFixed(2)}, ${c.cell_lon.toFixed(2)}</td><td>${f1(c.morning_C)}</td><td>${f1(c.afternoon_C)}</td><td>${sg(c.diff_C)}</td></tr>`).join('');
+let t='<tr><th>lat \\ lon</th>'+D.lon.map(l=>`<th>${l.toFixed(2)}</th>`).join('')+'</tr>';
+[['06:00 UTC °C',am],['15:00 UTC °C',pm],['Change °C',df]].forEach(([n,g])=>{t+=`<tr><th colspan="${nC+1}" style="text-align:left;background:#f0ebe2">${n}</th></tr>`+g.map((r,i)=>`<tr><th>${D.lat[i].toFixed(2)}</th>${r.map(v=>`<td>${f1(v)}</td>`).join('')}</tr>`).join('')});$('#tbl').innerHTML=t;
+$('#receipts').innerHTML=`<p>Store <code>full_37-1h-0p25deg-chunk-1.zarr-v3</code> reports <b>zarr_format ${D.zf}</b> metadata (<code>.zarray</code>), so “v3” in the name is a dataset label, not the Zarr format. Array <code>2m_temperature</code>, float32 kelvin, Blosc/LZ4.</p>`+Object.entries(D.src).map(([k,s])=>`<p><b>${k==='morning'?'06:00':'15:00'} UTC chunk</b> <code>${s.key}</code><br>${s.bytes.toLocaleString()} bytes compressed · MD5 <code>${s.md5}</code></p>`).join('')+`<p>Window: ${nR} × ${nC} cells, ${latT(D.lat[0])} to ${latT(D.lat[nR-1])}, ${lonT(D.lon[0])} to ${lonT(D.lon[nC-1])}. Kelvin to °C is K − 273.15.</p>`}
+$('#sh').onclick=e=>{shared=!shared;e.target.setAttribute('aria-pressed',shared);paint()};
+$('#tv').onclick=e=>{const o=$('#tablewrap').classList.toggle('hide');e.target.setAttribute('aria-pressed',!o);e.target.textContent=o?'Show table':'Hide table'};
+build();tables();paint();
+</script></body></html>

@@ -1,0 +1,105 @@
+{
+ "all_passed": true,
+ "checks": [
+  {
+   "name": "cache object .zgroup",
+   "ok": true,
+   "detail": "gen 1695105246219391 sha256 2383746e67b4.."
+  },
+  {
+   "name": "cache object .zattrs",
+   "ok": true,
+   "detail": "gen 1795337849146828 sha256 4abfc064d1b9.."
+  },
+  {
+   "name": "cache object 2m_temperature/.zarray",
+   "ok": true,
+   "detail": "gen 1724221386921857 sha256 1e9754951436.."
+  },
+  {
+   "name": "cache object 2m_temperature/.zattrs",
+   "ok": true,
+   "detail": "gen 1695105956544439 sha256 643f8f6f05dd.."
+  },
+  {
+   "name": "cache object latitude/.zarray",
+   "ok": true,
+   "detail": "gen 1695106089356351 sha256 aad0eee7c8a7.."
+  },
+  {
+   "name": "cache object latitude/.zattrs",
+   "ok": true,
+   "detail": "gen 1695106090611276 sha256 a2fdfd5ffee6.."
+  },
+  {
+   "name": "cache object longitude/.zarray",
+   "ok": true,
+   "detail": "gen 1695107130251608 sha256 c5337a85069f.."
+  },
+  {
+   "name": "cache object longitude/.zattrs",
+   "ok": true,
+   "detail": "gen 1695107131468806 sha256 52e4e24692ad.."
+  },
+  {
+   "name": "cache object time/.zarray",
+   "ok": true,
+   "detail": "gen 1724220934797593 sha256 78fbb0c14db1.."
+  },
+  {
+   "name": "cache object time/.zattrs",
+   "ok": true,
+   "detail": "gen 1695107260438784 sha256 4eabfc6fc738.."
+  },
+  {
+   "name": "cache object latitude/0",
+   "ok": true,
+   "detail": "gen 1695106090869994 sha256 ad2559188f86.."
+  },
+  {
+   "name": "cache object longitude/0",
+   "ok": true,
+   "detail": "gen 1695107131734434 sha256 7942ebac63ba.."
+  },
+  {
+   "name": "cache object time/15",
+   "ok": true,
+   "detail": "gen 1699598530107612 sha256 253cab9fea3c.."
+  },
+  {
+   "name": "cache object 2m_temperature/1074222.0.0",
+   "ok": true,
+   "detail": "gen 1695414772326240 sha256 0f85946c0d36.."
+  },
+  {
+   "name": "cache object 2m_temperature/1074231.0.0",
+   "ok": true,
+   "detail": "gen 1695414772277552 sha256 259834452173.."
+  },
+  {
+   "name": "mode",
+   "ok": true,
+   "detail": "replay (no network)"
+  },
+  {
+   "name": "analysis inside Computer exited 0",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "results.json byte-identical to expected/",
+   "ok": true,
+   "detail": "2b828d202b044afb"
+  },
+  {
+   "name": "window.csv byte-identical to expected/",
+   "ok": true,
+   "detail": "1d1b81fb75f5107b"
+  },
+  {
+   "name": "index.html byte-identical to expected/",
+   "ok": true,
+   "detail": "b3b222167048c1f9"
+  }
+ ]
+}
