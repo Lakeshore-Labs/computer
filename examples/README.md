@@ -1,5 +1,13 @@
 # Computer field guide
 
+## What crosses the MCP connection?
+
+A client lists four tools, runs a program beside a 50,000-row upstream timetable, then retrieves the chart. Follow the outer calls, the generated Python bindings and the shared filesystem in one measured run.
+
+[![Recorded data flow through Computer](four-tools/sample/trace.png)](four-tools/README.md)
+
+[Follow the execution and replay it](four-tools/README.md)
+
 ## From a tool response to a ferry report
 
 Which route carried the most people? A single shell script reads 24 departures through an MCP tool, totals the passengers in SQLite and draws a chart. All three steps run inside Computer. The only mounted host folder holds the output.

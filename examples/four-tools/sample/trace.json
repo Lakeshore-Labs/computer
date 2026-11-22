@@ -1,0 +1,52 @@
+{
+  "input_bytes": 738912,
+  "input_rows": 50000,
+  "input_sha256": "6aa3a8633e9af167adf67b68cdc8e0d7113e5b2ec2297d60dc23f3bcfef16e80",
+  "events": [
+    {
+      "method": "tools/list",
+      "upstream_servers": 0,
+      "tools": [
+        "bash",
+        "edit",
+        "read",
+        "write"
+      ]
+    },
+    {
+      "method": "tools/list",
+      "upstream_servers": 2,
+      "tools": [
+        "bash",
+        "edit",
+        "read",
+        "write"
+      ]
+    },
+    {
+      "method": "tools/call",
+      "tool": "bash",
+      "returned_text": "Upstream input: 738912 bytes, 50000 trips\nroute,boardings\nMuseum,666686\nNorth,666644\nPier,666631\nreport.png PNG 800x500\nsource-logo.png PNG 20x20\n",
+      "result_text_bytes": 146
+    },
+    {
+      "method": "tools/call",
+      "tool": "read",
+      "path": "report.png",
+      "content_type": "image/png",
+      "dimensions": [
+        800,
+        500
+      ],
+      "bytes": 22290,
+      "sha256": "f4186e7bf21d2d5838e23ee429079622568b9c6fdec2f0df7c70b4997010c4f6"
+    }
+  ],
+  "pass_checks": true,
+  "totals": {
+    "Museum": 666686,
+    "North": 666644,
+    "Pier": 666631
+  },
+  "source_logo_bytes": 1285
+}
