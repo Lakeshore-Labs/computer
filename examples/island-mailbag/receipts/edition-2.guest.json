@@ -1,0 +1,15 @@
+{
+  "dir": "edition-2",
+  "files": [
+    {
+      "name": "four-moons.epub",
+      "bytes": 121382,
+      "sha256": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5"
+    },
+    {
+      "name": "reading-card.md",
+      "bytes": 584,
+      "sha256": "df7c71c55648feea532c809ef3f3c0a7c48809d481ca1d5e90150e97b79c7b4a"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "reader": "carbox 0.3 + libipld 4.0.0 + hashlib (Python 3.14.0)",
+  "car": "edition-1.car",
+  "accepted": true,
+  "carBytes": 122395,
+  "carSha256": "1368425b5aa1173afec64750f2e347ebb3f574de59d1f5c50b401fbeaf53e22c",
+  "carVersion": 1,
+  "roots": [
+    "bafyreiapfhcpiwovzncwwbior2xd2dkppzem64nnc2ygvofdkxvmthc2v4"
+  ],
+  "blocks": [
+    {
+      "cid": "bafyreiapfhcpiwovzncwwbior2xd2dkppzem64nnc2ygvofdkxvmthc2v4",
+      "codec": "dag-cbor",
+      "bytes": 316,
+      "sha256": "0f29c4f459d5cb456b050e8eae3d0d4f7e48cf71ad16b06ab8a355eac99c5aaf"
+    },
+    {
+      "cid": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u",
+      "codec": "raw",
+      "bytes": 121382,
+      "sha256": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5"
+    },
+    {
+      "cid": "bafkreih7gkzykdplnejv7jzen4nntjbtdeoanbi4gw4ny4d7667ll2nddi",
+      "codec": "raw",
+      "bytes": 523,
+      "sha256": "ff32b3850deb69135fa7246f1ad9a433191c06851c35b8dc707ff7beb5e9a31a"
+    }
+  ],
+  "newBlocks": 3,
+  "duplicateBlocks": 0,
+  "storeBlocksNow": 3
+}
