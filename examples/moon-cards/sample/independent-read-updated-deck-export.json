@@ -1,0 +1,109 @@
+{
+ "zip_members": [
+  "meta",
+  "collection.anki21b",
+  "collection.anki2",
+  "0",
+  "media"
+ ],
+ "collection_member": "collection.anki21b",
+ "meta_hex": "0803",
+ "notes": [
+  {
+   "id": 1795266000000,
+   "guid": "lCPwFX/]sD",
+   "mid": 1795384321,
+   "fields": [
+    "Io",
+    "1,821.49 km",
+    "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+   ]
+  },
+  {
+   "id": 1795266000002,
+   "guid": "nis3?YJM(R",
+   "mid": 1795384321,
+   "fields": [
+    "Europa",
+    "1,560.80 km (±0.30 km)",
+    "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+   ]
+  },
+  {
+   "id": 1795266000004,
+   "guid": "N.4.5E_4OE",
+   "mid": 1795384321,
+   "fields": [
+    "Ganymede",
+    "2,631.20 km",
+    "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+   ]
+  },
+  {
+   "id": 1795266000006,
+   "guid": "KRf|-h}RJQ",
+   "mid": 1795384321,
+   "fields": [
+    "Callisto",
+    "2,410.30 km",
+    "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+   ]
+  }
+ ],
+ "cards": [
+  {
+   "id": 1795266000001,
+   "nid": 1795266000000,
+   "did": 1795390464932,
+   "type": 0,
+   "queue": 0,
+   "due": 0,
+   "ivl": 0,
+   "factor": 0,
+   "reps": 0
+  },
+  {
+   "id": 1795266000003,
+   "nid": 1795266000002,
+   "did": 1795390464932,
+   "type": 2,
+   "queue": 2,
+   "due": 5,
+   "ivl": 5,
+   "factor": 2500,
+   "reps": 1
+  },
+  {
+   "id": 1795266000005,
+   "nid": 1795266000004,
+   "did": 1795390464932,
+   "type": 0,
+   "queue": 0,
+   "due": 0,
+   "ivl": 0,
+   "factor": 0,
+   "reps": 0
+  },
+  {
+   "id": 1795266000007,
+   "nid": 1795266000006,
+   "did": 1795390464932,
+   "type": 0,
+   "queue": 0,
+   "due": 0,
+   "ivl": 0,
+   "factor": 0,
+   "reps": 0
+  }
+ ],
+ "revlog": [
+  {
+   "id": 1795390464939,
+   "cid": 1795266000003,
+   "ease": 4,
+   "ivl": 5,
+   "lastIvl": 0,
+   "type": 0
+  }
+ ]
+}

@@ -1,0 +1,1093 @@
+{
+ "anki_version": "26.09.4",
+ "editions": {
+  "1": "edition-1.apkg",
+  "2": "edition-2.apkg"
+ },
+ "import_logs": {
+  "edition-1": {
+   "new": 4,
+   "updated": 0,
+   "duplicate": 0,
+   "conflicting": 0,
+   "first_field_match": 0,
+   "missing_notetype": 0,
+   "missing_deck": 0,
+   "empty_first_field": 0
+  },
+  "edition-2": {
+   "new": 0,
+   "updated": 1,
+   "duplicate": 3,
+   "conflicting": 0,
+   "first_field_match": 0,
+   "missing_notetype": 0,
+   "missing_deck": 0,
+   "empty_first_field": 0
+  },
+  "export-roundtrip": {
+   "new": 4,
+   "updated": 0,
+   "duplicate": 0,
+   "conflicting": 0,
+   "first_field_match": 0,
+   "missing_notetype": 0,
+   "missing_deck": 0,
+   "empty_first_field": 0
+  }
+ },
+ "after_edition1": {
+  "notes": {
+   "lCPwFX/]sD": {
+    "id": 1795266000000,
+    "guid": "lCPwFX/]sD",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Io",
+     "Radius": "1,821.49 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000001,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795266000,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Io</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Io</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>1,821.49 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Io What is its mean radius?",
+      "answer_text": "Jupiter / field notes Io What is its mean radius? 1,821.49 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "nis3?YJM(R": {
+    "id": 1795266000002,
+    "guid": "nis3?YJM(R",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Europa",
+     "Radius": "1,560.80 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000003,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795266000,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Europa</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Europa</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>1,560.80 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Europa What is its mean radius?",
+      "answer_text": "Jupiter / field notes Europa What is its mean radius? 1,560.80 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "N.4.5E_4OE": {
+    "id": 1795266000004,
+    "guid": "N.4.5E_4OE",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Ganymede",
+     "Radius": "2,631.20 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000005,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795266000,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Ganymede</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Ganymede</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>2,631.20 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Ganymede What is its mean radius?",
+      "answer_text": "Jupiter / field notes Ganymede What is its mean radius? 2,631.20 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "KRf|-h}RJQ": {
+    "id": 1795266000006,
+    "guid": "KRf|-h}RJQ",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Callisto",
+     "Radius": "2,410.30 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000007,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795266000,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Callisto</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Callisto</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>2,410.30 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Callisto What is its mean radius?",
+      "answer_text": "Jupiter / field notes Callisto What is its mean radius? 2,410.30 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   }
+  },
+  "revlog": [],
+  "decks": {
+   "Default": 1,
+   "Four moons of Jupiter": 1795390464932
+  },
+  "counts": {
+   "notes": 4,
+   "cards": 4
+  }
+ },
+ "media": {
+  "galilean-moons.jpg": "f67b370075562ee36ee944ab587abbcea049eea8f0996139cb4c77628e222cdd"
+ },
+ "review_method": "suspend 3 other cards -> v3 get_queued_cards/answer_card(Easy) on Europa -> unsuspend",
+ "after_review": {
+  "notes": {
+   "lCPwFX/]sD": {
+    "id": 1795266000000,
+    "guid": "lCPwFX/]sD",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Io",
+     "Radius": "1,821.49 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000001,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Io</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Io</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>1,821.49 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Io What is its mean radius?",
+      "answer_text": "Jupiter / field notes Io What is its mean radius? 1,821.49 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "nis3?YJM(R": {
+    "id": 1795266000002,
+    "guid": "nis3?YJM(R",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Europa",
+     "Radius": "1,560.80 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000003,
+      "did": 1795390464932,
+      "type": 2,
+      "queue": 2,
+      "due": 5,
+      "ivl": 5,
+      "factor": 2500,
+      "reps": 1,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Europa</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Europa</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>1,560.80 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Europa What is its mean radius?",
+      "answer_text": "Jupiter / field notes Europa What is its mean radius? 1,560.80 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "N.4.5E_4OE": {
+    "id": 1795266000004,
+    "guid": "N.4.5E_4OE",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Ganymede",
+     "Radius": "2,631.20 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000005,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Ganymede</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Ganymede</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>2,631.20 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Ganymede What is its mean radius?",
+      "answer_text": "Jupiter / field notes Ganymede What is its mean radius? 2,631.20 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "KRf|-h}RJQ": {
+    "id": 1795266000006,
+    "guid": "KRf|-h}RJQ",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Callisto",
+     "Radius": "2,410.30 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000007,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Callisto</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Callisto</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>2,410.30 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Callisto What is its mean radius?",
+      "answer_text": "Jupiter / field notes Callisto What is its mean radius? 2,410.30 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   }
+  },
+  "revlog": [
+   {
+    "id": 1795390464939,
+    "cid": 1795266000003,
+    "usn": -1,
+    "ease": 4,
+    "ivl": 5,
+    "lastIvl": 0,
+    "factor": 2500,
+    "time": 0,
+    "type": 0
+   }
+  ],
+  "decks": {
+   "Default": 1,
+   "Four moons of Jupiter": 1795390464932
+  },
+  "counts": {
+   "notes": 4,
+   "cards": 4
+  }
+ },
+ "after_edition2": {
+  "notes": {
+   "lCPwFX/]sD": {
+    "id": 1795266000000,
+    "guid": "lCPwFX/]sD",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Io",
+     "Radius": "1,821.49 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000001,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Io</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Io</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>1,821.49 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Io What is its mean radius?",
+      "answer_text": "Jupiter / field notes Io What is its mean radius? 1,821.49 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "nis3?YJM(R": {
+    "id": 1795266000002,
+    "guid": "nis3?YJM(R",
+    "mid": 1795384321,
+    "mod": 1795269600,
+    "fields": {
+     "Moon": "Europa",
+     "Radius": "1,560.80 km (±0.30 km)",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000003,
+      "did": 1795390464932,
+      "type": 2,
+      "queue": 2,
+      "due": 5,
+      "ivl": 5,
+      "factor": 2500,
+      "reps": 1,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Europa</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Europa</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>1,560.80 km (±0.30 km)</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Europa What is its mean radius?",
+      "answer_text": "Jupiter / field notes Europa What is its mean radius? 1,560.80 km (±0.30 km) JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "N.4.5E_4OE": {
+    "id": 1795266000004,
+    "guid": "N.4.5E_4OE",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Ganymede",
+     "Radius": "2,631.20 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000005,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Ganymede</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Ganymede</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>2,631.20 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Ganymede What is its mean radius?",
+      "answer_text": "Jupiter / field notes Ganymede What is its mean radius? 2,631.20 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "KRf|-h}RJQ": {
+    "id": 1795266000006,
+    "guid": "KRf|-h}RJQ",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Callisto",
+     "Radius": "2,410.30 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000007,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Callisto</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Callisto</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>2,410.30 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Callisto What is its mean radius?",
+      "answer_text": "Jupiter / field notes Callisto What is its mean radius? 2,410.30 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   }
+  },
+  "revlog": [
+   {
+    "id": 1795390464939,
+    "cid": 1795266000003,
+    "usn": -1,
+    "ease": 4,
+    "ivl": 5,
+    "lastIvl": 0,
+    "factor": 2500,
+    "time": 0,
+    "type": 0
+   }
+  ],
+  "decks": {
+   "Default": 1,
+   "Four moons of Jupiter": 1795390464932
+  },
+  "counts": {
+   "notes": 4,
+   "cards": 4
+  }
+ },
+ "others_diff_vs_post_review": {
+  "after import 2": {
+   "Io": {
+    "note": [],
+    "card": []
+   },
+   "Ganymede": {
+    "note": [],
+    "card": []
+   },
+   "Callisto": {
+    "note": [],
+    "card": []
+   }
+  },
+  "after close/reopen": {
+   "Io": {
+    "note": [],
+    "card": []
+   },
+   "Ganymede": {
+    "note": [],
+    "card": []
+   },
+   "Callisto": {
+    "note": [],
+    "card": []
+   }
+  }
+ },
+ "europa_changed_fields": {
+  "after import 2": [
+   "Radius"
+  ],
+  "after close/reopen": [
+   "Radius"
+  ]
+ },
+ "after_reopen": {
+  "notes": {
+   "lCPwFX/]sD": {
+    "id": 1795266000000,
+    "guid": "lCPwFX/]sD",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Io",
+     "Radius": "1,821.49 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000001,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Io</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Io</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>1,821.49 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Io What is its mean radius?",
+      "answer_text": "Jupiter / field notes Io What is its mean radius? 1,821.49 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "nis3?YJM(R": {
+    "id": 1795266000002,
+    "guid": "nis3?YJM(R",
+    "mid": 1795384321,
+    "mod": 1795269600,
+    "fields": {
+     "Moon": "Europa",
+     "Radius": "1,560.80 km (±0.30 km)",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000003,
+      "did": 1795390464932,
+      "type": 2,
+      "queue": 2,
+      "due": 5,
+      "ivl": 5,
+      "factor": 2500,
+      "reps": 1,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Europa</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Europa</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>1,560.80 km (±0.30 km)</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Europa What is its mean radius?",
+      "answer_text": "Jupiter / field notes Europa What is its mean radius? 1,560.80 km (±0.30 km) JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "N.4.5E_4OE": {
+    "id": 1795266000004,
+    "guid": "N.4.5E_4OE",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Ganymede",
+     "Radius": "2,631.20 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000005,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Ganymede</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Ganymede</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>2,631.20 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Ganymede What is its mean radius?",
+      "answer_text": "Jupiter / field notes Ganymede What is its mean radius? 2,631.20 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "KRf|-h}RJQ": {
+    "id": 1795266000006,
+    "guid": "KRf|-h}RJQ",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Callisto",
+     "Radius": "2,410.30 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000007,
+      "did": 1795390464932,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Callisto</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Callisto</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>2,410.30 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Callisto What is its mean radius?",
+      "answer_text": "Jupiter / field notes Callisto What is its mean radius? 2,410.30 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   }
+  },
+  "revlog": [
+   {
+    "id": 1795390464939,
+    "cid": 1795266000003,
+    "usn": -1,
+    "ease": 4,
+    "ivl": 5,
+    "lastIvl": 0,
+    "factor": 2500,
+    "time": 0,
+    "type": 0
+   }
+  ],
+  "decks": {
+   "Default": 1,
+   "Four moons of Jupiter": 1795390464932
+  },
+  "counts": {
+   "notes": 4,
+   "cards": 4
+  }
+ },
+ "export": {
+  "file": "updated-deck-export.apkg",
+  "bytes": 174816,
+  "notes": 4
+ },
+ "roundtrip": {
+  "notes": {
+   "lCPwFX/]sD": {
+    "id": 1795266000000,
+    "guid": "lCPwFX/]sD",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Io",
+     "Radius": "1,821.49 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000001,
+      "did": 1795390465001,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Io</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Io</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>1,821.49 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Io What is its mean radius?",
+      "answer_text": "Jupiter / field notes Io What is its mean radius? 1,821.49 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "nis3?YJM(R": {
+    "id": 1795266000002,
+    "guid": "nis3?YJM(R",
+    "mid": 1795384321,
+    "mod": 1795269600,
+    "fields": {
+     "Moon": "Europa",
+     "Radius": "1,560.80 km (±0.30 km)",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000003,
+      "did": 1795390465001,
+      "type": 2,
+      "queue": 2,
+      "due": 5,
+      "ivl": 5,
+      "factor": 2500,
+      "reps": 1,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Europa</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Europa</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>1,560.80 km (±0.30 km)</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Europa What is its mean radius?",
+      "answer_text": "Jupiter / field notes Europa What is its mean radius? 1,560.80 km (±0.30 km) JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "N.4.5E_4OE": {
+    "id": 1795266000004,
+    "guid": "N.4.5E_4OE",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Ganymede",
+     "Radius": "2,631.20 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000005,
+      "did": 1795390465001,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Ganymede</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Ganymede</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>2,631.20 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Ganymede What is its mean radius?",
+      "answer_text": "Jupiter / field notes Ganymede What is its mean radius? 2,631.20 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   },
+   "KRf|-h}RJQ": {
+    "id": 1795266000006,
+    "guid": "KRf|-h}RJQ",
+    "mid": 1795384321,
+    "mod": 1795266000,
+    "fields": {
+     "Moon": "Callisto",
+     "Radius": "2,410.30 km",
+     "Image": "<img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\">"
+    },
+    "cards": [
+     {
+      "id": 1795266000007,
+      "did": 1795390465001,
+      "type": 0,
+      "queue": 0,
+      "due": 0,
+      "ivl": 0,
+      "factor": 0,
+      "reps": 0,
+      "lapses": 0,
+      "left": 0,
+      "mod": 1795390464,
+      "ord": 0,
+      "memory_state": null,
+      "question_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Callisto</h1><p>What is its mean radius?</p>",
+      "answer_html": "<style>.card{font:21px sans-serif;text-align:left;background:#16272e;color:#f5f3e6;padding:6%}header,footer{font-size:.72em;color:#b6cfc8}h1{font:2.8em Georgia,serif}h2{color:#eac283}img{max-width:100%;height:auto}footer{margin-top:.6em}</style><header>Jupiter / field notes</header><h1>Callisto</h1><p>What is its mean radius?</p><hr id=\"answer\"><h2>2,410.30 km</h2><img src=\"galilean-moons.jpg\" alt=\"Composite of the four Galilean moons\"><footer>JPL satellite physical parameters. Composite image NASA/JPL/DLR.</footer>",
+      "question_text": "Jupiter / field notes Callisto What is its mean radius?",
+      "answer_text": "Jupiter / field notes Callisto What is its mean radius? 2,410.30 km JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+     }
+    ]
+   }
+  },
+  "revlog": [
+   {
+    "id": 1795390464939,
+    "cid": 1795266000003,
+    "usn": -1,
+    "ease": 4,
+    "ivl": 5,
+    "lastIvl": 0,
+    "factor": 2500,
+    "time": 0,
+    "type": 0
+   }
+  ],
+  "decks": {
+   "Default": 1,
+   "Four moons of Jupiter": 1795390465001
+  },
+  "counts": {
+   "notes": 4,
+   "cards": 4
+  }
+ },
+ "ui": {
+  "europa_guid": "nis3?YJM(R",
+  "review": {
+   "rating": "Easy",
+   "card_id": 1795266000003,
+   "revlog": {
+    "id": 1795390464939,
+    "cid": 1795266000003,
+    "usn": -1,
+    "ease": 4,
+    "ivl": 5,
+    "lastIvl": 0,
+    "factor": 2500,
+    "time": 0,
+    "type": 0
+   },
+   "before": {
+    "type": 0,
+    "queue": 0,
+    "due": 0,
+    "ivl": 0,
+    "factor": 0,
+    "reps": 0
+   },
+   "after": {
+    "type": 2,
+    "queue": 2,
+    "due": 5,
+    "ivl": 5,
+    "factor": 2500,
+    "reps": 1
+   }
+  }
+ },
+ "checks": [
+  {
+   "check": "edition 1: 4 notes / 4 cards",
+   "pass": true,
+   "detail": {
+    "notes": 4,
+    "cards": 4
+   }
+  },
+  {
+   "check": "Europa card is new before review",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "check": "Europa is the top card of Anki's scheduler queue",
+   "pass": true,
+   "detail": [
+    1795266000003
+   ]
+  },
+  {
+   "check": "review log has exactly 1 entry for Europa (rating Easy=4)",
+   "pass": true,
+   "detail": [
+    {
+     "id": 1795390464939,
+     "cid": 1795266000003,
+     "usn": -1,
+     "ease": 4,
+     "ivl": 5,
+     "lastIvl": 0,
+     "factor": 2500,
+     "time": 0,
+     "type": 0
+    }
+   ]
+  },
+  {
+   "check": "Europa now a review card (type=2, ivl>0)",
+   "pass": true,
+   "detail": {
+    "type": 2,
+    "queue": 2,
+    "ivl": 5,
+    "due": 5,
+    "reps": 1
+   }
+  },
+  {
+   "check": "edition 2 updated exactly 1 note, 0 new",
+   "pass": true,
+   "detail": {
+    "new": 0,
+    "updated": 1,
+    "duplicate": 3,
+    "conflicting": 0,
+    "first_field_match": 0,
+    "missing_notetype": 0,
+    "missing_deck": 0,
+    "empty_first_field": 0
+   }
+  },
+  {
+   "check": "after import 2: still 4 notes / 4 cards",
+   "pass": true,
+   "detail": {
+    "notes": 4,
+    "cards": 4
+   }
+  },
+  {
+   "check": "after import 2: same GUIDs, note ids, model id, deck id",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after import 2: Europa card id preserved",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after import 2: old review log retained byte-for-byte",
+   "pass": true,
+   "detail": [
+    {
+     "id": 1795390464939,
+     "cid": 1795266000003,
+     "usn": -1,
+     "ease": 4,
+     "ivl": 5,
+     "lastIvl": 0,
+     "factor": 2500,
+     "time": 0,
+     "type": 0
+    }
+   ]
+  },
+  {
+   "check": "after import 2: Europa scheduling retained",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after import 2: 3 other notes unchanged (fields + cards + sched)",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after import 2: other notes' fields identical to edition-1 import and still new/unsuspended",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after import 2: Europa changed fields",
+   "pass": true,
+   "detail": [
+    "Radius"
+   ]
+  },
+  {
+   "check": "after import 2: new Europa answer visible in Anki-rendered answer",
+   "pass": true,
+   "detail": "Jupiter / field notes Europa What is its mean radius? 1,560.80 km (±0.30 km) JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+  },
+  {
+   "check": "after import 2: old answer lacked ±0.30 km",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after close/reopen: still 4 notes / 4 cards",
+   "pass": true,
+   "detail": {
+    "notes": 4,
+    "cards": 4
+   }
+  },
+  {
+   "check": "after close/reopen: same GUIDs, note ids, model id, deck id",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after close/reopen: Europa card id preserved",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after close/reopen: old review log retained byte-for-byte",
+   "pass": true,
+   "detail": [
+    {
+     "id": 1795390464939,
+     "cid": 1795266000003,
+     "usn": -1,
+     "ease": 4,
+     "ivl": 5,
+     "lastIvl": 0,
+     "factor": 2500,
+     "time": 0,
+     "type": 0
+    }
+   ]
+  },
+  {
+   "check": "after close/reopen: Europa scheduling retained",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after close/reopen: 3 other notes unchanged (fields + cards + sched)",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after close/reopen: other notes' fields identical to edition-1 import and still new/unsuspended",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "after close/reopen: Europa changed fields",
+   "pass": true,
+   "detail": [
+    "Radius"
+   ]
+  },
+  {
+   "check": "after close/reopen: new Europa answer visible in Anki-rendered answer",
+   "pass": true,
+   "detail": "Jupiter / field notes Europa What is its mean radius? 1,560.80 km (±0.30 km) JPL satellite physical parameters. Composite image NASA/JPL/DLR."
+  },
+  {
+   "check": "after close/reopen: old answer lacked ±0.30 km",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "raw sqlite: revlog 1 row for Europa card",
+   "pass": true,
+   "detail": [
+    1,
+    1795266000003
+   ]
+  },
+  {
+   "check": "exported updated deck .apkg (note count)",
+   "pass": true,
+   "detail": 4
+  },
+  {
+   "check": "round-trip: 4 notes/4 cards, revlog 1, Europa sched retained, new answer",
+   "pass": true,
+   "detail": {
+    "notes": 4,
+    "cards": 4
+   }
+  }
+ ],
+ "all_pass": true
+}

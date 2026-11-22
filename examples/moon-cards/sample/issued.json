@@ -1,0 +1,58 @@
+{
+  "epub_sha256": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5",
+  "embedded_jpeg_sha256": "f67b370075562ee36ee944ab587abbcea049eea8f0996139cb4c77628e222cdd",
+  "editions": [
+    {
+      "file": "edition-1.apkg",
+      "sha256": "4581d807ae64b37f598b5e74c4615f15a592df1ee0f6c5e1c3ef1a909317533e",
+      "cards": [
+        {
+          "moon": "Io",
+          "answer": "1,821.49 km",
+          "guid": "lCPwFX/]sD"
+        },
+        {
+          "moon": "Europa",
+          "answer": "1,560.80 km",
+          "guid": "nis3?YJM(R"
+        },
+        {
+          "moon": "Ganymede",
+          "answer": "2,631.20 km",
+          "guid": "N.4.5E_4OE"
+        },
+        {
+          "moon": "Callisto",
+          "answer": "2,410.30 km",
+          "guid": "KRf|-h}RJQ"
+        }
+      ]
+    },
+    {
+      "file": "edition-2.apkg",
+      "sha256": "76d214011f616158363f6ae964bdd10e4436c5603848fd0d921f112c71665eb7",
+      "cards": [
+        {
+          "moon": "Io",
+          "answer": "1,821.49 km",
+          "guid": "lCPwFX/]sD"
+        },
+        {
+          "moon": "Europa",
+          "answer": "1,560.80 km (±0.30 km)",
+          "guid": "nis3?YJM(R"
+        },
+        {
+          "moon": "Ganymede",
+          "answer": "2,631.20 km",
+          "guid": "N.4.5E_4OE"
+        },
+        {
+          "moon": "Callisto",
+          "answer": "2,410.30 km",
+          "guid": "KRf|-h}RJQ"
+        }
+      ]
+    }
+  ]
+}
