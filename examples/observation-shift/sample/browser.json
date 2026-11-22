@@ -1,0 +1,147 @@
+{
+  "page": "shift.html",
+  "chrome": "Chrome/158.0.8127.36",
+  "times": 36,
+  "scenes": {
+    "earliest_state": {
+      "ok": true,
+      "moment": "2026-11-22 16:55:13 UTC",
+      "bike_total": "No Oslo feed collected yet.",
+      "hosted_time": "No hosted round collected yet.",
+      "client": "The persistent client had not started."
+    },
+    "latest_group_10_vs_13": {
+      "10": [
+        "Arkaden Sør",
+        "Østbanehallen"
+      ],
+      "13": [
+        "Østbanehallen"
+      ]
+    },
+    "times_where_10_and_13_differ": [
+      "2026-11-22T20:21:04+00:00",
+      "2026-11-22T20:25:11+00:00",
+      "2026-11-22T20:25:15+00:00",
+      "2026-11-22T20:39:00+00:00",
+      "2026-11-22T20:41:04+00:00",
+      "2026-11-22T20:55:11+00:00",
+      "2026-11-22T20:55:36+00:00",
+      "2026-11-22T21:01:04+00:00",
+      "2026-11-22T21:21:04+00:00",
+      "2026-11-22T21:25:11+00:00",
+      "2026-11-22T21:25:16+00:00",
+      "2026-11-22T21:39:00+00:00",
+      "2026-11-22T21:41:04+00:00",
+      "2026-11-22T21:55:10+00:00",
+      "2026-11-22T21:55:16+00:00",
+      "2026-11-22T22:01:04+00:00",
+      "2026-11-22T22:21:04+00:00",
+      "2026-11-22T22:25:09+00:00",
+      "2026-11-22T22:25:16+00:00",
+      "2026-11-22T22:39:00+00:00",
+      "2026-11-22T22:41:04+00:00",
+      "2026-11-22T22:55:08+00:00",
+      "2026-11-22T22:55:16+00:00",
+      "2026-11-22T23:01:04+00:00",
+      "2026-11-22T23:21:04+00:00",
+      "2026-11-22T23:25:08+00:00",
+      "2026-11-22T23:25:17+00:00"
+    ],
+    "desktop-earliest-group10": {
+      "moment": "2026-11-22 16:55:13 UTC",
+      "bike_total": "No Oslo feed collected yet.",
+      "eligible": "",
+      "overflow": false
+    },
+    "desktop-latest-group10": {
+      "moment": "2026-11-22 23:25:17 UTC",
+      "bike_total": "1535 bikes reported across 261 stations.",
+      "eligible": "Enough for 10 at Arkaden Sør and Østbanehallen.",
+      "overflow": false
+    },
+    "desktop-latest-group13": {
+      "moment": "2026-11-22 23:25:17 UTC",
+      "bike_total": "1535 bikes reported across 261 stations.",
+      "eligible": "Enough for 13 at Østbanehallen.",
+      "overflow": false
+    },
+    "mobile-earliest-group10": {
+      "moment": "2026-11-22 16:55:13 UTC",
+      "bike_total": "No Oslo feed collected yet.",
+      "eligible": "",
+      "overflow": false
+    },
+    "mobile-latest-group10": {
+      "moment": "2026-11-22 23:25:17 UTC",
+      "bike_total": "1535 bikes reported across 261 stations.",
+      "eligible": "Enough for 10 at Arkaden Sør and Østbanehallen.",
+      "overflow": false
+    },
+    "mobile-latest-group13": {
+      "moment": "2026-11-22 23:25:17 UTC",
+      "bike_total": "1535 bikes reported across 261 stations.",
+      "eligible": "Enough for 13 at Østbanehallen.",
+      "overflow": false
+    }
+  },
+  "failures": [],
+  "exhaustive": {
+    "states_checked": 144,
+    "mismatches": 0,
+    "details": []
+  },
+  "recording": {
+    "file": "shift-desk.mp4",
+    "frames": 250,
+    "wall_seconds": 9.45,
+    "checks": [
+      {
+        "label": "latest, group 10",
+        "index": 35,
+        "time": "2026-11-22T23:25:17+00:00",
+        "group": 10,
+        "ok": true,
+        "eligible": "Enough for 10 at Arkaden Sør and Østbanehallen."
+      },
+      {
+        "label": "latest, group 13",
+        "index": 35,
+        "time": "2026-11-22T23:25:17+00:00",
+        "group": 13,
+        "ok": true,
+        "eligible": "Enough for 13 at Østbanehallen."
+      },
+      {
+        "label": "latest, group 10 again",
+        "index": 35,
+        "time": "2026-11-22T23:25:17+00:00",
+        "group": 10,
+        "ok": true,
+        "eligible": "Enough for 10 at Arkaden Sør and Østbanehallen."
+      },
+      {
+        "label": "earliest after drag",
+        "index": 0,
+        "time": "2026-11-22T16:55:13+00:00",
+        "group": 10,
+        "ok": true,
+        "eligible": ""
+      },
+      {
+        "label": "earliest + 3 steps",
+        "index": 3,
+        "time": "2026-11-22T18:25:12+00:00",
+        "group": 10,
+        "ok": true,
+        "eligible": ""
+      }
+    ]
+  },
+  "network_urls": [
+    "shift.html"
+  ],
+  "external_requests": [],
+  "console_problems": [],
+  "ok": true
+}

@@ -1,0 +1,212 @@
+{
+  "input": "observations.json",
+  "output": [
+    "shift.html",
+    "shift.sqlite",
+    "summary.json",
+    "timeline.csv"
+  ],
+  "source_sha256": "d8581861a184a616d626c6d4d7230f5da4fec95ff99a631a2d971a21107fab8d",
+  "checks": 39,
+  "failed": 0,
+  "notes": [
+    "source collector_complete is false: sample was still being captured; refresh before final freeze"
+  ],
+  "results": [
+    {
+      "check": "source: top-level keys",
+      "ok": true,
+      "detail": "['bikes', 'collector_complete', 'desk', 'hosted', 'single_session', 'tides']"
+    },
+    {
+      "check": "source: tides timestamps parse, strictly increasing, UTC",
+      "ok": true,
+      "detail": "14 entries"
+    },
+    {
+      "check": "source: bikes timestamps parse, strictly increasing, UTC",
+      "ok": true,
+      "detail": "10 entries"
+    },
+    {
+      "check": "source: hosted timestamps parse, strictly increasing, UTC",
+      "ok": true,
+      "detail": "4 entries"
+    },
+    {
+      "check": "source: desk timestamps parse, strictly increasing, UTC",
+      "ok": true,
+      "detail": "8 entries"
+    },
+    {
+      "check": "source: every tide batch has 3 distinct stations, numeric metres, observation <= capture",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "source: tide station set constant",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "source: bike feeds consistent (3 stops, stations_with_bikes<=station_count, stop bikes<=total, sha256)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "source: hosted rounds have astro/mslearn/svelte, sha256, passed is bool",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "source: client session age non-decreasing and single_session==1",
+      "ok": true,
+      "detail": "[0, 380, 2201, 3981, 5781, 7581, 9382, 11182]"
+    },
+    {
+      "check": "source: client reads are read-only, independent, sha256",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "source: client age agrees with elapsed time (+-60s)",
+      "ok": true,
+      "detail": "[('20:18:55', 0), ('20:25:15', 380), ('20:55:36', 2201), ('21:25:16', 3981), ('21:55:16', 5781), ('22:25:16', 7581), ('22:55:16', 9382), ('23:25:17', 11182)]"
+    },
+    {
+      "check": "summary.json equals recomputed summary",
+      "ok": true,
+      "detail": "identical"
+    },
+    {
+      "check": "summary: hosted_passed <= hosted_operations",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "sqlite: integrity_check ok",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "sqlite: tables exactly tide,bike,stop,hosted,client",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "sqlite: tide rows match source exactly (42)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "sqlite: bike rows match source exactly (10)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "sqlite: stop rows match source exactly (30)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "sqlite: hosted rows match source exactly (12)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "sqlite: client rows match source exactly (8)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "sqlite: bike row count equals summary bike_feeds",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "sqlite: hosted passed count == summary",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "sqlite: every stop/hosted/client capture has parent where applicable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "timeline.csv header",
+      "ok": true,
+      "detail": "['capture_utc', 'source', 'measurement_count']"
+    },
+    {
+      "check": "timeline.csv rows equal recomputed set",
+      "ok": true,
+      "detail": "36 vs 36"
+    },
+    {
+      "check": "timeline.csv chronologically ordered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "timeline.csv distinct capture times == summary.times",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "shift.html: placeholder substituted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "shift.html: embedded payload present, no raw '<'",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "shift.html payload times == recomputed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "shift.html payload summary == summary.json",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "shift.html payload tide rows match source",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "shift.html payload bike rows match source",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "shift.html payload stop rows match source",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "shift.html payload hosted rows match source",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "shift.html payload client rows match source",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "shift.html: no external script/style/src/href",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "check": "shift.html: no remote fetch/import code",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "times": 36,
+  "tide_rows": 42,
+  "tide_batches": 14,
+  "bike_feeds": 10,
+  "hosted_operations": 12,
+  "hosted_passed": 12,
+  "persistent_client_reads": 8,
+  "oldest": "2026-11-22T16:55:13+00:00",
+  "newest": "2026-11-22T23:25:17+00:00",
+  "one_persistent_session": true,
+  "capture_ended": false,
+  "source_sha256": "d8581861a184a616d626c6d4d7230f5da4fec95ff99a631a2d971a21107fab8d"
+}

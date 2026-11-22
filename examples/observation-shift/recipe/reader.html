@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  />
+  <title>The observation shift · Computer field guide</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #f5f2e9;
+      color: #213938;
+      font:
+        16px/1.47 system-ui,
+        sans-serif;
+    }
+    main {
+      max-width: 1240px;
+      margin: auto;
+      padding: clamp(16px, 3vw, 44px);
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+      align-items: baseline;
+      border-block: 1px solid #6f8c80;
+      padding: 0.65rem 0;
+    }
+    header b {
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.85rem;
+    }
+    h1 {
+      font:
+        500 clamp(42px, 6vw, 82px) / 1 Georgia,
+        serif;
+      margin: 1.4rem 0 0.6rem;
+      letter-spacing: -0.05em;
+    }
+    .lede {
+      font-size: 1.12rem;
+      max-width: 800px;
+      margin: 0.4rem 0 1.1rem;
+    }
+    .clock {
+      background: #234843;
+      color: #f9f5e9;
+      padding: clamp(15px, 2vw, 25px);
+      display: grid;
+      gap: 0.75rem;
+    }
+    .clock > div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+    #moment {
+      font:
+        600 clamp(20px, 3vw, 34px) ui-monospace,
+        monospace;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: #e8ab6f;
+    }
+    .clock button {
+      background: #f5efdc;
+      color: #1f403c;
+      border: 0;
+      font: inherit;
+      padding: 0.4rem 0.65rem;
+      cursor: pointer;
+    }
+    .clock button:disabled {
+      opacity: 0.5;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .panel {
+      background: #fffef8;
+      border: 1px solid #b8c5b7;
+      padding: clamp(14px, 2vw, 25px);
+      min-width: 0;
+    }
+    h2 {
+      font:
+        500 clamp(25px, 3.2vw, 37px) / 1.12 Georgia,
+        serif;
+      margin: 0 0 0.5rem;
+    }
+    h3 {
+      font: 600 1rem system-ui;
+      margin: 0.8rem 0 0.4rem;
+    }
+    .panel p {
+      margin: 0.4rem 0;
+    }
+    .small,
+    footer {
+      font-size: 0.85rem;
+      color: #455d55;
+    }
+    canvas {
+      width: 100%;
+      height: 150px;
+      display: block;
+      margin: 0.65rem 0;
+      border-bottom: 1px solid #b5c1b8;
+    }
+    .reading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.5rem;
+      border-top: 1px solid #d1d9cf;
+      padding: 0.4rem 0;
+    }
+    .reading strong {
+      font-variant-numeric: tabular-nums;
+    }
+    .dot {
+      display: inline-block;
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 50%;
+      margin-right: 0.45rem;
+    }
+    .num {
+      font:
+        500 clamp(29px, 4vw, 46px) Georgia,
+        serif;
+      letter-spacing: -0.035em;
+    }
+    select {
+      font: inherit;
+      padding: 0.2em 0.4em;
+      margin-left: 0.3em;
+      color: inherit;
+    }
+    a {
+      color: #215e59;
+    }
+    footer {
+      margin: 1rem 0;
+      border-top: 1px solid #95aa9d;
+      padding-top: 0.7rem;
+    }
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid #b46d3e;
+      outline-offset: 3px;
+    }
+    @media (max-width: 740px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .clock {
+        gap: 1rem;
+      }
+      .clock button {
+        font-size: 0.9rem;
+      }
+      header {
+        align-items: start;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+  <main>
+    <header><b>Computer / Observation shift</b><span id="span"></span></header>
+    <h1>What did the desk know?</h1>
+    <p class="lede">
+      Move through the actual collection times. Each panel shows the most recent
+      result available then. The collectors ran at different intervals.
+    </p>
+    <section class="clock" aria-label="Observation time">
+      <div><strong id="moment"></strong><span id="position"></span></div>
+      <input
+        id="time"
+        type="range"
+        min="0"
+        step="1"
+        aria-label="Observation time in UTC"
+      />
+      <div>
+        <button id="prev">← Earlier</button><span>Recorded times · UTC</span
+        ><button id="next">Later →</button>
+      </div>
+    </section>
+    <section class="grid">
+      <article class="panel">
+        <h2>Pacific water levels</h2>
+        <p class="small">
+          Metres above each station’s Mean Lower Low Water datum. NOAA publishes
+          observation and request times separately.
+        </p>
+        <canvas
+          id="plot"
+          aria-label="Water level sequences up to the selected time"
+        ></canvas>
+        <div id="tides"></div>
+        <p class="small" id="tide-time"></p>
+      </article>
+      <article class="panel">
+        <h2>Group bikes in Oslo</h2>
+        <p id="bike-total"></p>
+        <label
+          >Group size
+          <select id="group">
+            <option>5</option>
+            <option selected>10</option>
+            <option>13</option>
+            <option>20</option>
+          </select></label
+        >
+        <div id="stops"></div>
+        <p id="eligible"></p>
+        <p class="small" id="bike-time"></p>
+      </article>
+      <article class="panel">
+        <h2>Three hosted MCPs</h2>
+        <p class="small">
+          Computer repeated an Astro docs search, a Microsoft Learn search and a
+          Svelte component check.
+        </p>
+        <div id="hosted"></div>
+        <p class="small" id="docs-time"></p>
+      </article>
+      <article class="panel">
+        <h2>One open Computer client</h2>
+        <div class="num" id="age"></div>
+        <p id="client"></p>
+        <p class="small" id="client-time"></p>
+      </article>
+    </section>
+    <footer>
+      <a href="timeline.csv">Open the observation log</a> ·
+      <a href="shift.sqlite">Open the SQLite database</a> · NOAA CO-OPS water
+      levels · Oslo City Bike GBFS under NLOD 2.0. Bike availability was
+      observed, and no reservation was made.
+    </footer>
+  </main>
+  <script type="application/json" id="observations">
+    __SHIFT__
+  </script>
+  <script>
+    const model = JSON.parse(
+        document.querySelector("#observations").textContent,
+      ),
+      { series, times } = model,
+      by = (id) => document.getElementById(id),
+      slider = by("time"),
+      group = by("group");
+    const stamp = (s) =>
+      new Date(s).toISOString().replace("T", " ").slice(0, 19) + " UTC";
+    const short = (s) => new Date(s).toISOString().slice(11, 16);
+    const colors = {
+      9410170: "#a45b33",
+      9414290: "#346e91",
+      9447130: "#376951",
+    };
+    const names = {
+      astro: "Astro",
+      mslearn: "Microsoft Learn",
+      svelte: "Svelte",
+    };
+    slider.max = times.length - 1;
+    slider.value = slider.max;
+    by("span").textContent =
+      "First capture " + stamp(times[0]) + " · Last " + stamp(times.at(-1));
+    function recent(rows, at) {
+      const arr = rows.filter((r) => r.capture <= at);
+      const latest = arr.at(-1)?.capture;
+      return arr.filter((r) => r.capture === latest);
+    }
+    function line(root, label, value, color) {
+      const row = document.createElement("div");
+      row.className = "reading";
+      const name = document.createElement("span"),
+        val = document.createElement("strong");
+      if (color) {
+        const dot = document.createElement("i");
+        dot.className = "dot";
+        dot.style.background = color;
+        name.append(dot);
+      }
+      name.append(label);
+      val.textContent = value;
+      row.append(name, val);
+      root.append(row);
+    }
+    function chart(at) {
+      const canvas = by("plot"),
+        w = canvas.clientWidth,
+        h = canvas.clientHeight,
+        dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      const c = canvas.getContext("2d");
+      c.scale(dpr, dpr);
+      const rows = series.tide.filter((r) => r.capture <= at);
+      if (!rows.length) return;
+      const all = rows.map((r) => r.metres),
+        lo = Math.floor(Math.min(...all)),
+        hi = Math.ceil(Math.max(...all));
+      const t0 = Date.parse(times[0]),
+        t1 = Date.parse(times.at(-1));
+      const x = (t) => 32 + ((Date.parse(t) - t0) / (t1 - t0)) * (w - 45),
+        y = (m) => 10 + ((hi - m) / (hi - lo)) * (h - 23);
+      c.font = "11px system-ui";
+      c.fillStyle = "#52645d";
+      for (let k = lo; k <= hi; k++) {
+        c.strokeStyle = "#dbe1d7";
+        c.beginPath();
+        c.moveTo(32, y(k));
+        c.lineTo(w - 11, y(k));
+        c.stroke();
+        c.fillText(k + "m", 2, y(k) + 3);
+      }
+      for (const [station, color] of Object.entries(colors)) {
+        const sel = rows.filter((r) => r.station === station);
+        c.strokeStyle = color;
+        c.fillStyle = color;
+        c.lineWidth = 2;
+        c.beginPath();
+        sel.forEach((r, i) =>
+          i
+            ? c.lineTo(x(r.capture), y(r.metres))
+            : c.moveTo(x(r.capture), y(r.metres)),
+        );
+        c.stroke();
+        for (const r of sel) {
+          c.beginPath();
+          c.arc(x(r.capture), y(r.metres), 2.5, 0, 2 * Math.PI);
+          c.fill();
+        }
+      }
+    }
+    function update() {
+      const i = Number(slider.value),
+        t = times[i];
+      by("moment").textContent = stamp(t);
+      slider.setAttribute("aria-valuetext", stamp(t));
+      by("position").textContent = i + 1 + " / " + times.length;
+      by("prev").disabled = i === 0;
+      by("next").disabled = i === times.length - 1;
+      const water = recent(series.tide, t);
+      by("tides").replaceChildren();
+      for (const r of water)
+        line(
+          by("tides"),
+          r.city,
+          r.metres.toFixed(3) + " m",
+          colors[r.station],
+        );
+      by("tide-time").textContent = water.length
+        ? "Collected " +
+          short(water[0].capture) +
+          " UTC · Station time " +
+          water
+            .map((r) => r.observation.slice(-5))
+            .filter((v, i, a) => a.indexOf(v) === i)
+            .join(", ") +
+          " UTC · " +
+          (water.every((r) => r.quality === "p")
+            ? "preliminary readings"
+            : "see quality flags in the database")
+        : "No tide sample collected yet.";
+      chart(t);
+      const bike = recent(series.bike, t)[0],
+        stops = recent(series.stop, t);
+      by("stops").replaceChildren();
+      by("bike-total").textContent = bike
+        ? bike.bikes + " bikes reported across " + bike.stations + " stations."
+        : "No Oslo feed collected yet.";
+      for (const r of stops) line(by("stops"), r.name, String(r.bikes));
+      const ok = stops.filter(
+        (r) => r.renting && r.bikes >= Number(group.value),
+      );
+      by("eligible").textContent = bike
+        ? "Enough for " +
+          group.value +
+          " at " +
+          (ok.length
+            ? ok.map((r) => r.name).join(" and ")
+            : "none of these three stations") +
+          "."
+        : "";
+      by("bike-time").textContent = bike
+        ? "Feed published " +
+          stamp(bike.feed_time) +
+          " · collected " +
+          short(bike.capture) +
+          " UTC."
+        : "";
+      const docs = recent(series.hosted, t);
+      by("hosted").replaceChildren();
+      for (const r of docs)
+        line(
+          by("hosted"),
+          names[r.name],
+          r.passed ? "Passed · " + r.seconds + " s" : "Check missed",
+        );
+      by("docs-time").textContent = docs.length
+        ? "Round started " + stamp(docs[0].capture) + "."
+        : "No hosted round collected yet.";
+      const saved = series.client.filter((r) => r.capture <= t),
+        client = saved.at(-1);
+      by("age").textContent = client
+        ? Math.floor(client.age_seconds / 3600) +
+          "h " +
+          Math.floor((client.age_seconds % 3600) / 60) +
+          "m"
+        : "";
+      by("client").textContent = client
+        ? saved.length +
+          " tide snapshots read in the same stdio session. A new read-only process independently checked the latest file."
+        : "The persistent client had not started.";
+      by("client-time").textContent = client
+        ? "Latest readback " +
+          stamp(client.capture) +
+          " · SHA-256 " +
+          client.digest.slice(0, 12) +
+          "…"
+        : "";
+    }
+    slider.oninput = update;
+    group.onchange = update;
+    by("prev").onclick = () => {
+      slider.value = Number(slider.value) - 1;
+      update();
+    };
+    by("next").onclick = () => {
+      slider.value = Number(slider.value) + 1;
+      update();
+    };
+    window.addEventListener("resize", () => chart(times[Number(slider.value)]));
+    update();
+  </script>
+</html>

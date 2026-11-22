@@ -1,0 +1,886 @@
+{
+  "tides": [
+    {
+      "at": "2026-11-22T16:55:13+00:00",
+      "readings_sha256": "77e929999004462e9f630be0c61a2440aeb3263db86f27082b3b96b74a4c4167",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 1.863,
+          "observation_utc": "2026-11-22 16:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 2.316,
+          "observation_utc": "2026-11-22 16:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 2.372,
+          "observation_utc": "2026-11-22 16:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T17:25:13+00:00",
+      "readings_sha256": "7e8ed97d545acf8fab31e0bb789785d29484b57b59116bd580d1405b7f3bb7d8",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 1.756,
+          "observation_utc": "2026-11-22 17:12",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 2.285,
+          "observation_utc": "2026-11-22 17:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 2.422,
+          "observation_utc": "2026-11-22 17:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T17:55:13+00:00",
+      "readings_sha256": "02c193cd3305a977769bfb07a1bcfe1356ecb65cc0a03b1d093b3f624ed69eeb",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 1.465,
+          "observation_utc": "2026-11-22 17:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 2.235,
+          "observation_utc": "2026-11-22 17:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 2.536,
+          "observation_utc": "2026-11-22 17:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T18:25:12+00:00",
+      "readings_sha256": "d2147ebfbc18bded30f121ca843a3f699f1228fdf7e4dfe99f469c639d4a669d",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 1.234,
+          "observation_utc": "2026-11-22 18:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 2.102,
+          "observation_utc": "2026-11-22 18:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 2.692,
+          "observation_utc": "2026-11-22 18:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T18:55:12+00:00",
+      "readings_sha256": "db0efd43d51e6706eea23957fd979d047b88deac67ec02fdb87b176d2a85c887",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 1.011,
+          "observation_utc": "2026-11-22 18:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 1.908,
+          "observation_utc": "2026-11-22 18:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 2.872,
+          "observation_utc": "2026-11-22 18:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T19:25:11+00:00",
+      "readings_sha256": "e78f902a6cf30e8aac47b857da743a83fbf440ddd9b907eabc0eb3b66e1fd116",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 0.758,
+          "observation_utc": "2026-11-22 19:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 1.682,
+          "observation_utc": "2026-11-22 19:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 3.08,
+          "observation_utc": "2026-11-22 19:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T19:55:11+00:00",
+      "readings_sha256": "904cec1ea7a3b6b1d58d5f7669838fd3d3461c85c65761f1198b1070080624d5",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 0.588,
+          "observation_utc": "2026-11-22 19:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 1.411,
+          "observation_utc": "2026-11-22 19:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 3.28,
+          "observation_utc": "2026-11-22 19:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T20:25:11+00:00",
+      "readings_sha256": "a28b73d52c3d1170c64b9fe2a7b6652b693f3459e6d79accdc9cc52e62b2bc4d",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 0.4,
+          "observation_utc": "2026-11-22 20:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 1.178,
+          "observation_utc": "2026-11-22 20:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 3.484,
+          "observation_utc": "2026-11-22 20:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T20:55:11+00:00",
+      "readings_sha256": "2d075bb2035e3b53b1186ac998f0310a2721ca79be23fc34c2a4378f626668c4",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 0.294,
+          "observation_utc": "2026-11-22 20:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 0.92,
+          "observation_utc": "2026-11-22 20:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 3.654,
+          "observation_utc": "2026-11-22 20:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T21:25:11+00:00",
+      "readings_sha256": "fd8a80946db769c34f3047d620c7f96003852bced6d71ef877a9e1f257592d96",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 0.211,
+          "observation_utc": "2026-11-22 21:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 0.726,
+          "observation_utc": "2026-11-22 21:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 3.788,
+          "observation_utc": "2026-11-22 21:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T21:55:10+00:00",
+      "readings_sha256": "5774c5b37659a35d6aee790ce7087c8789394a89c3c15a417a1c1f0023b7cb72",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 0.212,
+          "observation_utc": "2026-11-22 21:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 0.538,
+          "observation_utc": "2026-11-22 21:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 3.848,
+          "observation_utc": "2026-11-22 21:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T22:25:09+00:00",
+      "readings_sha256": "7d73996190ec95fc6c7864c06ac9d61c6fe500ff58f452b5dfc2fefa634a6358",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 0.237,
+          "observation_utc": "2026-11-22 22:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 0.389,
+          "observation_utc": "2026-11-22 22:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 3.838,
+          "observation_utc": "2026-11-22 22:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T22:55:08+00:00",
+      "readings_sha256": "8b5d167b5374d6ab2e55c705cd59a767cd52e980bd109e16eb9e113429584e6a",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 0.375,
+          "observation_utc": "2026-11-22 22:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 0.264,
+          "observation_utc": "2026-11-22 22:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 3.744,
+          "observation_utc": "2026-11-22 22:48",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T23:25:08+00:00",
+      "readings_sha256": "6985c779d924b24eb04938d1da0c7a0065a52a1c3d7c6c44e6f0a913b2e5a22e",
+      "readings": [
+        {
+          "station": "9410170",
+          "city": "San Diego",
+          "meters": 0.491,
+          "observation_utc": "2026-11-22 23:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9410170&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9414290",
+          "city": "San Francisco",
+          "meters": 0.218,
+          "observation_utc": "2026-11-22 23:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9414290&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        },
+        {
+          "station": "9447130",
+          "city": "Seattle",
+          "meters": 3.58,
+          "observation_utc": "2026-11-22 23:18",
+          "quality": "p",
+          "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=9447130&product=water_level&datum=MLLW&time_zone=gmt&units=metric&application=ComputerFieldGuide&format=json"
+        }
+      ]
+    }
+  ],
+  "bikes": [
+    {
+      "at": "2026-11-22T20:21:04+00:00",
+      "feed_at": "2026-11-22T20:20:45+00:00",
+      "feed_sha256": "739e0232dc3773b5b467c6c09bbe27bdc56cb496b404e720fc1a44e0bd01cbcd",
+      "station_count": 261,
+      "stations_with_bikes": 208,
+      "bikes_available": 1541,
+      "stations": {
+        "6026": {
+          "name": "Østbanehallen",
+          "bikes": 23,
+          "renting": true
+        },
+        "545": {
+          "name": "Arkaden Sør",
+          "bikes": 12,
+          "renting": true
+        },
+        "478": {
+          "name": "Jernbanetorget",
+          "bikes": 9,
+          "renting": true
+        }
+      }
+    },
+    {
+      "at": "2026-11-22T20:41:04+00:00",
+      "feed_at": "2026-11-22T20:40:45+00:00",
+      "feed_sha256": "cc7d75faeb9c301d2358d359614ab4d623d471ea25d14f9e479cb714861a4b12",
+      "station_count": 261,
+      "stations_with_bikes": 209,
+      "bikes_available": 1543,
+      "stations": {
+        "6026": {
+          "name": "Østbanehallen",
+          "bikes": 23,
+          "renting": true
+        },
+        "545": {
+          "name": "Arkaden Sør",
+          "bikes": 12,
+          "renting": true
+        },
+        "478": {
+          "name": "Jernbanetorget",
+          "bikes": 8,
+          "renting": true
+        }
+      }
+    },
+    {
+      "at": "2026-11-22T21:01:04+00:00",
+      "feed_at": "2026-11-22T21:01:00+00:00",
+      "feed_sha256": "82cd499153fb2ca40d19fbe4c449a7a101aced3f4ba693cc940172c9c74c525a",
+      "station_count": 261,
+      "stations_with_bikes": 207,
+      "bikes_available": 1545,
+      "stations": {
+        "6026": {
+          "name": "Østbanehallen",
+          "bikes": 23,
+          "renting": true
+        },
+        "545": {
+          "name": "Arkaden Sør",
+          "bikes": 12,
+          "renting": true
+        },
+        "478": {
+          "name": "Jernbanetorget",
+          "bikes": 8,
+          "renting": true
+        }
+      }
+    },
+    {
+      "at": "2026-11-22T21:21:04+00:00",
+      "feed_at": "2026-11-22T21:20:45+00:00",
+      "feed_sha256": "d2cbc1d4520533eb2237c29ea173de1b440b716092d7cc7df4de15e40c7f7014",
+      "station_count": 261,
+      "stations_with_bikes": 209,
+      "bikes_available": 1543,
+      "stations": {
+        "6026": {
+          "name": "Østbanehallen",
+          "bikes": 23,
+          "renting": true
+        },
+        "545": {
+          "name": "Arkaden Sør",
+          "bikes": 12,
+          "renting": true
+        },
+        "478": {
+          "name": "Jernbanetorget",
+          "bikes": 8,
+          "renting": true
+        }
+      }
+    },
+    {
+      "at": "2026-11-22T21:41:04+00:00",
+      "feed_at": "2026-11-22T21:40:45+00:00",
+      "feed_sha256": "967999e5f3a2ee2df90425fde478c3f76e7a7396a91a21c8ea47d29c8aaaaa99",
+      "station_count": 261,
+      "stations_with_bikes": 209,
+      "bikes_available": 1544,
+      "stations": {
+        "6026": {
+          "name": "Østbanehallen",
+          "bikes": 23,
+          "renting": true
+        },
+        "545": {
+          "name": "Arkaden Sør",
+          "bikes": 12,
+          "renting": true
+        },
+        "478": {
+          "name": "Jernbanetorget",
+          "bikes": 8,
+          "renting": true
+        }
+      }
+    },
+    {
+      "at": "2026-11-22T22:01:04+00:00",
+      "feed_at": "2026-11-22T22:00:45+00:00",
+      "feed_sha256": "43decb6d51e59f07e1a02b3913e8639118f0f0e2aab5721c255f2bbd6ce5f343",
+      "station_count": 261,
+      "stations_with_bikes": 208,
+      "bikes_available": 1546,
+      "stations": {
+        "6026": {
+          "name": "Østbanehallen",
+          "bikes": 23,
+          "renting": true
+        },
+        "545": {
+          "name": "Arkaden Sør",
+          "bikes": 12,
+          "renting": true
+        },
+        "478": {
+          "name": "Jernbanetorget",
+          "bikes": 8,
+          "renting": true
+        }
+      }
+    },
+    {
+      "at": "2026-11-22T22:21:04+00:00",
+      "feed_at": "2026-11-22T22:20:45+00:00",
+      "feed_sha256": "f1f6aa71361c867bf4ccab234166c71ea46214b532af980d31320629880d30cd",
+      "station_count": 261,
+      "stations_with_bikes": 210,
+      "bikes_available": 1542,
+      "stations": {
+        "6026": {
+          "name": "Østbanehallen",
+          "bikes": 23,
+          "renting": true
+        },
+        "545": {
+          "name": "Arkaden Sør",
+          "bikes": 12,
+          "renting": true
+        },
+        "478": {
+          "name": "Jernbanetorget",
+          "bikes": 8,
+          "renting": true
+        }
+      }
+    },
+    {
+      "at": "2026-11-22T22:41:04+00:00",
+      "feed_at": "2026-11-22T22:40:45+00:00",
+      "feed_sha256": "e6e988d4810f83776109421d8e5c14ebd68e2c95f68596444af318b637b1ad7c",
+      "station_count": 261,
+      "stations_with_bikes": 208,
+      "bikes_available": 1541,
+      "stations": {
+        "6026": {
+          "name": "Østbanehallen",
+          "bikes": 23,
+          "renting": true
+        },
+        "545": {
+          "name": "Arkaden Sør",
+          "bikes": 12,
+          "renting": true
+        },
+        "478": {
+          "name": "Jernbanetorget",
+          "bikes": 8,
+          "renting": true
+        }
+      }
+    },
+    {
+      "at": "2026-11-22T23:01:04+00:00",
+      "feed_at": "2026-11-22T23:00:45+00:00",
+      "feed_sha256": "9e5713b4296da1150f8f65262b19c79b24b50db51f163be1f343ebeae073fb5b",
+      "station_count": 261,
+      "stations_with_bikes": 209,
+      "bikes_available": 1538,
+      "stations": {
+        "6026": {
+          "name": "Østbanehallen",
+          "bikes": 23,
+          "renting": true
+        },
+        "545": {
+          "name": "Arkaden Sør",
+          "bikes": 12,
+          "renting": true
+        },
+        "478": {
+          "name": "Jernbanetorget",
+          "bikes": 8,
+          "renting": true
+        }
+      }
+    },
+    {
+      "at": "2026-11-22T23:21:04+00:00",
+      "feed_at": "2026-11-22T23:20:45+00:00",
+      "feed_sha256": "4f754e75ad3c0aa5d2646f8767bf386a30f9314bd50d12dccdd1759b9d30055a",
+      "station_count": 261,
+      "stations_with_bikes": 212,
+      "bikes_available": 1535,
+      "stations": {
+        "6026": {
+          "name": "Østbanehallen",
+          "bikes": 23,
+          "renting": true
+        },
+        "545": {
+          "name": "Arkaden Sør",
+          "bikes": 12,
+          "renting": true
+        },
+        "478": {
+          "name": "Jernbanetorget",
+          "bikes": 8,
+          "renting": true
+        }
+      }
+    }
+  ],
+  "hosted": [
+    {
+      "at": "2026-11-22T19:42:00+00:00",
+      "checks": [
+        {
+          "name": "astro",
+          "endpoint": "https://mcp.docs.astro.build/mcp",
+          "passed": true,
+          "seconds": 2.394,
+          "response_bytes": 28493,
+          "sha256": "3a22af67aba9fbac7588042d488d086d049db16c9a231bceb27093c91dc41037",
+          "distinct_matches": 46,
+          "exit": 0
+        },
+        {
+          "name": "mslearn",
+          "endpoint": "https://learn.microsoft.com/api/mcp",
+          "passed": true,
+          "seconds": 3.688,
+          "response_bytes": 21631,
+          "sha256": "ff6e6252c0613c6a0a3513dbb3fae46a1d3489e59c04ab94eed5914be1494b50",
+          "distinct_matches": 8,
+          "exit": 0
+        },
+        {
+          "name": "svelte",
+          "endpoint": "https://mcp.svelte.dev/mcp",
+          "passed": true,
+          "seconds": 1.763,
+          "response_bytes": 91,
+          "sha256": "5567a16f285a0ae768d11441d7c37b1101b8d3918ca521dfc312799b541c4c96",
+          "distinct_matches": 2,
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T20:39:00+00:00",
+      "checks": [
+        {
+          "name": "astro",
+          "endpoint": "https://mcp.docs.astro.build/mcp",
+          "passed": true,
+          "seconds": 7.826,
+          "response_bytes": 28493,
+          "sha256": "3a22af67aba9fbac7588042d488d086d049db16c9a231bceb27093c91dc41037",
+          "distinct_matches": 46,
+          "exit": 0
+        },
+        {
+          "name": "mslearn",
+          "endpoint": "https://learn.microsoft.com/api/mcp",
+          "passed": true,
+          "seconds": 5.276,
+          "response_bytes": 21631,
+          "sha256": "ff6e6252c0613c6a0a3513dbb3fae46a1d3489e59c04ab94eed5914be1494b50",
+          "distinct_matches": 8,
+          "exit": 0
+        },
+        {
+          "name": "svelte",
+          "endpoint": "https://mcp.svelte.dev/mcp",
+          "passed": true,
+          "seconds": 1.655,
+          "response_bytes": 91,
+          "sha256": "5567a16f285a0ae768d11441d7c37b1101b8d3918ca521dfc312799b541c4c96",
+          "distinct_matches": 2,
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T21:39:00+00:00",
+      "checks": [
+        {
+          "name": "astro",
+          "endpoint": "https://mcp.docs.astro.build/mcp",
+          "passed": true,
+          "seconds": 2.077,
+          "response_bytes": 28493,
+          "sha256": "3a22af67aba9fbac7588042d488d086d049db16c9a231bceb27093c91dc41037",
+          "distinct_matches": 46,
+          "exit": 0
+        },
+        {
+          "name": "mslearn",
+          "endpoint": "https://learn.microsoft.com/api/mcp",
+          "passed": true,
+          "seconds": 3.317,
+          "response_bytes": 21631,
+          "sha256": "ff6e6252c0613c6a0a3513dbb3fae46a1d3489e59c04ab94eed5914be1494b50",
+          "distinct_matches": 8,
+          "exit": 0
+        },
+        {
+          "name": "svelte",
+          "endpoint": "https://mcp.svelte.dev/mcp",
+          "passed": true,
+          "seconds": 1.692,
+          "response_bytes": 91,
+          "sha256": "5567a16f285a0ae768d11441d7c37b1101b8d3918ca521dfc312799b541c4c96",
+          "distinct_matches": 2,
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-11-22T22:39:00+00:00",
+      "checks": [
+        {
+          "name": "astro",
+          "endpoint": "https://mcp.docs.astro.build/mcp",
+          "passed": true,
+          "seconds": 2.08,
+          "response_bytes": 28493,
+          "sha256": "3a22af67aba9fbac7588042d488d086d049db16c9a231bceb27093c91dc41037",
+          "distinct_matches": 46,
+          "exit": 0
+        },
+        {
+          "name": "mslearn",
+          "endpoint": "https://learn.microsoft.com/api/mcp",
+          "passed": true,
+          "seconds": 3.403,
+          "response_bytes": 21631,
+          "sha256": "ff6e6252c0613c6a0a3513dbb3fae46a1d3489e59c04ab94eed5914be1494b50",
+          "distinct_matches": 8,
+          "exit": 0
+        },
+        {
+          "name": "svelte",
+          "endpoint": "https://mcp.svelte.dev/mcp",
+          "passed": true,
+          "seconds": 1.636,
+          "response_bytes": 91,
+          "sha256": "5567a16f285a0ae768d11441d7c37b1101b8d3918ca521dfc312799b541c4c96",
+          "distinct_matches": 2,
+          "exit": 0
+        }
+      ]
+    }
+  ],
+  "desk": [
+    {
+      "batch": "20261122T195511Z",
+      "checked_utc": "2026-11-22T20:18:55+00:00",
+      "session_age_seconds": 0,
+      "source_read_only": true,
+      "independent_read_only_session": true,
+      "guest_sha256": "fac5852fde27fdf0e8ee0dbcce148f6344ed4f5c1732fffa8d8fb2f5239c8550"
+    },
+    {
+      "batch": "20261122T202511Z",
+      "checked_utc": "2026-11-22T20:25:15+00:00",
+      "session_age_seconds": 380,
+      "source_read_only": true,
+      "independent_read_only_session": true,
+      "guest_sha256": "6be23630152b36ae4eaceb0d646b4b6c28b7399e80d0e05396c7050cd67e41d1"
+    },
+    {
+      "batch": "20261122T205511Z",
+      "checked_utc": "2026-11-22T20:55:36+00:00",
+      "session_age_seconds": 2201,
+      "source_read_only": true,
+      "independent_read_only_session": true,
+      "guest_sha256": "1be70f457fdb71ff5cfc93ec66a7575378b08cbd46232f9affa11a8941d45cf6"
+    },
+    {
+      "batch": "20261122T212511Z",
+      "checked_utc": "2026-11-22T21:25:16+00:00",
+      "session_age_seconds": 3981,
+      "source_read_only": true,
+      "independent_read_only_session": true,
+      "guest_sha256": "2743b5c408bd55a92fab897d0cbd33963c8db209d65ee2abd57c45040c67ea6e"
+    },
+    {
+      "batch": "20261122T215510Z",
+      "checked_utc": "2026-11-22T21:55:16+00:00",
+      "session_age_seconds": 5781,
+      "source_read_only": true,
+      "independent_read_only_session": true,
+      "guest_sha256": "9a3287fdbd14681d0ef623b0526405d3b631ea28ad0ffbb68b8375f13e1b1d49"
+    },
+    {
+      "batch": "20261122T222509Z",
+      "checked_utc": "2026-11-22T22:25:16+00:00",
+      "session_age_seconds": 7581,
+      "source_read_only": true,
+      "independent_read_only_session": true,
+      "guest_sha256": "693db179ec5b03d5982530cf9901f277e3f46e4cbc66ec945e59b42409d4489f"
+    },
+    {
+      "batch": "20261122T225508Z",
+      "checked_utc": "2026-11-22T22:55:16+00:00",
+      "session_age_seconds": 9382,
+      "source_read_only": true,
+      "independent_read_only_session": true,
+      "guest_sha256": "d3beaa07dd2ff10cbe1be90887906baed8082c84c39efa1c91918ae81a628098"
+    },
+    {
+      "batch": "20261122T232508Z",
+      "checked_utc": "2026-11-22T23:25:17+00:00",
+      "session_age_seconds": 11182,
+      "source_read_only": true,
+      "independent_read_only_session": true,
+      "guest_sha256": "bf75a271f99ba2a7a379e27e28a17471daac842b2dce2b5175d58ce3c3ef7477"
+    }
+  ],
+  "single_session": 1,
+  "collector_complete": false
+}
