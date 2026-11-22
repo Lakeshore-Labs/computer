@@ -153,3 +153,7 @@ Open San Marco, Burano or Lido and inspect a real satellite pixel. The guest req
 ### Search 85 actual hosted MCP runs
 
 The [hosted fieldwork reader](hosted-fieldwork/) records 81 passing cases across 78 distinct endpoints and exposes the four missed checks. Replay a museum journey, a Warsaw sky brief or an independently checked Van Gogh record.
+
+### Build a designer’s palette from satellite pixels
+
+The [Venetian Lagoon palette](lagoon-palette/) uses the official Swift MCP client and all four Computer tools. Inspect six sampled pixels and take the colors into a native macOS list, GIMP, Adobe Swatch Exchange or CSS.
