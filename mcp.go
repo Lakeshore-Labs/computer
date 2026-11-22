@@ -13,18 +13,17 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// bashInput is the input of the bash tool, the same as gbash's bash tool takes.
+// bashInput is the input of the bash tool, named as agents' bash tools name it.
 type bashInput struct {
-	Commands  string `json:"commands,omitempty" jsonschema:"Bash commands to execute."`
-	Script    string `json:"script,omitempty" jsonschema:"The same as commands, for callers that send script."`
+	Command   string `json:"command" jsonschema:"The bash command to run."`
 	TimeoutMS int64  `json:"timeout_ms,omitempty" jsonschema:"Per-call timeout in milliseconds."`
 }
 
 // MCPServer is the computer as an MCP server for an agent, with the tools bash, read, edit and write. The caller
 // connects it: server.Run(ctx, &mcp.StdioTransport{}) for an agent that starts the computer as a program, or
 // server.Connect with one end of mcp.NewInMemoryTransports for an agent in this process. limit is how long a bash
-// call may run when the agent sets no shorter time. The tools and their wording are gbash's: the input of its bash
-// tool, and codingtools' read, edit and write.
+// call may run when the agent sets no shorter time. The file tools and their wording are gbash's codingtools' read,
+// edit and write.
 //
 // A computer is one agent's: every server made from it shares the one shell, with its working directory and
 // variables. The file tools take a relative path from the computer's WorkDir, wherever the shell has since moved.
@@ -43,12 +42,9 @@ func (c *Computer) MCPServer(ctx context.Context, limit time.Duration) (*mcp.Ser
 	description := "Run bash commands in a sandboxed computer. " + c.About(c.ToolCommands(), c.ToolModules())
 	mcp.AddTool(server, &mcp.Tool{Name: "bash", Description: description},
 		func(ctx context.Context, _ *mcp.CallToolRequest, in bashInput) (*mcp.CallToolResult, any, error) {
-			script := in.Commands
+			script := in.Command
 			if script == "" {
-				script = in.Script
-			}
-			if script == "" {
-				result, err := text("`commands` or `script` is required", true)
+				result, err := text("`command` is empty", true)
 				return result, nil, err
 			}
 			timeout := limit
