@@ -23,3 +23,11 @@ Read a file, inspect a commit, convert a time, query a graph, record milestones,
 [![Actual results from seven MCP servers](reference-servers/media/seven-servers.png)](reference-servers/README.md)
 
 [Run the seven reference servers](reference-servers/README.md)
+
+## A week beneath our feet
+
+Two public data sources become a map inside Computer. Each point opens a location and magnitude in the SVG.
+
+[![Global earthquake atlas drawn from the USGS weekly feed](earthquake-atlas/media/atlas.png)](earthquake-atlas/README.md)
+
+[Open the atlas and draw a fresh one](earthquake-atlas/README.md)
