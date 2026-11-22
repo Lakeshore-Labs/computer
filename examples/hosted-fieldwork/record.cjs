@@ -20,12 +20,15 @@ async function main() {
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(pageUrl);
       const counts = await page.locator('.stats b').allTextContents();
-      assert.deepEqual(counts, ['78','81','85']);
-      assert.equal(await page.locator('details').count(),85);
+      assert.deepEqual(counts, ['86','90','94']);
+      assert.equal(await page.locator('details').count(),94);
       await page.getByRole('button',{name:'Zürich to the museum'}).click();
       assert.equal(await page.locator('details[open]').count(),1);
       assert.equal(await page.locator('details a').count(),2);
       await page.screenshot({path:path.join(output,name+'.png')});
+      await page.getByRole('button',{name:'Two lynx catalogs'}).click();
+      assert.match(await page.locator('details[open]').innerText(),/398 vs 394/);
+      await page.screenshot({path:path.join(output,name+'-lynx.png')});
       await page.getByRole('button',{name:'Clear filters'}).click();
       await page.locator('#filter').selectOption('miss');
       const missed = await page.locator('summary b').allTextContents();

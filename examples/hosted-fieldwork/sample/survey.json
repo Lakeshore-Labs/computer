@@ -2319,5 +2319,324 @@
         "passed": true
       }
     ]
+  },
+  {
+    "pass_number": 3,
+    "id": "artnap-seurat",
+    "provider": "Artnap (public-domain art from museum open access)",
+    "task": "Find a Seurat painting, read its record and licence, compare creator and holding museum with Wikidata (the Art Institute's own API sat behind a Cloudflare challenge)",
+    "endpoints": [
+      "https://artnap.com/mcp"
+    ],
+    "passed": true,
+    "category": "arts",
+    "combined_story": false,
+    "checked_utc": "2026-11-22T21:51:46.398754+00:00",
+    "checks": [
+      {
+        "check": "output contains 'mcp_id=aic-27992'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'mcp_museum=Art Institute of Chicago'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'mcp_license=Public domain'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'wd_label=A Sunday Afternoon on the Island of La Grande Jatte'",
+        "passed": true
+      },
+      {
+        "check": "Wikidata creator is Georges Seurat (Q34013)",
+        "passed": true
+      },
+      {
+        "check": "Wikidata collection is the Art Institute of Chicago (Q239303)",
+        "passed": true
+      }
+    ]
+  },
+  {
+    "pass_number": 3,
+    "id": "dengdeng-yinhang",
+    "provider": "Dengdeng Chinese-English dictionary (CC-CEDICT, Tatoeba)",
+    "task": "Look up 银行, check its pinyin against Wiktionary and its documented Tatoeba sentence source",
+    "endpoints": [
+      "https://dengdeng.app/dictionary/mcp"
+    ],
+    "passed": true,
+    "category": "language reference",
+    "combined_story": false,
+    "checked_utc": "2026-11-22T21:53:01.045397+00:00",
+    "checks": [
+      {
+        "check": "output contains 'found=True'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'mcp_pinyin=yínháng'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'hsk3=2'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'wiktionary_has_yinhang=1'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'tatoeba_has_translated=1'",
+        "passed": true
+      },
+      {
+        "check": "Tatoeba lists at least 50 Mandarin sentences containing 银行",
+        "passed": true
+      }
+    ],
+    "note": "An earlier, stronger check for the exact example sentence in Tatoeba missed. The final check verifies independent pinyin and the presence of translated sentences containing the term. It does not establish the provenance of the example sentence."
+  },
+  {
+    "pass_number": 3,
+    "id": "epvotes-proxy-voting",
+    "provider": "EP Votes (European Parliament open data)",
+    "task": "Read a plenary roll-call, compare totals and split with HowTheyVote and arithmetic",
+    "endpoints": [
+      "https://epvotes.com/mcp"
+    ],
+    "passed": true,
+    "category": "civic",
+    "combined_story": false,
+    "checked_utc": "2026-11-22T21:47:27.135032+00:00",
+    "checks": [
+      {
+        "check": "for-votes equal HowTheyVote (578 == 578)",
+        "passed": true
+      },
+      {
+        "check": "against equal (25 == 25)",
+        "passed": true
+      },
+      {
+        "check": "abstentions equal (4 == 4)",
+        "passed": true
+      },
+      {
+        "check": "result equal (ADOPTED == ADOPTED)",
+        "passed": true
+      },
+      {
+        "check": "EP reference equal (A10-0270/2026 == A10-0270/2026)",
+        "passed": true
+      },
+      {
+        "check": "sum of political-group 'for' equals total (578 == 578)",
+        "passed": true
+      },
+      {
+        "check": "sum of country 'for' equals total (578 == 578)",
+        "passed": true
+      }
+    ]
+  },
+  {
+    "pass_number": 3,
+    "id": "gbif-lynx",
+    "provider": "GBIF hosted MCP (cyanheads server on caseyjhand.com)",
+    "task": "Match Iberian lynx on the GBIF backbone and count its occurrence records, compare with api.gbif.org",
+    "endpoints": [
+      "https://gbif-biodiversity.caseyjhand.com/mcp"
+    ],
+    "passed": true,
+    "category": "conservation / nature observations",
+    "combined_story": false,
+    "checked_utc": "2026-11-22T21:50:57.904791+00:00",
+    "checks": [
+      {
+        "check": "taxon key equals GBIF REST (2435261 == 2435261)",
+        "passed": true
+      },
+      {
+        "check": "family equals GBIF REST (Felidae == Felidae)",
+        "passed": true
+      },
+      {
+        "check": "PRESENT occurrence count vs api.gbif.org (MCP excludes absence records by default) (2271 vs 2271, tol 1%)",
+        "passed": true
+      },
+      {
+        "check": "arithmetic: REST PRESENT + ABSENT equals REST total count (2660 == 2660)",
+        "passed": true
+      },
+      {
+        "check": "output contains 'mcp_match_type=EXACT'",
+        "passed": true
+      }
+    ],
+    "note": "The MCP response excluded absence records. An initial comparison with the complete REST count was inappropriate. The final check compared present records and summed present plus absent in REST."
+  },
+  {
+    "pass_number": 3,
+    "id": "inat-lynx",
+    "provider": "iNaturalist hosted MCP (cyanheads server on caseyjhand.com)",
+    "task": "Resolve Iberian lynx, read its conservation listing and research-grade count, compare with iNaturalist REST and Wikidata",
+    "endpoints": [
+      "https://inaturalist.caseyjhand.com/mcp"
+    ],
+    "passed": true,
+    "category": "conservation / nature observations",
+    "combined_story": false,
+    "checked_utc": "2026-11-22T21:50:43.388097+00:00",
+    "checks": [
+      {
+        "check": "output contains 'taxon_id=41975'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'common=Iberian Lynx'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'mcp_global_status=VU'",
+        "passed": true
+      },
+      {
+        "check": "MCP research-grade count vs iNaturalist REST (926 vs 926, tol 3%)",
+        "passed": true
+      },
+      {
+        "check": "Wikidata IUCN item is Vulnerable (Q278113), matching MCP 'VU'",
+        "passed": true
+      }
+    ]
+  },
+  {
+    "pass_number": 3,
+    "id": "lviv-transit-rynok",
+    "provider": "Lviv public transport (city timetable-api, api.lad.lviv.ua)",
+    "task": "Find Rynok Square stop, read the tram route, check the stop lies at Lviv's Wikidata coordinates",
+    "endpoints": [
+      "https://api.lad.lviv.ua/mcp"
+    ],
+    "passed": true,
+    "category": "public transport",
+    "combined_story": false,
+    "checked_utc": "2026-11-22T21:51:56.965207+00:00",
+    "checks": [
+      {
+        "check": "output contains 'stop_id=61'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'eng=Rynok square'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'route_mentions_stop_name=1'",
+        "passed": true
+      },
+      {
+        "check": "stop within 2 km of Wikidata coordinates for Lviv (Q36036)",
+        "passed": true
+      }
+    ]
+  },
+  {
+    "pass_number": 3,
+    "id": "met-caseyjhand-cypresses",
+    "provider": "Met Museum hosted MCP (cyanheads server on caseyjhand.com)",
+    "task": "Search the Met collection, open one object, compare with the Met's own collection API",
+    "endpoints": [
+      "https://met-museum.caseyjhand.com/mcp"
+    ],
+    "passed": true,
+    "category": "arts",
+    "combined_story": false,
+    "checked_utc": "2026-11-22T21:51:37.155567+00:00",
+    "checks": [
+      {
+        "check": "output contains 'mcp_has_436535=1'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'mcp_title_hit=1'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'mcp_artist_hit=1'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'rest_title=Wheat Field with Cypresses'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'rest_artist=Vincent van Gogh'",
+        "passed": true
+      }
+    ]
+  },
+  {
+    "pass_number": 3,
+    "id": "sitesy-union-toronto",
+    "provider": "Sitesy transit (TTC, GO, Hamilton HSR GTFS)",
+    "task": "Search Toronto's Union Station in the static GTFS feeds, read current service alerts, check against Wikidata's Union Station",
+    "endpoints": [
+      "https://transit.sitesy.ca/mcp"
+    ],
+    "passed": true,
+    "category": "public transport",
+    "combined_story": false,
+    "checked_utc": "2026-11-22T21:52:06.029877+00:00",
+    "checks": [
+      {
+        "check": "output contains 'agency=TTC'",
+        "passed": true
+      },
+      {
+        "check": "output contains 'name=Union'",
+        "passed": true
+      },
+      {
+        "check": "TTC Union stop within 500 m of Wikidata Union Station, Toronto",
+        "passed": true
+      }
+    ]
+  },
+  {
+    "pass_number": 3,
+    "id": "story-lynx-two-catalogs",
+    "provider": "STORY: iNaturalist + GBIF (hosted MCP) + Wikidata",
+    "task": "The same Iberian lynx sightings in two catalogs: iNaturalist open-licence research-grade vs the iNaturalist dataset inside GBIF",
+    "endpoints": [
+      "https://inaturalist.caseyjhand.com/mcp",
+      "https://gbif-biodiversity.caseyjhand.com/mcp"
+    ],
+    "passed": true,
+    "category": "conservation / nature observations",
+    "combined_story": true,
+    "checked_utc": "2026-11-22T21:51:18.026145+00:00",
+    "checks": [
+      {
+        "check": "output contains 'dataset_title=iNaturalist'",
+        "passed": true
+      },
+      {
+        "check": "GBIF MCP (iNat dataset) vs GBIF REST (394 vs 394, tol 2%)",
+        "passed": true
+      },
+      {
+        "check": "iNaturalist MCP vs iNaturalist REST (398 vs 398, tol 3%)",
+        "passed": true
+      },
+      {
+        "check": "cross-catalog agreement iNaturalist (CC0/CC-BY/CC-BY-NC research-grade) vs GBIF copy (398 vs 394, tol 3%)",
+        "passed": true
+      }
+    ],
+    "note": "The two endpoints share the same third-party operator. Counts come from the iNaturalist dataset and its exported copy in GBIF. The snapshot covered licensed research-grade observations. It is not a population count."
   }
 ]

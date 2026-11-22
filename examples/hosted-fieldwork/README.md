@@ -1,10 +1,16 @@
 # A field guide to free hosted MCPs
 
-[Open the offline survey](sample/fieldwork.html) to search 85 actual Computer runs. It includes all four cases that missed a check. The survey covers two November 22, 2026 cohorts. Of 85 attempted cases, 81 passed across 78 distinct endpoint URLs. Each run used an isolated workspace and public queries without a user account. Access policies and timetables can change.
+[Open the offline survey](sample/fieldwork.html) to search 94 recorded Computer cases. It includes all four cases that missed a check. The survey covers three November 22, 2026 cohorts. Of 94 final cases, 90 passed across 86 distinct endpoint URLs. Each run used an isolated workspace and public queries without a user account. Access policies and timetables can change.
 
 ![A journey to the Kunstmuseum Basel in the fieldwork reader](sample/desktop.png)
 
-The first cohort passed 56 of 59 cases across 55 unique endpoints. The second passed 25 of 26 cases across 23 additional endpoints. Two of its cases combine services already counted. The searchable survey includes each task, actual endpoint, timestamp and individual predicate. Some predicates check for a string or a source domain. Others compare independently obtained measurements. Open a run to see which test was applied. This survey samples the separate [MCP registry census](../registry-census).
+The first cohort passed 56 of 59 cases across 55 unique endpoints. The second passed 25 of 26 cases across 23 additional endpoints. Two of its cases combine services already counted. The third cohort passed nine final cases across eight new endpoint URLs. Its three caseyjhand.com endpoints share an operator. Initial iterations with incorrect argument names, filters or unsupported checks are described separately from the final case counts. The searchable survey includes each task, actual endpoint, timestamp and individual predicate. Some predicates check for a string or a source domain. Others compare independently obtained measurements. Open a run to see which test was applied. This survey samples the separate [MCP registry census](../registry-census).
+
+## Read a result across two wildlife catalogs
+
+Two third-party MCP endpoints returned 398 records in the filtered iNaturalist query and 394 in its GBIF copy. Independent calls to each underlying REST service matched its own MCP result. The filters restrict the iNaturalist query to the research-grade records and licenses accepted by the export. The counts concern records in the chosen query. They cannot quantify the size of the animal population. See the [capture and predicates](sample/wildlife-catalogs.json) and [phone view](sample/phone-lynx.png).
+
+The dictionary case retains an earlier missed comparison in its notes. Its final pinyin and example-search checks establish different facts from finding the exact supplied sentence in a second corpus.
 
 ## Three recipes to run
 

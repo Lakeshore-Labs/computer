@@ -150,9 +150,9 @@ Open San Marco, Burano or Lido and inspect a real satellite pixel. The guest req
 
 [![A three-window satellite field reader over the Venetian Lagoon](lagoon-windows/sample/desktop.png)](lagoon-windows/README.md)
 
-### Search 85 actual hosted MCP runs
+### Search 94 recorded hosted MCP cases
 
-The [hosted fieldwork reader](hosted-fieldwork/) records 81 passing cases across 78 distinct endpoints and exposes the four missed checks. Replay a museum journey, a Warsaw sky brief or an independently checked Van Gogh record.
+The [hosted fieldwork reader](hosted-fieldwork/) records 90 passing cases across 86 distinct endpoints and exposes the four missed checks. Replay a museum journey, a Warsaw sky brief or an independently checked Van Gogh record.
 
 ### Build a designer’s palette from satellite pixels
 
