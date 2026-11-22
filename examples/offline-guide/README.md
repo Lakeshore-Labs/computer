@@ -4,10 +4,14 @@
 
 [Download the field guide](computer-field-guide.zip?raw=true) · [Browse the full exhibit index on GitHub](catalog.md)
 
-Extract the ZIP and open `index.html` in a browser. Search for a tool, file store or task. Each exhibit includes an observed result and its evidence. The collection study, festival calendars, tide listening room, terminal recordings, satellite viewer, printable dispatch sheet and Excel workbook all work offline. Public replay and attribution links open external sites.
+Extract the ZIP and open `index.html` in a browser. Search for a tool, file store or task. Each exhibit includes an observed result and its evidence. The rotating Oslofjord, bike-group selector, three-chapter Jupiter EPUB, printable QR claim, Gemini timeline and earlier 164 entries work offline. Public replay and attribution links open external sites.
 
 | Try this | What Computer does | What another interface verifies |
 | --- | --- | --- |
+| Compare two Oslofjord models | Writes two closed 13,428-face STL solids from the same real elevation grid. | Rotate both, then scrub the 30 and 84 deposited layers from CuraEngine. |
+| Find ten bikes in Oslo | Writes a shapefile and reads projected geometry from GDAL’s GeoPackage. | Change group size, choose from three feed times, or open the GIS files in another client. |
+| Take Jupiter into a classroom | Joins Wikidata and JPL measurements and packages a NASA/JPL/DLR image in a real EPUB. | EPUBCheck validates the book and EPUB.js reads all three chapters. |
+| Issue a lost-property claim | Writes a printable PDF and a QR image. | Quirc and Apple Vision decode the same synthetic claim. |
 | Compare two Van Gogh paintings | Joins Getty and Cleveland files through a native rclone VFS, resizes the two images and writes an offline study. | A browser decodes the exact thumbnails in two desktop columns or a single phone column. |
 | Update a festival program | TypeScript and Java clients use Computer to publish and amend a lobby page and calendar. | A read-only Python subscriber checks stable event IDs, and Chrome downloads the exact revised ICS. |
 | Listen to three tide stations | Synthesizes one timed note for each observed NOAA level and packages the tracks in HTML. | A waveform reader checks note pitch against the measurements. The browser plays each track offline. |
@@ -19,7 +23,7 @@ Extract the ZIP and open `index.html` in a browser. Search for a tool, file stor
 
 ## What the numbers count
 
-The November 22, 2026 snapshot contains 164 entries. Twenty-two featured entries tell complete stories. Seven runtime chapters cover the CLI, MCP and embedded runtimes. The library also contains 48 shell recipes, 22 storage exhibits, nine multi-tool workflows and 56 successful hosted calls to 55 distinct endpoints. Each number counts entries in that category. Several entries show the same underlying feature from different interfaces.
+The November 22, 2026 snapshot contains 172 entries. Twenty-six featured stories, eight runtime chapters, 48 command recipes, 25 storage exhibits, nine local MCP workflows and 56 hosted operations make up the catalog. The original hosted calls reached 55 distinct endpoints. One client or server can appear in several stories.
 
 The scope page records the three hosted attempts with unmet checks, observed storage limitations and cases left unrun in the initial survey. Later chapters demonstrate an actual Azurite-backed Blob mount, two Git tag filesystems, an in-process rclone VFS and two chunked storage gateways. Hosted results and public datasets reflect the time of capture.
 

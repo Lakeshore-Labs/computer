@@ -1,8 +1,8 @@
 # Offline exhibit index
 
-164 exhibits · 435 files · 8,483,514 bytes
+172 exhibits · 472 files · 11,479,229 bytes
 
-Archive SHA-256: `e5144646361178af492bd6a32d9a97030f2e7b292050094c0557e060533d626a`
+Archive SHA-256: `d17124afe9cf649adaa500dbb870dc51948497922c1288dafc37e25b393cea8f`
 
 The paths below are relative to the extracted archive. Public replay links open on GitHub.
 
@@ -19,14 +19,18 @@ The paths below are relative to the extracted archive. Public replay links open 
 - **Count the official MCP registry** — Computer fetched 703 pages of latest-version registry metadata, indexed 70,222 registrations in SQLite and charted the distribution. The replay can also fetch a small live sample. · `cases/registry.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/29)
 - **Curate two Van Gogh paintings from different collections** — An in-process rclone filesystem brings Getty and Cleveland source directories into one read-only mount. Computer reads two metadata formats, resizes the images and publishes a credited offline study. · `cases/museum.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/31)
 - **Draw proportional bars** — With a truncated axis the smallest route looked almost empty. The revised bar command puts zero on the value axis for wholly positive or wholly negative values. · `cases/baseline.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/18)
+- **Find ten bikes near Jernbanetorget** — Computer reads an actual GeoPackage to find a station with enough bikes for the whole group. Change the number of riders or explore the three underlying GBFS snapshots. · `cases/oslo-group.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/44)
 - **Follow 50,000 trips through four tools** — Two upstream servers supply CSV records and a binary image. Computer's WASI Python invokes both tools and writes SQLite. The shell builds the chart and an outer client reads the PNG. · `cases/trace.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/16)
 - **Follow a changing Azure Blob selection** — A Go host mounted an Azure Blob bucket backed by local Azurite. The guest made a thumbnail, then read a new selection from the same live mount after the host updated the blob. · `cases/blob.html`
 - **Hand a mounted file to another client** — Inspector writes a notice. mcporter edits it. A new Python SDK client reads the exact result and checks the shell checksum. Each client starts a separate Computer process. · `cases/handoff.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/17)
+- **Issue and scan a lost-property ticket** — A Rust MCP client asks Computer to make a synthetic paper claim and QR code. Two independent decoders recover the claim from a printed-page render and a rotated image. · `cases/claim-ticket.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/37)
 - **Listen to Pacific water levels at three stations** — Computer turns each saved NOAA height into a timed note and embeds three WAV recordings, charts and readings in one HTML file. An independent waveform check measures the pitch of every note. · `cases/tide-sound.html`
 - **Measure how much of a file reaches Gemini** — An actual filesystem MCP supplied the same CSV to two clients. A fixed query in Computer selected the matching row. Gemini returned the same answer with 13,338 and 55 prompt tokens on the largest input. · `cases/prompt.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/21)
 - **Print a dispatch sheet or open the workbook** — WASI Python produced a one-page PDF and an Excel workbook with formulas and a chart. Computer reopened the packet and rendered the printed page. · `cases/packet.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/12)
+- **Read four moons of Jupiter offline** — A guest joins Wikidata MCP records with JPL radii and a NASA spacecraft photograph. Download the resulting three-chapter EPUB and read it in your own reader. · `cases/moon-book.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/40)
 - **Repair a bakery site and recheck it in Chrome** — A bakery editor publishes a repaired sales board. Computer calls Chrome DevTools MCP, edits the HTML in WASI Python and assembles the report. Chrome independently checks both pages. · `cases/repair.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/22)
 - **Reschedule a short film festival across three clients** — The TypeScript client publishes the program. Java changes the running time. A separate read-only Python client parses the revised calendar. Its two later screenings start 15 minutes later. · `cases/festival.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/30)
+- **Rotate and slice the Oslofjord** — Computer turns 6,399 Norwegian elevation samples into two closed STL solids. Rotate the terrain or move a cut through the outer walls of both models. · `cases/terrain.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/42)
 - **Sit down at the Computer prompt** — A real pseudo-terminal session exercises command and file completion, tool arguments, history, and the working directory. The embedded agent segment uses a deterministic model fixture. · `cases/terminal.html`
 - **Try two edits to the same timetable** — A Go application supplies a read-only base and a writable memory layer per Computer. An edit at noon and an edit in the evening coexist. Each shell sees its own schedule. · `cases/plans.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/19)
 - **Turn a tool result into a browser artifact** — DuckDB MCP aggregates synthetic orders. Computer passes the result into a local dashboard. Playwright MCP operates the browser and captures the dashboard. The host assembles eleven real browser captures into an animation. · `cases/browser.html`
@@ -34,6 +38,7 @@ The paths below are relative to the extracted archive. Public replay links open 
 ## Runtime behavior
 
 - **Discover a new command between calls** — A fixture MCP advertises a new notes export tool. On the next execution Computer discovers it and makes it available as a shell command. · `cases/changed-tools.html`
+- **Finish a claim after the agent stops mid-tool** — A real Google Gemini process stopped before its packing tool returned. A fresh Computer process reopened the conversation and wrote the correct two-part notice. · `cases/claim-recovery.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/43)
 - **Give two jobs one WebAssembly slot** — A Go host starts finite guest jobs with controlled inputs. With one slot, an arriving job reaches its own deadline in the queue. When the host compiles the module with two slots, both guests enter before either is released. · `cases/concurrency.html`
 - **Interrupt a command and keep the working shell** — The reference prompt exited when Ctrl-C interrupted sleep. In the fixed executable the prompt returns, and a reader can open the same file in the same session. · `cases/interrupt.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/24)
 - **Pipe a script, inputs and deadlines through Computer** — The CLI reads a script on stdin, passes process arguments, preserves exit codes and applies call timeout limits. A Go host exercises the public package surface. · `cases/stream-input.html`
@@ -104,8 +109,11 @@ The paths below are relative to the extracted archive. Public replay links open 
 - **Host directory, read-write** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-host.html`
 - **io/fs: files compiled into the binary (embed.FS)** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-iofs-embed.html`
 - **Memory filesystem** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-memory.html`
+- **Publish two reading times with one book** — A librarian moves a Jupiter reading to 18:00 UTC. Both OCI editions use the same book layer. Two clients verify the separate calendars in a real loopback registry. · `cases/reading-registry.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/41)
+- **Read the same circulation ledger in six formats** — A single Computer reads a 32,768-row ledger through rclone alias, gzip, hasher, union, ZIP and SquashFS mounts. Independent readers check the recovered bytes. · `cases/storage-formats.html`
 - **Read-only by Mount.ReadOnly** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-readonly-flag.html`
 - **Read-only by the filesystem (afero.ReadOnlyFs)** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-readonly-fs.html`
+- **Recalibrate a weather bulletin in a mounted bucket** — An rclone editor updates a correction in an emulated Google Cloud Storage bucket. The same Computer observes it through its read-only mount and recalculates the bulletin from 24 synthetic readings. · `cases/gcs-calibration.html`
 - **S3 with a memory read cache (afero.CacheOnReadFs)** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-cache-on-read.html`
 - **S3-compatible object store (+ fstat, lost-write and marker findings)** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-s3.html`
 - **S3-compatible object store, second server (gofakes3) (+ leading-slash key finding)** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-s3-gofakes3.html`
