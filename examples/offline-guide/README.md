@@ -4,10 +4,14 @@
 
 [Download the field guide](computer-field-guide.zip?raw=true) · [Browse the full exhibit index on GitHub](catalog.md)
 
-Extract the ZIP and open `index.html` in a browser. Search for a tool, file store or task. Each exhibit includes an observed result and its evidence. The rotating Oslofjord, bike-group selector, three-chapter Jupiter EPUB, printable QR claim, Gemini timeline and earlier 164 entries work offline. Public replay and attribution links open external sites.
+Extract the ZIP and open `index.html` in a browser. Search for a tool, file store or task. Each exhibit includes an observed result and its evidence. The six-chapter film, engraved rehearsal score, wardrobe recount, satellite pixel reader, GIS models and other exhibits work from disk. Public replay and attribution links open external sites.
 
 | Try this | What Computer does | What another interface verifies |
 | --- | --- | --- |
+| Watch the 79-second field film | Six chapters trace each guest, client and reader’s contribution. | The offline player offers captions, chapter jumps, a separate MP4 and the transcript. |
+| Play one tune on two instruments | Two shells use a compiled WASI command to write standard MIDI and MusicXML parts. | Verovio engraves the music, Apple AudioToolbox reads both parts and the browser plays the opening. |
+| Fit seven ushers offline | A wardrobe MCP gives the guest two tools for stock and fittings. | The browser writes eight jackets offline and recovers the completed fitting list after restart. |
+| Pick colors from Venice | A Swift MCP client uses Computer to produce six colors from satellite tiles. | Native AppKit reads the color list. The offline page exports four palette formats. |
 | Compare two Oslofjord models | Writes two closed 13,428-face STL solids from the same real elevation grid. | Rotate both, then scrub the 30 and 84 deposited layers from CuraEngine. |
 | Find ten bikes in Oslo | Writes a shapefile and reads projected geometry from GDAL’s GeoPackage. | Change group size, choose from three feed times, or open the GIS files in another client. |
 | Take Jupiter into a classroom | Joins Wikidata and JPL measurements and packages a NASA/JPL/DLR image in a real EPUB. | EPUBCheck validates the book and EPUB.js reads all three chapters. |
@@ -23,9 +27,9 @@ Extract the ZIP and open `index.html` in a browser. Search for a tool, file stor
 
 ## What the numbers count
 
-The November 22, 2026 snapshot contains 172 entries. Twenty-six featured stories, eight runtime chapters, 48 command recipes, 25 storage exhibits, nine local MCP workflows and 56 hosted operations make up the catalog. The original hosted calls reached 55 distinct endpoints. One client or server can appear in several stories.
+The November 22, 2026 edition contains 215 exhibits. There are 31 featured stories, ten runtime chapters, 48 command recipes, 27 storage exhibits, nine local MCP workflows and 90 successful hosted cases. Several exhibits can exercise the same client, API or filesystem.
 
-The scope page records the three hosted attempts with unmet checks, observed storage limitations and cases left unrun in the initial survey. Later chapters demonstrate an actual Azurite-backed Blob mount, two Git tag filesystems, an in-process rclone VFS and two chunked storage gateways. Hosted results and public datasets reflect the time of capture.
+The hosted survey contains 94 final cases, of which 90 passed across 86 distinct endpoint URLs. Thirty-three passing cases share a documentation search-and-read pattern. Repeated tools or shared operators do not establish independent protocol implementations. The archive’s scope page and the [hosted fieldwork](../hosted-fieldwork/) describe the checks, four final misses and capture times. The catalog also records the editor’s native confirmation prompt and partial storage results.
 
 ## Verify the package
 
