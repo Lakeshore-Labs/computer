@@ -1,0 +1,23 @@
+[
+  {
+    "museum": "getty",
+    "inscription": "A print for Zoë & René <3",
+    "download_bytes": 35753,
+    "sha256": "43566222c025c8f6d20f730e3c9dbdaaa95adfcfa33e1987969ca707323c0cb6",
+    "native_raster": "19b6246ec5a53499ba0ef8fbb79d2174f71b03e2d19c366d3e1ab4d5fa676181"
+  },
+  {
+    "museum": "cleveland",
+    "inscription": "A print for Zoë & René <3",
+    "download_bytes": 31342,
+    "sha256": "01e0c8ccd57782644bd4dc1411aabbba7b15534dca95d948226f0dc690e0e522",
+    "native_raster": "45b4ec7f2e22d1c884c19fa511aecad390bfc1f2f35f73170aea8f5884538616"
+  },
+  {
+    "museum": "cleveland",
+    "inscription": "A print for Zoë & René <3",
+    "download_bytes": 31342,
+    "sha256": "01e0c8ccd57782644bd4dc1411aabbba7b15534dca95d948226f0dc690e0e522",
+    "native_raster": "45b4ec7f2e22d1c884c19fa511aecad390bfc1f2f35f73170aea8f5884538616"
+  }
+]

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Postcard Press — Van Gogh at the museum table</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div>
+        <p class="eyebrow">Computer · museum table</p>
+        <h1>Postcard Press</h1>
+      </div>
+      <p
+        id="status"
+        class="status"
+        data-state="connecting"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="dot" aria-hidden="true"></span
+        ><span id="status-text">Connecting to /mcp…</span>
+      </p>
+    </header>
+
+    <main class="table">
+      <section class="desk" aria-labelledby="h-order">
+        <h2 id="h-order">1 · Choose a painting</h2>
+        <fieldset class="works">
+          <legend class="sr">Artwork</legend>
+          <label class="work" data-museum="getty">
+            <input type="radio" name="museum" value="getty" checked />
+            <span class="swatch getty" aria-hidden="true"></span>
+            <span class="meta">
+              <strong>Irises</strong>
+              <span>Vincent van Gogh, 1889</span>
+              <span>The J. Paul Getty Museum · 90.PA.20</span>
+            </span>
+          </label>
+          <label class="work" data-museum="cleveland">
+            <input type="radio" name="museum" value="cleveland" />
+            <span class="swatch cleveland" aria-hidden="true"></span>
+            <span class="meta">
+              <strong
+                >The Large Plane Trees (Road Menders at Saint-Rémy)</strong
+              >
+              <span>Vincent van Gogh, 1889</span>
+              <span>The Cleveland Museum of Art · 1947.209</span>
+            </span>
+          </label>
+        </fieldset>
+
+        <h2 id="h-ins">2 · Write the inscription</h2>
+        <div class="field">
+          <label for="inscription"
+            >Inscription
+            <span class="hint">(1–48 characters, one line)</span></label
+          >
+          <input
+            id="inscription"
+            type="text"
+            maxlength="48"
+            value="From the garden"
+            autocomplete="off"
+            spellcheck="false"
+            aria-describedby="count err"
+          />
+          <p class="row">
+            <span id="err" class="err" role="alert"></span
+            ><span id="count" class="count">15 / 48</span>
+          </p>
+        </div>
+
+        <button id="issue" type="button" class="issue" disabled>
+          Issue postcard
+        </button>
+        <p class="fine">
+          Open-access artwork images, credited to the lending museum. The
+          inscription is yours; nothing leaves this computer.
+        </p>
+
+        <h2>Tools on this Computer</h2>
+        <ul id="tools" class="tools" aria-label="Tools reported by the server">
+          <li class="muted">waiting for listTools…</li>
+        </ul>
+      </section>
+
+      <section class="bench" aria-labelledby="h-card">
+        <h2 id="h-card">Postcard</h2>
+        <div id="stage" class="stage" aria-live="polite">
+          <p class="empty">
+            Your issued card appears here, drawn from the exact SVG the server
+            returns.
+          </p>
+        </div>
+        <div id="actions" class="actions" hidden>
+          <a id="download" class="dl" href="#">Download SVG</a>
+          <p id="facts" class="facts"></p>
+        </div>
+        <dl id="receipt" class="receipt" hidden></dl>
+
+        <h2>Steps</h2>
+        <ol id="trace" class="trace" aria-label="Tool calls made by this page">
+          <li class="muted">No calls yet.</li>
+        </ol>
+
+        <h2 id="h-issued">Issued this visit</h2>
+        <ul id="issued" class="issued" aria-labelledby="h-issued">
+          <li class="muted">None yet.</li>
+        </ul>
+      </section>
+    </main>
+    <script type="module" src="/desk.js"></script>
+  </body>
+</html>
