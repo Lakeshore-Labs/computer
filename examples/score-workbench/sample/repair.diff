@@ -1,0 +1,5 @@
+--- before/clarinet.go
++++ after/clarinet.go
+@@ -10 +10 @@
+-	return concert + "2"
++	return concert + WrittenOffset

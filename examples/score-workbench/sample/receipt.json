@@ -1,0 +1,50 @@
+{
+  "outer_tools": [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ],
+  "go": "go version go1.25.2 darwin/arm64",
+  "gopls": "golang.org/x/tools/gopls v0.23.0",
+  "initial_compiler": {
+    "exit": 1,
+    "text": "FAIL\texample.test/scoredesk/clarinet [build failed]\nFAIL\texample.test/scoredesk/cmd [build failed]\nFAIL\n# example.test/scoredesk/clarinet\nclarinet/clarinet.go:10:9: invalid operation: concert + \"2\" (mismatched types int and untyped string)\n"
+  },
+  "diagnostics_before": "File `<workspace>/score desk/clarinet/clarinet.go` has the following diagnostics:\n9:8-9:21: [Error] invalid operation: concert + \"2\" (mismatched types int and untyped string)\n\n",
+  "workspace_seen": true,
+  "symbol_found": true,
+  "references": "The object has 3 references. Their locations are listed below\nReference 1\nLocated in the file: <workspace>/score desk/clarinet/clarinet.go\nThe reference is located on line 8, which has content `func Written(concert int) int {`\n\nReference 2\nLocated in the file: <workspace>/score desk/clarinet/clarinet_test.go\nThe reference is located on line 7, which has content `if got := Written(c.concert); got != c.written {`\n\nReference 3\nLocated in the file: <workspace>/score desk/cmd/main.go\nThe reference is located on line 10, which has content `w := clarinet.Written(concert)`\n\n",
+  "package_api": "\"example.test/scoredesk/clarinet\" (package clarinet)\nclarinet.go:\n```go\n// Package clarinet converts concert pitch to the written pitch of a B-flat clarinet.\npackage clarinet\n\n// WrittenOffset is how many semitones a B-flat clarinet's written note sits\n// above the concert (sounding) note: a major second.\nconst WrittenOffset = 2\n\n// Written returns the written MIDI note for a concert MIDI note.\nfunc Written(concert int) int\n\n// Name returns a note name such as \"C4\" for a MIDI number (sharps only).\nfunc Name(midi int) string\n\n```\n\n",
+  "diff": "--- before/clarinet.go\n+++ after/clarinet.go\n@@ -10 +10 @@\n-\treturn concert + \"2\"\n+\treturn concert + WrittenOffset\n",
+  "same_session": "No diagnostics.\n",
+  "fresh_session": "No diagnostics.\n",
+  "after_checks": [
+    {
+      "exit": 0,
+      "text": ""
+    },
+    {
+      "exit": 0,
+      "text": ""
+    },
+    {
+      "exit": 0,
+      "text": "ok  \texample.test/scoredesk/clarinet\t0.271s\n?   \texample.test/scoredesk/cmd\t[no test files]\n"
+    },
+    {
+      "exit": 0,
+      "text": "concert C4 (MIDI 60) -> written D4 (MIDI 62)\n"
+    }
+  ],
+  "unchanged_files": [
+    "clarinet/clarinet_test.go",
+    "cmd/main.go",
+    "go.mod"
+  ],
+  "wrong_offset_test": {
+    "exit": 1,
+    "text": "--- FAIL: TestWritten (0.00s)\n    clarinet_test.go:9: Written(60) = 63, want 62\n    clarinet_test.go:9: Written(58) = 61, want 60\n    clarinet_test.go:9: Written(70) = 73, want 72\nFAIL\nFAIL\texample.test/scoredesk/clarinet\t0.272s\n?   \texample.test/scoredesk/cmd\t[no test files]\nFAIL\n"
+  },
+  "passed": true
+}
