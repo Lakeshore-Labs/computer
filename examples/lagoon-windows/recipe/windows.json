@@ -1,0 +1,11 @@
+{
+  "crs": "EPSG:32632",
+  "origin_east_m": 699960,
+  "origin_north_m": 5100000,
+  "pixel_m": 10,
+  "locations": [
+    {"id":"san-marco","name":"San Marco","lon":12.338,"lat":45.434,"east_m":761089.6986593677,"north_m":5036585.628163036},
+    {"id":"burano","name":"Burano","lon":12.4165,"lat":45.4854,"east_m":766986.6809175008,"north_m":5042553.966645449},
+    {"id":"lido","name":"Lido","lon":12.3711,"lat":45.4158,"east_m":763763.4899112928,"north_m":5034671.851762064}
+  ]
+}

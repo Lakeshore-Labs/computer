@@ -143,3 +143,9 @@ Rotate two solids made from the same real elevation grid, then move through thei
 Explore three observed Oslo City Bike feeds, open the GIS files, or change the size of a group meeting at Jernbanetorget. Computer writes a shapefile, reads back a GDAL-projected GeoPackage and calculates which nearby station could serve everyone. [Open the two offline readers](oslo-bike-desk/README.md)
 
 [![Three sites with enough bikes for the group](oslo-bike-desk/sample/meeting.png)](oslo-bike-desk/README.md)
+
+## Inspect three satellite windows over Venice
+
+Open San Marco, Burano or Lido and inspect a real satellite pixel. The guest requested 3.65% of the remote GeoTIFF using four HTTP range reads. A separate GDAL reader matched every pixel. [Open the offline inspector](lagoon-windows/README.md)
+
+[![A three-window satellite field reader over the Venetian Lagoon](lagoon-windows/sample/desktop.png)](lagoon-windows/README.md)

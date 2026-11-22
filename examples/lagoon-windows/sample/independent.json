@@ -1,0 +1,42 @@
+{
+  "independent_reader": "Rasterio 1.4.3 / GDAL 3.9.3",
+  "whole_object_bytes": 129604455,
+  "guest_image_range_bytes": 4725740,
+  "requested_percent": 3.6463,
+  "compressed_blocks": 3,
+  "images": [
+    {
+      "place": "San Marco",
+      "pixels_matched": 65536,
+      "rgb_sha256": "a2969b4eb939a5de236217ec0923f87f03cf5694860a77751e57218ff3ff88a9",
+      "window": [
+        5984,
+        6213,
+        256,
+        256
+      ]
+    },
+    {
+      "place": "Burano",
+      "pixels_matched": 65536,
+      "rgb_sha256": "ada105d6a5722969b2499c6f9779cd54f9cd4984a23d341e3fda480ce8933e92",
+      "window": [
+        6574,
+        5616,
+        256,
+        256
+      ]
+    },
+    {
+      "place": "Lido",
+      "pixels_matched": 65536,
+      "rgb_sha256": "e74368341e33f1d2ffd2c23bb60e8a4f8b254726e6a7590a39f2c19808e43f46",
+      "window": [
+        6252,
+        6404,
+        256,
+        256
+      ]
+    }
+  ]
+}
