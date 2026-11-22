@@ -67,3 +67,5 @@ require (
 	golang.org/x/tools v0.52.0 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 )
+
+replace github.com/ewhauser/gbash => github.com/Lakeshore-Labs/gbash v0.0.42-0.20261122043934-58176192a7d5
