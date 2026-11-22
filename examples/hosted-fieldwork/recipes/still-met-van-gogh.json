@@ -1,0 +1,30 @@
+{
+  "id": "still-met-van-gogh",
+  "servers": {
+    "st": "https://still-mcp.still-limit-c6ac.workers.dev/mcp"
+  },
+  "allow": [
+    "https://collectionapi.metmuseum.org/"
+  ],
+  "python": true,
+  "checks": [
+    {
+      "desc": "output contains 'Wheat Field with Cypresses'",
+      "ok": true
+    },
+    {
+      "desc": "output contains 'Vincent van Gogh'",
+      "ok": true
+    },
+    {
+      "desc": "output contains 'status: ok'",
+      "ok": true
+    },
+    {
+      "desc": "all six fields match",
+      "ok": true
+    }
+  ],
+  "stdout_sha256": "4514cc9f6869ffe266e51f32e43906345402ed9ec7f8512bc1383835dd7a220c",
+  "observed_utc": "2026-11-22T21:29:30.603968+00:00"
+}

@@ -1,0 +1,45 @@
+{
+  "id": "story-warsaw-sky-night",
+  "servers": {
+    "ks": "https://kosmos.info.pl/mcp",
+    "tm": "https://time.memoryapi.org/mcp"
+  },
+  "allow": [],
+  "python": true,
+  "checks": [
+    {
+      "desc": "output contains 'kosmos verdict:'",
+      "ok": true
+    },
+    {
+      "desc": "output contains 'USNO sun:'",
+      "ok": true
+    },
+    {
+      "desc": "output contains 'synodic model:'",
+      "ok": true
+    },
+    {
+      "desc": "output contains 'Geminids peak'",
+      "ok": true
+    },
+    {
+      "desc": "sunset check",
+      "ok": true
+    },
+    {
+      "desc": "dark window check",
+      "ok": true
+    },
+    {
+      "desc": "moon check",
+      "ok": true
+    },
+    {
+      "desc": "Geminids date check",
+      "ok": true
+    }
+  ],
+  "stdout_sha256": "0f0579b9add026c71613cce1dd1611470bcd5c20bff55bb164326bf8c4ab0da7",
+  "observed_utc": "2026-11-22T21:31:07.135272+00:00"
+}

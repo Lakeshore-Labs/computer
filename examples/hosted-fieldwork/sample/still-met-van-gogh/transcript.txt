@@ -1,0 +1,4 @@
+MCP  : Wheat Field with Cypresses | Vincent van Gogh | 1889 | Oil on canvas | The Metropolitan Museum of Art
+Met  : Wheat Field with Cypresses | Vincent van Gogh | 1889 | Oil on canvas | accession 1993.132
+fields matching Met API: 6 of 6
+status: ok

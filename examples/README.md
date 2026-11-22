@@ -149,3 +149,7 @@ Explore three observed Oslo City Bike feeds, open the GIS files, or change the s
 Open San Marco, Burano or Lido and inspect a real satellite pixel. The guest requested 3.65% of the remote GeoTIFF using four HTTP range reads. A separate GDAL reader matched every pixel. [Open the offline inspector](lagoon-windows/README.md)
 
 [![A three-window satellite field reader over the Venetian Lagoon](lagoon-windows/sample/desktop.png)](lagoon-windows/README.md)
+
+### Search 85 actual hosted MCP runs
+
+The [hosted fieldwork reader](hosted-fieldwork/) records 81 passing cases across 78 distinct endpoints and exposes the four missed checks. Replay a museum journey, a Warsaw sky brief or an independently checked Van Gogh record.
