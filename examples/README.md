@@ -113,3 +113,9 @@ A native rclone filesystem combines the Getty and Cleveland collections inside C
 Pick from 34 standalone shell recipes. Build images and charts, read or write documents, query a million SQLite rows and turn a timetable into sound. Every run starts with a new writable directory.
 
 [![Four products from an actual complete workbook run](offline-workbook/workbook.jpg)](offline-workbook/README.md)
+
+## Issue a printable lost-property ticket
+
+Computer issues a PDF and QR for a fictional library desk. A Rust MCP client reads the original and rotated image, then independently scans a rendering of the printable ticket.
+
+[![A printed ticket for a red wool scarf](claim-ticket/sample/paper.png)](claim-ticket/README.md)
