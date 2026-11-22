@@ -95,3 +95,9 @@ Four NASA Terra MODIS observations became an offline application inside Computer
 Computer paged through 70,222 registrations and charted how providers distribute their servers. Replay all 703 captured page counts offline or collect a bounded live sample.
 
 [![Registry registrations grouped by declared distribution](registry-census/sample/distribution.png)](registry-census/README.md)
+
+## Publish a revised festival program
+
+The box office uses TypeScript, the projectionist uses Java and a calendar subscriber uses Python. Their three independent Computer sessions publish the lobby board and verify the revised calendar. A browser downloads the new edition.
+
+[![The revised screening times displayed in a browser](festival-calendar/sample/amended.png)](festival-calendar/README.md)

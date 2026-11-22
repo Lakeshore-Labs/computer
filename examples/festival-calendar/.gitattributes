@@ -1,0 +1,2 @@
+# Calendar subscribers receive the guest's original CRLF bytes.
+*.ics -text whitespace=cr-at-eol

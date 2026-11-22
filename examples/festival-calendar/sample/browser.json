@@ -1,0 +1,16 @@
+{
+  "original": [
+    "18:00",
+    "18:30",
+    "19:07"
+  ],
+  "amended": [
+    "18:00",
+    "18:45",
+    "19:22"
+  ],
+  "download": "amended.ics",
+  "sha256": "2c3acb14ea5bfda35d72bcec69e7e249b22828dc738478c9821eaaf007b657ac",
+  "mobile_width": 390,
+  "external_requests": []
+}
