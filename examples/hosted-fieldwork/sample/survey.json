@@ -1975,7 +1975,7 @@
   {
     "pass_number": 2,
     "id": "memoryapi-warsaw-sun",
-    "provider": "time.memoryapi.org (US Naval Observatory times)",
+    "provider": "time.memoryapi.org",
     "task": "Sunrise/sunset for Warsaw on the 2026 solstice vs an independent NOAA solar calculation",
     "endpoints": [
       "https://time.memoryapi.org/mcp"
@@ -1997,7 +1997,8 @@
         "check": "output contains 'within 3 min: True'",
         "passed": true
       }
-    ]
+    ],
+    "note": "The original guest labeled the provider response “USNO via MCP”. That check only matched output text. The independent comparison used a NOAA-style solar calculation."
   },
   {
     "pass_number": 2,
@@ -2138,25 +2139,18 @@
     "passed": true,
     "category": "arts",
     "combined_story": false,
-    "checked_utc": "2026-11-22T21:29:30.603968+00:00",
+    "checked_utc": "2026-11-22T21:47:38.510445+00:00",
     "checks": [
       {
-        "check": "output contains 'Wheat Field with Cypresses'",
+        "check": "fields matching Met API: 6 of 6$",
         "passed": true
       },
       {
-        "check": "output contains 'Vincent van Gogh'",
-        "passed": true
-      },
-      {
-        "check": "output contains 'status: ok'",
-        "passed": true
-      },
-      {
-        "check": "all six fields match",
+        "check": "status: ok$",
         "passed": true
       }
-    ]
+    ],
+    "stdout_sha256": "4514cc9f6869ffe266e51f32e43906345402ed9ec7f8512bc1383835dd7a220c"
   },
   {
     "pass_number": 2,
@@ -2170,38 +2164,31 @@
     "passed": true,
     "category": "story",
     "combined_story": true,
-    "checked_utc": "2026-11-22T21:30:55.694355+00:00",
+    "checked_utc": "2026-11-22T21:47:45.194652+00:00",
     "checks": [
       {
-        "check": "output contains 'The Body of the Dead Christ in the Tomb'",
+        "check": "= Kunstmuseum Basel",
         "passed": true
       },
       {
-        "check": "output contains 'STEP 4'",
+        "check": "city is Basel in both sources: True$",
         "passed": true
       },
       {
-        "check": "output contains '= Kunstmuseum Basel'",
+        "check": "year within 2 of Wikidata: True$",
         "passed": true
       },
       {
-        "check": "city is Basel in both sources",
-        "passed": true
-      },
-      {
-        "check": "year check",
-        "passed": true
-      },
-      {
-        "check": "duration arithmetic",
+        "check": "min equals stated \\d+ min: True$",
         "passed": true
       }
-    ]
+    ],
+    "stdout_sha256": "9fc73262b998ac1c413f0d72640a5251de4bc652b0e0ea6cf174e2adadbbba58"
   },
   {
     "pass_number": 2,
     "id": "story-warsaw-sky-night",
-    "provider": "STORY: kosmos.info.pl + USNO times + independent astronomy",
+    "provider": "kosmos.info.pl and time.memoryapi.org, with independent arithmetic",
     "task": "A Warsaw sky-watching brief: tonight verdict, moon, sun and a Geminids countdown, checked against NOAA solar maths and a synodic-month model",
     "endpoints": [
       "https://kosmos.info.pl/mcp",
@@ -2210,41 +2197,26 @@
     "passed": true,
     "category": "story",
     "combined_story": true,
-    "checked_utc": "2026-11-22T21:31:07.135272+00:00",
+    "checked_utc": "2026-11-22T22:38:14.109750+00:00",
     "checks": [
       {
-        "check": "output contains 'kosmos verdict:'",
+        "check": "CHECK sunset agrees within 5 min: True$",
         "passed": true
       },
       {
-        "check": "output contains 'USNO sun:'",
+        "check": "CHECK dark window starts after civil twilight: True$",
         "passed": true
       },
       {
-        "check": "output contains 'synodic model:'",
+        "check": "CHECK kosmos moon within 6 points of model: True$",
         "passed": true
       },
       {
-        "check": "output contains 'Geminids peak'",
-        "passed": true
-      },
-      {
-        "check": "sunset check",
-        "passed": true
-      },
-      {
-        "check": "dark window check",
-        "passed": true
-      },
-      {
-        "check": "moon check",
-        "passed": true
-      },
-      {
-        "check": "Geminids date check",
+        "check": "CHECK Geminids peak is Dec 13/14: True$",
         "passed": true
       }
-    ]
+    ],
+    "stdout_sha256": "ff4a0be3a53369a6b62ca649fe9cfbae62ae9cd0680f4a98aced9349cf72183b"
   },
   {
     "pass_number": 2,

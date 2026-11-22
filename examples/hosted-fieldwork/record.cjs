@@ -26,6 +26,11 @@ async function main() {
       assert.equal(await page.locator('details[open]').count(),1);
       assert.equal(await page.locator('details a').count(),2);
       await page.screenshot({path:path.join(output,name+'.png')});
+      await page.getByRole('button',{name:'The Warsaw night sky'}).click();
+      const warsaw = await page.locator('details[open]').innerText();
+      assert.match(warsaw,/time.memoryapi.org/);
+      assert.match(warsaw,/CHECK sunset agrees within 5 min/);
+      assert.doesNotMatch(warsaw,/USNO times/);
       await page.getByRole('button',{name:'Two lynx catalogs'}).click();
       assert.match(await page.locator('details[open]').innerText(),/398 vs 394/);
       await page.screenshot({path:path.join(output,name+'-lynx.png')});

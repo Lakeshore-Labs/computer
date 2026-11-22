@@ -1,6 +1,8 @@
 """Recompute the published counts from sample/survey.json and check sample/amendment-8.json against them.
 usage: python3 -I check_counts.py   (no network; exits 1 on any mismatch)"""
+import hashlib
 import json
+import re
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -42,4 +44,16 @@ check("cohort 3 operator groups", len(groups), c3["operator_groups"])
 att = amend["cohort3_attempts"]
 check("attempt entries (runs)", sum(len(v) for v in att["cases"].values()), att["logged_runs"])
 check("first-run passes", sum(v[0] == "pass" for v in att["cases"].values()), att["first_runs"]["passed"])
+for path in sorted(root.glob("*/receipt.json")):
+    receipt = json.loads(path.read_text())
+    case = receipt["case"]
+    row = next(r for r in rows if r["id"] == case)
+    transcript = path.with_name("transcript.txt").read_bytes()
+    check(case + " transcript digest", hashlib.sha256(transcript).hexdigest(), receipt["stdout_sha256"])
+    check(case + " observation time", row["checked_utc"], receipt["observed_utc"])
+    check(case + " recorded transcript", row.get("stdout_sha256"), receipt["stdout_sha256"])
+    predicates = [{"check": pattern, "passed": result} for pattern, result in receipt["checks"].items()]
+    check(case + " survey predicates", row["checks"], predicates)
+    for pattern, result in receipt["checks"].items():
+        check(case + " " + pattern, bool(re.search(pattern, transcript.decode(), re.MULTILINE)), result)
 raise SystemExit(1 if failures else 0)

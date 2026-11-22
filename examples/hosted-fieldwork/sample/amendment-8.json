@@ -1,5 +1,5 @@
 {
- "label": "Amendment after independent review 8 (2026-11-22). Survey rows in survey.json are unchanged; this file adds counting context. Verify with check_counts.py.",
+ "label": "Historical amendment after independent review 8 (2026-11-22). Counting context for the original survey. The gallery now links the latest published story receipts.",
  "final_counts": {
   "final_cases": 94,
   "passed": 90,
