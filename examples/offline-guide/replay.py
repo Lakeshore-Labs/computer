@@ -22,10 +22,26 @@ async def replay(guide, computer, output):
     with ZipFile(Path(__file__).with_name('computer-field-guide.zip')) as archive:
         expected_pdf = archive.read('assets/dispatch.pdf')
         expected_image = archive.read('assets/repair.png')
+        documents = {
+            uri: (kind, archive.read(member)) for uri, kind, member in [
+                ('guide://festival/original', 'text/calendar', 'assets/original.ics'),
+                ('guide://festival/amended', 'text/calendar', 'assets/amended.ics'),
+                ('guide://collections/saint-remy', 'text/html', 'assets/museum-study.html'),
+                ('guide://observations/pacific-listening-room', 'text/html', 'assets/listen-to-the-pacific.html'),
+            ]
+        }
     async with connect(guide) as direct:
         operations = sorted(t.name for t in (await direct.list_tools()).tools)
         assert operations == ['search', 'show']
         resources = sorted(str(r.uri) for r in (await direct.list_resources()).resources)
+        document_checks = {}
+        for uri, (mime, expected) in documents.items():
+            assert uri in resources
+            result = await direct.read_resource(uri)
+            assert len(result.contents) == 1
+            content = result.contents[0]
+            assert content.mime_type == mime and content.text.encode('utf-8') == expected
+            document_checks[uri] = {'bytes': len(expected), 'sha256': hashlib.sha256(expected).hexdigest()}
         pdf = await direct.read_resource('guide://dispatch/sheet')
         sheet = base64.b64decode(pdf.contents[0].blob, validate=True)
         assert sheet == expected_pdf
@@ -54,7 +70,7 @@ identify bakery.png"""
         assert not read.is_error and len(images) == 1 and images[0].mime_type == 'image/png'
         image = base64.b64decode(images[0].data, validate=True)
         assert image == expected_image == (output / 'bakery.png').read_bytes()
-    receipt = {'guide_tools': operations, 'resource_uris': resources, 'outer_tools': tools,
+    receipt = {'guide_tools': operations, 'resource_uris': resources, 'documents': document_checks, 'outer_tools': tools,
                'pdf_bytes': len(sheet), 'pdf_sha256': hashlib.sha256(sheet).hexdigest(),
                'guest_answer': answer, 'image_bytes': len(image), 'image_sha256': hashlib.sha256(image).hexdigest()}
     (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')

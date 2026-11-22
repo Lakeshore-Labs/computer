@@ -63,7 +63,7 @@ func newGuide() (*mcp.Server, error) {
 		exhibits[id] = item
 	}
 
-	server := mcp.NewServer(&mcp.Implementation{Name: "computer-field-guide", Version: "1.0.0"}, nil)
+	server := mcp.NewServer(&mcp.Implementation{Name: "computer-field-guide", Version: "1.1.0"}, nil)
 	mcp.AddTool(server, &mcp.Tool{Name: "search", Description: "Find recorded Computer exhibits. Returns up to twelve matching entries and the full match count."},
 		func(_ context.Context, _ *mcp.CallToolRequest, in searchInput) (*mcp.CallToolResult, searchOutput, error) {
 			if in.Offset < 0 {
@@ -114,6 +114,10 @@ func newGuide() (*mcp.Server, error) {
 		{"guide://dispatch/sheet", "Printable dispatch sheet", "application/pdf", "assets/dispatch.pdf"},
 		{"guide://dispatch/workbook", "Dispatch workbook", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "assets/dispatch.xlsx"},
 		{"guide://observations/great-lakes", "Offline satellite observation desk", "text/html", "assets/great-lakes.html"},
+		{"guide://festival/original", "Original festival calendar", "text/calendar", "assets/original.ics"},
+		{"guide://festival/amended", "Amended festival calendar", "text/calendar", "assets/amended.ics"},
+		{"guide://collections/saint-remy", "Two paintings from Saint-Rémy", "text/html", "assets/museum-study.html"},
+		{"guide://observations/pacific-listening-room", "Pacific tide listening room", "text/html", "assets/listen-to-the-pacific.html"},
 	} {
 		server.AddResource(&mcp.Resource{URI: asset.uri, Name: asset.name, MIMEType: asset.kind},
 			func(_ context.Context, _ *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
@@ -122,7 +126,7 @@ func newGuide() (*mcp.Server, error) {
 					return nil, err
 				}
 				content := &mcp.ResourceContents{URI: asset.uri, MIMEType: asset.kind}
-				if asset.kind == "text/html" {
+				if strings.HasPrefix(asset.kind, "text/") {
 					content.Text = string(data)
 				} else {
 					content.Blob = data

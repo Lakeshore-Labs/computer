@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -91,5 +92,28 @@ func TestDispatchResourceReturnsPDF(t *testing.T) {
 	}
 	if len(packet.Contents) != 1 || !bytes.HasPrefix(packet.Contents[0].Blob, []byte("%PDF-")) {
 		t.Fatal("dispatch resource did not return a PDF")
+	}
+}
+
+func TestGuidePublishesAmendedFestivalCalendar(t *testing.T) {
+	session := connectGuide(t)
+	uri := "guide://festival/amended"
+	listed, err := session.ListResources(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.ContainsFunc(listed.Resources, func(r *mcp.Resource) bool { return r.URI == uri && r.MIMEType == "text/calendar" }) {
+		t.Fatalf("the amended calendar is missing from listed resources")
+	}
+	result, err := session.ReadResource(t.Context(), &mcp.ReadResourceParams{URI: uri})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Contents) != 1 {
+		t.Fatalf("got %d contents", len(result.Contents))
+	}
+	cal := result.Contents[0]
+	if cal.URI != uri || cal.MIMEType != "text/calendar" || !strings.Contains(cal.Text, "DTSTART:20261123T184500Z\r\n") {
+		t.Fatalf("calendar time or encoding differs from the published program")
 	}
 }

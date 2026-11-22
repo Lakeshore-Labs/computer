@@ -42,13 +42,17 @@ The same ZIP can be the data source for a local MCP server. Build the server fro
 CGO_ENABLED=0 go build -o ./bin/field-guide ./examples/offline-guide
 ```
 
-The `search` tool finds exhibits by words in their titles, categories and descriptions. It returns up to twelve matches and the total match count. Pass an offset to read the next matches in stable ID order. The `show` tool accepts one of those IDs and returns the evidence document plus a PNG or JPEG when the exhibit has one. An MCP client can also list three resources and read their data directly.
+The `search` tool finds exhibits by words in their titles, categories and descriptions. It returns up to twelve matches and the total match count. Pass an offset to read the next matches in stable ID order. The `show` tool accepts one of those IDs and returns the evidence document plus a PNG or JPEG when the exhibit has one. An MCP client can also list seven resources and read their data directly.
 
 | Resource | Content |
 | --- | --- |
 | `guide://dispatch/sheet` | Printable PDF |
 | `guide://dispatch/workbook` | Excel workbook |
 | `guide://observations/great-lakes` | Self-contained satellite comparison HTML |
+| `guide://festival/original` | Original three-screening calendar in iCalendar format |
+| `guide://festival/amended` | Updated calendar with stable event UIDs and revised times |
+| `guide://collections/saint-remy` | Self-contained museum study with both collection images and credits |
+| `guide://observations/pacific-listening-room` | Self-contained player with three recorded tide tracks and observation tables |
 
 MCP Inspector can list the resources directly with `npx -y @modelcontextprotocol/inspector@2.13.0 --cli ./bin/field-guide --method resources/list`.
 
@@ -61,7 +65,7 @@ mkdir -p ./bin/guide-work
   -c "guide search --query 'bakery chrome' | jq -r '.items[].title'"
 ```
 
-The replay uses the Python MCP SDK to read the PDF as a resource. A second connection lists Computer’s four tools, calls its shell to select a bakery exhibit and save the upstream image, then reads the resulting PNG. The replay compares both files byte for byte against the archive. The recorded PDF is 1,983 bytes. The PNG returned through Computer is 100,352 bytes. Run it with a fresh output directory. [Captured MCP receipt](mcp-receipt.json)
+The replay uses the Python MCP SDK to read the PDF and compare the two calendars, museum study and tide player byte for byte with the archive. A second connection lists Computer’s four tools, calls its shell to select a bakery exhibit and save the upstream image, then reads the resulting PNG. The replay compares both files byte for byte against the archive. The recorded PDF is 1,983 bytes. The PNG returned through Computer is 100,352 bytes. Run it with a fresh output directory. [Captured MCP receipt](mcp-receipt.json)
 
 ```sh
 uv run --with mcp==2.3.0 python examples/offline-guide/replay.py \

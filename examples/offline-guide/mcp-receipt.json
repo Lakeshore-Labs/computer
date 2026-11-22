@@ -4,10 +4,32 @@
     "show"
   ],
   "resource_uris": [
+    "guide://collections/saint-remy",
     "guide://dispatch/sheet",
     "guide://dispatch/workbook",
-    "guide://observations/great-lakes"
+    "guide://festival/amended",
+    "guide://festival/original",
+    "guide://observations/great-lakes",
+    "guide://observations/pacific-listening-room"
   ],
+  "documents": {
+    "guide://festival/original": {
+      "bytes": 679,
+      "sha256": "e06d6868078deabee0cba257e10146d99453885f34e92f492e8bb3bd7ffba3bc"
+    },
+    "guide://festival/amended": {
+      "bytes": 679,
+      "sha256": "2c3acb14ea5bfda35d72bcec69e7e249b22828dc738478c9821eaaf007b657ac"
+    },
+    "guide://collections/saint-remy": {
+      "bytes": 349258,
+      "sha256": "ebeef91aff90dbd13f00efe4ac5d98f6e10a316e8de1c37f1b2b94a845e5a319"
+    },
+    "guide://observations/pacific-listening-room": {
+      "bytes": 415117,
+      "sha256": "df57776b7131028ac51ed4373d6a668d46caba82ec6d20f0066020b1e1283027"
+    }
+  },
   "outer_tools": [
     "bash",
     "edit",
