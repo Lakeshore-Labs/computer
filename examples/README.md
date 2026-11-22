@@ -81,3 +81,11 @@ Computer reads two tagged lighting plans as separate filesystems. The show still
 [![Cue timing and colors in the two Git tags](stage-lighting/sample/cues.png)](stage-lighting/README.md)
 
 [Inspect the cue sheet and replay the comparison](stage-lighting/README.md)
+
+## Compare the Great Lakes from orbit
+
+Four NASA Terra MODIS observations became an offline application inside Computer. Switch the dates and move the divider to inspect the same landscape.
+
+[![Actual browser capture of the Great Lakes comparison desk](earth-observer/sample/desk.jpg)](earth-observer/README.md)
+
+[Download the viewer and replay the workflow](earth-observer/README.md)
