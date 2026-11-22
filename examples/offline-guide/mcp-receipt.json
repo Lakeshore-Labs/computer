@@ -13,7 +13,7 @@
     "guide://observations/pacific-listening-room"
   ],
   "exhibit_template": "guide://exhibits/{id}",
-  "exact_exhibit_receipts": 215,
+  "exact_exhibit_receipts": 226,
   "documents": {
     "guide://festival/original": {
       "bytes": 679,
@@ -28,8 +28,8 @@
       "sha256": "ebeef91aff90dbd13f00efe4ac5d98f6e10a316e8de1c37f1b2b94a845e5a319"
     },
     "guide://observations/pacific-listening-room": {
-      "bytes": 850088,
-      "sha256": "75ca4d4ec25e582938f12e8c31237c78b0cd6432f2c5fb180b400f4dd7400df6"
+      "bytes": 995078,
+      "sha256": "42ab5090018b0f190d0886781f9066f7f30c748ec2623188e3c0a5ecba1968f3"
     }
   },
   "outer_tools": [

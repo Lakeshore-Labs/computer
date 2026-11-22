@@ -8,6 +8,9 @@ Extract the ZIP and open `index.html` in a browser. Search for a tool, file stor
 
 | Try this | What Computer does | What another interface verifies |
 | --- | --- | --- |
+| Rewind four observation histories | WASI Python joins tide, bike, hosted MCP and persistent client records in SQLite. | An independent browser checks each capture time and party size. |
+| Issue a ZPL file | A local model calls read and write across resumed Computer processes. | The verifier holds malformed drafts and the browser downloads the corrected printer jobs. |
+| Deliver a flute score through nine stores | Computer calls separate rclone write and read tools for 18 copies. | External reads reproduce the original score bytes. |
 | Watch the 79-second field film | Six chapters trace each guest, client and reader’s contribution. | The offline player offers captions, chapter jumps, a separate MP4 and the transcript. |
 | Play one tune on two instruments | Two shells use a compiled WASI command to write standard MIDI and MusicXML parts. | Verovio engraves the music, Apple AudioToolbox reads both parts and the browser plays the opening. |
 | Fit seven ushers offline | A wardrobe MCP gives the guest two tools for stock and fittings. | The browser writes eight jackets offline and recovers the completed fitting list after restart. |
@@ -27,7 +30,7 @@ Extract the ZIP and open `index.html` in a browser. Search for a tool, file stor
 
 ## What the numbers count
 
-The November 22, 2026 edition contains 215 exhibits. There are 31 featured stories, ten runtime chapters, 48 command recipes, 27 storage exhibits, nine local MCP workflows and 90 successful hosted cases. Several exhibits can exercise the same client, API or filesystem.
+The November 22, 2026 edition contains 226 exhibits. There are 34 featured stories, 12 runtime chapters, 48 command recipes, 30 storage exhibits, 12 local MCP workflows and 90 successful hosted cases. Several exhibits can exercise the same client, API or filesystem.
 
 The hosted survey contains 94 final cases, of which 90 passed across 86 distinct endpoint URLs. Thirty-three passing cases share a documentation search-and-read pattern. Repeated tools or shared operators do not establish independent protocol implementations. The archive’s scope page and the [hosted fieldwork](../hosted-fieldwork/) describe the checks, four final misses and capture times. The catalog also records the editor’s native confirmation prompt and partial storage results.
 

@@ -1,6 +1,6 @@
 # Computer field guide
 
-[Watch the 79-second field film](field-film/README.md) · [Download the visual guide for offline use](offline-guide/README.md) · [Browse all 215 exhibits](offline-guide/catalog.md)
+[Watch the 79-second field film](field-film/README.md) · [Download the visual guide for offline use](offline-guide/README.md) · [Browse all 226 exhibits](offline-guide/catalog.md)
 
 ## What crosses the MCP connection?
 
