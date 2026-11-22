@@ -1,0 +1,22 @@
+{
+  "guide_tools": [
+    "search",
+    "show"
+  ],
+  "resource_uris": [
+    "guide://dispatch/sheet",
+    "guide://dispatch/workbook",
+    "guide://observations/great-lakes"
+  ],
+  "outer_tools": [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ],
+  "pdf_bytes": 1983,
+  "pdf_sha256": "44458168def9c1c2a146cb270b4d680673f373cc3ddf3d9d034945822903122c",
+  "guest_answer": "100\nbakery.png PNG 1080x650",
+  "image_bytes": 100352,
+  "image_sha256": "2f2c65cbde6cbea9dd1876845362eb593041f672c1a9aaacd14b136c4d189831"
+}

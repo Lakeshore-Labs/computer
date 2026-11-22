@@ -28,3 +28,39 @@ The verification program uses the Python standard library. It checks archive int
 python3 examples/offline-guide/verify_bundle.py > /tmp/computer-exhibit-index.md
 diff -u examples/offline-guide/catalog.md /tmp/computer-exhibit-index.md
 ```
+
+## Connect an MCP client to the guide
+
+![Computer searching the guide, reading the bakery audit, and saving its image](query-guide.gif)
+
+The same ZIP can be the data source for a local MCP server. Build the server from this directory and it embeds the exhibits, receipts and downloadable documents in one binary. Start the binary over stdio with MCP Inspector or another MCP client.
+
+```sh
+CGO_ENABLED=0 go build -o ./bin/field-guide ./examples/offline-guide
+```
+
+The `search` tool finds exhibits by words in their titles, categories and descriptions. It returns up to twelve matches and the total match count. Pass an offset to read the next matches in stable ID order. The `show` tool accepts one of those IDs and returns the evidence document plus a PNG or JPEG when the exhibit has one. An MCP client can also list three resources and read their data directly.
+
+| Resource | Content |
+| --- | --- |
+| `guide://dispatch/sheet` | Printable PDF |
+| `guide://dispatch/workbook` | Excel workbook |
+| `guide://observations/great-lakes` | Self-contained satellite comparison HTML |
+
+MCP Inspector can list the resources directly with `npx -y @modelcontextprotocol/inspector@2.13.0 --cli ./bin/field-guide --method resources/list`.
+
+To explore it inside Computer, start the field-guide server as an upstream MCP. The following example assumes a repository path without spaces. Use a Computer JSON config with separate command and argument fields for other paths.
+
+```sh
+CGO_ENABLED=0 go build -o ./bin/computer ./cmd/computer
+mkdir -p ./bin/guide-work
+./bin/computer -mount ./bin/guide-work:/work -mcp "guide=$PWD/bin/field-guide" \
+  -c "guide search --query 'bakery chrome' | jq -r '.items[].title'"
+```
+
+The replay uses the Python MCP SDK to read the PDF as a resource. A second connection lists Computer’s four tools, calls its shell to select a bakery exhibit and save the upstream image, then reads the resulting PNG. The replay compares both files byte for byte against the archive. The recorded PDF is 1,983 bytes. The PNG returned through Computer is 100,352 bytes. Run it with a fresh output directory. [Captured MCP receipt](mcp-receipt.json)
+
+```sh
+uv run --with mcp==2.3.0 python examples/offline-guide/replay.py \
+  --guide ./bin/field-guide --computer ./bin/computer --output ./bin/guide-result
+```
