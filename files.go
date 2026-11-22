@@ -86,14 +86,31 @@ func (r *ruled) OpenFile(ctx context.Context, name string, flag int, perm fs.Fil
 	}
 	// A file written anew, or added to, is changed only once all of what is written is known to fit: changed as it
 	// is written, one too large would be left cut off at the limit, and what a file written anew held before lost.
-	_, statErr := r.FileSystem.Lstat(ctx, abs)
-	f, err := r.FileSystem.OpenFile(ctx, abs, flag&^os.O_TRUNC, perm)
+	// A file this open makes is taken away again if the write is refused. Only an exclusive open proves the file is
+	// this one's; one another command made meanwhile is opened as it is. ponytail: a name that is a dangling
+	// symlink is not followed here, so a refused write through one leaves its target made and empty.
+	open, mine := flag&^os.O_TRUNC, false
+	if _, err := r.FileSystem.Lstat(ctx, abs); errors.Is(err, fs.ErrNotExist) && flag&os.O_CREATE != 0 {
+		open, mine = open|os.O_EXCL, true
+	}
+	f, err := r.FileSystem.OpenFile(ctx, abs, open, perm)
+	if mine && errors.Is(err, fs.ErrExist) && flag&os.O_EXCL == 0 {
+		mine = false
+		f, err = r.FileSystem.OpenFile(ctx, abs, flag&^os.O_TRUNC, perm)
+	}
 	if err != nil {
 		return nil, err
 	}
 	w := &whole{File: f, room: r.maxFileBytes}
-	if errors.Is(statErr, fs.ErrNotExist) { // made by this open, so a refused write takes it away again
-		w.made = func() error { return r.FileSystem.Remove(ctx, abs, false) }
+	if mine {
+		w.made = func() error {
+			made, errMade := f.Stat()
+			now, errNow := r.FileSystem.Lstat(ctx, abs)
+			if errMade != nil || errNow != nil || !os.SameFile(made, now) || now.Size() != 0 {
+				return nil // no longer only what this open made
+			}
+			return r.FileSystem.Remove(ctx, abs, false)
+		}
 	}
 	if anew {
 		w.put = func(content []byte) error { // emptied now; it is there by now, so nothing is created
@@ -141,11 +158,11 @@ func (w *whole) Write(p []byte) (int, error) {
 
 func (w *whole) Close() error {
 	if w.tooMuch {
-		err := w.File.Close()
+		var err error
 		if w.made != nil {
-			err = errors.Join(err, w.made())
+			err = w.made() // while the file is open, to know it is still the one made
 		}
-		return err
+		return errors.Join(err, w.File.Close())
 	}
 	return w.put(w.content)
 }
