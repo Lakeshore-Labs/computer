@@ -79,14 +79,19 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 		_ = term.Restore(fd, cooked)
 		running, stop := signal.NotifyContext(ctx, os.Interrupt)
 		res, err := c.Exec(running, &gbash.ExecutionRequest{Script: line, Stdin: os.Stdin, Stdout: os.Stdout, Stderr: os.Stderr})
+		interrupted := running.Err() != nil
 		stop()
 		if _, rawErr := term.MakeRaw(fd); rawErr != nil {
 			return rawErr
 		}
 		switch {
+		case ctx.Err() != nil:
+			return ctx.Err()
 		case err != nil:
-			fmt.Fprintf(t, "computer: %v\n", err)
-		case res.ShellExited:
+			if !interrupted {
+				fmt.Fprintf(t, "computer: %v\n", err)
+			}
+		case res.ShellExited && !interrupted:
 			return nil
 		case res.FinalEnv["PWD"] != "":
 			cwd = res.FinalEnv["PWD"]
