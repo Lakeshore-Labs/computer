@@ -1,0 +1,10 @@
+{
+  "command": "part",
+  "compiled_modules": 1,
+  "module_sum": "62feaae5af6f98e883a7afb2758b27d579fd86fb0ba55223b50e74981cd1b7fb",
+  "parts": {
+    "clarinet": "861a78d286d68b7dae1acc423c0c76f96a3828161a1f6ec5e076ab40577973c4  clarinet.musicxml\n8f937d1d8666641b8e392adba303918651143e4b4471465046d991c771543398  clarinet.mid\n",
+    "flute": "94791b09d17580631fb9e427aede257bd32ab9ca5f17edb2584ee5c5c7bfb82a  flute.musicxml\n9098ba67dc8393ab21c0c4f77dae74cc591ba170eb6ee3343e7ecdbeea015e47  flute.mid\n"
+  },
+  "shells": 2
+}

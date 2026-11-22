@@ -161,3 +161,7 @@ The [Venetian Lagoon palette](lagoon-palette/) uses the official Swift MCP clien
 ### Recover last week’s library opening hours
 
 The [restored reading room](restored-library/) compares two actual encrypted restic snapshots. Computer generated the editions, then a fresh guest read the restored files and published a comparison with both schedules available to download.
+
+### Publish parts for a flute and a B-flat clarinet
+
+[Last Boat Home](rehearsal-room/) registers a custom WASI command in Computer. Two shells turn one concert-pitch score into four files. Switch instruments in the offline stand, play the 20-second tune or open the parts in a music editor.
