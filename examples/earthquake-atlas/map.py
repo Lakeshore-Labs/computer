@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from html import escape
 import json
 from pathlib import Path
+from xml.etree import ElementTree
 
 land = json.loads(Path("land.json").read_text())
 feed = json.loads(Path("earthquakes.json").read_text())
@@ -45,8 +46,15 @@ for event in sorted(events, key=lambda f: f["properties"]["mag"]):
     radius = 3 + 2.5 * (mag - 4.5)
     label = escape(f'M{mag:g} · {event["properties"].get("place") or event["id"]}')
     svg.append(f'<circle class="earthquake" cx="{x:.2f}" cy="{y:.2f}" r="{radius:.2f}" fill="#ffbd68" fill-opacity=".70" stroke="#ffe4ac"><title>{label}</title></circle>')
-svg.append('<g font-family="sans-serif" fill="#d3dfd2" font-size="16"><text x="40" y="677">Larger circles indicate higher magnitude. Hover over a point to read its location.</text><text x="40" y="705">Observations: USGS Earthquake Hazards Program   ·   Land: Natural Earth   ·   Equirectangular projection</text></g></svg>')
+svg.append('<g font-family="sans-serif" fill="#d3dfd2" font-size="16"><text x="40" y="677">Larger circles indicate higher magnitude. Open the SVG file to inspect individual points.</text><text x="40" y="705">Observations: USGS Earthquake Hazards Program   ·   Land: Natural Earth   ·   Equirectangular projection</text></g></svg>')
 Path("atlas.svg").write_text("\n".join(svg))
-assert len(events) == sum('class="earthquake"' in element for element in svg)
+drawing = ElementTree.parse("atlas.svg")
+circles = drawing.findall('.//{*}circle[@class="earthquake"]')
+for circle, event in zip(circles, sorted(events, key=lambda f: f["properties"]["mag"]), strict=True):
+    x, y = float(circle.get("cx")), float(circle.get("cy"))
+    lon, lat = event["geometry"]["coordinates"][:2]
+    assert left <= x <= left + width and top <= y <= top + height
+    assert abs((x - left) * 360 / width - 180 - lon) < 0.01
+    assert abs(90 - (y - top) * 180 / height - lat) < 0.01
 print(f"{len(events)} earthquakes plotted from {len(feed['features'])} feed records.")
 print(f"USGS feed generated {generated:%Y-%m-%d %H:%M:%S} UTC.")

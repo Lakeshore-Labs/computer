@@ -2,7 +2,7 @@
 
 ![MCP Inspector showing Computer's four tools and the result of reading the file](media/inspector-read.png)
 
-An operator writes a departure notice in MCP Inspector. Another client edits it. A third reads the result and runs a checksum inside Computer. Each client starts a fresh Computer MCP process with the same directory mounted at `/work`. The mount carries the file between those processes.
+An operator writes a departure notice in MCP Inspector. Another client edits it. A third reads the result and runs a checksum inside Computer. Each client starts a fresh Computer MCP process with the same directory mounted at `/work`. The host directory retains the file. Computer exposes the same four MCP operations to each client, applies the exact-text edit and lets the last client read and hash the result.
 
 | Client | Computer tool | Result |
 | --- | --- | --- |
@@ -23,3 +23,5 @@ uv run --with mcp==2.3.0 python examples/client-handoff/replay.py \
 ```
 
 [Read the client calls](replay.py)
+
+To reproduce the web screenshot after the scripted handoff, open MCP Inspector, connect it over stdio to the same Computer binary with the arguments `-mount ABSOLUTE_OUTPUT:/work mcp`, select **Tools → read**, enter `handoff.txt` and execute the tool.

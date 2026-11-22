@@ -11,7 +11,10 @@ The same 24 ferry departures become two documents. A dispatcher gets a one-page 
 Build the Computer binary as described in the main README. Download and unpack the project's Python WASI release as described in [the Python build notes](../../python/README.md). From the repository root, run the command below with the path to that unpacked directory.
 
 ```sh
+CGO_ENABLED=0 go build -o ./bin/computer ./cmd/computer
 sh examples/dispatch/run.sh ./bin/computer ./python-wasi ./bin/dispatch
 ```
 
 Computer runs CPython to write the PDF and XLSX, reads them back, renders the PDF with PDFium, and resizes its first page for the preview. The output directory contains both documents, the full-page PNG, and its thumbnail. The program uses the libraries shipped in the Python WASI release.
+
+Each route uses the same color in the PDF and the workbook. The guest checks every formula range and its stored value against the original timetable. It also reads the route totals back from the PDF. The page is A4. Choose a new output directory for each run.

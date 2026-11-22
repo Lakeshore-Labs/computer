@@ -10,7 +10,7 @@ A client lists four tools, runs a program beside a 50,000-row upstream timetable
 
 ## From a tool response to a ferry report
 
-Which route carried the most people? A single shell script reads 24 departures through an MCP tool, totals the passengers in SQLite and draws a chart. All three steps run inside Computer. The only mounted host folder holds the output.
+Which route had the most boardings? A single shell script reads 24 departures through an MCP tool, totals the passengers in SQLite and draws a chart. The host runs the Filesystem MCP. Computer runs the shell, SQLite and the chart command. The only mounted host folder holds the output.
 
 [![Four frames showing the timetable, MCP records, SQLite result and chart](ferry/media/ferry-story.gif)](ferry/README.md)
 
@@ -34,7 +34,7 @@ Read a file, inspect a commit, convert a time, query a graph, record milestones,
 
 ## A week beneath our feet
 
-Two public data sources become a map inside Computer. Each point opens a location and magnitude in the SVG.
+Two public data sources become a map inside Computer. Download the SVG and hover over a point in a browser to read its location and magnitude.
 
 [![Global earthquake atlas drawn from the USGS weekly feed](earthquake-atlas/media/atlas.png)](earthquake-atlas/README.md)
 
