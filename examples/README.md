@@ -73,3 +73,11 @@ Computer reads a mobile browser audit, repairs the page in a mounted directory a
 [![Chrome's mobile audit before and after the guest edits the bakery page](bakery-repair/sample/audit.png)](bakery-repair/README.md)
 
 [Replay the edit and inspect both reports](bakery-repair/README.md)
+
+## What changed between rehearsal and opening night?
+
+Computer reads two tagged lighting plans as separate filesystems. The show still runs for 133 seconds, but four cues changed duration and two changed color.
+
+[![Cue timing and colors in the two Git tags](stage-lighting/sample/cues.png)](stage-lighting/README.md)
+
+[Inspect the cue sheet and replay the comparison](stage-lighting/README.md)
