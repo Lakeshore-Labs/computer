@@ -46,7 +46,7 @@ The same ZIP can be the data source for a local MCP server. Build the server fro
 CGO_ENABLED=0 go build -o ./bin/field-guide ./examples/offline-guide
 ```
 
-The `search` tool finds exhibits by words in their titles, categories and descriptions. It returns up to twelve matches and the total match count. Pass an offset to read the next matches in stable ID order. The `show` tool accepts one of those IDs and returns the evidence document plus a PNG or JPEG when the exhibit has one. An MCP client can also list seven resources and read their data directly.
+The `search` tool finds exhibits by words in their titles, categories and descriptions. It returns up to twelve matches and the total match count. Pass an offset to read the next matches in stable ID order. The `show` tool accepts one of those IDs and returns the evidence document plus a PNG or JPEG when the exhibit has one. An MCP client can also list seven named resources and read their data directly. Clients that support resource templates can open the JSON evidence for any exhibit using `guide://exhibits/{id}`. For example, searching for the Oslo bike group returns `oslo-group`, whose recorded decision is available at `guide://exhibits/oslo-group`. The official Python client replay compares every templated resource byte-for-byte with its file in the ZIP.
 
 | Resource | Content |
 | --- | --- |

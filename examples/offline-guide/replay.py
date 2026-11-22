@@ -22,6 +22,8 @@ async def replay(guide, computer, output):
     with ZipFile(Path(__file__).with_name('computer-field-guide.zip')) as archive:
         expected_pdf = archive.read('assets/dispatch.pdf')
         expected_image = archive.read('assets/repair.png')
+        receipts = {Path(name).stem: archive.read('evidence/' + Path(name).stem + '.json')
+                    for name in archive.namelist() if name.startswith('cases/') and name.endswith('.html')}
         documents = {
             uri: (kind, archive.read(member)) for uri, kind, member in [
                 ('guide://festival/original', 'text/calendar', 'assets/original.ics'),
@@ -34,6 +36,16 @@ async def replay(guide, computer, output):
         operations = sorted(t.name for t in (await direct.list_tools()).tools)
         assert operations == ['search', 'show']
         resources = sorted(str(r.uri) for r in (await direct.list_resources()).resources)
+        templates = (await direct.list_resource_templates()).resource_templates
+        template = next(t for t in templates if t.uri_template == 'guide://exhibits/{id}')
+        assert template.mime_type == 'application/json'
+        for exhibit_id, expected in receipts.items():
+            uri = template.uri_template.replace('{id}', exhibit_id)
+            response = await direct.read_resource(uri)
+            assert len(response.contents) == 1
+            item = response.contents[0]
+            assert str(item.uri) == uri and item.mime_type == 'application/json'
+            assert item.text.encode('utf-8') == expected
         document_checks = {}
         for uri, (mime, expected) in documents.items():
             assert uri in resources
@@ -70,7 +82,7 @@ identify bakery.png"""
         assert not read.is_error and len(images) == 1 and images[0].mime_type == 'image/png'
         image = base64.b64decode(images[0].data, validate=True)
         assert image == expected_image == (output / 'bakery.png').read_bytes()
-    receipt = {'guide_tools': operations, 'resource_uris': resources, 'documents': document_checks, 'outer_tools': tools,
+    receipt = {'guide_tools': operations, 'resource_uris': resources, 'exhibit_template': template.uri_template, 'exact_exhibit_receipts': len(receipts), 'documents': document_checks, 'outer_tools': tools,
                'pdf_bytes': len(sheet), 'pdf_sha256': hashlib.sha256(sheet).hexdigest(),
                'guest_answer': answer, 'image_bytes': len(image), 'image_sha256': hashlib.sha256(image).hexdigest()}
     (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')

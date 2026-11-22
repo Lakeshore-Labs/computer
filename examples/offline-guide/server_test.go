@@ -117,3 +117,31 @@ func TestGuidePublishesAmendedFestivalCalendar(t *testing.T) {
 		t.Fatalf("calendar time or encoding differs from the published program")
 	}
 }
+
+func TestReadExhibitResourceTemplate(t *testing.T) {
+	session := connectGuide(t)
+	templates, err := session.ListResourceTemplates(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.ContainsFunc(templates.ResourceTemplates, func(r *mcp.ResourceTemplate) bool {
+		return r.URITemplate == "guide://exhibits/{id}" && r.MIMEType == "application/json"
+	}) {
+		t.Fatal("no JSON exhibit resource template")
+	}
+	uri := "guide://exhibits/oslo-group"
+	result, err := session.ReadResource(t.Context(), &mcp.ReadResourceParams{URI: uri})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Contents) != 1 || result.Contents[0].URI != uri || result.Contents[0].MIMEType != "application/json" {
+		t.Fatalf("unexpected resource contents: %v", result.Contents)
+	}
+	show, err := session.CallTool(t.Context(), &mcp.CallToolParams{Name: "show", Arguments: map[string]any{"id": "oslo-group"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if show.IsError || result.Contents[0].Text != show.Content[0].(*mcp.TextContent).Text {
+		t.Fatal("resource and show tool returned different evidence")
+	}
+}

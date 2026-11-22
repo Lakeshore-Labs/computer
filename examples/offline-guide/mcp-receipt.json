@@ -12,6 +12,8 @@
     "guide://observations/great-lakes",
     "guide://observations/pacific-listening-room"
   ],
+  "exhibit_template": "guide://exhibits/{id}",
+  "exact_exhibit_receipts": 172,
   "documents": {
     "guide://festival/original": {
       "bytes": 679,

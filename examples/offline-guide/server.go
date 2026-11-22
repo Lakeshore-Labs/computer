@@ -21,10 +21,11 @@ import (
 var bundle []byte
 
 type exhibit struct {
-	ID      string `json:"id"`
-	Title   string `json:"title"`
-	Group   string `json:"group"`
-	Summary string `json:"summary"`
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Group    string `json:"group"`
+	Summary  string `json:"summary"`
+	evidence []byte
 }
 
 type searchInput struct {
@@ -60,10 +61,11 @@ func newGuide() (*mcp.Server, error) {
 			return nil, err
 		}
 		item.ID = id
+		item.evidence = data
 		exhibits[id] = item
 	}
 
-	server := mcp.NewServer(&mcp.Implementation{Name: "computer-field-guide", Version: "1.1.0"}, nil)
+	server := mcp.NewServer(&mcp.Implementation{Name: "computer-field-guide", Version: "1.2.0"}, nil)
 	mcp.AddTool(server, &mcp.Tool{Name: "search", Description: "Find recorded Computer exhibits. Returns up to twelve matching entries and the full match count."},
 		func(_ context.Context, _ *mcp.CallToolRequest, in searchInput) (*mcp.CallToolResult, searchOutput, error) {
 			if in.Offset < 0 {
@@ -85,13 +87,11 @@ func newGuide() (*mcp.Server, error) {
 		})
 	mcp.AddTool(server, &mcp.Tool{Name: "show", Description: "Read an exhibit's evidence and its first recorded still image when available."},
 		func(_ context.Context, _ *mcp.CallToolRequest, in showInput) (*mcp.CallToolResult, any, error) {
-			if _, ok := exhibits[in.ID]; !ok {
+			item, ok := exhibits[in.ID]
+			if !ok {
 				return nil, nil, fmt.Errorf("unknown exhibit %q", in.ID)
 			}
-			data, err := fs.ReadFile(archive, "evidence/"+in.ID+".json")
-			if err != nil {
-				return nil, nil, err
-			}
+			data := item.evidence
 			result := &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: string(data)}}}
 			for _, ext := range []string{".png", ".jpg"} {
 				image, err := fs.ReadFile(archive, "assets/"+in.ID+ext)
@@ -110,6 +110,22 @@ func newGuide() (*mcp.Server, error) {
 			}
 			return result, nil, nil
 		})
+	const exhibitPrefix = "guide://exhibits/"
+	server.AddResourceTemplate(&mcp.ResourceTemplate{
+		URITemplate: exhibitPrefix + "{id}",
+		Name:        "Recorded exhibit evidence",
+		Description: "Read the recorded JSON evidence for an ID returned by search.",
+		MIMEType:    "application/json",
+	}, func(_ context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		uri := req.Params.URI
+		id, _ := strings.CutPrefix(uri, exhibitPrefix)
+		item, ok := exhibits[id]
+		if !ok {
+			return nil, mcp.ResourceNotFoundError(uri)
+		}
+		content := &mcp.ResourceContents{URI: uri, MIMEType: "application/json", Text: string(item.evidence)}
+		return &mcp.ReadResourceResult{Contents: []*mcp.ResourceContents{content}}, nil
+	})
 	for _, asset := range []struct{ uri, name, kind, path string }{
 		{"guide://dispatch/sheet", "Printable dispatch sheet", "application/pdf", "assets/dispatch.pdf"},
 		{"guide://dispatch/workbook", "Dispatch workbook", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "assets/dispatch.xlsx"},
