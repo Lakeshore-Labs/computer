@@ -15,3 +15,11 @@ The agent's computer can also produce the files people use at their desks. Print
 [![The ferry dispatch packet](dispatch/media/cover.png)](dispatch/README.md)
 
 [Open the dispatch packet and replay it](dispatch/README.md)
+
+## Seven servers in one shell
+
+Read a file, inspect a commit, convert a time, query a graph, record milestones, fetch a page and save a binary image response in one session.
+
+[![Actual results from seven MCP servers](reference-servers/media/seven-servers.png)](reference-servers/README.md)
+
+[Run the seven reference servers](reference-servers/README.md)

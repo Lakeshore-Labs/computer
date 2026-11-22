@@ -1,0 +1,24 @@
+
+[Filesystem] Count the departures served by the tool.
+24
+
+[Git] Read the synthetic fixture commit.
+Message: Add the synthetic timetable.
+
+[Time] Convert 08:00 UTC to Tokyo time.
+Asia/Tokyo	2026-11-22T17:00:00+09:00
+
+[Memory] Store a route observation and read it back.
+Pier: 310 boardings
+
+[Sequential Thinking] Record two planning milestones.
+{
+  "nextThoughtNeeded": false,
+  "thoughtHistoryLength": 2
+}
+
+[Fetch] Read the title of the public example page.
+# Example Domain
+
+[Everything] Save the image content returned by the tool.
+logo.png PNG 20x20
