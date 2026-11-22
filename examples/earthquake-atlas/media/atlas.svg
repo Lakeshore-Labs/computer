@@ -246,4 +246,4 @@
 <circle class="earthquake" cx="905.16" cy="409.72" r="8.25" fill="#ffbd68" fill-opacity=".70" stroke="#ffe4ac"><title>M6.6 · 149 km WSW of Tual, Indonesia</title></circle>
 <circle class="earthquake" cx="328.95" cy="423.15" r="8.50" fill="#ffbd68" fill-opacity=".70" stroke="#ffe4ac"><title>M6.7 · 9 km NE of Carhuamayo, Peru</title></circle>
 <circle class="earthquake" cx="894.28" cy="414.48" r="8.75" fill="#ffbd68" fill-opacity=".70" stroke="#ffe4ac"><title>M6.8 · 105 km NE of Lospalos, Timor Leste</title></circle>
-<g font-family="sans-serif" fill="#d3dfd2" font-size="16"><text x="40" y="677">Larger circles indicate higher magnitude. Hover over a point to read its location.</text><text x="40" y="705">Observations: USGS Earthquake Hazards Program   ·   Land: Natural Earth   ·   Equirectangular projection</text></g></svg>
+<g font-family="sans-serif" fill="#d3dfd2" font-size="16"><text x="40" y="677">Larger circles indicate higher magnitude. Open the SVG file to inspect individual points.</text><text x="40" y="705">Observations: USGS Earthquake Hazards Program   ·   Land: Natural Earth   ·   Equirectangular projection</text></g></svg>
