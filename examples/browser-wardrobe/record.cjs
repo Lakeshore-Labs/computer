@@ -66,7 +66,24 @@ async function main() {
           if (/^https?:/.test(request.url()))
             origins.add(new URL(request.url()).origin);
         });
-        await page.goto(address);
+        // Hold the first OPFS open so the recorder can observe the startup controls.
+        await page.addInitScript(() => {
+          if (sessionStorage.getItem("wardrobe-initial-open")) return;
+          sessionStorage.setItem("wardrobe-initial-open", "checked");
+          const original = navigator.storage.getDirectory.bind(navigator.storage);
+          const waiting = new Promise((release) => { window.releaseWardrobeStore = release; });
+          navigator.storage.getDirectory = async () => {
+            document.body.dataset.opening = "true";
+            await waiting;
+            return original();
+          };
+        });
+        await page.goto(address, { waitUntil: "commit" });
+        await page.locator('body[data-opening="true"]').waitFor();
+        const connect = page.getByRole("button", { name: "Connect this tab" });
+        const disabledDuringOpen = await connect.isDisabled();
+        await page.evaluate(() => window.releaseWardrobeStore());
+        assert.equal(disabledDuringOpen, true, "Connect must wait for the first OPFS open");
         await page.locator('body[data-ready="true"]').waitFor();
         await page.getByRole("button", { name: "Connect this tab" }).click();
         await page.getByRole("button", { name: "Run Computer" }).click();

@@ -4,7 +4,7 @@
 
 ![The completed Sunday fitting list stored in the browser](sample/after.png)
 
-Chrome stores two real files, `inventory.json` and `allocation.json`, in its [origin-private file system](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system). This example exposes two fixed MCP tools for the wardrobe. A local stdio bridge forwards their requests to the connected browser tab. Computer’s WASI Python imports the generated `tools.wardrobe` module, calculates the allocation and asks the browser to save it. The tab checks the inventory revision before writing the plan. This is a tool-mediated browser store.
+Chrome stores two real files, `inventory.json` and `allocation.json`, in its [origin-private file system](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system). This example exposes two fixed MCP tools for the wardrobe. A local stdio bridge forwards their requests to the connected browser tab. Computer’s WASI Python imports the generated `tools.wardrobe` module, calculates the allocation and asks the browser to save it. The tab enables its connection button once its storage is ready. Before writing the plan, it checks the SHA-256 of the stock serialized with compact JSON. This is a tool-mediated browser store.
 
 ## Run the live desk
 

@@ -156,3 +156,4 @@ $("run").onclick = async () => {
   }
 };
 await refresh();
+$("connect").disabled = false;
