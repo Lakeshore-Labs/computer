@@ -54,3 +54,5 @@ python3 examples/hosted-fieldwork/replay_manifest.py all \
 ```
 
 Pass one or more case IDs instead of `all` to replay fewer. The earlier [phone view](sample/phone.png), [desktop view](sample/desktop.png) and [browser film](sample/fieldwork.webm) were recorded before the label change and still show "attempted cases".
+
+The [four-cohort workbook](cohort4/README.md) adds thirteen fresh reference-desk cases across nine more URLs and keeps the earlier runs visible. Search all 107 cases, including the four missed checks.

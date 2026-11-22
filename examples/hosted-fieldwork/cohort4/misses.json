@@ -1,0 +1,41 @@
+{
+  "observed_utc": "2026-11-22",
+  "endpoint_misses": [
+    {
+      "url": "https://potto.app/mcp",
+      "operator": "potto.app (Japanese JLPT dataset)",
+      "result": "initialize returned Unauthorized (auth required) despite no-auth listing in registry",
+      "counted": false
+    },
+    {
+      "url": "https://freedict.com/mcp",
+      "operator": "freedict.com",
+      "result": "not re-tried: an earlier pass recorded HTTP 401",
+      "counted": false
+    }
+  ],
+  "first_run_failures": [
+    {
+      "id": "gumball-fallback-hour",
+      "failed": [
+        "verifier error AttributeError(\"'str' object has no attribute 'get'\")"
+      ],
+      "cause": "my verifier assumed candidates were objects"
+    },
+    {
+      "id": "ghana-census-accra",
+      "failed": [
+        "Greater Accra 5,455,692"
+      ],
+      "cause": "The first check incorrectly required the service subset to equal the published regional census total. The final checks record both totals and separately verify internal arithmetic."
+    },
+    {
+      "id": "lemmapark-programs",
+      "failed": [
+        "returned parseable JSON"
+      ],
+      "cause": "my verifier assumed JSON; endpoint returns plain text"
+    }
+  ],
+  "note": "These discovery exclusions are outside the 107 operational cases. All thirteen new cases were retained after correcting the verifier."
+}

@@ -1,0 +1,10 @@
+<section class="clock-study" aria-labelledby="clock-title">
+<style>
+.body p,.body .date{overflow-wrap:anywhere}summary b{min-width:0;overflow-wrap:anywhere}
+.clock-study{background:#153c3b;color:#fff9e8;margin:14px 0 25px;padding:clamp(18px,4vw,34px)}.clock-study h2{font:normal clamp(29px,4vw,49px)/1.05 Georgia,serif;letter-spacing:-.035em;margin:0 0 8px}.clock-study p{max-width:720px;margin:.4em 0}.clock-study .time-pair{display:flex;align-items:flex-end;gap:clamp(12px,5vw,60px);margin:1em 0}.clock-study time{font:normal clamp(28px,5vw,58px)/1.15 ui-monospace,monospace;display:block;color:#e8e0a3}.clock-study small{font-size:14px;color:#d4e0d5}.clock-study button{background:#f5eed5;padding:7px 12px;border:0}.clock-study button:focus-visible{outline:3px solid #f5bc78;outline-offset:3px}
+</style>
+<h2 id="clock-title">When 01:30 happens twice</h2>
+<p>New York set its clocks back on 1 November 2026. The timezone server returned two UTC instants for the same local time. Python’s time zone database reproduced both.</p>
+<div class="time-pair"><div><small>First occurrence · EDT</small><time datetime="2026-11-01T05:30Z">05:30Z</time></div><div><small>Second occurrence · EST</small><time datetime="2026-11-01T06:30Z">06:30Z</time></div></div>
+<button type="button" onclick="const q=document.querySelector('#query');q.value='gumball-fallback-hour';document.querySelector('#filter').value='all';q.dispatchEvent(new Event('input'));document.querySelector('summary').focus();">Inspect the repeated hour ↓</button>
+</section>
