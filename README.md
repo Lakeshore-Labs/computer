@@ -208,6 +208,8 @@ export COMPUTER_MODEL_KEY=...
   agent that does not stop is stopped where it stands.
 - The bundle is compiled to the engine's bytecode once and loaded from there, so a run starts in about 0.15 s.
 
+[Replay a real interruption and recovery with the standalone Gemini agent](examples/gemini-recovery/README.md).
+
 One `agent` is one message and its answer. A message cannot yet be given to a run that is under way, and nothing
 asks a person to approve a step.
 
