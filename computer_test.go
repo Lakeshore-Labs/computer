@@ -409,7 +409,7 @@ func TestTheComputerIsAnMCPServerForAnAgentInThisProcess(t *testing.T) {
 		return res.Content[0].(*mcp.TextContent).Text
 	}
 	call("write", map[string]any{"path": "/home/user/note.txt", "content": "kept"})
-	if got := strings.TrimSpace(call("bash", map[string]any{"commands": "cat note.txt"})); got != "kept" {
+	if got := strings.TrimSpace(call("bash", map[string]any{"command": "cat note.txt"})); got != "kept" {
 		t.Fatalf("bash read %q", got)
 	}
 	if res, _ := agent.CallTool(ctx, &mcp.CallToolParams{Name: "write", Arguments: map[string]any{"path": "/etc/x", "content": "no"}}); res == nil || !res.IsError {
