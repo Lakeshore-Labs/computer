@@ -1,0 +1,26 @@
+[
+  {
+    "screen": "desktop",
+    "width": 1280,
+    "checks": [
+      "Overlaps Stage setup (room) and Section coaching (flute).",
+      "Overlaps Piano move (room) and School ensemble (clarinet).",
+      "Overlaps Piano move (room).",
+      "11:15–12:00 was also available before the booking."
+    ],
+    "agendaRows": 4,
+    "downloadSHA256": "a8aae5b632a543064201fb8e1de5a11374fad7e97352caf96f1fe705c51a0544"
+  },
+  {
+    "screen": "phone",
+    "width": 390,
+    "checks": [
+      "Overlaps Stage setup (room) and Section coaching (flute).",
+      "Overlaps Piano move (room) and School ensemble (clarinet).",
+      "Overlaps Piano move (room).",
+      "11:15–12:00 was also available before the booking."
+    ],
+    "agendaRows": 4,
+    "downloadSHA256": "a8aae5b632a543064201fb8e1de5a11374fad7e97352caf96f1fe705c51a0544"
+  }
+]
