@@ -1,25 +1,32 @@
 # Offline exhibit index
 
-154 exhibits · 398 files · 6,602,047 bytes
+164 exhibits · 435 files · 8,483,514 bytes
 
-Archive SHA-256: `3178decac916bbc7c89c7ff5bb66c6ffede079162041d7692e2e00c67f2b209b`
+Archive SHA-256: `e5144646361178af492bd6a32d9a97030f2e7b292050094c0557e060533d626a`
 
 The paths below are relative to the extracted archive. Public replay links open on GitHub.
 
 ## Start here
 
+- **Ask Gemini for a stage manager’s change brief** — Native Gemini reads two synthetic cue sheets through Computer and writes a structured comparison plus a brief. Independent checks confirm the largest increase and decrease. · `cases/stage-manager.html`
 - **Build a tide record over time** — Each Computer shell run appends readings from three NOAA stations to a persistent mount. Another Computer opens those captures read-only and uses WASI Python and SQLite to build this time series. · `cases/tides.html`
-- **Compare four Great Lakes satellite scenes offline** — Computer fetched four dated NASA GIBS scenes and bundled them into a single offline viewer. Select dates and slide the divider across the same geographic frame. · `cases/lakes.html`
+- **Compare four Great Lakes satellite scenes offline** — Computer fetched four dated NASA GIBS scenes and bundled them into a single offline viewer. Select dates and slide the divider across the same geographic frame. · `cases/lakes.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/27)
 - **Compare the same satellite file across two clouds** — An allowlisted shell reads a NOAA object from Amazon S3 and Google Cloud Storage. The guest computes a checksum for each copy. An independent host read compares all bytes. A third shell call reads a public blob on Azure. · `cases/cloud.html`
+- **Compare two tagged theatre lighting plans** — A Go host mounts two Git tags. The shell finds four timing changes and two color changes. Both editions run for 133 seconds, and an uncommitted working copy survives. · `cases/opening-night.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/26)
 - **Continue a Gemini session in a new process** — A Go host supplies Computer’s Environment to the native Google model client. Gemini writes the route totals. A new host process resumes the saved ACP session and asks Computer to turn those totals into a PNG. · `cases/native-gemini.html`
+- **Continue a standalone Gemini tool session** — The standalone agent calls Google directly. A second Computer process reopens the same conversation, reads a label and writes a remembered desk code. Two independently recorded runs passed and a third was filmed. · `cases/standalone-gemini.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/32)
 - **Count the books in an Appbox catalog** — Computer called a live local bookcatalog application, counted books by author, and returned the chart. Separate MCP and PostgreSQL reads verified the twelve fictional books. · `cases/library.html`
+- **Count the official MCP registry** — Computer fetched 703 pages of latest-version registry metadata, indexed 70,222 registrations in SQLite and charted the distribution. The replay can also fetch a small live sample. · `cases/registry.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/29)
+- **Curate two Van Gogh paintings from different collections** — An in-process rclone filesystem brings Getty and Cleveland source directories into one read-only mount. Computer reads two metadata formats, resizes the images and publishes a credited offline study. · `cases/museum.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/31)
 - **Draw proportional bars** — With a truncated axis the smallest route looked almost empty. The revised bar command puts zero on the value axis for wholly positive or wholly negative values. · `cases/baseline.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/18)
 - **Follow 50,000 trips through four tools** — Two upstream servers supply CSV records and a binary image. Computer's WASI Python invokes both tools and writes SQLite. The shell builds the chart and an outer client reads the PNG. · `cases/trace.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/16)
 - **Follow a changing Azure Blob selection** — A Go host mounted an Azure Blob bucket backed by local Azurite. The guest made a thumbnail, then read a new selection from the same live mount after the host updated the blob. · `cases/blob.html`
 - **Hand a mounted file to another client** — Inspector writes a notice. mcporter edits it. A new Python SDK client reads the exact result and checks the shell checksum. Each client starts a separate Computer process. · `cases/handoff.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/17)
+- **Listen to Pacific water levels at three stations** — Computer turns each saved NOAA height into a timed note and embeds three WAV recordings, charts and readings in one HTML file. An independent waveform check measures the pitch of every note. · `cases/tide-sound.html`
 - **Measure how much of a file reaches Gemini** — An actual filesystem MCP supplied the same CSV to two clients. A fixed query in Computer selected the matching row. Gemini returned the same answer with 13,338 and 55 prompt tokens on the largest input. · `cases/prompt.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/21)
 - **Print a dispatch sheet or open the workbook** — WASI Python produced a one-page PDF and an Excel workbook with formulas and a chart. Computer reopened the packet and rendered the printed page. · `cases/packet.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/12)
 - **Repair a bakery site and recheck it in Chrome** — A bakery editor publishes a repaired sales board. Computer calls Chrome DevTools MCP, edits the HTML in WASI Python and assembles the report. Chrome independently checks both pages. · `cases/repair.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/22)
+- **Reschedule a short film festival across three clients** — The TypeScript client publishes the program. Java changes the running time. A separate read-only Python client parses the revised calendar. Its two later screenings start 15 minutes later. · `cases/festival.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/30)
 - **Sit down at the Computer prompt** — A real pseudo-terminal session exercises command and file completion, tool arguments, history, and the working directory. The embedded agent segment uses a deterministic model fixture. · `cases/terminal.html`
 - **Try two edits to the same timetable** — A Go application supplies a read-only base and a writable memory layer per Computer. An edit at noon and an edit in the evening coexist. Each shell sees its own schedule. · `cases/plans.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/19)
 - **Turn a tool result into a browser artifact** — DuckDB MCP aggregates synthetic orders. Computer passes the result into a local dashboard. Playwright MCP operates the browser and captures the dashboard. The host assembles eleven real browser captures into an animation. · `cases/browser.html`
@@ -28,7 +35,9 @@ The paths below are relative to the extracted archive. Public replay links open 
 
 - **Discover a new command between calls** — A fixture MCP advertises a new notes export tool. On the next execution Computer discovers it and makes it available as a shell command. · `cases/changed-tools.html`
 - **Give two jobs one WebAssembly slot** — A Go host starts finite guest jobs with controlled inputs. With one slot, an arriving job reaches its own deadline in the queue. When the host compiles the module with two slots, both guests enter before either is released. · `cases/concurrency.html`
+- **Interrupt a command and keep the working shell** — The reference prompt exited when Ctrl-C interrupted sleep. In the fixed executable the prompt returns, and a reader can open the same file in the same session. · `cases/interrupt.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/24)
 - **Pipe a script, inputs and deadlines through Computer** — The CLI reads a script on stdin, passes process arguments, preserves exit codes and applies call timeout limits. A Go host exercises the public package surface. · `cases/stream-input.html`
+- **Read the field guide from an MCP client** — The first published field guide is an offline stdio MCP. Computer searches it and retrieves the bakery score and image. A Python client reads the exact dispatch PDF as an MCP resource. · `cases/guide-server.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/25)
 - **Set the number of Python workers** — The same bounded pipeline runs with one, two and unlimited Python workers. Recorded guest timestamps show which programs overlap. A separate finite loop exercises the opt-in runtime mode. · `cases/python-workers.html`
 - **Watch an agent compact a conversation** — The real embedded agent calls a deterministic loopback model. A smaller context triggers a recorded summarization request. A resumed turn reads the resulting summary. · `cases/agent-context.html`
 
@@ -89,6 +98,7 @@ The paths below are relative to the extracted archive. Public replay links open 
 - **CLI binary: read-write and :ro host mounts** — bin/computer-static (CLI, revision ea7bf235) · `cases/store-cli-mounts.html`
 - **Copy-on-write over a host directory** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-copy-on-write.html`
 - **Cross-backend story: ZIP → S3 → WebDAV chart → SFTP → SQLite manifest** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-story.html`
+- **Deliver a film in ten pieces** — Computer writes a 42-frame film to an SFTP-mounted rclone shelf. Chunker splits the file, with optional encryption before chunking. A separate rclone process reconstructs the exact original from each shelf. · `cases/shelf.html`
 - **Editable ZIP: copy-on-write over zipfs, re-packed** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-zip-overlay.html`
 - **Git: memory mount exported as a commit** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-git-export.html`
 - **Host directory, read-write** — Computer Go library (embedder), computer.New + Computer.Exec · `cases/store-host.html`

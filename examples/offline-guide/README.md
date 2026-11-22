@@ -4,10 +4,13 @@
 
 [Download the field guide](computer-field-guide.zip?raw=true) · [Browse the full exhibit index on GitHub](catalog.md)
 
-Extract the ZIP and open `index.html` in a browser. Search for a tool, file store or task. Each exhibit includes an observed result and its evidence. The terminal and browser recordings, an interactive satellite viewer, a playable audio file, a printable dispatch sheet and an Excel workbook all work offline. Public replay and attribution links open external sites.
+Extract the ZIP and open `index.html` in a browser. Search for a tool, file store or task. Each exhibit includes an observed result and its evidence. The collection study, festival calendars, tide listening room, terminal recordings, satellite viewer, printable dispatch sheet and Excel workbook all work offline. Public replay and attribution links open external sites.
 
 | Try this | What Computer does | What another interface verifies |
 | --- | --- | --- |
+| Compare two Van Gogh paintings | Joins Getty and Cleveland files through a native rclone VFS, resizes the two images and writes an offline study. | A browser decodes the exact thumbnails in two desktop columns or a single phone column. |
+| Update a festival program | TypeScript and Java clients use Computer to publish and amend a lobby page and calendar. | A read-only Python subscriber checks stable event IDs, and Chrome downloads the exact revised ICS. |
+| Listen to three tide stations | Synthesizes one timed note for each observed NOAA level and packages the tracks in HTML. | A waveform reader checks note pitch against the measurements. The browser plays each track offline. |
 | Repair the bakery sales board | Calls Chrome DevTools MCP and writes a repaired HTML file in WASI Python. | Lighthouse checks the original and revised pages. |
 | Compare the Great Lakes in winter and summer | Fetches four dated NASA scenes and bundles them into a single HTML application. | An offline browser changes dates and moves the image divider. |
 | Find a ferry trip in 1,440 records | Queries an upstream filesystem inside the shell and passes the selected row to Gemini. | Native provider usage records 55 input tokens for the selected-row prompt and 13,338 for the full-file prompt. Both answer the same trip and rider count. |
@@ -16,9 +19,9 @@ Extract the ZIP and open `index.html` in a browser. Search for a tool, file stor
 
 ## What the numbers count
 
-The November 22, 2026 snapshot contains 154 entries. Fifteen featured entries tell complete stories. Five runtime chapters cover the CLI and embedded runtimes. The library also contains 48 shell recipes, 21 storage configurations, nine multi-tool workflows and 56 successful hosted calls to 55 distinct endpoints. Each number counts entries in that category. Several entries show the same underlying feature from different interfaces.
+The November 22, 2026 snapshot contains 164 entries. Twenty-two featured entries tell complete stories. Seven runtime chapters cover the CLI, MCP and embedded runtimes. The library also contains 48 shell recipes, 22 storage exhibits, nine multi-tool workflows and 56 successful hosted calls to 55 distinct endpoints. Each number counts entries in that category. Several entries show the same underlying feature from different interfaces.
 
-The scope page records the three hosted attempts with unmet checks, observed storage limitations and cases left unrun in the initial survey. The featured Azure Blob exhibit extends that initial storage survey. Hosted results and public datasets reflect the time of capture.
+The scope page records the three hosted attempts with unmet checks, observed storage limitations and cases left unrun in the initial survey. Later chapters demonstrate an actual Azurite-backed Blob mount, two Git tag filesystems, an in-process rclone VFS and two chunked storage gateways. Hosted results and public datasets reflect the time of capture.
 
 ## Verify the package
 

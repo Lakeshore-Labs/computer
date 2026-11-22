@@ -1,6 +1,6 @@
 # Computer field guide
 
-[Download the visual guide for offline use](offline-guide/README.md) · [Browse all 154 exhibits](offline-guide/catalog.md)
+[Download the visual guide for offline use](offline-guide/README.md) · [Browse all 164 exhibits](offline-guide/catalog.md)
 
 ## What crosses the MCP connection?
 
