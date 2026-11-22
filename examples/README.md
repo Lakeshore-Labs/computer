@@ -26,7 +26,7 @@ Read a file, inspect a commit, convert a time, query a graph, record milestones,
 
 ## A week beneath our feet
 
-Two public data sources become a map inside Computer. Each point opens a location and magnitude in the SVG.
+Two public data sources become a map inside Computer. Download the SVG and hover over a point in a browser to read its location and magnitude.
 
 [![Global earthquake atlas drawn from the USGS weekly feed](earthquake-atlas/media/atlas.png)](earthquake-atlas/README.md)
 
