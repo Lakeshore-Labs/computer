@@ -344,6 +344,7 @@ func TestExtraBarChartIncludesZero(t *testing.T) {
 	for _, test := range []struct{ name, data string }{
 		{"positive", "route,x,y\na,184,225\nb,310,270\n"},
 		{"negative", "route,x,y\na,-184,-225\nb,-310,-270\n"},
+		{"missing", "route,x,y\na,NaN,225\nb,310,270\n"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			writeHome(t, c, "values.csv", []byte(test.data))
@@ -601,9 +602,9 @@ func TestExtraMagickFlattensOntoTheBackgroundAndWritesTheQualityAsked(t *testing
 	}
 	writeHome(t, c, "clear.png", b.Bytes())
 	for options, want := range map[string]color.NRGBA{
-		"-background red -flatten":        {255, 0, 0, 255},
-		"-flatten":                        {255, 255, 255, 255}, // ImageMagick's default background is white
-		"-background '#0000ff' -flatten":  {0, 0, 255, 255},
+		"-background red -flatten":      {255, 0, 0, 255},
+		"-flatten":                      {255, 255, 255, 255}, // ImageMagick's default background is white
+		"-background '#0000ff' -flatten": {0, 0, 255, 255},
 		"-background black -alpha remove": {0, 0, 0, 255},
 	} {
 		run(t, c, "convert clear.png "+options+" flat.png")

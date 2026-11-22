@@ -7,9 +7,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -21,7 +21,7 @@ const chartUsage = `usage: chart KIND --x COLUMN --y COLUMN[,COLUMN...] [--title
 
 Draws a chart of a CSV table that has a header row. It reads INPUT.csv, or standard input without one.
 
-  chart bar       one group of bars per row, one bar per --y column
+  chart bar       one group of bars per row, one bar per --y column, with a zero baseline
   chart line      one line per --y column
   chart pie       one slice per row; takes a single --y column
   chart scatter   one set of points per --y column; the rows are spaced evenly, whatever the --x values are
@@ -108,15 +108,20 @@ func runChart(ctx context.Context, inv *commands.Invocation) error {
 		opt := charts.NewBarChartOptionWithSeries(charts.NewSeriesListBar(series, charts.BarSeriesOption{Names: ys}))
 		opt.CategoryAxis.Labels, opt.Title, opt.Legend = labels, heading, legend
 		// Bar lengths measure distance from zero, even when the observations are close together.
-		low, high := series[0][0], series[0][0]
+		var positive, negative bool
 		for _, column := range series {
-			low = min(low, slices.Min(column))
-			high = max(high, slices.Max(column))
+			for _, value := range column {
+				if value == charts.GetNullValue() || math.IsInf(value, 0) {
+					continue
+				}
+				positive = positive || value > 0
+				negative = negative || value < 0
+			}
 		}
 		switch {
-		case low > 0:
+		case positive && !negative:
 			opt.ValueAxis[0].Min = charts.Ptr(0.0)
-		case high < 0:
+		case negative && !positive:
 			opt.ValueAxis[0].Max = charts.Ptr(0.0)
 		}
 		err = p.BarChart(opt)
