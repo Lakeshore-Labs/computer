@@ -107,3 +107,9 @@ The box office uses TypeScript, the projectionist uses Java and a calendar subsc
 A native rclone filesystem combines the Getty and Cleveland collections inside Computer. The guest produces a portable two-painting study with credited images and collection links.
 
 [![Vincent van Gogh’s paintings from Cleveland and the Getty](museum-study/sample/study.jpg)](museum-study/README.md)
+
+## Run the offline workbook
+
+Pick from 34 standalone shell recipes. Build images and charts, read or write documents, query a million SQLite rows and turn a timetable into sound. Every run starts with a new writable directory.
+
+[![Four products from an actual complete workbook run](offline-workbook/workbook.jpg)](offline-workbook/README.md)

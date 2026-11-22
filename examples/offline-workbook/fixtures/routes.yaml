@@ -1,0 +1,8 @@
+service: Harborside
+routes:
+  - name: Pier
+    capacity: 80
+  - name: Museum
+    capacity: 56
+  - name: North
+    capacity: 40
