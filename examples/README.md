@@ -89,3 +89,9 @@ Four NASA Terra MODIS observations became an offline application inside Computer
 [![Actual browser capture of the Great Lakes comparison desk](earth-observer/sample/desk.jpg)](earth-observer/README.md)
 
 [Download the viewer and replay the workflow](earth-observer/README.md)
+
+## Count the official MCP registry
+
+Computer paged through 70,222 registrations and charted how providers distribute their servers. Replay all 703 captured page counts offline or collect a bounded live sample.
+
+[![Registry registrations grouped by declared distribution](registry-census/sample/distribution.png)](registry-census/README.md)
