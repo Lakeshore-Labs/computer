@@ -15,6 +15,8 @@ parser.add_argument("--computer", type=Path, required=True)
 parser.add_argument("--output", type=Path, required=True)
 args = parser.parse_args()
 output = args.output.resolve()
+if not args.computer.is_file() or ":" in str(output):
+    parser.error("Provide an existing Computer executable and a mount path without colons.")
 if (output / "handoff.txt").exists():
     parser.error("Use a fresh output directory so an existing handoff.txt is preserved.")
 output.mkdir(parents=True, exist_ok=True)
