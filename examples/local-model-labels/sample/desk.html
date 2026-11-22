@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wardrobe pickup print desk</title>
+  <style>
+:root {
+  --bg: #1d1b19;
+  --panel: #2a2724;
+  --line: #4a443d;
+  --ink: #f1ead9;
+  --mute: #b3a994;
+  --paper: #fbf7ea;
+  --brass: #e0b45a;
+  --ok: #8fd18a;
+  --warn: #f0a35e;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: radial-gradient(circle at 20% 0,#2c2925,var(--bg) 60%);
+  color: var(--ink);
+  font: 16px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+.mono {
+  font-family: ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+header {
+  padding: 28px clamp(16px,4vw,48px) 8px;
+}
+h1 {
+  margin: 0;
+  font: 700 clamp(26px,4vw,40px)/1.1 ui-serif,Georgia,serif;
+  letter-spacing: .01em;
+}
+header p {
+  margin: 6px 0 0;
+  color: var(--mute);
+  max-width: 60ch;
+}
+main {
+  display: grid;
+  grid-template-columns: minmax(0,1.25fr) minmax(0,1fr);
+  gap: 24px;
+  padding: 16px clamp(16px,4vw,48px) 40px;
+}
+@media(max-width:820px) {
+  main{grid-template-columns: 1fr};
+}
+fieldset {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  background: var(--panel);
+}
+legend {
+  padding: 0 6px;
+  color: var(--brass);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.seg {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.seg label {
+  position: relative;
+  flex: 1 1 140px;
+}
+.seg input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  cursor: pointer;
+  margin: 0;
+}
+.seg label>span {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: center;
+  min-height: 44px;
+}
+.seg input:checked+span {
+  background: var(--brass);
+  color: #22190a;
+  border-color: var(--brass);
+  font-weight: 700;
+}
+.seg input:focus-visible+span {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+.seg small {
+  display: block;
+  font-weight: 400;
+  opacity: .8;
+}
+.desk {
+  background: linear-gradient(#34302c,#26231f);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 18px 26px;
+  position: relative;
+  overflow: hidden;
+}
+.slot {
+  height: 16px;
+  border-radius: 8px;
+  background: #0e0d0c;
+  box-shadow: inset 0 3px 6px #000;
+  margin: 0 -4px;
+}
+.paper {
+  margin: -6px 18px 0;
+  background: var(--paper);
+  color: #111;
+  border-radius: 0 0 6px 6px;
+  padding: 10px;
+  box-shadow: 0 8px 18px #0008;
+  position: relative;
+  transform-origin: top;
+  transition: transform .5s,opacity .3s;
+}
+.paper.held {
+  background: repeating-linear-gradient(135deg,#eae3cf 0 8px,#f3edda 8px 16px);
+}
+.paper svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.stripe {
+  height: 10px;
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+.stamp {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  border: 3px solid var(--warn);
+  color: #a85a14;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-weight: 800;
+  letter-spacing: .2em;
+  transform: rotate(-6deg);
+  background: #fff9;
+  display: none;
+}
+.paper.held .stamp {
+  display: block;
+}
+.safe {
+  margin: 16px 0 0;
+  padding: 8px 10px;
+  border-left: 4px solid var(--ok);
+  background: #0003;
+  color: var(--ink);
+  font-size: 14px;
+}
+dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+}
+dt {
+  color: var(--mute);
+}
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.chip {
+  display: inline-block;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 10px;
+  margin-right: 6px;
+  font-size: 14px;
+}
+.seg .dot {
+  display: inline-block;
+  margin-right: 6px}.dot{display:inline-block;
+  width: .8em;
+  height: .8em;
+  border-radius: 50%;
+  vertical-align: -1px;
+  margin-right: 6px;
+}
+.sp {
+  color: var(--brass);
+}
+button {
+  font: inherit;
+  min-height: 46px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 0;
+  background: var(--brass);
+  color: #22190a;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+}
+button:disabled {
+  background: #4a443d;
+  color: #9d9484;
+  cursor: not-allowed;
+}
+button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+pre {
+  margin: 10px 0 0;
+  padding: 10px;
+  background: #12100e;
+  border-radius: 8px;
+  overflow: auto;
+  font-size: 13px;
+  max-height: 190px;
+}
+.ok {
+  color: var(--ok)}.bad{color:var(--warn);
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.seg input:disabled + span {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.paper.held .stamp,
+.paper.accepted .stamp {
+  display: block;
+}
+.paper.accepted .stamp {
+  border-color: var(--ok);
+  color: #2b6a2a;
+}
+.note {
+  color: var(--mute);
+  font-size: 14px;
+  margin: 0 0 12px;
+}
+#status,
+#zpl {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Wardrobe pickup print desk</h1>
+    <p>Saved jobs pass an inspection gate. A draft that matches the source is accepted; otherwise it is held and then corrected. This page only previews and downloads the ZPL file; it never prints.</p>
+  </header>
+  <main>
+    <section aria-label="Ticket printer">
+      <div class="desk">
+        <div class="slot" aria-hidden="true"></div>
+        <div class="paper" id="paper">
+          <div class="stripe" id="stripe"></div>
+          <div class="stamp" id="stamp" aria-hidden="true"></div>
+          <div id="labelbox"></div>
+        </div>
+      </div>
+      <p class="safe">No physical printing happens here. A queue file is evidence from the desk gate; the button only saves that file to your computer.</p>
+    </section>
+    <section aria-label="Job controls and facts">
+      <fieldset>
+        <legend>Job</legend>
+        <div class="seg" id="jobs" role="radiogroup" aria-label="Job"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Stage</legend>
+        <div class="seg" id="stages" role="radiogroup" aria-label="Stage"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Facts</legend>
+        <dl id="facts"></dl>
+      </fieldset>
+      <button id="dl" type="button" disabled>Download ZPL</button>
+      <p id="status" role="status" aria-live="polite"></p>
+      <pre id="zpl" tabindex="0" aria-label="ZPL payload"></pre>
+    </section>
+  </main>
+  <script id="jobs-data" type="application/json">
+[
+ {
+  "id": "final-north",
+  "control": false,
+  "shelf": "NORTH-17",
+  "ribbon": "FERN",
+  "ribbonHex": "#4f7d4a",
+  "model": "qwen3:0.6b",
+  "modelDigest": "7df6b6e09427a769808717c0a93cadc4ae99ed4eb8bf5ca557c90846becea435",
+  "controlNote": null,
+  "tools": [
+   "read",
+   "write"
+  ],
+  "saved": "Shelf: NORTH-17  Pickup ribbon: FERN",
+  "source": "NORTH-17 FERN",
+  "stages": [
+   {
+    "key": "inspect",
+    "title": "Inspect",
+    "decision": "held",
+    "queued": false
+   },
+   {
+    "key": "issue",
+    "title": "Issue",
+    "decision": "corrected from source",
+    "queued": true
+   }
+  ],
+  "ticket": {
+   "name": "wardrobe-final-north-north-17-fern.zpl",
+   "sha256": "b2f6acc6f57483eca251d323f947cb24ca04fca421ffb1ecb56c5acf26e12640",
+   "b64": "XlhBCl5QVzYwMApeTEwyMjAKXkZPMzAsMzBeQTBOLDMwLDI4XkZEV0FSRFJPQkUgUElDS1VQXkZTCl5GTzMwLDEwMF5BME4sNjUsNTBeRkROT1JUSC0xNyBGRVJOXkZTCl5YWgo="
+  }
+ },
+ {
+  "id": "final-east",
+  "control": false,
+  "shelf": "EAST-42",
+  "ribbon": "COPPER",
+  "ribbonHex": "#b8693a",
+  "model": "qwen3:0.6b",
+  "modelDigest": "7df6b6e09427a769808717c0a93cadc4ae99ed4eb8bf5ca557c90846becea435",
+  "controlNote": null,
+  "tools": [
+   "read",
+   "write"
+  ],
+  "saved": "Shelf: EAST-42\nPickup ribbon: COPPER",
+  "source": "EAST-42 COPPER",
+  "stages": [
+   {
+    "key": "inspect",
+    "title": "Inspect",
+    "decision": "held",
+    "queued": false
+   },
+   {
+    "key": "issue",
+    "title": "Issue",
+    "decision": "corrected from source",
+    "queued": true
+   }
+  ],
+  "ticket": {
+   "name": "wardrobe-final-east-east-42-copper.zpl",
+   "sha256": "554354fce9931d0823e309fef77c470cfca7414d3fe3ddabc68ecb4f1a59c0fb",
+   "b64": "XlhBCl5QVzYwMApeTEwyMjAKXkZPMzAsMzBeQTBOLDMwLDI4XkZEV0FSRFJPQkUgUElDS1VQXkZTCl5GTzMwLDEwMF5BME4sNjUsNTBeRkRFQVNULTQyIENPUFBFUl5GUwpeWFoK"
+  }
+ }
+]
+  </script>
+  <script>
+"use strict";
+
+const JOBS = JSON.parse(document.getElementById("jobs-data").textContent);
+const $ = (id) => document.getElementById(id);
+const decoder = new TextDecoder("utf-8");
+const MONO = 'ui-monospace, Menlo, Consolas, monospace';
+
+const state = { job: 0, stage: "inspect" };
+// Per job: decoded bytes, text, and whether the bytes match every recorded sha-256.
+const tickets = [];
+let hashError = null;
+
+function escapeHtml(text) {
+  const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+  return String(text).replace(/[&<>"]/g, (c) => map[c]);
+}
+
+/** Make spaces and newlines visible in the saved label. */
+function visible(text) {
+  return escapeHtml(text)
+    .replace(/ /g, '<span class="sp">·</span>')
+    .replace(/\n/g, '<span class="sp">↵</span>');
+}
+
+function base64ToBytes(b64) {
+  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+}
+
+async function sha256Hex(bytes) {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Decode every ticket and verify it with the browser's own SHA-256. */
+async function loadTickets() {
+  for (const job of JOBS) {
+    if (!job.ticket) {
+      tickets.push(null);
+      continue;
+    }
+    const bytes = base64ToBytes(job.ticket.b64);
+    const sha = await sha256Hex(bytes);
+    tickets.push({
+      bytes,
+      text: decoder.decode(bytes),
+      sha,
+      verified: sha === job.ticket.sha256,
+    });
+  }
+}
+
+/** Draw the label from the ZPL text itself (^PW, ^LL, ^FO ... ^A0N ... ^FD ... ^FS). */
+function zplPreview(text) {
+  const width = Number((/\^PW(\d+)/.exec(text) || [0, 600])[1]);
+  const height = Number((/\^LL(\d+)/.exec(text) || [0, 220])[1]);
+  const field = /\^FO(\d+),(\d+)\^A0N,(\d+),(\d+)\^FD(.*?)\^FS/g;
+  const spoken = [];
+  let svg = "";
+  for (const m of text.matchAll(field)) {
+    const [, x, y, h, w, value] = m;
+    const room = Math.min(width - Number(x) - 20, value.length * Number(w) * 0.95);
+    spoken.push(value);
+    svg +=
+      `<text x="${x}" y="${Number(y) + Number(h) * 0.8}" font-size="${h}" font-weight="700" ` +
+      `font-family="Helvetica, Arial, sans-serif" textLength="${room}" ` +
+      `lengthAdjust="spacingAndGlyphs">${escapeHtml(value)}</text>`;
+  }
+  const alt = escapeHtml("Label preview: " + spoken.join(", "));
+  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${alt}">${svg}</svg>`;
+}
+
+function blankLabel(job, caption) {
+  const draft = job.saved.split("\n")[0];
+  const draftWidth = Math.min(540, draft.length * 16);
+  return (
+    `<svg viewBox="0 0 600 220" role="img" aria-label="Blank label: ${escapeHtml(caption)}">` +
+    `<text x="30" y="70" font-size="30" fill="#777" font-family="Helvetica, Arial, sans-serif">Waiting at the desk</text>` +
+    `<text x="30" y="140" font-size="26" fill="#777" font-family="${MONO}" textLength="${draftWidth}" lengthAdjust="spacingAndGlyphs">${escapeHtml(draft)}</text>` +
+    `<text x="30" y="190" font-size="22" fill="#777" font-family="Helvetica, Arial, sans-serif">${escapeHtml(caption)}</text></svg>`
+  );
+}
+
+function buildControls() {
+  $("jobs").innerHTML = JOBS.map(
+    (job, i) =>
+      `<label><input type="radio" name="job" value="${i}"${i === 0 ? " checked" : ""}>` +
+      `<span><span class="dot" style="background:${job.ribbonHex}"></span>` +
+      `${escapeHtml(job.shelf)} ${escapeHtml(job.ribbon)}` +
+      `<small>${escapeHtml(job.id)}${job.control ? " (control)" : ""}</small></span></label>`
+  ).join("");
+  $("stages").innerHTML = ["inspect", "issue"]
+    .map(
+      (key) =>
+        `<label><input type="radio" name="stage" value="${key}"${key === "inspect" ? " checked" : ""}>` +
+        `<span><b data-title></b><small data-sub></small></span></label>`
+    )
+    .join("");
+}
+
+function currentStage() {
+  return JOBS[state.job].stages.find((s) => s.key === state.stage);
+}
+
+function stageSubtitle(stage) {
+  if (stage.decision === null) return "not needed";
+  return stage.decision;
+}
+
+function fact(name, key, html) {
+  return `<dt>${name}</dt><dd data-fact="${key}">${html}</dd>`;
+}
+
+function render() {
+  const job = JOBS[state.job];
+  const ticket = tickets[state.job];
+  const stage = currentStage();
+  const missing = stage.decision === null;
+  const available = stage.queued && ticket;
+  const held = !missing && !stage.queued;
+
+  // Stage radios: names are fixed, subtitles and availability come from the evidence.
+  document.querySelectorAll("#stages label").forEach((label, i) => {
+    const s = job.stages[i];
+    label.querySelector("[data-title]").textContent = s.title;
+    label.querySelector("[data-sub]").textContent = stageSubtitle(s);
+    const input = label.querySelector("input");
+    input.disabled = s.decision === null;
+    input.checked = s.key === state.stage;
+  });
+
+  $("stripe").style.background = job.ribbonHex;
+  $("paper").className = "paper" + (held ? " held" : "") + (available && stage.key === "inspect" ? " accepted" : "");
+  $("stamp").textContent = held ? "HELD" : "ACCEPTED";
+  $("labelbox").innerHTML = available
+    ? zplPreview(ticket.text)
+    : blankLabel(job, held ? "held: no ticket queued" : "no ticket queued");
+
+  const sameAsSource = job.saved === job.source;
+  const rows = [
+    fact("Shelf", "shelf", escapeHtml(job.shelf)),
+    fact("Ribbon", "ribbon", `<span class="dot" style="background:${job.ribbonHex}"></span>${escapeHtml(job.ribbon)}`),
+    fact(
+      "Saved label",
+      "saved",
+      `<span class="mono">${visible(job.saved)}</span> ` +
+        `<span class="${sameAsSource ? "ok" : "bad"}">${sameAsSource ? "matches source" : "differs from source"}</span>`
+    ),
+    fact("Decision", "decision", escapeHtml(stage.decision)),
+    fact("Queue file", "queue", stage.queued ? "present" : "none"),
+  ];
+  if (job.control) {
+    rows.push(fact("Model", "model", "none — desk control, no model run"));
+  } else {
+    rows.push(
+      fact("Model", "model", escapeHtml(job.model)),
+      fact("Model digest", "digest", `<span class="mono">${escapeHtml(job.modelDigest.slice(0, 16))}…</span>`)
+    );
+    rows.push(fact("Tools", "tools", job.tools.map((t) => `<span class="chip mono">${escapeHtml(t)}</span>`).join("")));
+  }
+  if (available) {
+    const verdict = ticket.verified
+      ? '<span class="ok">verified</span>'
+      : '<span class="bad">MISMATCH</span>';
+    rows.push(
+      fact("ZPL sha-256", "sha", `<span class="mono">${ticket.sha.slice(0, 16)}…</span> ${verdict}`),
+      fact("Size", "size", ticket.bytes.length + " bytes")
+    );
+  }
+  $("facts").innerHTML = rows.join("");
+
+  $("zpl").textContent = available ? ticket.text : "(no ZPL queued at this stage)";
+  const button = $("dl");
+  button.disabled = !(available && ticket.verified);
+  button.textContent = available ? "Download " + job.ticket.name : "Download ZPL (nothing queued)";
+
+  const verb = stage.key === "inspect" ? "Inspect" : "Issue";
+  $("status").textContent =
+    `${job.shelf} ${job.ribbon} — ${verb}: ${stage.decision}. ` +
+    (stage.queued ? "Queue file present." : "No queue file.");
+  document.body.dataset.job = job.id;
+  document.body.dataset.stage = state.stage;
+}
+
+function download() {
+  const job = JOBS[state.job];
+  const ticket = tickets[state.job];
+  if (!ticket || !currentStage().queued || !ticket.verified) return;
+  const url = URL.createObjectURL(new Blob([ticket.bytes], { type: "application/octet-stream" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = job.ticket.name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  $("status").textContent = `Saved ${job.ticket.name} (${ticket.bytes.length} bytes). Nothing was printed.`;
+}
+
+async function start() {
+  buildControls();
+  document.addEventListener("change", (event) => {
+    if (event.target.name === "job") {
+      state.job = Number(event.target.value);
+      const stage = currentStage();
+      if (stage.decision === null) state.stage = "inspect";
+    }
+    if (event.target.name === "stage") state.stage = event.target.value;
+    render();
+  });
+  $("dl").addEventListener("click", download);
+  $("status").textContent = "Verifying tickets…";
+  try {
+    await loadTickets();
+  } catch (error) {
+    hashError = error;
+    JOBS.forEach((_, i) => (tickets[i] = tickets[i] || null));
+  }
+  render();
+  if (hashError) $("status").textContent = "SHA-256 verification is unavailable in this browser; downloads are disabled.";
+  document.body.dataset.ready = "true";
+}
+
+start();
+
+  </script>
+</body>
+</html>

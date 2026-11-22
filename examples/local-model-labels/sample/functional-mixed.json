@@ -1,0 +1,99 @@
+{
+  "runs": [
+    "accept-control",
+    "final-east",
+    "held-only-fixture"
+  ],
+  "records": [
+    {
+      "run": "accept-control",
+      "stage": "inspect",
+      "viewport": "desktop",
+      "stageAvailable": true,
+      "stageMatchesEvidence": true,
+      "decision": "accepted",
+      "decisionMatches": true,
+      "queueMatches": true,
+      "downloadOffered": true,
+      "downloadExpected": true,
+      "offerMatches": true,
+      "shaShownVerified": true,
+      "saved": true,
+      "bytes": 101,
+      "bytesEqualEvidence": true,
+      "sha256Equal": true,
+      "startsWithXA": true,
+      "filenameOk": true,
+      "pass": true
+    },
+    {
+      "run": "accept-control",
+      "stage": "issue",
+      "viewport": "desktop",
+      "stageAvailable": false,
+      "stageMatchesEvidence": true,
+      "pass": true
+    },
+    {
+      "run": "final-east",
+      "stage": "inspect",
+      "viewport": "desktop",
+      "stageAvailable": true,
+      "stageMatchesEvidence": true,
+      "decision": "held",
+      "decisionMatches": true,
+      "queueMatches": true,
+      "downloadOffered": false,
+      "downloadExpected": false,
+      "offerMatches": true,
+      "shaShownVerified": true,
+      "pass": true
+    },
+    {
+      "run": "final-east",
+      "stage": "issue",
+      "viewport": "desktop",
+      "stageAvailable": true,
+      "stageMatchesEvidence": true,
+      "decision": "corrected from source",
+      "decisionMatches": true,
+      "queueMatches": true,
+      "downloadOffered": true,
+      "downloadExpected": true,
+      "offerMatches": true,
+      "shaShownVerified": true,
+      "saved": true,
+      "bytes": 102,
+      "bytesEqualEvidence": true,
+      "sha256Equal": true,
+      "startsWithXA": true,
+      "filenameOk": true,
+      "pass": true
+    },
+    {
+      "run": "held-only-fixture",
+      "stage": "inspect",
+      "viewport": "desktop",
+      "stageAvailable": true,
+      "stageMatchesEvidence": true,
+      "decision": "held",
+      "decisionMatches": true,
+      "queueMatches": true,
+      "downloadOffered": false,
+      "downloadExpected": false,
+      "offerMatches": true,
+      "shaShownVerified": true,
+      "pass": true
+    },
+    {
+      "run": "held-only-fixture",
+      "stage": "issue",
+      "viewport": "desktop",
+      "stageAvailable": false,
+      "stageMatchesEvidence": true,
+      "pass": true
+    }
+  ],
+  "externalRequests": 0,
+  "pass": true
+}

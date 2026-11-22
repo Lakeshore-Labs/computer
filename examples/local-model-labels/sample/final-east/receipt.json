@@ -1,0 +1,88 @@
+{
+  "job": "east",
+  "started_utc": "2026-11-22T23:18:45.775740+00:00",
+  "model": "qwen3:0.6b",
+  "model_digest": "7df6b6e09427a769808717c0a93cadc4ae99ed4eb8bf5ca557c90846becea435",
+  "model_details": {
+    "family": "qwen3",
+    "parameter_size": "751.63M",
+    "quantization_level": "Q4_K_M"
+  },
+  "ollama_version": "0.31.1",
+  "source_sha256": "9defa5012160c6b7ca462a437346126dcc892d41af9d7564d3bcfe8031e95f04",
+  "bundle_sha256": "4816601754e5ce066d9f8dd8217ad401cc9d11e0d17e83c12963cc20df20d046",
+  "engine_sha256": "2c218412cb8b17e46ee91bea7556ec38f5b9b6bd6312fddd3ceeed14aa71eaaa",
+  "lookup": {
+    "exit": 0,
+    "seconds": 5.02,
+    "prompt": "Use the read tool to read /orders/today.txt. Reply with the exact pickup ribbon and shelf from the file.",
+    "tool_calls": [
+      {
+        "name": "read",
+        "arguments": {
+          "path": "/orders/today.txt"
+        }
+      }
+    ],
+    "tool_results": [
+      {
+        "name": "read",
+        "is_error": false
+      }
+    ],
+    "answers": [
+      "The exact pickup ribbon and shelf from the file are:  \n- **Pickup ribbon:** COPPER  \n- **Shelf:** EAST-42  \n\nThese details are retrieved directly from the file contents after using the read tool."
+    ]
+  },
+  "continued": {
+    "exit": 0,
+    "seconds": 3.1,
+    "prompt": "Using the shelf and pickup ribbon we just read, use the write tool to make /desk/label.txt. Write the shelf, a single space, then the ribbon, with no other text. Report when saved.",
+    "tool_calls": [
+      {
+        "name": "write",
+        "arguments": {
+          "path": "/desk/label.txt",
+          "content": "Shelf: EAST-42\nPickup ribbon: COPPER"
+        }
+      }
+    ],
+    "tool_results": [
+      {
+        "name": "write",
+        "is_error": false
+      }
+    ],
+    "answers": [
+      "The file /desk/label.txt has been successfully created and saved with the details: **Shelf: EAST-42** and **Pickup ribbon: COPPER**."
+    ]
+  },
+  "label": "Shelf: EAST-42\nPickup ribbon: COPPER",
+  "checks": {
+    "read_returned": true,
+    "answer_has_shelf_and_ribbon": true,
+    "write_returned": true,
+    "label_matches": false,
+    "queue_decision_matches_draft": true,
+    "first_queue_matches_observation": true,
+    "draft_preserved": true,
+    "printer_job_matches_source": true
+  },
+  "initial_gate": {
+    "mode": "inspect",
+    "decision": "held",
+    "source_label": "EAST-42 COPPER",
+    "draft": "Shelf: EAST-42\nPickup ribbon: COPPER",
+    "queue_file_exists": false,
+    "zpl_sha256": null
+  },
+  "final_gate": {
+    "mode": "correct",
+    "decision": "corrected from source",
+    "source_label": "EAST-42 COPPER",
+    "draft": "Shelf: EAST-42\nPickup ribbon: COPPER",
+    "queue_file_exists": true,
+    "zpl_sha256": "554354fce9931d0823e309fef77c470cfca7414d3fe3ddabc68ecb4f1a59c0fb"
+  },
+  "passed": true
+}
