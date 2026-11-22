@@ -1,0 +1,64 @@
+{
+  "captured": {
+    "live": false,
+    "book_bytes": 121382,
+    "book_sha256": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5",
+    "byte_identical_to_sample": true,
+    "spine_chapters": 3,
+    "rows": [
+      [
+        "Io",
+        "1,821.49",
+        "\u00b10.50"
+      ],
+      [
+        "Europa",
+        "1,560.80",
+        "\u00b10.30"
+      ],
+      [
+        "Ganymede",
+        "2,631.20",
+        "\u00b11.70"
+      ],
+      [
+        "Callisto",
+        "2,410.30",
+        "\u00b11.50"
+      ]
+    ],
+    "pandoc_read_all_rows": true,
+    "guest_output": "3 chapters, 4 moons; source image SHA-256 f67b370075562ee36ee944ab587abbcea049eea8f0996139cb4c77628e222cdd"
+  },
+  "live": {
+    "live": true,
+    "book_bytes": 121382,
+    "book_sha256": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5",
+    "byte_identical_to_sample": true,
+    "spine_chapters": 3,
+    "rows": [
+      [
+        "Io",
+        "1,821.49",
+        "\u00b10.50"
+      ],
+      [
+        "Europa",
+        "1,560.80",
+        "\u00b10.30"
+      ],
+      [
+        "Ganymede",
+        "2,631.20",
+        "\u00b11.70"
+      ],
+      [
+        "Callisto",
+        "2,410.30",
+        "\u00b11.50"
+      ]
+    ],
+    "pandoc_read_all_rows": true,
+    "guest_output": "3 chapters, 4 moons; source image SHA-256 f67b370075562ee36ee944ab587abbcea049eea8f0996139cb4c77628e222cdd"
+  }
+}

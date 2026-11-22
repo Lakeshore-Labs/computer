@@ -1,0 +1,14 @@
+{
+  "wikidata_mcp": "https://wd-mcp.wmcloud.org/mcp",
+  "jpl_measurements": "https://ssd.jpl.nasa.gov/sats/phys_par/",
+  "photo_page": "https://science.nasa.gov/photojournal/the-galilean-satellites-3/",
+  "image_url": "https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia00/pia00601/PIA00601.jpg",
+  "image_credit": "NASA/JPL/DLR",
+  "captured_utc": "2026-11-22",
+  "sha256": {
+    "jpl.html": "9a9c004d950923ea368a8c4815d813c9c232c332d1586402a23b15d9581370d1",
+    "wikidata.csv": "69de00b8e89e1660a29b928f6572501f2ee103801058a98226ef0b34e5b4e048",
+    "galilean.jpg": "f67b370075562ee36ee944ab587abbcea049eea8f0996139cb4c77628e222cdd"
+  },
+  "captured_jpl_excerpt_sha256": "ac8f2f86cd480d043545d8e6b40136df8856f2ed327f7800a9b4ef5b33530b04"
+}

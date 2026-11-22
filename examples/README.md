@@ -119,3 +119,9 @@ Pick from 34 standalone shell recipes. Build images and charts, read or write do
 Computer issues a PDF and QR for a fictional library desk. A Rust MCP client reads the original and rotated image, then independently scans a rendering of the printable ticket.
 
 [![A printed ticket for a red wool scarf](claim-ticket/sample/paper.png)](claim-ticket/README.md)
+
+## Take four moons into the classroom
+
+A Wikidata MCP query, a JPL measurement table and a credited spacecraft image become an offline e-book. Open the actual EPUB, compare the moon sizes and follow the chapter navigation on a phone.
+
+[![Four moons of Jupiter open in an EPUB reader](moon-almanac/sample/cover.png)](moon-almanac/README.md)
