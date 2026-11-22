@@ -1,0 +1,237 @@
+{
+ "checks": [
+  {
+   "id": "session-no-error",
+   "row": "go-method:computer.Computer.Session",
+   "expected": "both calls return a session and no error",
+   "observed": {
+    "err1": "\u003cnil\u003e",
+    "err2": "\u003cnil\u003e",
+    "nil1": false,
+    "nil2": false
+   },
+   "pass": true
+  },
+  {
+   "id": "session-same-identity",
+   "row": "go-method:computer.Computer.Session",
+   "expected": "unchanged listing returns the same *gbash.Session pointer",
+   "observed": {
+    "same_pointer": true
+   },
+   "pass": true
+  },
+  {
+   "id": "session-shell-command",
+   "row": "go-method:computer.Computer.Session",
+   "expected": "echo, pwd and a redirected write/read run in the returned session, exit 0",
+   "observed": {
+    "exit": 0,
+    "stderr": "",
+    "stdout": "session-says-hi\n/work\ndata\n"
+   },
+   "pass": true
+  },
+  {
+   "id": "session-file-on-host",
+   "row": "go-method:computer.Computer.Session",
+   "expected": "the file the session wrote is on the host mount",
+   "observed": {
+    "err": "\u003cnil\u003e",
+    "host_content": "data\n"
+   },
+   "pass": true
+  },
+  {
+   "id": "session-same-after-exec",
+   "row": "go-method:computer.Computer.Session",
+   "expected": "a third call after Exec still returns that pointer",
+   "observed": {
+    "same_pointer": true
+   },
+   "pass": true
+  },
+  {
+   "id": "wasm-run-before-close",
+   "row": "go-method:wasm.Module.Close",
+   "expected": "the tiny module runs and exits 0",
+   "observed": {
+    "err": "\u003cnil\u003e",
+    "exit": 0
+   },
+   "pass": true
+  },
+  {
+   "id": "wasm-close-status",
+   "row": "go-method:wasm.Module.Close",
+   "expected": "Close returns a nil error after a normal compile and run",
+   "observed": {
+    "err": "\u003cnil\u003e",
+    "returned_nil": true
+   },
+   "pass": true
+  },
+  {
+   "id": "agent-help",
+   "row": "go-function:agent.Command",
+   "expected": "--help under the chosen name prints a usage line naming that name, exit 0",
+   "observed": {
+    "exit": 0,
+    "stderr": "",
+    "stdout": "usage: probe-agent [-q] [--json] [-c | -r NAME] \"message\"\n       probe-agent --list\n\nAnswers one message in a new conversation and prints the answer; the steps taken go to standard error.\n  -q        show no steps\n  --json    print the whole run as JSON lines\n  -c        continue the latest conversation\n  -r NAME   continue the conversation NAME\n  --list    print the conversations' names, newest first\n"
+   },
+   "pass": true
+  },
+  {
+   "id": "agent-list-reads-state",
+   "row": "go-function:agent.Command",
+   "expected": "--list prints the two conversation directories of Config.State, newest first, exit 0",
+   "observed": {
+    "exit": 0,
+    "stderr": "",
+    "stdout": "20260101T000000.000002\n20260101T000000.000001\n"
+   },
+   "pass": true
+  },
+  {
+   "id": "agent-help-list-leave-state-alone",
+   "row": "go-function:agent.Command",
+   "expected": "--help and --list create no conversation",
+   "observed": {
+    "after": [
+     "20260101T000000.000001",
+     "20260101T000000.000002"
+    ],
+    "before": [
+     "20260101T000000.000001",
+     "20260101T000000.000002"
+    ]
+   },
+   "pass": true
+  },
+  {
+   "id": "agent-control-unregistered-names",
+   "row": "go-function:agent.Command",
+   "expected": "names never registered (other-agent, agent) are not found: exit 127",
+   "observed": {
+    "agent": {
+     "exit": 127,
+     "stderr": "agent: command not found\n",
+     "stdout": ""
+    },
+    "other-agent": {
+     "exit": 127,
+     "stderr": "other-agent: command not found\n",
+     "stdout": ""
+    }
+   },
+   "pass": true
+  },
+  {
+   "id": "env-run-replace-false-vs-true",
+   "row": "go-method:computer.Environment.Run",
+   "expected": "replaceEnv=false adds A=1 to the shell's own environment; replaceEnv=true drops the shell's own HOME while keeping A=1 (PATH is observed, not assumed)",
+   "observed": {
+    "false": {
+     "err": "\u003cnil\u003e",
+     "exit": 0,
+     "out": "A=1 B=unset HOME=/work PATH=set/usr/bin:/bin PWD=/work\n"
+    },
+    "true": {
+     "err": "\u003cnil\u003e",
+     "exit": 0,
+     "out": "A=1 B=unset HOME=unset PATH=set/usr/bin:/bin PWD=/work\n"
+    }
+   },
+   "pass": true
+  },
+  {
+   "id": "stat-symlink-follow",
+   "row": "go-method:computer.Environment.Stat",
+   "expected": "follow=true describes the target (regular, 12 bytes); follow=false describes the link (symlink mode)",
+   "observed": {
+    "follow_false": {
+     "mode": "Lrwxr-xr-x",
+     "name": "link.txt",
+     "regular": false,
+     "size": 10,
+     "symlink": true
+    },
+    "follow_true": {
+     "mode": "-rw-r--r--",
+     "name": "link.txt",
+     "regular": true,
+     "size": 12,
+     "symlink": false
+    },
+    "link_made_by": "host os.Symlink (shell ln -s exit 1: ln: failed to create symbolic link '/work/link.txt': Permission denied)"
+   },
+   "pass": true
+  },
+  {
+   "id": "truncate-grow",
+   "row": "go-method:computer.Environment.Truncate",
+   "expected": "3-byte file truncated to 10 reads back 10 bytes: abc then 7 zero bytes",
+   "observed": {
+    "err": "\u003cnil\u003e",
+    "hex": "61626300000000000000",
+    "size": 10
+   },
+   "pass": true
+  },
+  {
+   "id": "truncate-zero",
+   "row": "go-method:computer.Environment.Truncate",
+   "expected": "truncate to 0 leaves an empty file that still exists",
+   "observed": {
+    "err": "\u003cnil\u003e",
+    "read_bytes": 0,
+    "size": 0
+   },
+   "pass": true
+  },
+  {
+   "id": "mkdir-single",
+   "row": "go-method:computer.Environment.Mkdir",
+   "expected": "Mkdir without parents makes one missing folder whose parent exists; it lists empty",
+   "observed": {
+    "entries": 0,
+    "err": "\u003cnil\u003e"
+   },
+   "pass": true
+  },
+  {
+   "id": "rename-folder",
+   "row": "go-method:computer.Environment.Rename",
+   "expected": "renaming an empty folder moves it: old name gone, new name is a directory",
+   "observed": {
+    "err": "\u003cnil\u003e",
+    "new_is_dir": true,
+    "old_not_exist": true
+   },
+   "pass": true
+  },
+  {
+   "id": "remove-empty-folder-nonrecursive",
+   "row": "go-method:computer.Environment.Remove",
+   "expected": "non-recursive Remove deletes the empty folder; it is then not found",
+   "observed": {
+    "err": "\u003cnil\u003e",
+    "not_exist_after": true
+   },
+   "pass": true
+  },
+  {
+   "id": "remove-file-nonrecursive",
+   "row": "go-method:computer.Environment.Remove",
+   "expected": "non-recursive Remove deletes an ordinary file",
+   "observed": {
+    "err": "\u003cnil\u003e",
+    "not_exist_after": true
+   },
+   "pass": true
+  }
+ ],
+ "passed": 19,
+ "total": 19
+}

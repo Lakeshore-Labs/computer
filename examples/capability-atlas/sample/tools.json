@@ -1,0 +1,19 @@
+{
+  "go_result": {
+    "day": "Sunday",
+    "closes": "16:00"
+  },
+  "group": "library",
+  "host_result": {
+    "day": "Sunday",
+    "closes": "16:00"
+  },
+  "python_function": "get_hours",
+  "python_module": "library",
+  "shell_command": "library get-hours --json '{}'",
+  "shell_result": {
+    "day": "Sunday",
+    "closes": "16:00"
+  },
+  "tool": "library_getHours"
+}
