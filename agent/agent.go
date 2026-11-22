@@ -193,6 +193,9 @@ func Command(name string, cfg Config) commands.Command {
 			dirs = append(dirs, wasm.Dir{Guest: state, Host: dir})
 		}
 		env := map[string]string{"HOME": cfg.Home, "AGENT_STATE": state, "AGENT_MODEL": cfg.Model, "AGENT_INSTRUCTIONS": cfg.Instructions}
+		if address, err := url.Parse(cfg.ModelURL); err == nil && strings.EqualFold(address.Hostname(), "generativelanguage.googleapis.com") {
+			env["AGENT_MODEL_COMPAT"] = "gemini"
+		}
 		for name, n := range map[string]int{"AGENT_CONTEXT_WINDOW": cfg.ContextWindow, "AGENT_MAX_TOKENS": cfg.MaxTokens, "AGENT_MAX_TURNS": cfg.MaxTurns} {
 			if n > 0 {
 				env[name] = strconv.Itoa(n)

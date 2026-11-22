@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "node --test gemini.test.js",
     "build": "esbuild agent.js --bundle --platform=browser --format=esm --target=es2023 --outfile=dist/agent.js --alias:openai=./openai.js --define:global=globalThis --external:node:* --external:qjs:* --log-level=warning && esbuild conformance.js --bundle --platform=browser --format=esm --target=es2023 --outfile=dist/conformance.js --alias:openai=./openai.js --define:global=globalThis --external:node:* --external:qjs:* --log-level=warning"
   },
   "dependencies": {
