@@ -101,3 +101,9 @@ Computer paged through 70,222 registrations and charted how providers distribute
 The box office uses TypeScript, the projectionist uses Java and a calendar subscriber uses Python. Their three independent Computer sessions publish the lobby board and verify the revised calendar. A browser downloads the new edition.
 
 [![The revised screening times displayed in a browser](festival-calendar/sample/amended.png)](festival-calendar/README.md)
+
+## Bring two museum collections into the same room
+
+A native rclone filesystem combines the Getty and Cleveland collections inside Computer. The guest produces a portable two-painting study with credited images and collection links.
+
+[![Vincent van Gogh’s paintings from Cleveland and the Getty](museum-study/sample/study.jpg)](museum-study/README.md)
