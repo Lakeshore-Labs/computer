@@ -13,6 +13,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	"math"
 	"os"
 	"path"
 	"strconv"
@@ -23,6 +24,7 @@ import (
 
 	"golang.org/x/image/bmp"
 	"golang.org/x/image/colornames"
+	"golang.org/x/image/math/f64"
 	"golang.org/x/image/tiff"
 	_ "golang.org/x/image/webp" // registers the WebP decoder
 )
@@ -41,9 +43,9 @@ Reads png, jpeg, gif, bmp, tiff and webp. Writes png, jpg, jpeg, gif, bmp and ti
 Options:
   -resize GEOMETRY, -thumbnail GEOMETRY   W, xH, WxH (fit within), WxH! (exactly), N%, WxH> (only shrink), WxH^ (fill)
   -crop WxH+X+Y                           cut out a rectangle; +X+Y is optional and defaults to +0+0
-  -rotate DEGREES                         clockwise, a multiple of 90; negative turns counterclockwise
+  -rotate DEGREES                         turn clockwise; negative and fractional degrees are supported
   -flip, -flop                            mirror top to bottom, mirror left to right
-  -background COLOR                       the colour -flatten and a JPEG put behind transparency; white by default
+  -background COLOR                       colour for exposed corners, flattening and JPEG output; default white
   -flatten, -alpha remove                 put the image on the background colour
   -quality N                              JPEG quality, 1 to 100; 90 by default
   -strip, -auto-orient                    accepted and ignored
@@ -242,16 +244,24 @@ func runMagick(ctx context.Context, inv *commands.Invocation) error {
 				return dst, nil
 			})
 		case "-rotate":
-			degrees, err := strconv.Atoi(value)
-			if err != nil || degrees%90 != 0 {
-				return usagef("-rotate supports only multiples of 90 degrees, not %q", value)
+			degrees, err := strconv.ParseFloat(value, 64)
+			if err != nil || math.IsInf(degrees, 0) || math.IsNaN(degrees) {
+				return usagef("-rotate needs a finite angle in degrees, not %q", value)
 			}
-			degrees = (degrees%360 + 360) % 360
+			// Preserve exact right angles for integers larger than a float64 can represent.
+			if integer, err := strconv.ParseInt(value, 10, 64); err == nil {
+				degrees = float64(integer % 360)
+			}
+			degrees = math.Mod(degrees, 360)
+			over := background
 			ops = append(ops, func(src *image.NRGBA) (*image.NRGBA, error) {
 				if degrees == 0 {
 					return src, nil
 				}
-				return rotate(src, degrees), nil
+				if math.Mod(degrees, 90) == 0 {
+					return rotate(src, (int(degrees)+360)%360), nil
+				}
+				return rotateAngle(src, degrees, over)
 			})
 		}
 	}
@@ -379,6 +389,41 @@ func rotate(src *image.NRGBA, degrees int) *image.NRGBA {
 		}
 	}
 	return dst
+}
+
+// The bilinear filter samples one pixel past the original edge as it blends into the background.
+type borderedImage struct {
+	image.RGBA64Image
+	background color.RGBA64
+}
+
+func (m borderedImage) Bounds() image.Rectangle { return m.RGBA64Image.Bounds().Inset(-1) }
+func (m borderedImage) At(x, y int) color.Color { return m.RGBA64At(x, y) }
+
+func (m borderedImage) RGBA64At(x, y int) color.RGBA64 {
+	if image.Pt(x, y).In(m.RGBA64Image.Bounds()) {
+		return m.RGBA64Image.RGBA64At(x, y)
+	}
+	return m.background
+}
+
+// rotateAngle places the image centers on the same point and rounds the new canvas outwards.
+func rotateAngle(src *image.NRGBA, degrees float64, background color.Color) (*image.NRGBA, error) {
+	b := src.Bounds()
+	sin, cos := math.Sincos(degrees * math.Pi / 180)
+	w, h := float64(b.Dx()), float64(b.Dy())
+	dw := int(math.Ceil(math.Abs(w*cos) + math.Abs(h*sin)))
+	dh := int(math.Ceil(math.Abs(w*sin) + math.Abs(h*cos)))
+	if err := checkSize(dw, dh); err != nil {
+		return nil, err
+	}
+	dst := image.NewNRGBA(image.Rect(0, 0, dw, dh))
+	draw.Draw(dst, dst.Bounds(), image.NewUniform(background), image.Point{}, draw.Src)
+	cx, cy := float64(b.Min.X)+w/2, float64(b.Min.Y)+h/2
+	transform := f64.Aff3{cos, -sin, float64(dw)/2 - cos*cx + sin*cy, sin, cos, float64(dh)/2 - sin*cx - cos*cy}
+	bordered := borderedImage{src, color.RGBA64Model.Convert(background).(color.RGBA64)}
+	xdraw.BiLinear.Transform(dst, transform, bordered, bordered.Bounds(), draw.Src, nil)
+	return dst, nil
 }
 
 // encoder is the writer for the format that name's extension gives.
