@@ -1,0 +1,152 @@
+{
+  "sdk": "mcp 1.11.0 (official Ruby SDK)",
+  "ruby": "4.0.9",
+  "tools": [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ],
+  "catalog_records_read": [
+    "/collection/getty/record.json",
+    "/collection/getty/year.json",
+    "/collection/cleveland/record.json"
+  ],
+  "catalog": {
+    "getty": {
+      "title": "Irises",
+      "accession": "90.PA.20",
+      "year": "1889",
+      "artist": "Vincent van Gogh (Dutch, 1853 - 1890)",
+      "credit": "The J. Paul Getty Museum"
+    },
+    "cleveland": {
+      "title": "The Large Plane Trees (Road Menders at Saint-Rémy)",
+      "accession": "1947.209",
+      "year": "1889",
+      "artist": "Vincent van Gogh (Dutch, 1853–1890)",
+      "credit": "The Cleveland Museum of Art",
+      "license": "CC0"
+    }
+  },
+  "cards": [
+    {
+      "file": "01-getty-a-mira.svg",
+      "visitor": "Mira",
+      "edition": "A",
+      "museum": "getty",
+      "title": "Irises",
+      "accession": "90.PA.20",
+      "credit": "The J. Paul Getty Museum",
+      "inscription": "For Mira · 90.PA.20 · 1889",
+      "svg_bytes": 35741,
+      "svg_sha256": "75fda67b362c38b28386e82569518374cdbd25763efb043aba513d6ffe53174c",
+      "png_sha256": "9c848263e946c22b5a228c65dd7ec7edeedcdc00e1a237b4aee964ade0f65903"
+    },
+    {
+      "file": "02-getty-b-tobias.svg",
+      "visitor": "Tobias",
+      "edition": "B",
+      "museum": "getty",
+      "title": "Irises",
+      "accession": "90.PA.20",
+      "credit": "The J. Paul Getty Museum",
+      "inscription": "For Tobias · 90.PA.20 · 1889",
+      "svg_bytes": 35745,
+      "svg_sha256": "e6bd66f7875798c61c54c5429b41b0ea4ed7991158df3f7017a28d111b168588",
+      "png_sha256": "0405f5c8c92ec904c2436d862c4caf684b8bf7916cbc8e7abb2a5771d5480c84"
+    },
+    {
+      "file": "03-cleveland-a-ines.svg",
+      "visitor": "Ines",
+      "edition": "A",
+      "museum": "cleveland",
+      "title": "The Large Plane Trees (Road Menders at Saint-Rémy)",
+      "accession": "1947.209",
+      "credit": "The Cleveland Museum of Art",
+      "inscription": "For Ines · 1947.209 · 1889",
+      "svg_bytes": 31330,
+      "svg_sha256": "fa04e7e277759db8eb90a3b11eb10da485ef886c93b0c0aafe7fe99d978c518c",
+      "png_sha256": "840e3652528acb25cc2bc36b2585ef759a20d0d9fc15020da244866360bda64a"
+    }
+  ],
+  "ui_http_status": 200,
+  "mcp_calls": 15,
+  "mcp_trace": [
+    {
+      "tool": "read",
+      "path": "/collection/getty/record.json",
+      "bytes": 496
+    },
+    {
+      "tool": "read",
+      "path": "/collection/getty/year.json",
+      "bytes": 7
+    },
+    {
+      "tool": "read",
+      "path": "/collection/cleveland/record.json",
+      "bytes": 335
+    },
+    {
+      "tool": "write",
+      "path": "/desk/order.json",
+      "bytes": 47
+    },
+    {
+      "tool": "bash",
+      "path": null,
+      "bytes": 429
+    },
+    {
+      "tool": "read",
+      "path": "/desk/postcard.svg",
+      "bytes": 35741
+    },
+    {
+      "tool": "read",
+      "path": "/desk/receipt.json",
+      "bytes": 428
+    },
+    {
+      "tool": "edit",
+      "path": "/desk/order.json",
+      "bytes": 47
+    },
+    {
+      "tool": "bash",
+      "path": null,
+      "bytes": 431
+    },
+    {
+      "tool": "read",
+      "path": "/desk/postcard.svg",
+      "bytes": 35745
+    },
+    {
+      "tool": "read",
+      "path": "/desk/receipt.json",
+      "bytes": 430
+    },
+    {
+      "tool": "edit",
+      "path": "/desk/order.json",
+      "bytes": 47
+    },
+    {
+      "tool": "bash",
+      "path": null,
+      "bytes": 481
+    },
+    {
+      "tool": "read",
+      "path": "/desk/postcard.svg",
+      "bytes": 31330
+    },
+    {
+      "tool": "read",
+      "path": "/desk/receipt.json",
+      "bytes": 480
+    }
+  ]
+}
