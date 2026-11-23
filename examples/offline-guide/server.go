@@ -11,6 +11,9 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"mime"
+	"net/url"
+	"path"
 	"slices"
 	"strings"
 
@@ -65,7 +68,7 @@ func newGuide() (*mcp.Server, error) {
 		exhibits[id] = item
 	}
 
-	server := mcp.NewServer(&mcp.Implementation{Name: "computer-field-guide", Version: "1.2.0"}, nil)
+	server := mcp.NewServer(&mcp.Implementation{Name: "computer-field-guide", Version: "1.3.0"}, nil)
 	mcp.AddTool(server, &mcp.Tool{Name: "search", Description: "Find recorded Computer exhibits. Returns up to twelve matching entries and the full match count."},
 		func(_ context.Context, _ *mcp.CallToolRequest, in searchInput) (*mcp.CallToolResult, searchOutput, error) {
 			if in.Offset < 0 {
@@ -126,6 +129,23 @@ func newGuide() (*mcp.Server, error) {
 		content := &mcp.ResourceContents{URI: uri, MIMEType: "application/json", Text: string(item.evidence)}
 		return &mcp.ReadResourceResult{Contents: []*mcp.ResourceContents{content}}, nil
 	})
+	// Resource URIs describe embedded members. Byte payloads stay in the archive until read.
+	addFile := func(uri, name, kind, member string) {
+		server.AddResource(&mcp.Resource{URI: uri, Name: name, MIMEType: kind},
+			func(_ context.Context, _ *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+				data, err := fs.ReadFile(archive, member)
+				if err != nil {
+					return nil, err
+				}
+				content := &mcp.ResourceContents{URI: uri, MIMEType: kind}
+				if strings.HasPrefix(kind, "text/") || kind == "application/json" || kind == "image/svg+xml" {
+					content.Text = string(data)
+				} else {
+					content.Blob = data
+				}
+				return &mcp.ReadResourceResult{Contents: []*mcp.ResourceContents{content}}, nil
+			})
+	}
 	for _, asset := range []struct{ uri, name, kind, path string }{
 		{"guide://dispatch/sheet", "Printable dispatch sheet", "application/pdf", "assets/dispatch.pdf"},
 		{"guide://dispatch/workbook", "Dispatch workbook", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "assets/dispatch.xlsx"},
@@ -135,22 +155,34 @@ func newGuide() (*mcp.Server, error) {
 		{"guide://collections/saint-remy", "Two paintings from Saint-Rémy", "text/html", "assets/museum-study.html"},
 		{"guide://observations/pacific-listening-room", "Pacific tide listening room", "text/html", "assets/listen-to-the-pacific.html"},
 	} {
-		server.AddResource(&mcp.Resource{URI: asset.uri, Name: asset.name, MIMEType: asset.kind},
-			func(_ context.Context, _ *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
-				data, err := fs.ReadFile(archive, asset.path)
-				if err != nil {
-					return nil, err
-				}
-				content := &mcp.ResourceContents{URI: asset.uri, MIMEType: asset.kind}
-				if strings.HasPrefix(asset.kind, "text/") {
-					content.Text = string(data)
-				} else {
-					content.Blob = data
-				}
-				return &mcp.ReadResourceResult{Contents: []*mcp.ResourceContents{content}}, nil
-			})
+		addFile(asset.uri, asset.name, asset.kind, asset.path)
+	}
+	for _, file := range archive.File {
+		name, ok := strings.CutPrefix(file.Name, "assets/")
+		if !ok || file.FileInfo().IsDir() {
+			continue
+		}
+		uri := (&url.URL{Scheme: "guide", Host: "assets", Path: "/" + name}).String()
+		addFile(uri, name, assetMediaType(name), file.Name)
 	}
 	return server, nil
+}
+
+func assetMediaType(name string) string {
+	ext := path.Ext(name)
+	switch ext {
+	case ".sqlite":
+		return "application/vnd.sqlite3"
+	case ".gpkg":
+		return "application/geopackage+sqlite3"
+	case ".apkg":
+		return "application/octet-stream"
+	}
+	kind, _, _ := strings.Cut(mime.TypeByExtension(ext), ";")
+	if kind == "" {
+		return "application/octet-stream"
+	}
+	return kind
 }
 
 func main() {

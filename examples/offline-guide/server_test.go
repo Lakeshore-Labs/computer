@@ -1,8 +1,10 @@
 package main
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
+	"io/fs"
 	"slices"
 	"strings"
 	"testing"
@@ -143,5 +145,43 @@ func TestReadExhibitResourceTemplate(t *testing.T) {
 	}
 	if show.IsError || result.Contents[0].Text != show.Content[0].(*mcp.TextContent).Text {
 		t.Fatal("resource and show tool returned different evidence")
+	}
+}
+
+func TestDownloadableGalleryAssets(t *testing.T) {
+	session := connectGuide(t)
+	archive, err := zip.NewReader(bytes.NewReader(bundle), int64(len(bundle)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		member, uri, media string
+		text               bool
+	}{
+		{"assets/moon-study/sample/edition-2.apkg", "guide://assets/moon-study/sample/edition-2.apkg", "application/octet-stream", false},
+		{"assets/postcard-press/sample/desktop-card1-getty.svg", "guide://assets/postcard-press/sample/desktop-card1-getty.svg", "image/svg+xml", true},
+		{"assets/observation-shift/sample/shift.sqlite", "guide://assets/observation-shift/sample/shift.sqlite", "application/vnd.sqlite3", false},
+	} {
+		t.Run(tc.member, func(t *testing.T) {
+			want, err := fs.ReadFile(archive, tc.member)
+			if err != nil {
+				t.Fatal(err)
+			}
+			result, err := session.ReadResource(t.Context(), &mcp.ReadResourceParams{URI: tc.uri})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(result.Contents) != 1 {
+				t.Fatalf("got %d contents", len(result.Contents))
+			}
+			content := result.Contents[0]
+			data := content.Blob
+			if tc.text {
+				data = []byte(content.Text)
+			}
+			if content.URI != tc.uri || content.MIMEType != tc.media || !bytes.Equal(data, want) {
+				t.Fatalf("resource differed from %s", tc.member)
+			}
+		})
 	}
 }

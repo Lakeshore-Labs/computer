@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 from zipfile import ZipFile
+from urllib.parse import quote
 
 from mcp import ClientSession, StdioServerParameters, stdio_client
 
@@ -24,6 +25,10 @@ async def replay(guide, computer, output):
         expected_image = archive.read('assets/repair.png')
         receipts = {Path(name).stem: archive.read('evidence/' + Path(name).stem + '.json')
                     for name in archive.namelist() if name.startswith('cases/') and name.endswith('.html')}
+        assets = {
+            'guide://assets/' + quote(name.removeprefix('assets/'), safe='/'): archive.read(name)
+            for name in archive.namelist() if name.startswith('assets/') and not name.endswith('/')
+        }
         documents = {
             uri: (kind, archive.read(member)) for uri, kind, member in [
                 ('guide://festival/original', 'text/calendar', 'assets/original.ics'),
@@ -35,7 +40,22 @@ async def replay(guide, computer, output):
     async with connect(guide) as direct:
         operations = sorted(t.name for t in (await direct.list_tools()).tools)
         assert operations == ['search', 'show']
-        resources = sorted(str(r.uri) for r in (await direct.list_resources()).resources)
+        page = await direct.list_resources()
+        listed = list(page.resources)
+        while page.next_cursor:
+            page = await direct.list_resources(cursor=page.next_cursor)
+            listed.extend(page.resources)
+        resources = sorted(str(r.uri) for r in listed)
+        asset_uris = {uri for uri in resources if uri.startswith('guide://assets/')}
+        assert asset_uris == assets.keys()
+        asset_bytes = 0
+        for uri in sorted(asset_uris):
+            result = await direct.read_resource(uri)
+            assert len(result.contents) == 1
+            content = result.contents[0]
+            data = content.text.encode('utf-8') if hasattr(content, 'text') else base64.b64decode(content.blob, validate=True)
+            assert str(content.uri) == uri and data == assets[uri], uri
+            asset_bytes += len(data)
         templates = (await direct.list_resource_templates()).resource_templates
         template = next(t for t in templates if t.uri_template == 'guide://exhibits/{id}')
         assert template.mime_type == 'application/json'
@@ -82,7 +102,7 @@ identify bakery.png"""
         assert not read.is_error and len(images) == 1 and images[0].mime_type == 'image/png'
         image = base64.b64decode(images[0].data, validate=True)
         assert image == expected_image == (output / 'bakery.png').read_bytes()
-    receipt = {'guide_tools': operations, 'resource_uris': resources, 'exhibit_template': template.uri_template, 'exact_exhibit_receipts': len(receipts), 'documents': document_checks, 'outer_tools': tools,
+    receipt = {'guide_tools': operations, 'resource_uris': [uri for uri in resources if uri not in assets], 'exact_downloadable_assets': len(assets), 'downloadable_asset_bytes': asset_bytes, 'exhibit_template': template.uri_template, 'exact_exhibit_receipts': len(receipts), 'documents': document_checks, 'outer_tools': tools,
                'pdf_bytes': len(sheet), 'pdf_sha256': hashlib.sha256(sheet).hexdigest(),
                'guest_answer': answer, 'image_bytes': len(image), 'image_sha256': hashlib.sha256(image).hexdigest()}
     (output / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')

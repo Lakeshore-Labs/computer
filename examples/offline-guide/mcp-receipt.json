@@ -12,6 +12,8 @@
     "guide://observations/great-lakes",
     "guide://observations/pacific-listening-room"
   ],
+  "exact_downloadable_assets": 216,
+  "downloadable_asset_bytes": 28760154,
   "exhibit_template": "guide://exhibits/{id}",
   "exact_exhibit_receipts": 242,
   "documents": {

@@ -32,7 +32,7 @@ Extract the ZIP and open `index.html` in a browser. Search for a tool, file stor
 
 The November 22, 2026 edition contains 242 exhibits. There are 37 featured stories, 12 runtime chapters, 48 command recipes, 30 storage exhibits, 12 local MCP workflows and 103 successful hosted cases. Several exhibits can exercise the same client, API or filesystem.
 
-The hosted survey contains 94 final cases, of which 90 passed across 86 distinct endpoint URLs. Thirty-three passing cases share a documentation search-and-read pattern. Repeated tools or shared operators do not establish independent protocol implementations. The archive’s scope page and the [hosted fieldwork](../hosted-fieldwork/) describe the checks, four final misses and capture times. The catalog also records the editor’s native confirmation prompt and partial storage results.
+The four-cohort hosted survey contains 107 final cases, of which 103 passed across 95 distinct endpoint URLs. Thirty-three passing cases share a documentation search-and-read pattern. Repeated tools or shared operators do not establish independent protocol implementations. The archive’s scope page and the [four-cohort fieldwork](../hosted-fieldwork/cohort4/) describe the checks, four final misses and capture times. The catalog also records the editor’s native confirmation prompt and partial storage results.
 
 ## Verify the package
 
@@ -53,7 +53,7 @@ The same ZIP can be the data source for a local MCP server. Build the server fro
 CGO_ENABLED=0 go build -o ./bin/field-guide ./examples/offline-guide
 ```
 
-The `search` tool finds exhibits by words in their titles, categories and descriptions. It returns up to twelve matches and the total match count. Pass an offset to read the next matches in stable ID order. The `show` tool accepts one of those IDs and returns the evidence document plus a PNG or JPEG when the exhibit has one. An MCP client can also list seven named resources and read their data directly. Clients that support resource templates can open the JSON evidence for any exhibit using `guide://exhibits/{id}`. For example, searching for the Oslo bike group returns `oslo-group`, whose recorded decision is available at `guide://exhibits/oslo-group`. The official Python client replay compares every templated resource byte-for-byte with its file in the ZIP.
+The `search` tool finds exhibits by words in their titles, categories and descriptions. It returns up to twelve matches and the total match count. Pass an offset to read the next matches in stable ID order. The `show` tool accepts one of those IDs and returns the evidence document plus a PNG or JPEG when the exhibit has one. An MCP client can also discover all the embedded gallery assets and the seven original named resources. Clients that support resource templates can open the JSON evidence for any exhibit using `guide://exhibits/{id}`. For example, searching for the Oslo bike group returns `oslo-group`, whose recorded decision is available at `guide://exhibits/oslo-group`. The official Python client replay compares every templated resource byte-for-byte with its file in the ZIP.
 
 | Resource | Content |
 | --- | --- |
@@ -82,3 +82,17 @@ The replay uses the Python MCP SDK to read the PDF and compare the two calendars
 uv run --with mcp==2.3.0 python examples/offline-guide/replay.py \
   --guide ./bin/field-guide --computer ./bin/computer --output ./bin/guide-result
 ```
+
+### Take an exhibit into another program
+
+Every file under the public ZIP’s assets directory has a standard, read-only MCP resource URI. List resources in your client, then save one file using the official Python SDK. The URI retains its archive path, for example `guide://assets/moon-study/sample/edition-2.apkg` or `guide://assets/postcard-press/sample/desktop-card1-getty.svg`. The original seven URIs remain available.
+
+```sh
+uv run --with mcp==2.3.0 python examples/offline-guide/fetch.py --guide ./bin/field-guide \
+  guide://assets/observation-shift/sample/shift.sqlite ./shift.sqlite
+sqlite3 -readonly ./shift.sqlite '.tables'
+```
+
+The download requires a fresh output filename. The server reads from its embedded ZIP. Each replay lists all downloadable URIs and compares every text or binary response with the corresponding archive member. [Official client receipt](mcp-receipt.json)
+
+[Watch the live resource downloads](download-assets.gif). The recording saves the amended moon deck and SQLite database with the helper above. Native unzip and sqlite3 then inspect the files. The shell’s short get-asset command supplies the Python executable and guide path.
