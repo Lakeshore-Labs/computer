@@ -40,4 +40,4 @@ The controller accepts `GEMINI_API_KEY` or `GOOGLE_API_KEY` and supplies the key
 
 To capture either desk again, install Playwright Core, Google Chrome and Playwright’s FFmpeg helper. Run `NODE_PATH=/path/to/node_modules node examples/gemini-recovery/record.cjs /path/to/generated-desk /path/to/new-recording`.
 
-The CLI digest in the receipt identifies the executable used for this recording. Compiler, platform and build settings can change a locally built binary’s digest. The replay also records the agent bundle and engine digests.
+The sample records the original adapter build. Rebuilding the updated adapter produces a different bundle digest. The CLI digest in the receipt identifies the executable used for this recording. Compiler, platform and build settings can change a locally built binary’s digest. The replay also records the agent bundle and engine digests.

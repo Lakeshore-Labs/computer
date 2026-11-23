@@ -13,6 +13,7 @@ import { AssistantEntry, createRegistry, Harness } from "@earendil-works/pi-dura
 import { JsonlStorage } from "@earendil-works/pi-durable/storage/jsonl";
 import { CodingTools } from "@earendil-works/pi-durable/tools";
 import { computerEnv } from "./env.js";
+import { geminiModel } from "./gemini.js";
 
 run(async () => {
   const message = scriptArgs.slice(1).join(" ").trim();
@@ -22,11 +23,11 @@ run(async () => {
   const modelId = env("AGENT_MODEL", "default"), instructions = env("AGENT_INSTRUCTIONS", "");
 
   // The host knows the model's address and holds its key; the address here only names the provider.
-  const provider = env("AGENT_MODEL_COMPAT") === "gemini" ? "google" : "host";
-  const model = { id: modelId, name: modelId, api: "openai-completions", provider, baseUrl: "host:", reasoning: false, input: ["text"],
+  const providerOptions = env("AGENT_MODEL_COMPAT") === "gemini" ? geminiModel : { provider: "host" };
+  const model = { id: modelId, name: modelId, api: "openai-completions", ...providerOptions, baseUrl: "host:", reasoning: false, input: ["text"],
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: Number(env("AGENT_CONTEXT_WINDOW", "200000")), maxTokens: Number(env("AGENT_MAX_TOKENS", "16384")) };
   const models = createModels();
-  models.setProvider(createProvider({ id: provider, name: provider, baseUrl: "host:", models: [model], api: openaiCompletions,
+  models.setProvider(createProvider({ id: model.provider, name: model.provider, baseUrl: "host:", models: [model], api: openaiCompletions,
     auth: { apiKey: { name: "host", resolve: async () => ({ auth: { apiKey: "none" } }) } } }));
 
   const registry = createRegistry();
@@ -43,7 +44,7 @@ run(async () => {
   // A conversation keeps the agent it was made with, so each run sets it again: what this run was started with
   // holds, whatever the store says, and a model or limit the embedder has since changed takes effect.
   const root = await harness.root(ctx);
-  await root.configure({ model: { provider, modelId }, cwd: home, maxTurns: Number(env("AGENT_MAX_TURNS", "50")),
+  await root.configure({ model: { provider: model.provider, modelId }, cwd: home, maxTurns: Number(env("AGENT_MAX_TURNS", "50")),
     instructions: null, extensions: null, tools: null, modelTools: null, compaction: null, thinkingLevel: null }, ctx);
   harness.resume(); // a run an earlier process was cut off in goes on
   whenStopped(() => void root.abort(ctx)); // the host's stop: queued input is withdrawn and the run's work aborted

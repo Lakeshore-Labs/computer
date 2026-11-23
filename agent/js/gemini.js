@@ -1,9 +1,11 @@
+// The provider ID is part of the identity Pi checks before replaying signed history.
+export const geminiModel = { provider: "google", compat: { supportsStore: false } };
+
 // Pi persists OpenAI reasoning_details with the originating assistant message. Gemini's
 // OpenAI endpoint puts the same opaque replay data on a particular function call.
 const format = "google-gemini-v1";
 
 export function geminiRequest(params) {
-  delete params.store;
   for (const message of params.messages) {
     if (!Array.isArray(message.reasoning_details)) continue;
     const other = [];

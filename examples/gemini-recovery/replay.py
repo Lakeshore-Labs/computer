@@ -25,9 +25,9 @@ SECOND = (
 )
 
 
-def terminal_events(buf):
+def terminal_events(lines):
     events = []
-    for line in buf.splitlines():
+    for line in lines:
         try:
             item = json.loads(line)
         except ValueError:
@@ -82,7 +82,10 @@ def main():
         stage.replace(target)
         print(name, flush=True)
 
-    with tempfile.TemporaryDirectory(prefix="computer-claim-") as temporary:
+    # The agent can emit more progress than a pipe holds before the packing checkpoint.
+    with tempfile.TemporaryDirectory(prefix="computer-claim-") as temporary, tempfile.TemporaryFile(
+        dir=temporary
+    ) as transcript:
         scratch = Path(temporary)
         work = scratch / "work"
         work.mkdir()
@@ -90,6 +93,7 @@ def main():
         env = {
             "PATH": os.environ["PATH"],
             "HOME": str(scratch),
+            "TMPDIR": str(scratch),
             "COMPUTER_MODEL_KEY": key,
         }
         base = [
@@ -112,16 +116,13 @@ def main():
             "9",
             "-model-max-tokens",
             "1000",
-            "-timeout",
-            "95s",
             "-c",
         ]
         first = subprocess.Popen(
             [*base, "agent --json " + shlex.quote(FIRST)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=transcript,
+            stderr=subprocess.DEVNULL,
             env=env,
-            text=True,
         )
         try:
             event("opened", child_process=1)
@@ -145,22 +146,25 @@ def main():
         finally:
             if first.poll() is None:
                 first.kill()
-            stdout, _ = first.communicate(timeout=10)
-        events = terminal_events(stdout)
+            first.wait(timeout=10)
+        transcript.seek(0)
+        events = terminal_events(transcript)
         if first.returncode != -signal.SIGKILL or events:
             raise RuntimeError("first process did not stop at the expected checkpoint")
         event("interrupted", exit=first.returncode, terminal_events=events)
         (work / "desk-open.txt").write_text("Desk open\n")
         event("reopened", child_process=2)
+        second_start = transcript.tell()
         result = subprocess.run(
             [*base, "agent -c --json " + shlex.quote(SECOND)],
             env=env,
-            capture_output=True,
-            text=True,
+            stdout=transcript,
+            stderr=subprocess.DEVNULL,
             timeout=130,
             check=False,
         )
-        events = terminal_events(result.stdout)
+        transcript.seek(second_start)
+        events = terminal_events(transcript)
         for name, expected in [("packed.txt", REFERENCE), ("notice.txt", EXPECTED)]:
             if (
                 not (work / name).is_file()
