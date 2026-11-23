@@ -4,7 +4,7 @@
 
 ![The engraved clarinet part playing in the offline rehearsal stand](sample/desktop.png)
 
-The [score](source/score.csv) is an original eight-measure study in 4/4. The Go compiler builds a small WASI program. A [Go host](host/main.go) compiles that bytecode once with Computer’s WASI runtime, registers it as the shell command `part`, and starts two independent Computer shells. Both read the same read-only score mount. Shell redirection saves each program’s MusicXML and MIDI output to the parts mount.
+The [score](source/score.csv) is an original eight-measure study in 4/4. The Go compiler builds a small WASI program. A [Go host](host/main.go) compiles that bytecode once with Computer’s WASI runtime, registers it as the shell command `part`, and starts two shell sessions on the same Computer. Both read the same read-only score mount. Shell redirection saves each program’s MusicXML and MIDI output to the parts mount.
 
 Each file is ready to take into another reader. Download the flute [MusicXML](sample/flute.musicxml) and [MIDI](sample/flute.mid), or the clarinet [MusicXML](sample/clarinet.musicxml) and [MIDI](sample/clarinet.mid).
 

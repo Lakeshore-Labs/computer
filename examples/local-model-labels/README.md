@@ -1,4 +1,4 @@
-# Issue a wardrobe label with a local model
+# Check a local model’s wardrobe labels before issuing them
 
 [Open the offline print desk](sample/desk.html) · [Watch the two jobs](sample/screencast.mp4) · [Download the NORTH-17 ZPL](sample/final-north/desk/ticket.zpl)
 

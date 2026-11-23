@@ -9,7 +9,8 @@ This edition adds thirteen observations from nine new, independently operated pu
 * A local time of 01:30 during New York’s autumn transition resolved to both 05:30 and 06:30 UTC. The spring request correctly reported a missing wall-clock time. Its transition timestamp differed from the reference by 28.125 seconds.
 * A four-chord progression transposed up a whole tone to D, A, Bm and G. E-flat Dorian returned seven notes and the expected sequence of whole and half steps.
 * The Ghana census service returned 30,212,780 nationally and 5,295,246 for Greater Accra. The official 2021 totals are 30,832,019 and 5,455,692. The differences are 2.01% and 2.94%. The service discloses missing districts in its national coverage. Its regional result does not establish which districts explain the difference. [Ghana Statistical Service, 2021 census volume 3C, table 5.1](https://census2021.statsghana.gov.gh/gssmain/fileUpload/reportthemelist/2021%20PHC%20General%20Report%20Vol%203C_Background%20Characteristics_181121.pdf)
-* Other calls checked a leap-year span, a Korean public calendar listing, an ISBN check digit, elementary arithmetic and two public catalogs. The workbook records exactly what was tested for each.
+* Two 2026 Korean holiday names and dates agree with the Korea Tourism Organization’s listing. The checks recognize both common romanizations of Hangeul and verify the weekday separately. [Korean public holidays](https://english.visitkorea.or.kr/svc/contents/contentsView.do?menuSn=372&vcontsId=140038)
+* Other calls checked a leap-year span, an ISBN check digit, elementary arithmetic and two public catalogs. The workbook records exactly what was tested for each.
 
 From this directory, regenerate the workbook using the committed observations:
 

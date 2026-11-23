@@ -15,7 +15,7 @@ Install Go, gopls and the official Python MCP SDK. The recorded language server 
 ```sh
 mkdir -p bin
 go build -o bin/computer ./cmd/computer
-uv run --with mcp python examples/score-workbench/replay.py --computer bin/computer --output bin/score-workbench
+uv run --with mcp==2.3.0 python examples/score-workbench/replay.py --computer bin/computer --output bin/score-workbench
 python3 examples/score-workbench/build_reader.py bin/score-workbench
 ```
 

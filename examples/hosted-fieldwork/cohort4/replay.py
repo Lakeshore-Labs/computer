@@ -65,13 +65,19 @@ def check(case, d, text):
             < 60,
         }
     if case == "opencurrent-kr-holidays":
-        dates = {r["date"]: r for r in d["holidays"]}
+        names = {r["date"]: r.get("nameEn") for r in d["holidays"]}
         return {
-            f"{stamp}: provider lists {dates[stamp]['nameEn']} and weekday is {day}": dt.date.fromisoformat(
-                stamp
-            ).strftime("%A")
-            == day
-            for stamp, day in (("2026-10-03", "Saturday"), ("2026-10-09", "Friday"))
+            f"{stamp}: {label} on {day}": names.get(stamp) in accepted
+            and dt.date.fromisoformat(stamp).strftime("%A") == day
+            for stamp, label, accepted, day in (
+                (
+                    "2026-10-03",
+                    "National Foundation Day",
+                    ("National Foundation Day",),
+                    "Saturday",
+                ),
+                ("2026-10-09", "Hangeul Day", ("Hangul Day", "Hangeul Day"), "Friday"),
+            )
         }
     if case == "eancheck-isbn":
         digits = "978030640615"
@@ -85,13 +91,12 @@ def check(case, d, text):
     if case.startswith("ghana-census-"):
         total = d["people"]
         reference = GHANA_NATIONAL if case.endswith("total") else ACCRA
+        gap = 619_239 if case.endswith("total") else 160_446
         return {
-            f"recorded subset {total:,} of official {reference:,}": 0
-            < total
-            < reference,
-            f"recorded shortfall {reference - total:,} ({(reference - total) / reference:.2%})": sum(
-                d["by_sex"].values()
-            )
+            f"recorded shortfall {gap:,} ({gap / reference:.2%}) against official {reference:,}": reference
+            - total
+            == gap,
+            "by-sex counts sum to the reported population": sum(d["by_sex"].values())
             == total,
             "age and schooling counts both sum to the reported subset": all(
                 sum(d[k].values()) == total for k in ("by_age_band", "by_schooling")

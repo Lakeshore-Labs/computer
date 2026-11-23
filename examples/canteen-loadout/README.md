@@ -22,6 +22,8 @@ Transfers (`transfers.csv`, written by the guest): roast vegetables Orchard→Qu
 Final per hall (ordered = final): Hill 12 pasta / 18 roast; Orchard 36 / 24; Quay 22 / 38. Units short after: 0.
 
 ## Replay
+
+Run from this example directory. Supply a new writable directory in place of SUPPORT for the pinned Python and Node installations. Put the stock computer executable on PATH. On systems where the PostgreSQL programs are outside /opt/homebrew/bin, pass `--pgbin "$(pg_config --bindir)"` to replay/run.py.
 ```
 sh replay/install.sh SUPPORT
 python3 replay/run.py --support SUPPORT --pywasi PATH_TO_PYTHON_WASI --out runs/new   # needs `computer` on PATH
