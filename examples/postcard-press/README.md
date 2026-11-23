@@ -34,3 +34,5 @@ uv run --with mcp==2.3.0 python examples/postcard-press/observe.py \
 For the browser replay set CHROME to your Chrome or Chromium executable and install FFmpeg. Run `node examples/postcard-press/ui/capture/capture.mjs "$PRESS_ADDRESS" ./bin/postcard-capture`. The independent repeat-order check accepts the same address, a fresh output path and the executable of a Python environment with the MCP SDK.
 
 The images and original collection metadata come from the museum study. Both museums identify the images as open access. [Getty collection](https://www.getty.edu/art/collection/object/103JNH) · [Cleveland collection](https://www.clevelandart.org/art/1947.209) · [Pinned input files and acquisition recipe](../museum-study/README.md)
+
+The offline proof sheet embeds each SVG download so a browser opened from disk saves the original file. Rebuild it with `python3 examples/postcard-press/build_proofs.py`. The [download checks](sample/proof-downloads.json) compare all three files at desktop and phone widths.
