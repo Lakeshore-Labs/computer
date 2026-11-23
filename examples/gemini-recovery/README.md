@@ -28,7 +28,7 @@ mkdir -p ./bin/claim-view
 
 ## Repeat the live call
 
-Use a POSIX host and build the Computer CLI and agent bundle from [the standalone adapter in #43](https://github.com/Lakeshore-Labs/computer/pull/43). Its [setup instructions](https://github.com/Lakeshore-Labs/computer/blob/47fecc9454ad1380a9ffa78014e6414a90d0c832/README.md) describe the matching QuickJS-WASI engine. Run the command below from this gallery checkout with paths to those builds. A live run calls Google and needs a model available to your key.
+Use a POSIX host and build the Computer CLI and agent bundle from [the standalone adapter in #43](https://github.com/Lakeshore-Labs/computer/pull/43). Its [setup instructions](https://github.com/Lakeshore-Labs/computer/blob/f5a61809320972d91fa703b8d23956d92e447d83/README.md) describe the matching QuickJS-WASI engine. Run the command below from this gallery checkout with paths to those builds. A live run calls Google and needs a model available to your key.
 
 ```sh
 ADAPTER=/path/to/built-adapter-checkout
