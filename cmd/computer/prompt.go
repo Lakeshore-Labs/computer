@@ -203,7 +203,7 @@ func candidates(ctx context.Context, c *computer.Computer, cwd, before, word str
 	case strings.HasPrefix(word, "-") || len(words) == 1:
 		// A command that calls tools lists them, and a tool its arguments, in the first word of its help's
 		// indented lines. Any other command's help is not read this way, and its arguments complete as files.
-		// Only such a command is run: any other, such as agent, would do its work with --help as its argument.
+		// Only such a command is run: another might do its work with --help as its argument.
 		if !slices.Contains(c.ToolCommands(), words[0]) {
 			break
 		}
