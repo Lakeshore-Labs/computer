@@ -7,7 +7,8 @@ the page is opened from file:// and every network request is logged (must all be
 Writes into --artifacts: desktop-*.png, mobile-*.png, shift-desk.mp4, browser-report.json.
 """
 
-import argparse, base64, json, os, re, select, shutil, sqlite3, subprocess, sys, tempfile, time
+import argparse, atexit, base64, json, os, re, select, sqlite3, subprocess, sys, tempfile, time
+from contextlib import ExitStack
 from pathlib import Path
 
 ap = argparse.ArgumentParser()
@@ -23,12 +24,19 @@ a = ap.parse_args()
 art = a.artifacts
 art.mkdir(parents=True, exist_ok=True)
 page = (a.output / "shift.html").resolve()
-profile = tempfile.mkdtemp(prefix="shiftdesk-chrome-")
-frames_dir = Path(tempfile.mkdtemp(prefix="shiftdesk-frames-"))
+# Register each resource as it is acquired so startup and capture failures unwind it too.
+cleanup = ExitStack()
+atexit.register(cleanup.close)
+profile = cleanup.enter_context(tempfile.TemporaryDirectory(prefix="shiftdesk-chrome-"))
+frames_dir = Path(cleanup.enter_context(tempfile.TemporaryDirectory(prefix="shiftdesk-frames-")))
 
 # ---------- CDP over --remote-debugging-pipe (Chrome reads fd 3, writes fd 4; NUL-delimited JSON) ----------
 c2b_r, c2b_w = os.pipe()
+child_input = cleanup.enter_context(os.fdopen(c2b_r, "rb"))
+cleanup.callback(os.close, c2b_w)
 b2c_r, b2c_w = os.pipe()
+child_output = cleanup.enter_context(os.fdopen(b2c_w, "wb"))
+cleanup.callback(os.close, b2c_r)
 chrome_args = [
     a.chrome,
     "--headless=new",
@@ -47,8 +55,19 @@ proc = subprocess.Popen(
     stdout=subprocess.DEVNULL,
     stderr=subprocess.DEVNULL,
 )
-os.close(c2b_r)
-os.close(b2c_w)
+def stop_browser():
+    if proc.poll() is None:
+        proc.terminate()
+    try:
+        proc.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
+
+
+cleanup.callback(stop_browser)
+child_input.close()
+child_output.close()
 buf = b""
 mid = 0
 events = []
@@ -77,8 +96,8 @@ def call(method, params=None, session=None, timeout=30):
     if session:
         d["sessionId"] = session
     os.write(c2b_w, json.dumps(d).encode() + b"\0")
-    end = time.time() + timeout
-    while time.time() < end:
+    end = time.monotonic() + timeout
+    while time.monotonic() < end:
         for m in msgs():
             if m.get("id") == me:
                 if "error" in m:
@@ -86,6 +105,8 @@ def call(method, params=None, session=None, timeout=30):
                 return m.get("result", {})
             elif "method" in m:
                 events.append(m)
+        if not select.select([b2c_r], [], [], max(0, end - time.monotonic()))[0]:
+            break
         pump()
     raise TimeoutError(method)
 
@@ -168,6 +189,7 @@ def setstate(i=None, g=None):
 
 # ---------- expected values from SQLite (independent of the page's JS) ----------
 db = sqlite3.connect(f"file:{a.output / 'shift.sqlite'}?mode=ro", uri=True)
+cleanup.callback(db.close)
 times = [
     r[0]
     for r in db.execute(
@@ -546,16 +568,7 @@ report["ok"] = not report["failures"]
 (art / "browser-report.json").write_text(
     json.dumps(report, indent=2, ensure_ascii=False) + "\n"
 )
-try:
-    call("Browser.close", timeout=5)
-except Exception:
-    pass
-try:
-    proc.wait(timeout=10)
-except Exception:
-    proc.kill()
-shutil.rmtree(profile, ignore_errors=True)
-shutil.rmtree(frames_dir, ignore_errors=True)
+cleanup.close()
 print(
     json.dumps(
         {k: report[k] for k in ("ok", "failures", "exhaustive", "external_requests")},

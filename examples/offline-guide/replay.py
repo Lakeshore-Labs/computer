@@ -2,7 +2,7 @@
 import argparse
 import asyncio
 import base64
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
 import hashlib
 import json
 from pathlib import Path
@@ -20,13 +20,14 @@ async def connect(program, *arguments):
 
 async def replay(guide, computer, output):
     output.mkdir(parents=True, exist_ok=False)
-    with ZipFile(Path(__file__).with_name('computer-field-guide.zip')) as archive:
+    async with AsyncExitStack() as stack:
+        archive = stack.enter_context(ZipFile(Path(__file__).with_name('computer-field-guide.zip')))
         expected_pdf = archive.read('assets/dispatch.pdf')
         expected_image = archive.read('assets/repair.png')
         receipts = {Path(name).stem: archive.read('evidence/' + Path(name).stem + '.json')
                     for name in archive.namelist() if name.startswith('cases/') and name.endswith('.html')}
         assets = {
-            'guide://assets/' + quote(name.removeprefix('assets/'), safe='/'): archive.read(name)
+            'guide://assets/' + quote(name.removeprefix('assets/'), safe='/'): name
             for name in archive.namelist() if name.startswith('assets/') and not name.endswith('/')
         }
         documents = {
@@ -37,7 +38,7 @@ async def replay(guide, computer, output):
                 ('guide://observations/pacific-listening-room', 'text/html', 'assets/listen-to-the-pacific.html'),
             ]
         }
-    async with connect(guide) as direct:
+        direct = await stack.enter_async_context(connect(guide))
         operations = sorted(t.name for t in (await direct.list_tools()).tools)
         assert operations == ['search', 'show']
         page = await direct.list_resources()
@@ -54,7 +55,7 @@ async def replay(guide, computer, output):
             assert len(result.contents) == 1
             content = result.contents[0]
             data = content.text.encode('utf-8') if hasattr(content, 'text') else base64.b64decode(content.blob, validate=True)
-            assert str(content.uri) == uri and data == assets[uri], uri
+            assert str(content.uri) == uri and data == archive.read(assets[uri]), uri
             asset_bytes += len(data)
         templates = (await direct.list_resource_templates()).resource_templates
         template = next(t for t in templates if t.uri_template == 'guide://exhibits/{id}')

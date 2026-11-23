@@ -1,6 +1,8 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
+import { checkInscription } from "./inscription.js";
+
 const $ = (id) => document.getElementById(id);
 const el = (tag, props = {}, ...kids) => {
   const n = Object.assign(document.createElement(tag), props);
@@ -88,15 +90,10 @@ const hex = async (bytes) =>
     .join("");
 
 function validate() {
-  const v = $("inscription").value;
-  let msg = "";
-  if (!v.trim()) msg = "Write at least one character.";
-  else if (v.length > 48) msg = "Keep it to 48 characters.";
-  else if (/[\p{C}\p{Z}]/u.test(v.replaceAll(" ", "")))
-    msg = "Use a single line of printable text.";
+  const { length, error: msg } = checkInscription($("inscription").value);
   $("err").textContent = msg;
   $("inscription").setAttribute("aria-invalid", msg ? "true" : "false");
-  $("count").textContent = `${[...v].length} / 48`;
+  $("count").textContent = `${length} / 48`;
   return !msg;
 }
 function refreshButton() {

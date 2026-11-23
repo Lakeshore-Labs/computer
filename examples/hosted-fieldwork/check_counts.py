@@ -44,9 +44,13 @@ check("cohort 3 operator groups", len(groups), c3["operator_groups"])
 att = amend["cohort3_attempts"]
 check("attempt entries (runs)", sum(len(v) for v in att["cases"].values()), att["logged_runs"])
 check("first-run passes", sum(v[0] == "pass" for v in att["cases"].values()), att["first_runs"]["passed"])
-for path in sorted(root.glob("*/receipt.json")):
+paths = sorted(root.glob("*/receipt.json"))
+expected_cases = sorted(r["id"] for r in rows if "stdout_sha256" in r)
+check("detailed receipts", [path.parent.name for path in paths], expected_cases)
+for path in paths:
     receipt = json.loads(path.read_text())
     case = receipt["case"]
+    check(path.parent.name + " receipt identity", case, path.parent.name)
     row = next(r for r in rows if r["id"] == case)
     transcript = path.with_name("transcript.txt").read_bytes()
     check(case + " transcript digest", hashlib.sha256(transcript).hexdigest(), receipt["stdout_sha256"])

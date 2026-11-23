@@ -41,18 +41,42 @@ try:
     clean_env = {k: v for k, v in os.environ.items() if not k.lower().startswith("motherduck")}
     def comp(name, script): return step(name, base + ["-c", "set -eo pipefail\n" + script], env=clean_env, timeout=300)
     comp("generated upstream commands", "orders-pg --help; loads-duck --help")
-    comp("SQL engines refuse writes", "orders-pg query --sql 'DELETE FROM orders' 2>&1 || true; loads-duck execute-query --sql 'CREATE TABLE x(a int)' 2>&1 || true")
+    writes_rejected = True
+    for name, query, message in (
+        ("PostgreSQL", "orders-pg query --sql 'DELETE FROM orders'", "cannot execute DELETE in a read-only transaction"),
+        ("DuckDB", "loads-duck execute-query --sql 'CREATE TABLE x(a int)'", "attached in read-only mode"),
+    ):
+        probe = comp(name + " refuses writes", query)
+        rejected = probe.returncode != 0 and message in (probe.stdout + probe.stderr)
+        if name == "DuckDB" and probe.returncode == 0:
+            try:
+                payload = json.loads(probe.stdout)
+            except ValueError:
+                payload = None
+            rejected = (isinstance(payload, dict) and payload.get("success") is False
+                        and message in str(payload.get("error", "")))
+        writes_rejected &= rejected
     comp("DuckDB view references the Parquet file", "loads-duck execute-query --sql \"SELECT sql FROM duckdb_views() WHERE view_name='loaded_totals'\"; loads-duck execute-query --sql \"SELECT num_rows, created_by FROM parquet_file_metadata('%s/loaded.parquet')\"" % run)
     g = comp("guest (WASI Python) retrieves both tables, joins, writes transfers", "python3 /scripts/guest.py; cat /work/transfers.csv")
     assert g.returncode == 0, g.stderr
     v = subprocess.run(["uv", "run", "--offline", "--python", "3.13", "--no-project", "--with", "pyarrow==" + PYARROW, "python", "-I", str(here / "verify.py"), str(run), a.pgbin, str(out / "independent-verify.json")], capture_output=True, text=True)
     rec["steps"].append({"name": "independent verify (psql + pyarrow)", "exit": v.returncode, "stdout": v.stdout, "stderr": clean(v.stderr)})
-    ok = v.returncode == 0
+    ok = writes_rejected and v.returncode == 0
     for f in ("transfers.csv", "balance.json"): shutil.copy(run / "work" / f, out / f)
     shutil.copy(run / "loaded.parquet", out / "loaded.parquet")
 finally:
-    subprocess.run([f"{a.pgbin}/pg_ctl", "-D", str(run / "pgdata"), "-m", "fast", "-w", "stop"], capture_output=True)
-    if not a.keep: shutil.rmtree(run, ignore_errors=True)
+    try:
+        stop = step("stop PostgreSQL", [f"{a.pgbin}/pg_ctl", "-D", str(run / "pgdata"), "-m", "fast", "-w", "stop"])
+        stopped = stop.returncode == 0
+    except OSError as error:
+        stopped = False
+        rec["shutdown_error"] = str(error)
+    if not stopped:
+        ok = False
+        rec["retained_directory"] = str(run)
+        print(f"PostgreSQL shutdown unconfirmed. Kept {run}", file=sys.stderr)
+    elif not a.keep:
+        shutil.rmtree(run)
     rec["pass"] = ok
     (out / "receipt.json").write_text(json.dumps(rec, indent=1))
     print("PASS" if ok else "FAIL", out.name)
