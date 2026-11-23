@@ -70,6 +70,7 @@ try:
     time.sleep(0.05)
     os.write(terminal, b'\x03')
     expect(b'$ ')
+    assert b'error' not in last, f'Ctrl-C during read printed {bytes(last)!r}'
     os.write(terminal, b'echo taking-one; read -n 1 x; echo took-one; sleep 30\r')
     expect(b'\r\ntaking-one\r\n')
     os.write(terminal, b'xecho leftover > /work/unexpected.txt\n')
@@ -98,13 +99,17 @@ try:
     expect(b'\r\nresumed\r\n')
     expect(b'$ ')
     if mode == 'sigterm':
+        # SIGTERM ends the CLI at once, even with a command running, and the parent sees it die of the signal.
+        os.write(terminal, b'echo sleeping; sleep 30\r')
+        expect(b'\r\nsleeping\r\n')
         os.killpg(session.pid, signal.SIGTERM)
     else:
         os.write(terminal, b'exit\r')
     expect(b'cli-exit=')
-    expect(b'\r\n')
+    expect(b'\n')
     status = int(re.findall(rb'\d+', bytes(last))[-1])
-    assert status == 0, f'exit status {status}'
+    wanted = 128 + signal.SIGTERM if mode == 'sigterm' else 0
+    assert status == wanted, f'exit status {status}, not {wanted}'
     assert not os.path.exists(os.path.join(directory, 'unexpected.txt')), 'canceled input ran as a command'
     assert os.get_blocking(tty) == started_blocking, f'the terminal was left with blocking={os.get_blocking(tty)}'
     def line_settings(attributes):  # PENDIN is the kernel's note that input is waiting, not a setting

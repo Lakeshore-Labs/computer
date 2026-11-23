@@ -29,28 +29,38 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 	if err != nil {
 		return err
 	}
-	defer func() { _ = term.Restore(fd, cooked) }()
 	// Each reader of the terminal below has its own duplicate of the descriptor in non-blocking mode, which Go's
-	// poller manages: closing one makes a read under way on it return at once without taking input, and gbash's read
-	// deadlines work. The mode belongs to the terminal, which the program that started this one shares, so the mode
-	// the terminal had is put back on return.
+	// poller manages, so gbash's read deadlines work and closing one ends a read under way without taking input.
+	// The mode belongs to the terminal, which the program that started this one shares, so the mode it had is put
+	// back, as are the terminal's line settings.
 	flags, err := unix.FcntlInt(uintptr(fd), unix.F_GETFL, 0)
 	if err != nil {
+		_ = term.Restore(fd, cooked)
 		return err
 	}
+	restore := func() {
+		_ = syscall.SetNonblock(fd, flags&syscall.O_NONBLOCK != 0)
+		_ = term.Restore(fd, cooked)
+	}
+	defer restore()
 	if err := syscall.SetNonblock(fd, true); err != nil {
 		return err
 	}
-	defer func() { _ = syscall.SetNonblock(fd, flags&syscall.O_NONBLOCK != 0) }()
-	// SIGTERM and SIGHUP end the prompt as exit does, so the terminal is put back as it was.
-	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGHUP)
-	defer cancel()
+	// SIGTERM and SIGHUP put the terminal back and then end the process as they would have, without waiting for the
+	// command that is running.
+	ended := make(chan os.Signal, 1)
+	signal.Notify(ended, syscall.SIGTERM, syscall.SIGHUP)
+	defer signal.Stop(ended)
+	go func() {
+		sig := (<-ended).(syscall.Signal)
+		restore()
+		signal.Reset(sig)
+		_ = syscall.Kill(os.Getpid(), sig)
+	}()
 	input, err := openTerminal(fd)
 	if err != nil {
 		return err
 	}
-	defer input.Close()
-	context.AfterFunc(ctx, func() { _ = input.Close() })
 	t := term.NewTerminal(struct {
 		io.Reader
 		io.Writer
@@ -101,25 +111,24 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 		// The command has the terminal as it was, so its output is laid out as it expects, and Ctrl-C stops it.
 		_ = term.Restore(fd, cooked)
 		running, stop := signal.NotifyContext(ctx, os.Interrupt)
-		// The command reads the terminal through its own descriptor, closed on Ctrl-C and when the command ends. A read
-		// still under way then returns, and does not take what is typed next, which is the prompt's.
+		// The command reads the terminal through its own descriptor. Ctrl-C sets a deadline that ends a read under way,
+		// as gbash's read builtin expects, and closing the descriptor when the command ends stops one a program left
+		// behind, so neither takes what is typed next, which is the prompt's.
 		in, err := openTerminal(fd)
 		if err != nil {
 			stop()
 			return err
 		}
-		stopClosing := context.AfterFunc(running, func() { _ = in.Close() })
+		stopInterrupt := context.AfterFunc(running, func() { _ = in.SetReadDeadline(time.Now()) })
 		res, err := c.Exec(running, &gbash.ExecutionRequest{Script: line, Stdin: terminal{in}, Stdout: os.Stdout, Stderr: os.Stderr})
 		interrupted := running.Err() != nil
-		stopClosing()
+		stopInterrupt()
 		_ = in.Close()
 		stop()
 		if _, rawErr := term.MakeRaw(fd); rawErr != nil {
 			return rawErr
 		}
 		switch {
-		case ctx.Err() != nil: // SIGTERM or SIGHUP
-			return nil
 		case err != nil:
 			if !interrupted {
 				fmt.Fprintf(t, "computer: %v\n", err)
