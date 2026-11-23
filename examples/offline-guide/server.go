@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
-	"mime"
 	"net/url"
 	"path"
 	"slices"
@@ -168,21 +167,23 @@ func newGuide() (*mcp.Server, error) {
 	return server, nil
 }
 
+// Host MIME tables may depend on installed applications. These are the public guide formats.
+var galleryMediaTypes = map[string]string{
+	".csv": "text/csv", ".css": "text/css", ".diff": "text/plain", ".html": "text/html",
+	".ics": "text/calendar", ".js": "text/javascript", ".json": "application/json",
+	".md": "text/markdown", ".sh": "text/plain", ".txt": "text/plain", ".vtt": "text/vtt", ".zpl": "text/plain",
+	".gif": "image/gif", ".jpg": "image/jpeg", ".png": "image/png", ".svg": "image/svg+xml",
+	".mp4": "video/mp4", ".wav": "audio/wav", ".webm": "video/webm",
+	".epub": "application/epub+zip", ".gz": "application/gzip", ".pdf": "application/pdf",
+	".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".zip": "application/zip",
+	".gpkg": "application/geopackage+sqlite3", ".sqlite": "application/vnd.sqlite3",
+}
+
 func assetMediaType(name string) string {
-	ext := path.Ext(name)
-	switch ext {
-	case ".sqlite":
-		return "application/vnd.sqlite3"
-	case ".gpkg":
-		return "application/geopackage+sqlite3"
-	case ".apkg":
-		return "application/octet-stream"
+	if kind, ok := galleryMediaTypes[strings.ToLower(path.Ext(name))]; ok {
+		return kind
 	}
-	kind, _, _ := strings.Cut(mime.TypeByExtension(ext), ";")
-	if kind == "" {
-		return "application/octet-stream"
-	}
-	return kind
+	return "application/octet-stream"
 }
 
 func main() {

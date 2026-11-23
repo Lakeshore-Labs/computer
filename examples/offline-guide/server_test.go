@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/fs"
+	"mime"
 	"slices"
 	"strings"
 	"testing"
@@ -183,5 +184,21 @@ func TestDownloadableGalleryAssets(t *testing.T) {
 				t.Fatalf("resource differed from %s", tc.member)
 			}
 		})
+	}
+}
+
+func TestAssetTypesIndependentOfHostAssociations(t *testing.T) {
+	const ext = ".csv"
+	original := mime.TypeByExtension(ext)
+	if err := mime.AddExtensionType(ext, "application/x-local-spreadsheet"); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if original != "" {
+			_ = mime.AddExtensionType(ext, original)
+		}
+	})
+	if got := assetMediaType("timeline.csv"); got != "text/csv" {
+		t.Fatalf("advertised %q for the gallery CSV", got)
 	}
 }
