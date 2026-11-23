@@ -391,6 +391,22 @@ func rotate(src *image.NRGBA, degrees int) *image.NRGBA {
 	return dst
 }
 
+// The bilinear filter samples one pixel past the original edge as it blends into the background.
+type borderedImage struct {
+	image.RGBA64Image
+	background color.RGBA64
+}
+
+func (m borderedImage) Bounds() image.Rectangle { return m.RGBA64Image.Bounds().Inset(-1) }
+func (m borderedImage) At(x, y int) color.Color { return m.RGBA64At(x, y) }
+
+func (m borderedImage) RGBA64At(x, y int) color.RGBA64 {
+	if image.Pt(x, y).In(m.RGBA64Image.Bounds()) {
+		return m.RGBA64Image.RGBA64At(x, y)
+	}
+	return m.background
+}
+
 // rotateAngle places the image centers on the same point and rounds the new canvas outwards.
 func rotateAngle(src *image.NRGBA, degrees float64, background color.Color) (*image.NRGBA, error) {
 	b := src.Bounds()
@@ -405,7 +421,8 @@ func rotateAngle(src *image.NRGBA, degrees float64, background color.Color) (*im
 	draw.Draw(dst, dst.Bounds(), image.NewUniform(background), image.Point{}, draw.Src)
 	cx, cy := float64(b.Min.X)+w/2, float64(b.Min.Y)+h/2
 	transform := f64.Aff3{cos, -sin, float64(dw)/2 - cos*cx + sin*cy, sin, cos, float64(dh)/2 - sin*cx - cos*cy}
-	xdraw.BiLinear.Transform(dst, transform, src, b, draw.Src, nil)
+	bordered := borderedImage{src, color.RGBA64Model.Convert(background).(color.RGBA64)}
+	xdraw.BiLinear.Transform(dst, transform, bordered, bordered.Bounds(), draw.Src, nil)
 	return dst, nil
 }
 

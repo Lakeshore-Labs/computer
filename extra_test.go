@@ -168,6 +168,25 @@ func TestExtraMagickRotateFractional(t *testing.T) {
 	}
 }
 
+func TestExtraMagickRotateSinglePixel(t *testing.T) {
+	c := newExtra(t)
+	writeHome(t, c, "black.png", testPNG(t, 1, 1))
+	for _, background := range []string{"white", "none"} {
+		run(t, c, "magick black.png -background "+background+" -rotate 45 rotated.png")
+		for y := range 2 {
+			for x := range 2 {
+				p := pixel(t, c, "rotated.png", x, y)
+				if background == "white" && (p.R == 0 || p.R == 255 || p.A != 255) {
+					t.Fatalf("pixel (%d,%d) on white should be opaque gray, got %v", x, y, p)
+				}
+				if background == "none" && (p.R != 0 || p.A == 0 || p.A == 255) {
+					t.Fatalf("pixel (%d,%d) on transparent should be translucent black, got %v", x, y, p)
+				}
+			}
+		}
+	}
+}
+
 func TestExtraMagickRotateChecksExpandedCanvas(t *testing.T) {
 	c := newExtra(t)
 	writeHome(t, c, "strip.png", testPNG(t, 20000, 1))
