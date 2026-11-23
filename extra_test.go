@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ewhauser/gbash"
+	"github.com/Lakeshore-Labs/gbash"
 
 	"github.com/Lakeshore-Labs/computer/extra"
 )
@@ -636,9 +636,9 @@ func TestExtraMagickFlattensOntoTheBackgroundAndWritesTheQualityAsked(t *testing
 	}
 	writeHome(t, c, "clear.png", b.Bytes())
 	for options, want := range map[string]color.NRGBA{
-		"-background red -flatten":      {255, 0, 0, 255},
-		"-flatten":                      {255, 255, 255, 255}, // ImageMagick's default background is white
-		"-background '#0000ff' -flatten": {0, 0, 255, 255},
+		"-background red -flatten":        {255, 0, 0, 255},
+		"-flatten":                        {255, 255, 255, 255}, // ImageMagick's default background is white
+		"-background '#0000ff' -flatten":  {0, 0, 255, 255},
 		"-background black -alpha remove": {0, 0, 0, 255},
 	} {
 		run(t, c, "convert clear.png "+options+" flat.png")

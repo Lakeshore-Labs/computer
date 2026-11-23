@@ -3,13 +3,13 @@ module github.com/Lakeshore-Labs/computer
 go 1.26.0
 
 require (
-	github.com/ewhauser/gbash v0.0.41
-	github.com/ewhauser/gbash/contrib/awk v0.0.41
-	github.com/ewhauser/gbash/contrib/codingtools v0.0.41
-	github.com/ewhauser/gbash/contrib/htmltomarkdown v0.0.41
-	github.com/ewhauser/gbash/contrib/jq v0.0.41
-	github.com/ewhauser/gbash/contrib/sqlite3 v0.0.41
-	github.com/ewhauser/gbash/contrib/yq v0.0.41
+	github.com/Lakeshore-Labs/gbash v0.0.42
+	github.com/Lakeshore-Labs/gbash/contrib/awk v0.0.42
+	github.com/Lakeshore-Labs/gbash/contrib/codingtools v0.0.42
+	github.com/Lakeshore-Labs/gbash/contrib/htmltomarkdown v0.0.42
+	github.com/Lakeshore-Labs/gbash/contrib/jq v0.0.42
+	github.com/Lakeshore-Labs/gbash/contrib/sqlite3 v0.0.42
+	github.com/Lakeshore-Labs/gbash/contrib/yq v0.0.42
 	github.com/go-analyze/charts v0.6.4
 	github.com/klippa-app/go-pdfium v1.21.5
 	github.com/modelcontextprotocol/go-sdk v1.8.0
@@ -67,5 +67,3 @@ require (
 	golang.org/x/tools v0.52.0 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 )
-
-replace github.com/ewhauser/gbash => github.com/Lakeshore-Labs/gbash v0.0.42-0.20261123045538-174b6f7d1ae5

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ewhauser/gbash"
-	"github.com/ewhauser/gbash/contrib/codingtools"
+	"github.com/Lakeshore-Labs/gbash"
+	"github.com/Lakeshore-Labs/gbash/contrib/codingtools"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 

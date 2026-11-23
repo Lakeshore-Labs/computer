@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ewhauser/gbash"
+	"github.com/Lakeshore-Labs/gbash"
 )
 
 func TestAProgramCannotFollowALinkOutOfAMount(t *testing.T) {

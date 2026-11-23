@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ewhauser/gbash/commands"
+	"github.com/Lakeshore-Labs/gbash/commands"
 
 	"github.com/Lakeshore-Labs/computer/wasm"
 )
