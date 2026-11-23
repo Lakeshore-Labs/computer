@@ -2,7 +2,7 @@
 // OpenAI endpoint puts the same opaque replay data on a particular function call.
 const format = "google-gemini-v1";
 
-export function geminiRequest(params) {
+export function geminiRequest(params, google) {
   for (const message of params.messages) {
     if (!Array.isArray(message.reasoning_details)) continue;
     const other = [];
@@ -11,6 +11,7 @@ export function geminiRequest(params) {
         other.push(detail);
         continue;
       }
+      if (!google) continue; // Only Gemini accepts its stored call signatures.
       const call = message.tool_calls?.find((call) => call.id === detail.id);
       if (call) call.extra_content = { ...call.extra_content, google: { ...call.extra_content?.google, thought_signature: detail.data } };
     }

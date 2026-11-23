@@ -24,7 +24,7 @@ function request(params, signal, timeoutMs) {
     if (signal?.aborted) return reject(aborted());
     const google = env("AGENT_MODEL_COMPAT") === "gemini";
     const adaptChunk = google ? geminiChunks() : undefined;
-    if (google) geminiRequest(params);
+    geminiRequest(params, google);
     const chunks = [];
     let wake, over = false, failed, started = false;
     const fail = (e) => { if (over) return; failed = e; over = true; started ? wake?.() : reject(e); };

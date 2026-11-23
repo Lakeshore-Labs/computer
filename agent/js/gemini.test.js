@@ -40,9 +40,9 @@ test("a signed parallel tool turn survives serialization and keeps each signatur
     },
   }).result();
   assert.equal(Object.hasOwn(params, "store"), false);
-  geminiRequest(params);
+  geminiRequest(params, true);
   const request = structuredClone(params);
-  geminiRequest(params); // Pi retries the same parameter object.
+  geminiRequest(params, true); // Pi retries the same parameter object.
   assert.deepEqual(params, request);
   const assistant = params.messages.find((message) => message.role === "assistant");
   assert.equal(Object.hasOwn(assistant, "reasoning_details"), false);
@@ -79,7 +79,18 @@ test("a request sends signatures only on calls from the same assistant message",
     ] },
     { role: "assistant", tool_calls: [{ id: "repeat" }] },
   ] };
-  geminiRequest(params);
+  geminiRequest(params, true);
   assert.equal(params.messages[0].tool_calls[0].extra_content.google.thought_signature, "first");
   assert.deepEqual(params.messages[1].tool_calls, [{ id: "repeat" }]);
+});
+
+test("switching endpoints drops Gemini signatures and preserves other reasoning details", () => {
+  const other = { type: "reasoning.text", text: "kept" };
+  const params = { messages: [{
+    role: "assistant", tool_calls: [{ id: "a" }],
+    reasoning_details: [{ type: "reasoning.encrypted", format: "google-gemini-v1", id: "a", data: "opaque" }, other],
+  }] };
+  geminiRequest(params, false);
+  assert.deepEqual(params.messages[0].tool_calls, [{ id: "a" }]);
+  assert.deepEqual(params.messages[0].reasoning_details, [other]);
 });
