@@ -1,0 +1,116 @@
+[
+  {
+    "title": "The museum counter",
+    "source": "postcard-press",
+    "start": 0.0,
+    "shots": [
+      {
+        "file": "desktop.png",
+        "sha256": "496d14ec313607076f6dabe83b259a423c665085daa65abda461626bab928acb",
+        "start": 0.0,
+        "frames": 167
+      },
+      {
+        "file": "desktop-film.mp4",
+        "sha256": "df6406d6f4e1da6680532d3bd2e458d1ff44683be68a2768ad394812a67a8039",
+        "start": 6.958333333333333,
+        "frames": 154
+      }
+    ]
+  },
+  {
+    "title": "The print queue",
+    "source": "museum-print-run",
+    "start": 13.375,
+    "shots": [
+      {
+        "file": "first/sheet.png",
+        "sha256": "d21e42015a3cfc14c3a0107242781c050530e407b43497071e2f77d145d9022e",
+        "start": 13.375,
+        "frames": 129
+      },
+      {
+        "file": "desktop.png",
+        "sha256": "c07827a64a147cd1713d8838bac9d0f8609b3be75e768930fbbc2eae310ba42b",
+        "start": 18.75,
+        "frames": 209
+      }
+    ]
+  },
+  {
+    "title": "The learner\u2019s deck",
+    "source": "moon-cards",
+    "start": 27.458333333333332,
+    "shots": [
+      {
+        "file": "study.mp4",
+        "sha256": "a98ee6ee546fc49ca73d3484f7f263cdf09242e35377849d1619d4d78e1c2009",
+        "start": 27.458333333333332,
+        "frames": 128
+      },
+      {
+        "file": "desktop.png",
+        "sha256": "fd0ecebb166417e8a6d5c17af97862a9573e519c587de3270d63ccd8f435c498",
+        "start": 32.791666666666664,
+        "frames": 186
+      }
+    ]
+  },
+  {
+    "title": "The radio booth",
+    "source": "radio-jetstream",
+    "start": 40.541666666666664,
+    "shots": [
+      {
+        "file": "capture.mp4",
+        "sha256": "b4fcbcacc128cd9cd056d3b7191bbb8ca47255af54faf270d7e6adb1c7f3fa7d",
+        "start": 40.541666666666664,
+        "frames": 169
+      },
+      {
+        "file": "desktop.png",
+        "sha256": "3bcab5c1a649ab031b8af64c3a98abcd0a0841cc35cacedf9b107486f5de838d",
+        "start": 47.583333333333336,
+        "frames": 163
+      }
+    ]
+  },
+  {
+    "title": "The lunch round",
+    "source": "canteen-loadout",
+    "start": 54.375,
+    "shots": [
+      {
+        "file": "board-recording.mp4",
+        "sha256": "28c73a2a89cc71a8af3a9b39290cc82819fa97864608aecca5f800463e28433a",
+        "start": 54.375,
+        "frames": 117
+      },
+      {
+        "file": "desktop-quay-after.png",
+        "sha256": "40ac9f36ebca25ec5d3ca3657ad0edae725c9dcb6cc55aced27bf6ae80fe96b3",
+        "start": 59.25,
+        "frames": 203
+      }
+    ]
+  },
+  {
+    "title": "The island book club",
+    "source": "island-mailbag",
+    "start": 67.70833333333333,
+    "shots": [
+      {
+        "file": "mailbag.webm",
+        "sha256": "051f7ddfc8aff2d43cd77b19169e56d150db6c41c8eb3ee75081231a0ef769a9",
+        "start": 67.70833333333333,
+        "frames": 136
+      },
+      {
+        "file": "desktop.png",
+        "sha256": "3bd1cb250ab800bb5e19b49aa61cf423aa317b92a5d073da7ebf9340d49cf35a",
+        "start": 73.375,
+        "frames": 196
+      }
+    ]
+  }
+]

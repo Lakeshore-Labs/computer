@@ -1,0 +1,19 @@
+{
+  "chapters": [
+    "The museum counter",
+    "The print queue",
+    "The learner\u2019s deck",
+    "The radio booth",
+    "The lunch round",
+    "The island book club"
+  ],
+  "stream_codecs": [
+    "h264",
+    "aac",
+    "mov_text",
+    "bin_data"
+  ],
+  "original_shot_hashes_verified": 12,
+  "recovered_audio_bytes": 24044,
+  "recovered_audio_sha256": "85dc11e4486cc68a7702d8888ac5a4c9054709361317170701a5f6056646cfdf"
+}

@@ -27,3 +27,5 @@ python examples/field-film/player.py film
 ```
 
 Piper supplies synthetic narration using the LJ Speech High model. Voice timings can vary between renders. The source score supplies the synthesized flute phrase. [Piper voice model card](https://huggingface.co/rhasspy/piper-voices/blob/main/en/en_US/ljspeech/high/MODEL_CARD)
+
+[Watch the second field film, Where the files go](working-files/). Its six chapters follow actual files into a print queue, study collection, radio booth and other receiving applications.

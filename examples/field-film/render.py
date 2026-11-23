@@ -69,7 +69,7 @@ def render(args, tmp):
     if (sha(args.voice), sha(config_path)) != (VOICE_SHA, CONFIG_SHA):
         raise ValueError('Use the pinned LJ Speech High model and config.')
     voice = PiperVoice.load(str(args.voice), config_path=str(config_path))
-    scenes = json.loads((HERE / 'scenes.json').read_text())
+    scenes = json.loads(args.scenes.read_text())
     captions, transcript, clips, chapters = ['WEBVTT\n'], [], [], []
     start_frame = 0
     for number, scene in enumerate(scenes, 1):
@@ -77,13 +77,20 @@ def render(args, tmp):
         transcript.append('## ' + scene['title'] + '\n')
         for shot in scene['shots']:
             name, sentence, *extras = shot
-            source = HERE.parent / scene['source'] / 'sample' / name
+            source = HERE.parent / scene['source'] / scene.get('folder', 'sample') / name
             speech, overlay, clip = (tmp / f'{len(clips):02}.{ext}' for ext in ('wav', 'png', 'mp4'))
             with wave.open(str(speech), 'wb') as audio:
                 voice.synthesize_wav(sentence, audio, SynthesisConfig(length_scale=.91))
             with wave.open(str(speech)) as audio:
                 speech_duration = audio.getnframes() / audio.getframerate()
             music_time = 5.2 if extras else 0
+            sound_caption = '[Opening phrase of Last Boat Home, synthesized flute]'
+            cue = None
+            if extras and isinstance(extras[0], dict):
+                cue = source.parent / extras[0]['file']
+                sound_caption = extras[0]['caption']
+                with wave.open(str(cue)) as audio:
+                    music_time = audio.getnframes() / audio.getframerate()
             frames = round((speech_duration + .34 + music_time) * FPS)
             duration = frames / FPS
             frame(scene, sentence, number, len(scenes), args.font, args.bold, overlay)
@@ -92,16 +99,19 @@ def render(args, tmp):
             inputs = [*visual, '-i', source, '-i', overlay, '-i', speech]
             sound = '[2:a]aresample=44100,apad[a]'
             if music_time:
-                stand = source.with_name('stand.html').read_text()
-                assignment = re.search(r"const DATA\s*=\s*", stand)
-                score, _ = json.JSONDecoder().raw_decode(stand[assignment.end():])
-                flute = score["parts"]["flute"]
-                music = tmp / 'opening.wav'
-                music.write_bytes(base64.b64decode(flute["b64"]["wav"], validate=True))
-                if sha(music) != flute["sha_wav"]:
-                    raise ValueError("The embedded flute audio does not match the rehearsal reader.")
+                if cue is not None:
+                    music = cue
+                else:
+                    stand = source.with_name('stand.html').read_text()
+                    assignment = re.search(r"const DATA\s*=\s*", stand)
+                    score, _ = json.JSONDecoder().raw_decode(stand[assignment.end():])
+                    flute = score["parts"]["flute"]
+                    music = tmp / 'opening.wav'
+                    music.write_bytes(base64.b64decode(flute["b64"]["wav"], validate=True))
+                    if sha(music) != flute["sha_wav"]:
+                        raise ValueError("The embedded flute audio does not match the rehearsal reader.")
                 inputs.extend(['-i', music])
-                sound = (f'[3:a]atrim=duration={music_time},aresample=44100,afade=t=out:st=4.8:d=0.4,'
+                sound = (f'[3:a]atrim=duration={music_time},aresample=44100,afade=t=out:st={max(0,music_time-.4)}:d=0.4,'
                          f'adelay={round((speech_duration + .18)*1000)}:all=1[m];'
                          '[2:a]aresample=44100,apad[v];[v][m]amix=inputs=2:normalize=0[a]')
             picture = ('[0:v]fps=24,scale=910:512:force_original_aspect_ratio=decrease:force_divisible_by=2,'
@@ -116,8 +126,8 @@ def render(args, tmp):
             captions.append(f'{ts(start)} --> {ts(start + speech_duration)}\n{sentence}\n')
             transcript.append(sentence + '\n')
             if music_time:
-                captions.append(f'{ts(start + speech_duration + .18)} --> {ts(start_frame / FPS)}\n[Opening phrase of Last Boat Home, synthesized flute]\n')
-                transcript.append('[Opening phrase of *Last Boat Home*, synthesized flute.]\n')
+                captions.append(f'{ts(start + speech_duration + .18)} --> {ts(start_frame / FPS)}\n{sound_caption}\n')
+                transcript.append(sound_caption+'\n')
             chapter['shots'].append({'file': name, 'sha256': sha(source), 'start': start, 'frames': frames})
             clips.append(clip)
         chapters.append(chapter)
@@ -132,11 +142,13 @@ def render(args, tmp):
            'language=eng', '-metadata:s:a:0', 'language=eng', '-movflags', '+faststart', args.out / 'computer.mp4')
     ffmpeg('-ss', 1, '-i', args.out / 'computer.mp4', '-frames:v', 1, args.out / 'poster.jpg')
     (args.out / 'chapters.json').write_text(json.dumps(chapters, indent=2) + '\n')
-    (args.out / 'transcript.md').write_text('# Computer field guide\n\n' + '\n'.join(transcript))
+    (args.out / 'transcript.md').write_text('# ' + args.title + '\n\n' + '\n'.join(transcript))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--scenes', type=Path, default=HERE / 'scenes.json')
+    parser.add_argument('--title', default='Computer field guide')
     for opt in ('voice', 'font', 'bold', 'out'):
         parser.add_argument('--' + opt, type=Path, required=True)
     with tempfile.TemporaryDirectory() as temp:
