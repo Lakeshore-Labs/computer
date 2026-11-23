@@ -20,7 +20,7 @@ Download [claim.html](sample/claim.html) and open it in a browser. The events, c
 
 ```sh
 mkdir -p ./bin/claim-view
-./bin/computer -mount "$PWD/bin/claim-view:/work" \
+./computer -mount "$PWD/bin/claim-view:/work" \
   -mount "$PWD/examples/gemini-recovery/sample:/capture:ro" \
   -mount "$PWD/examples/gemini-recovery/recipe:/recipe:ro" \
   -c 'bash /recipe/publish.sh'
@@ -32,8 +32,8 @@ Use a POSIX host and build the Computer CLI and agent bundle from [the standalon
 
 ```sh
 ADAPTER=/path/to/built-adapter-checkout
-python3 examples/gemini-recovery/replay.py --computer "$ADAPTER/bin/computer" \
-  --engine "$ADAPTER/bin/local/qjs-wasi.wasm" --bundle "$ADAPTER/agent/js/dist" \
+python3 examples/gemini-recovery/replay.py --computer "$ADAPTER/computer" \
+  --engine "$ADAPTER/agent-wasi/qjs-wasi.wasm" --bundle "$ADAPTER/agent/js/dist" \
   --output ./bin/fresh-claim
 ```
 
