@@ -3,6 +3,7 @@ import errno
 import fcntl
 import os
 import pty
+from pathlib import Path
 import select
 import struct
 import sys
@@ -15,6 +16,9 @@ if pid == 0:
     fcntl.ioctl(0, termios.TIOCSWINSZ, struct.pack('HHHH', 24, 100, 0, 0))
     if mode == 'nonblocking':
         os.set_blocking(0, False)
+    if mode == 'inherited-only':
+        Path(directory, 'tty-mode').write_text(f'{os.fstat(0).st_mode & 0o7777} {os.ttyname(0)}')
+        os.fchmod(0, 0)
     os.execv(binary, [binary, '-mount', directory + ':/work'])
 
 pending = bytearray()
@@ -74,6 +78,9 @@ try:
     assert os.waitstatus_to_exitcode(status) == 0
     assert not os.path.exists(os.path.join(directory, 'unexpected.txt')), 'canceled input ran as a command'
 finally:
+    if mode == 'inherited-only':
+        original_mode, device = Path(directory, 'tty-mode').read_text().split(' ', 1)
+        os.chmod(device, int(original_mode))
     os.close(terminal)
     if pid is not None:
         try:

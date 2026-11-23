@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,7 +10,9 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"syscall"
+	"time"
 
 	"github.com/ewhauser/gbash"
 	"golang.org/x/term"
@@ -28,14 +31,11 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 		return err
 	}
 	defer func() { _ = term.Restore(fd, cooked) }()
-	inputPath, err := terminalPath(fd)
-	if err != nil {
-		return err
-	}
+	input := &terminalInput{terminalDescriptor: os.Stdin}
 	t := term.NewTerminal(struct {
 		io.Reader
 		io.Writer
-	}{os.Stdin, os.Stdout}, "")
+	}{commandInput{input, ctx}, os.Stdout}, "")
 	resize := func() {
 		if w, h, err := term.GetSize(fd); err == nil {
 			_ = t.SetSize(w, h)
@@ -80,18 +80,9 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 			continue
 		}
 		// The command has the terminal as it was, so its output is laid out as it expects, and Ctrl-C stops it.
-		// Open a pollable handle for the command. Closing it wakes its reads without
-		// consuming the prompt's next input or sharing the command's read deadline.
-		input, err := os.OpenFile(inputPath, os.O_RDONLY|syscall.O_NONBLOCK|syscall.O_NOCTTY, 0)
-		if err != nil {
-			return err
-		}
 		running, stop := signal.NotifyContext(ctx, os.Interrupt)
-		closeOnInterrupt := context.AfterFunc(running, func() { _ = input.Close() })
 		_ = term.Restore(fd, cooked)
-		res, err := c.Exec(running, &gbash.ExecutionRequest{Script: line, Stdin: input, Stdout: os.Stdout, Stderr: os.Stderr})
-		closeOnInterrupt()
-		_ = input.Close()
+		res, err := c.Exec(running, &gbash.ExecutionRequest{Script: line, Stdin: commandInput{input, running}, Stdout: os.Stdout, Stderr: os.Stderr})
 		interrupted := running.Err() != nil
 		_, rawErr := term.MakeRaw(fd)
 		stop()
@@ -107,6 +98,85 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 			return nil
 		case res.FinalEnv["PWD"] != "":
 			cwd = res.FinalEnv["PWD"]
+		}
+	}
+}
+
+// An interrupted terminal read can still receive the next line. Both the command and
+// the prompt use the same pending read so those bytes reach whoever reads next.
+type terminalInput struct {
+	terminalDescriptor
+	mu      sync.Mutex
+	pending chan terminalRead
+	owner   context.Context
+	rest    []byte
+}
+
+// Forward terminal metadata without exposing os.File.WriteTo, which bypasses Read during io.Copy.
+type terminalDescriptor interface {
+	io.Reader
+	Fd() uintptr
+	Stat() (os.FileInfo, error)
+	SetReadDeadline(time.Time) error
+}
+
+type commandInput struct {
+	*terminalInput
+	ctx context.Context
+}
+
+func (in commandInput) Close() error { return nil } // the prompt owns the terminal
+
+type terminalRead struct {
+	data   []byte
+	err    error
+	active bool
+}
+
+func (in commandInput) Read(p []byte) (int, error) {
+	in.mu.Lock()
+	defer in.mu.Unlock()
+	for {
+		if err := in.ctx.Err(); err != nil || len(p) == 0 {
+			return 0, err
+		}
+		if len(in.rest) > 0 {
+			n := copy(p, in.rest)
+			in.rest = in.rest[n:]
+			return n, nil
+		}
+		if in.pending == nil {
+			if in.ctx.Done() == nil {
+				return in.terminalDescriptor.Read(p)
+			}
+			in.pending, in.owner = make(chan terminalRead, 1), in.ctx
+			// Read only what this command requested. An unread suffix must remain
+			// in the terminal, where Ctrl-C flushes it before the next prompt.
+			go func(done chan<- terminalRead, size int) {
+				buf := make([]byte, size)
+				n, err := in.terminalDescriptor.Read(buf)
+				done <- terminalRead{buf[:n], err, in.ctx.Err() == nil}
+			}(in.pending, len(p))
+		}
+		select {
+		case <-in.ctx.Done():
+			return 0, in.ctx.Err()
+		case result := <-in.pending:
+			owner := in.owner
+			in.pending, in.owner = nil, nil
+			if owner.Err() != nil && result.active {
+				continue // this read finished for the interrupted command
+			}
+			if owner != in.ctx && errors.Is(result.err, os.ErrDeadlineExceeded) {
+				continue // the deadline belonged to the previous command
+			}
+			if len(result.data) == 0 {
+				return 0, result.err
+			}
+			if result.active {
+				return copy(p, result.data), result.err
+			}
+			in.rest = result.data
 		}
 	}
 }
