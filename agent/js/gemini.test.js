@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { stream } from "@earendil-works/pi-ai/api/openai-completions";
-import { geminiChunks, geminiModel, geminiRequest } from "./gemini.js";
+import { geminiChunks, geminiRequest } from "./gemini.js";
 
 test("a signed parallel tool turn survives serialization and keeps each signature on its own call", async () => {
   const chunk = geminiChunks();
@@ -17,7 +17,7 @@ test("a signed parallel tool turn survives serialization and keeps each signatur
   chunk(last);
   assert.equal(last.choices[0].finish_reason, "tool_calls");
   // Round-trip the assistant message in the same JSON form that Pi Durable persists.
-  const model = { id: "fixture", api: "openai-completions", ...geminiModel,
+  const model = { id: "fixture", api: "openai-completions", provider: "host", compat: { supportsStore: false },
     baseUrl: "https://example.invalid", input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } };
   const user = { role: "user", content: "Use both tools.", timestamp: 0 };
   const response = (chunks) => new Response(
@@ -27,7 +27,7 @@ test("a signed parallel tool turn survives serialization and keeps each signatur
     apiKey: "offline", fetch: async () => response([first, last]),
   }).result();
   assert.equal(reply.stopReason, "toolUse");
-  assert.equal(reply.provider, "google");
+  assert.equal(reply.provider, "host");
   const history = JSON.parse(JSON.stringify(reply));
   const results = history.content.filter((part) => part.type === "toolCall").map((call) => ({
     role: "toolResult", toolCallId: call.id, toolName: call.name, content: [{ type: "text", text: "done" }], timestamp: 1,
