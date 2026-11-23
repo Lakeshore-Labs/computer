@@ -160,7 +160,7 @@ pdftoppm -png -r 100 report.pdf page       # writes page-1.png, page-2.png, ... 
 the tool commands still work.
 
 ```
-gh release download python-3.15.2-2 --repo Lakeshore-Labs/computer --pattern '*.tar.gz'
+gh release download python-3.15.2-3 --repo Lakeshore-Labs/computer --pattern '*.tar.gz'
 mkdir python-wasi && tar -xzf python-3.15.2-wasi.tar.gz -C python-wasi
 ./computer -mount ./work:/home/user -python python-wasi/python.wasm -python-lib python-wasi/lib
 ```
