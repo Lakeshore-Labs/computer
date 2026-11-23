@@ -18,7 +18,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Lakeshore-Labs/computer/agent"
 	"github.com/Lakeshore-Labs/computer/files"
 	"github.com/Lakeshore-Labs/computer/tools"
 	"github.com/Lakeshore-Labs/computer/wasm"
@@ -45,7 +44,6 @@ type Config struct {
 	Commands []commands.Command // commands beyond the shell's own
 	Tools    []tools.Source     // the MCP servers whose tools become commands and the Python package `tools`
 	Python   *Python            // python3; nil for none
-	Agent    *agent.Config      // the command agent, an agent that works in this computer; nil for none
 	// Options are further gbash options, applied last: gbash.WithHTTPAccess or WithNetwork for curl, which the
 	// computer otherwise lacks, WithLimitOverrides, WithTracing, WithPolicy.
 	Options []gbash.Option
@@ -86,9 +84,6 @@ type Computer struct {
 	tmp  string // a host directory mounted at /tmp when the caller mounts none, removed by Close
 	// opened are the host directories among the mounts, opened by New and closed by Close.
 	opened []io.Closer
-	// state is where the agent keeps its conversation: the caller's directory, or one made here and removed by
-	// Close, with which the conversation ends.
-	state, ownState string
 
 	mu      sync.Mutex
 	listed  [sha256.Size]byte // the tools the session was built from
@@ -136,14 +131,6 @@ func New(cfg Config) (_ *Computer, err error) {
 		}
 		c.cfg.Mounts[i].FS, c.opened = dir, append(c.opened, dir)
 	}
-	if cfg.Agent != nil {
-		if c.state = cfg.Agent.State; c.state == "" {
-			if c.ownState, err = os.MkdirTemp("", "computer-agent"); err != nil {
-				return nil, err
-			}
-			c.state = c.ownState
-		}
-	}
 	return c, nil
 }
 
@@ -159,9 +146,6 @@ func (c *Computer) Close() error {
 	err = errors.Join(err, os.RemoveAll(c.site))
 	if c.tmp != "" {
 		err = errors.Join(err, os.RemoveAll(c.tmp))
-	}
-	if c.ownState != "" {
-		err = errors.Join(err, os.RemoveAll(c.ownState))
 	}
 	return err
 }
@@ -313,9 +297,9 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 		if name == "" { // a group whose name has no letter or digit a command can be spelled with
 			name = "tools"
 		}
-		// The shell's command, builtin or keyword, the agent, or a group whose name spells the same, keeps the
-		// name: the shell would run its own, and the group's command could not be reached.
-		for _, taken := registry.Lookup(name); taken || syntax.IsKeyword(name) || shellBuiltins()[name] || c.cfg.Agent != nil && name == "agent"; _, taken = registry.Lookup(name) {
+		// The shell's command, builtin or keyword, or a group whose name spells the same, keeps the name: the shell
+		// would run its own, and the group's command could not be reached.
+		for _, taken := registry.Lookup(name); taken || syntax.IsKeyword(name) || shellBuiltins()[name]; _, taken = registry.Lookup(name) {
 			name += "-tools"
 		}
 		if err := registry.Register(tools.Command(name, c.cfg.Tools, groups[group])); err != nil {
@@ -324,16 +308,6 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 		names = append(names, name)
 	}
 	c.calling, c.modules = names, tools.Modules(sorted)
-	if c.cfg.Agent != nil {
-		a := *c.cfg.Agent
-		a.Mounts, a.Home, a.State = mounts, c.cfg.WorkDir, c.state
-		if a.Instructions == "" {
-			a.Instructions = c.About(names, c.modules)
-		}
-		if err := registry.Register(agent.Command("agent", a)); err != nil {
-			return nil, err
-		}
-	}
 	var table []gbfs.MountConfig
 	writable := []string{"/dev/null"} // gbash's own device, which a redirect to nowhere writes
 	for _, m := range mounts {

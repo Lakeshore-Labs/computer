@@ -12,7 +12,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -34,7 +33,6 @@ import (
 	"golang.org/x/term"
 
 	"github.com/Lakeshore-Labs/computer"
-	"github.com/Lakeshore-Labs/computer/agent"
 	"github.com/Lakeshore-Labs/computer/extra"
 	"github.com/Lakeshore-Labs/computer/tools"
 	"github.com/Lakeshore-Labs/computer/wasm"
@@ -129,14 +127,6 @@ func run(ctx context.Context) error {
 	pythonRuns := flag.Int("python-runs", 8, "how many python3 may run at once, each with up to 512 MiB; a further one waits; 0 is no limit")
 	pythonFast := flag.Bool("python-unstoppable", false, "run Python three to four times faster, and give up stopping a script that does not end")
 	timeout := flag.Duration("timeout", 2*time.Minute, "in the mcp mode, how long a bash call may run when the agent sets no limit")
-	agentDir := flag.String("agent", "", "a directory holding the agent's bundle, agent.js, for the command agent")
-	agentEngine := flag.String("agent-engine", "", "QuickJS built as a WASI command, which runs the agent")
-	agentState := flag.String("agent-state", "", "a directory in which the agent keeps its conversation, outside every mount; by default one under the user's cache directory, named for the first mount")
-	modelURL := flag.String("model-url", "", "the agent's model: an OpenAI-compatible address, without /chat/completions; its key is read from COMPUTER_MODEL_KEY")
-	modelName := flag.String("model", "", "the agent's model's name")
-	contextWindow := flag.Int("model-context", 0, "how many tokens the agent's model reads, which sets when the conversation is compacted; 0 is the agent's default of 200,000")
-	maxTokens := flag.Int("model-max-tokens", 0, "the most tokens the agent's model may write in one reply; 0 is the agent's default of 16,384")
-	maxTurns := flag.Int("agent-max-turns", 0, "the most tool rounds one run of the agent takes; 0 is the agent's default of 50")
 	script := flag.String("c", "", "run this command and exit")
 	config := flag.String("config", "", `a JSON file of mounts and MCP servers, added to those the flags give: {"mounts": ["host:guest"], "mcpServers": {"name": {"url": "..."} or {"command": "...", "args": [...]}}}; mcpServers is as in Claude Code's .mcp.json, and ${NAME} in a header or an env value is read from the environment`)
 	flag.Parse()
@@ -189,9 +179,9 @@ func run(ctx context.Context) error {
 		switch {
 		case s.Command != "" && s.URL == "":
 			command := exec.CommandContext(ctx, s.Command, s.Args...)
-			// The program is not given the model's key or any server's token, unless its own env names one.
+			// The program is not given any server's token, unless its own env names one.
 			command.Env = slices.DeleteFunc(os.Environ(), func(kv string) bool {
-				return strings.HasPrefix(kv, "COMPUTER_MODEL_KEY=") || strings.HasPrefix(kv, "COMPUTER_MCP_TOKEN")
+				return strings.HasPrefix(kv, "COMPUTER_MCP_TOKEN")
 			})
 			for k, v := range s.Env {
 				command.Env = append(command.Env, k+"="+v)
@@ -228,36 +218,6 @@ func run(ctx context.Context) error {
 		}
 		cfg.Python = p
 	}
-	if *agentDir != "" {
-		engine, err := os.ReadFile(*agentEngine)
-		if err != nil {
-			return fmt.Errorf("-agent-engine: %w", err)
-		}
-		cache, err := cacheDir(cfg.Mounts)
-		if err != nil {
-			return err
-		}
-		// The agent can be stopped where it stands: what the model asks of it, such as many edits of a large
-		// file, can keep it computing long past the time a caller allows.
-		module, err := wasm.Compile(ctx, wasm.Program{Binary: engine, MemoryPages: 8192, CacheDir: cache})
-		if err != nil {
-			return fmt.Errorf("-agent-engine: %w", err)
-		}
-		// The conversation is kept outside every mount, by default in a directory named for the first one, so
-		// that it goes on from one invocation to the next over the same folder.
-		stateDir := *agentState
-		if stateDir == "" && len(cfg.Mounts) > 0 {
-			folder, _ := filepath.Abs(cfg.Mounts[0].Host)
-			stateDir = fmt.Sprintf("%s/agent/%x", cache, sha256.Sum256([]byte(folder)))
-		}
-		if stateDir != "" {
-			if err := outside(stateDir, cfg.Mounts); err != nil {
-				return fmt.Errorf("-agent-state: %w", err)
-			}
-		}
-		cfg.Agent = &agent.Config{Engine: module, Script: *agentDir, Cache: cache + "/agent-bytecode", State: stateDir, ModelURL: *modelURL, ModelKey: os.Getenv("COMPUTER_MODEL_KEY"), Model: *modelName,
-			ContextWindow: *contextWindow, MaxTokens: *maxTokens, MaxTurns: *maxTurns}
-	}
 	c, err := computer.New(cfg)
 	if err != nil {
 		return err
@@ -267,8 +227,7 @@ func run(ctx context.Context) error {
 	if *script == "" && flag.NArg() == 0 && term.IsTerminal(syscall.Stdin) {
 		return prompt(ctx, c, cfg.WorkDir) // which gives an interrupt to the command that is running, and goes on
 	}
-	// An interrupt ends what is running as a deadline would: the agent records its run as aborted, and the
-	// computer removes its temporary directories.
+	// An interrupt ends what is running as a deadline would, and the computer removes its temporary directories.
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if flag.Arg(0) == "mcp" {
@@ -318,8 +277,8 @@ func parseMount(m string) (computer.Mount, error) {
 	return computer.Mount{}, fmt.Errorf("-mount %q is not host, host:guest, or either with :ro", m)
 }
 
-// cacheDir is where compiled programs and, by default, the agent's conversation are kept. What is compiled there
-// is native code that this process runs, so a script must not be able to write it.
+// cacheDir is where compiled programs are kept. What is compiled there is native code that this process runs, so a
+// script must not be able to write it.
 func cacheDir(mounts []computer.Mount) (string, error) {
 	dir, err := os.UserCacheDir()
 	if err != nil {
