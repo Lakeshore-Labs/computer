@@ -390,6 +390,23 @@ func TestExtraChartDrawsEveryKindAsSVG(t *testing.T) {
 	}
 }
 
+func TestExtraBarChartIncludesZero(t *testing.T) {
+	c := newExtra(t)
+	for _, test := range []struct{ name, data string }{
+		{"positive", "route,x,y\na,184,225\nb,310,270\n"},
+		{"negative", "route,x,y\na,-184,-225\nb,-310,-270\n"},
+		{"missing", "route,x,y\na,NaN,225\nb,310,270\n"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			writeHome(t, c, "values.csv", []byte(test.data))
+			svg := run(t, c, "chart bar --x route --y x,y values.csv")
+			if !strings.Contains(svg, ">0</text>") {
+				t.Error("the value axis omits the zero baseline")
+			}
+		})
+	}
+}
+
 func TestExtraChartSeriesAreNamedByTheirColumns(t *testing.T) {
 	c := newExtra(t)
 	writeHome(t, c, "sales.csv", []byte(sales))
