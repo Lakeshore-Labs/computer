@@ -1,0 +1,232 @@
+[
+  {
+    "width": 1280,
+    "name": "MCP Inspector",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "mcporter",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Python SDK",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Claude Code",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Codex app-server",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Gemini CLI",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Go SDK",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "TypeScript SDK · Node",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Java SDK",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Swift SDK",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Rust SDK",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "TypeScript SDK · browser",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Ruby SDK",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Visual Studio Code",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Filesystem MCP",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Go language server",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "PostgreSQL and MotherDuck",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "NATS JetStream",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Browser OPFS",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "rclone · nine backends",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "IPLD CAR archives",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "Anki",
+    "exact_download": true
+  },
+  {
+    "width": 1280,
+    "name": "CUPS IPP Everywhere",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "MCP Inspector",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "mcporter",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Python SDK",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Claude Code",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Codex app-server",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Gemini CLI",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Go SDK",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "TypeScript SDK · Node",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Java SDK",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Swift SDK",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Rust SDK",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "TypeScript SDK · browser",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Ruby SDK",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Visual Studio Code",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Filesystem MCP",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Go language server",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "PostgreSQL and MotherDuck",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "NATS JetStream",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Browser OPFS",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "rclone · nine backends",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "IPLD CAR archives",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "Anki",
+    "exact_download": true
+  },
+  {
+    "width": 390,
+    "name": "CUPS IPP Everywhere",
+    "exact_download": true
+  }
+]

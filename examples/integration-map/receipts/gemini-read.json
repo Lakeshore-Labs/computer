@@ -1,0 +1,16 @@
+{
+  "client": "Gemini CLI",
+  "model": "gemini-3.5-flash-lite",
+  "events": [
+    {
+      "tool": "mcp_computer_read",
+      "params": {
+        "path": "/work/handoff.txt"
+      }
+    },
+    {
+      "answer": "Evening ferry: Pier"
+    }
+  ],
+  "pass": true
+}

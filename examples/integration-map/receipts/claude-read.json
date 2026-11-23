@@ -1,0 +1,17 @@
+{
+  "client": "Claude Code",
+  "model": "Haiku",
+  "pass": true,
+  "events": [
+    {
+      "tool": "mcp__computer__read",
+      "arguments": {
+        "path": "/work/handoff.txt"
+      }
+    },
+    {
+      "result": "Evening ferry: Pier",
+      "is_error": false
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "client": "codex-cli 0.163.0",
+  "method": "mcpServer/tool/call",
+  "tool": "read",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Evening ferry: Pier"
+      }
+    ]
+  },
+  "pass": true
+}

@@ -1,0 +1,209 @@
+[
+  {
+    "role": "MCP client",
+    "name": "MCP Inspector",
+    "task": "Post a ferry notice",
+    "computer": "Writes the new notice in a mounted directory.",
+    "outcome": "The original file reads Morning ferry: Pier.",
+    "receipt": "integration-map/receipts/inspector-write.json",
+    "cover": "client-handoff/media/inspector-read.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "mcporter",
+    "task": "Amend a ferry notice",
+    "computer": "Applies an exact-text edit to the same mounted file in a new process.",
+    "outcome": "Morning changes to Evening.",
+    "receipt": "integration-map/receipts/mcporter-edit.json",
+    "cover": "client-handoff/media/inspector-read.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "Python SDK",
+    "task": "Verify a departure notice",
+    "computer": "Reads the amended file and calculates its shell checksum.",
+    "outcome": "The client and host agree on the final text and digest.",
+    "receipt": "integration-map/receipts/python-sdk-read.json",
+    "cover": "client-handoff/media/inspector-read.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "Claude Code",
+    "task": "Read a posted departure",
+    "computer": "Serves the read tool to a model-requested call.",
+    "outcome": "Haiku requested the file and received Evening ferry: Pier.",
+    "receipt": "integration-map/receipts/claude-read.json",
+    "cover": "client-handoff/media/inspector-read.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "Codex app-server",
+    "task": "Retrieve a posted departure",
+    "computer": "Reads the file for a direct MCP request from app-server.",
+    "outcome": "The direct tool call returned Evening ferry: Pier without a model turn.",
+    "receipt": "integration-map/receipts/codex-read.json",
+    "cover": "client-handoff/media/inspector-read.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "Gemini CLI",
+    "task": "Read a posted departure",
+    "computer": "Serves the read tool to Gemini CLI.",
+    "outcome": "The model requested the file and reported Evening ferry: Pier.",
+    "receipt": "integration-map/receipts/gemini-read.json",
+    "cover": "client-handoff/media/inspector-read.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "Go SDK",
+    "task": "Read the library closing time",
+    "computer": "Connects a shell command to a library-hours tool.",
+    "outcome": "The official Go client and guest lookup returned Sunday 16:00.",
+    "receipt": "capability-atlas/sample/tools.json",
+    "cover": "capability-atlas/sample/desktop.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "TypeScript SDK · Node",
+    "task": "Publish a film program",
+    "computer": "Runs WASI Python to publish a lobby board and calendar from three film records.",
+    "outcome": "The box-office client produced the first edition.",
+    "receipt": "festival-calendar/sample/boxoffice.json",
+    "cover": "festival-calendar/sample/original.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "Java SDK",
+    "task": "Revise a running time",
+    "computer": "Edits the program and reruns the guest publisher.",
+    "outcome": "Two later screenings moved by 15 minutes. A separate client parsed the calendar.",
+    "receipt": "festival-calendar/sample/projectionist.json",
+    "cover": "festival-calendar/sample/amended.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "Swift SDK",
+    "task": "Take colors from the lagoon",
+    "computer": "Reads the real satellite inputs and writes the selected palette through four tools.",
+    "outcome": "Six original swatches round-tripped into a native macOS color list.",
+    "receipt": "lagoon-palette/sample/swift.json",
+    "cover": "lagoon-palette/sample/desktop.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "Rust SDK",
+    "task": "Issue a lost-property claim",
+    "computer": "Runs WASI Python and rotates a QR image. Returns the PNG through read.",
+    "outcome": "Quirc decoded LF-042 from the original, rotated image and rendered PDF.",
+    "receipt": "claim-ticket/sample/checks.json",
+    "cover": "claim-ticket/sample/paper.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "TypeScript SDK · browser",
+    "task": "Order an A6 postcard",
+    "computer": "Serves a memory-backed desk over Streamable HTTP. Turns an edited order into a credited SVG.",
+    "outcome": "A second Python client read the same 31,326 bytes as the phone download.",
+    "receipt": "postcard-press/sample/python-client.json",
+    "cover": "postcard-press/sample/desktop.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "Ruby SDK",
+    "task": "Prepare three visitor cards",
+    "computer": "Reads the museum catalogs, accepts two order edits and runs the postcard recipe.",
+    "outcome": "The docent packed three originals and three native proofs into a transferable archive.",
+    "receipt": "postcard-press/ruby-docent/sample/operator-receipt.json",
+    "cover": "postcard-press/ruby-docent/sample/desktop.png"
+  },
+  {
+    "role": "MCP client",
+    "name": "Visual Studio Code",
+    "task": "Discover the workspace tools",
+    "computer": "Registers four tools in a signed-out editor.",
+    "outcome": "The editor displayed its native confirmation for read. That call remained pending.",
+    "receipt": "integration-map/receipts/vscode-discovery.json",
+    "cover": "integration-map/receipts/editor-confirmation.png"
+  },
+  {
+    "role": "Upstream MCP",
+    "name": "Filesystem MCP",
+    "task": "Summarize 50,000 ferry trips",
+    "computer": "Reads upstream records and queries them with WASI Python and SQLite.",
+    "outcome": "The outer shell returned 146 bytes of text. A separate read returned the chart.",
+    "receipt": "four-tools/sample/trace.json",
+    "cover": "four-tools/sample/trace.png"
+  },
+  {
+    "role": "Upstream MCP",
+    "name": "Go language server",
+    "task": "Repair clarinet transposition",
+    "computer": "Uses gopls tools inside the shell and edits the practice package.",
+    "outcome": "The repaired package plays MIDI 62. A compile-clean alternative fails the musical test.",
+    "receipt": "score-workbench/sample/receipt.json",
+    "cover": "score-workbench/sample/desktop.png"
+  },
+  {
+    "role": "Upstream MCP",
+    "name": "PostgreSQL and MotherDuck",
+    "task": "Balance three kitchens",
+    "computer": "Joins PostgreSQL orders to Parquet loads through two database servers.",
+    "outcome": "Four transfers resolve thirteen misplaced portions out of 150.",
+    "receipt": "canteen-loadout/runs/run2/independent-verify.json",
+    "cover": "canteen-loadout/evidence/desktop-quay-after.png"
+  },
+  {
+    "role": "File store",
+    "name": "NATS JetStream",
+    "task": "Recover an audio cue after restart",
+    "computer": "Creates a WAV, stores it and publishes the revised rundown through NATS MCP.",
+    "outcome": "A delayed subscriber retrieved 24,044 bytes and acknowledged the message.",
+    "receipt": "radio-jetstream/evidence/run-2/verify.json",
+    "cover": "radio-jetstream/evidence/run-2/desktop.png"
+  },
+  {
+    "role": "File store",
+    "name": "Browser OPFS",
+    "task": "Fit seven ushers after an offline edit",
+    "computer": "Reads the revised inventory through an upstream MCP and plans fittings.",
+    "outcome": "A new browser process reopened its own persisted files after reconnection.",
+    "receipt": "browser-wardrobe/sample/browser.json",
+    "cover": "browser-wardrobe/sample/after.png"
+  },
+  {
+    "role": "File store",
+    "name": "rclone · nine backends",
+    "task": "Move two score files",
+    "computer": "Runs read and write adapters for nine account-free rclone storage configurations.",
+    "outcome": "Eighteen deliveries retained the original MusicXML and MIDI bytes.",
+    "receipt": "score-stores/sample/evidence.json",
+    "cover": "score-stores/sample/desktop.png"
+  },
+  {
+    "role": "File store",
+    "name": "IPLD CAR archives",
+    "task": "Amend an island book-club meeting",
+    "computer": "Builds a 1,035-byte delta beside the existing publication.",
+    "outcome": "The receiver reused the original 121,382-byte e-book.",
+    "receipt": "island-mailbag/receipts/decision.json",
+    "cover": "island-mailbag/sample/desktop.png"
+  },
+  {
+    "role": "Receiving application",
+    "name": "Anki",
+    "task": "Keep a learner’s review after a correction",
+    "computer": "Issues two compatible decks from one four-moon EPUB.",
+    "outcome": "One note updated. The existing card and review survived in the official backend.",
+    "receipt": "moon-cards/sample/independent-read-updated-deck-export.json",
+    "cover": "moon-cards/sample/desktop.png"
+  },
+  {
+    "role": "Receiving application",
+    "name": "CUPS IPP Everywhere",
+    "task": "Release only the amended proof",
+    "computer": "Imposes the two postcard orders on A4 sheets with WASI Python.",
+    "outcome": "One virtual print job completed. The spool retained the exact amended PDF.",
+    "receipt": "museum-print-run/sample/receipt.json",
+    "cover": "museum-print-run/sample/desktop.png"
+  }
+]
