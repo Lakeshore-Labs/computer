@@ -9,6 +9,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -25,8 +26,22 @@ import (
 // this the computer's web terminal.
 func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 	fd := syscall.Stdin // os.Stdin.Fd would put a non-blocking terminal into blocking mode
+	// SIGTERM and SIGHUP put the terminal back and then end the process as they would have, without waiting for the
+	// command that is running. One the parent had this process ignore, as nohup does, stays ignored. They are caught
+	// before the terminal is changed, so there is no moment when one would leave it changed.
+	ended := make(chan os.Signal, 1)
+	for _, sig := range []os.Signal{syscall.SIGTERM, syscall.SIGHUP} {
+		if !signal.Ignored(sig) {
+			signal.Notify(ended, sig)
+		}
+	}
+	// mu is held while the terminal's settings change. Putting them back for good takes it and keeps it, so nothing
+	// changes them after.
+	var mu sync.Mutex
+	mu.Lock()
 	cooked, err := term.MakeRaw(fd)
 	if err != nil {
+		signal.Stop(ended)
 		return err
 	}
 	// Each reader of the terminal below has its own duplicate of the descriptor in non-blocking mode, which Go's
@@ -36,25 +51,27 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 	flags, err := unix.FcntlInt(uintptr(fd), unix.F_GETFL, 0)
 	if err != nil {
 		_ = term.Restore(fd, cooked)
+		signal.Stop(ended)
 		return err
 	}
+	err = syscall.SetNonblock(fd, true)
 	restore := func() {
+		mu.Lock()
 		_ = syscall.SetNonblock(fd, flags&syscall.O_NONBLOCK != 0)
 		_ = term.Restore(fd, cooked)
 	}
-	defer restore()
-	if err := syscall.SetNonblock(fd, true); err != nil {
+	mu.Unlock()
+	defer func() {
+		restore()
+		signal.Stop(ended)
+	}()
+	if err != nil {
 		return err
 	}
-	// SIGTERM and SIGHUP put the terminal back and then end the process as they would have, without waiting for the
-	// command that is running.
-	ended := make(chan os.Signal, 1)
-	signal.Notify(ended, syscall.SIGTERM, syscall.SIGHUP)
-	defer signal.Stop(ended)
 	go func() {
 		sig := (<-ended).(syscall.Signal)
 		restore()
-		signal.Reset(sig)
+		signal.Reset(syscall.SIGTERM, syscall.SIGHUP)
 		_ = syscall.Kill(os.Getpid(), sig)
 	}()
 	input, err := openTerminal(fd)
@@ -109,7 +126,9 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 			continue
 		}
 		// The command has the terminal as it was, so its output is laid out as it expects, and Ctrl-C stops it.
+		mu.Lock()
 		_ = term.Restore(fd, cooked)
+		mu.Unlock()
 		running, stop := signal.NotifyContext(ctx, os.Interrupt)
 		// The command reads the terminal through its own descriptor. Ctrl-C sets a deadline that ends a read under way,
 		// as gbash's read builtin expects, and closing the descriptor when the command ends stops one a program left
@@ -125,7 +144,10 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 		stopInterrupt()
 		_ = in.Close()
 		stop()
-		if _, rawErr := term.MakeRaw(fd); rawErr != nil {
+		mu.Lock()
+		_, rawErr := term.MakeRaw(fd)
+		mu.Unlock()
+		if rawErr != nil {
 			return rawErr
 		}
 		switch {

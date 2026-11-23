@@ -138,7 +138,7 @@ func TestInterruptReturnsToThePrompt(t *testing.T) {
 	if out, err := exec.Command("go", "build", "-o", binary, ".").CombinedOutput(); err != nil {
 		t.Fatalf("build CLI: %v: %s", err, out)
 	}
-	for _, mode := range []string{"blocking", "nonblocking", "inherited-only", "sigterm"} {
+	for _, mode := range []string{"blocking", "nonblocking", "inherited-only", "sigterm", "sighup-ignored"} {
 		t.Run(mode, func(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
 			defer cancel()

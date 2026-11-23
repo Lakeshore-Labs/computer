@@ -35,7 +35,8 @@ python = os.environ.get('PYTHON_WASM'), os.environ.get('PYTHON_LIB')
 if all(python):
     command += ['-python', python[0], '-python-lib', python[1]]
 # sh survives Ctrl-C and SIGTERM, which are the CLI's to handle, and waits after the CLI ends so the terminal stays.
-shell = 'trap : INT TERM; "$@"; echo "cli-exit=$?"; sleep 30'
+# In mode sighup-ignored the CLI starts with SIGHUP ignored, as under nohup, and must leave it ignored.
+shell = ('trap "" HUP; ' if mode == 'sighup-ignored' else '') + 'trap : INT TERM; "$@"; echo "cli-exit=$?"; sleep 30'
 session = subprocess.Popen(['sh', '-c', shell, 'sh', *command], stdin=tty, stdout=tty, stderr=tty,
                            preexec_fn=controlling_terminal)
 
@@ -98,6 +99,13 @@ try:
     os.write(terminal, b'echo resumed\r')
     expect(b'\r\nresumed\r\n')
     expect(b'$ ')
+    if mode == 'sighup-ignored':
+        os.killpg(session.pid, signal.SIGHUP)
+        time.sleep(0.2)
+        assert not termios.tcgetattr(tty)[3] & termios.ICANON, 'an ignored SIGHUP took the prompt out of raw mode'
+        os.write(terminal, b'echo still-here\r')
+        expect(b'\r\nstill-here\r\n')
+        expect(b'$ ')
     if mode == 'sigterm':
         # SIGTERM ends the CLI at once, even with a command running, and the parent sees it die of the signal.
         os.write(terminal, b'echo sleeping; sleep 30\r')
