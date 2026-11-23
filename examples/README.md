@@ -66,6 +66,8 @@ A full-file prompt and a Computer-filtered prompt answered the same question abo
 
 [Inspect the measurements or replay the experiment](model-input/README.md)
 
+A second recording follows a tool call interrupted in one Computer process and resumed in another. [Watch the claim desk recover](gemini-recovery/README.md).
+
 ## Repair the bakery sales board
 
 Computer reads a mobile browser audit, repairs the page in a mounted directory and sends Chrome to the new URL. Both original findings clear on the second audit.
