@@ -32,4 +32,4 @@ jobs:
       - name: Test
         env:
           PYTHON_HOST_MODULE: computer
-        run: go test -count=1 -timeout 900s -v . ./cmd/computer | grep -E '^(--- |ok|FAIL|PASS)' ; exit "${PIPESTATUS[0]}"
+        run: go test -count=1 -timeout 900s -v . ./cmd/computer | grep -vE '^=== (RUN|PAUSE|CONT|NAME)' ; exit "${PIPESTATUS[0]}"
