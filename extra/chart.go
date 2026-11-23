@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ewhauser/gbash/commands"
+	"github.com/Lakeshore-Labs/gbash/commands"
 	"github.com/go-analyze/charts"
 )
 

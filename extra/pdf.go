@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ewhauser/gbash/commands"
+	"github.com/Lakeshore-Labs/gbash/commands"
 	"github.com/klippa-app/go-pdfium"
 	"github.com/klippa-app/go-pdfium/references"
 	"github.com/klippa-app/go-pdfium/requests"

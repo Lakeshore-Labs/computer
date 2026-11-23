@@ -143,7 +143,7 @@ pdftoppm -png -r 100 report.pdf page       # writes page-1.png, page-2.png, ... 
 
 | Part | What it does |
 |---|---|
-| [gbash](https://github.com/ewhauser/gbash) | The shell and its commands, in Go, with `jq`, `yq`, `awk`, `sqlite3`, `html-to-markdown` |
+| [gbash](https://github.com/Lakeshore-Labs/gbash), our fork of [ewhauser/gbash](https://github.com/ewhauser/gbash) | The shell and its commands, in Go, with `jq`, `yq`, `awk`, `sqlite3`, `html-to-markdown` |
 | [wazero](https://github.com/wazero/wazero) | Runs CPython as WebAssembly |
 | [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Talks to the MCP servers |
 | `wasm/` | Runs a WASI program like a command: memory cap, deadline, and directories that are afero filesystems |

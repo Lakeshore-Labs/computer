@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ewhauser/gbash"
+	"github.com/Lakeshore-Labs/gbash"
 
 	"github.com/Lakeshore-Labs/computer"
 )

@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ewhauser/gbash/commands"
+	"github.com/Lakeshore-Labs/gbash/commands"
 	xdraw "golang.org/x/image/draw"
 
 	"golang.org/x/image/bmp"

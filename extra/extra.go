@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ewhauser/gbash/commands"
+	"github.com/Lakeshore-Labs/gbash/commands"
 )
 
 // Commands is every command in the package.

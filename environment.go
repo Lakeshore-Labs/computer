@@ -10,9 +10,9 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/ewhauser/gbash"
-	gbfs "github.com/ewhauser/gbash/fs"
-	"github.com/ewhauser/gbash/policy"
+	"github.com/Lakeshore-Labs/gbash"
+	gbfs "github.com/Lakeshore-Labs/gbash/fs"
+	"github.com/Lakeshore-Labs/gbash/policy"
 )
 
 // An Environment is the computer as the place an agent harness's own tools act: shell commands, and files, under

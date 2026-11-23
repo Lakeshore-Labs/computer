@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ewhauser/gbash"
-	"github.com/ewhauser/gbash/policy"
+	"github.com/Lakeshore-Labs/gbash"
+	"github.com/Lakeshore-Labs/gbash/policy"
 )
 
 // The interface pi-durable-go declares for a session's sandbox, which an Environment is to satisfy as it stands.

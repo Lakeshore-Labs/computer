@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ewhauser/gbash"
+	"github.com/Lakeshore-Labs/gbash"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"github.com/Lakeshore-Labs/computer/tools"

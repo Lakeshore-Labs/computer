@@ -18,8 +18,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ewhauser/gbash/commands"
-	"github.com/ewhauser/gbash/policy"
+	"github.com/Lakeshore-Labs/gbash/commands"
+	"github.com/Lakeshore-Labs/gbash/policy"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
