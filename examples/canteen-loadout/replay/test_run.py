@@ -14,7 +14,7 @@ SCRIPT = Path(__file__).with_name("run.py")
 
 
 class ReplayTest(unittest.TestCase):
-    def replay(self, accepted=None, stop_exit=0, structured=False):
+    def replay(self, accepted=None, stop_exit=0, structured=False, missing_parquet=False):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
@@ -27,7 +27,8 @@ class ReplayTest(unittest.TestCase):
             if any(str(arg).endswith("/prepare.py") for arg in cmd):
                 (cluster / "pg.env").write_text("PGHOST=/test\nPGPORT=1234\n")
                 (cluster / "pgdata").mkdir()
-                (cluster / "loaded.parquet").touch()
+                if not missing_parquet:
+                    (cluster / "loaded.parquet").touch()
             elif cmd[0] == "computer":
                 for db, query, rejection in (
                     ("postgres", "DELETE FROM orders", "cannot execute DELETE in a read-only transaction"),
@@ -50,9 +51,10 @@ class ReplayTest(unittest.TestCase):
         args = [str(SCRIPT), "--support", str(root), "--pywasi", str(root), "--out", str(output)]
         with patch.object(sys, "argv", args), patch("tempfile.mkdtemp", return_value=str(cluster)), \
                 patch("subprocess.run", side_effect=program), redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()), \
-                self.assertRaises(SystemExit) as exit:
+                self.assertRaises(FileNotFoundError if missing_parquet else SystemExit) as exit:
             runpy.run_path(str(SCRIPT), run_name="__main__")
-        return exit.exception.code, json.loads((output / "receipt.json").read_text()), cluster
+        code = getattr(exit.exception, "code", None)
+        return code, json.loads((output / "receipt.json").read_text()), cluster
 
     def test_accepted_write_fails_the_replay(self):
         for db in ("postgres", "duckdb"):
@@ -65,6 +67,10 @@ class ReplayTest(unittest.TestCase):
         code, receipt, _ = self.replay(structured=True)
         self.assertEqual(code, 0)
         self.assertTrue(receipt["pass"])
+
+    def test_failed_last_export_records_failure(self):
+        _, receipt, _ = self.replay(missing_parquet=True)
+        self.assertFalse(receipt["pass"])
 
     def test_unconfirmed_shutdown_preserves_cluster(self):
         for failure in (1, OSError("pg_ctl unavailable")):

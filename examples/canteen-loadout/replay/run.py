@@ -61,9 +61,9 @@ try:
     assert g.returncode == 0, g.stderr
     v = subprocess.run(["uv", "run", "--offline", "--python", "3.13", "--no-project", "--with", "pyarrow==" + PYARROW, "python", "-I", str(here / "verify.py"), str(run), a.pgbin, str(out / "independent-verify.json")], capture_output=True, text=True)
     rec["steps"].append({"name": "independent verify (psql + pyarrow)", "exit": v.returncode, "stdout": v.stdout, "stderr": clean(v.stderr)})
-    ok = writes_rejected and v.returncode == 0
     for f in ("transfers.csv", "balance.json"): shutil.copy(run / "work" / f, out / f)
     shutil.copy(run / "loaded.parquet", out / "loaded.parquet")
+    ok = writes_rejected and v.returncode == 0
 finally:
     try:
         stop = step("stop PostgreSQL", [f"{a.pgbin}/pg_ctl", "-D", str(run / "pgdata"), "-m", "fast", "-w", "stop"])
