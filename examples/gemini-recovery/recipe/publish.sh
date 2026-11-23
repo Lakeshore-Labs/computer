@@ -7,7 +7,8 @@ trap 'rm -f "$stage"' EXIT
   jq -cse 'select(length == 1) | .[0] | select(
     .passed == true and
     [.events[].step] == ["opened","packing","interrupted","reopened","finished"] and
-    all(.events[]; (.elapsed_s | type) == "number") and
+    all(.events[]; (.elapsed_s | type) == "number" and
+      ((.terminal_events // []) | type == "array" and all(.[]; type == "string"))) and
     (.events[0].child_process | type) == "number" and (.events[1].in_progress | type) == "string" and
     (.events[1].replay_markers | type) == "number" and (.events[2].exit | type) == "number" and
     (.events[2].terminal_events | type) == "array" and (.events[3].child_process | type) == "number" and
