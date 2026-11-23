@@ -1,8 +1,8 @@
 # Offline exhibit index
 
-242 exhibits · 705 files · 22,819,866 bytes
+249 exhibits · 742 files · 37,937,760 bytes
 
-Archive SHA-256: `e943106e2c13295aa294c1299ec3ebd7ba3ef70b49310bb411b0783455db32f2`
+Archive SHA-256: `d0aadbc9c935af00c3fd78ffbf37e91cb5c775bd9c015ffb5cf185f2a6a23a10`
 
 The paths below are relative to the extracted archive. Public replay links open on GitHub.
 
@@ -10,6 +10,7 @@ The paths below are relative to the extracted archive. Public replay links open 
 
 - **Ask Gemini for a stage manager’s change brief** — Native Gemini reads two synthetic cue sheets through Computer and writes a structured comparison plus a brief. Independent checks confirm the largest increase and decrease. · `cases/stage-manager.html`
 - **Build a tide record over time** — Each Computer shell run appends readings from three NOAA stations to a persistent mount. Another Computer opens those captures read-only and uses WASI Python and SQLite to build this time series. · `cases/tides.html`
+- **Change a museum print order before it reaches the queue** — WASI Python imposed four A6 cards on each A4 sheet. Only the amended PDF reached the virtual IPP queue. Independent raster comparisons identified every artwork and the retained spool matched the guest output. · `cases/print-run.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/78)
 - **Compare four Great Lakes satellite scenes offline** — Computer fetched four dated NASA GIBS scenes and bundled them into a single offline viewer. Select dates and slide the divider across the same geographic frame. · `cases/lakes.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/27)
 - **Compare six temperatures from two ERA5 chunks** — Computer read pinned Zarr metadata and two hourly chunks for southern England. Its guest decompressed 341 cells per hour. The London grid point rose from 23.5 to 36.5 degrees Celsius between 06:00 and 15:00 UTC on 19 July 2022. · `cases/heatwave.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/60)
 - **Compare the same satellite file across two clouds** — An allowlisted shell reads a NOAA object from Amazon S3 and Google Cloud Storage. The guest computes a checksum for each copy. An independent host read compares all bytes. A third shell call reads a public blob on Azure. · `cases/cloud.html`
@@ -31,18 +32,23 @@ The paths below are relative to the extracted archive. Public replay links open 
 - **Listen to Pacific water levels at three stations** — Computer turns each saved NOAA height into a timed note and embeds three WAV recordings, charts and readings in one HTML file. An independent waveform check measures the pitch of every note. · `cases/tide-sound.html`
 - **Measure how much of a file reaches Gemini** — An actual filesystem MCP supplied the same CSV to two clients. A fixed query in Computer selected the matching row. Gemini returned the same answer with 13,338 and 55 prompt tokens on the largest input. · `cases/prompt.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/21)
 - **Play one score on flute or B-flat clarinet** — Two Computer shells share one compiled WASI command. It writes MusicXML and MIDI for each instrument. Select notes on the engraved parts, listen to the shared concert melody and keep either part. · `cases/rehearsal.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/53)
+- **Prepare three museum souvenirs with the official Ruby client** — The client reads the museum’s source records, writes an order and edits the next two. Computer issues the SVGs, librsvg renders the proofs, and Ruby packs the results for three visitors. · `cases/ruby-docent.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/82)
 - **Print a dispatch sheet or open the workbook** — WASI Python produced a one-page PDF and an Excel workbook with formulas and a chart. Computer reopened the packet and rendered the printed page. · `cases/packet.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/12)
 - **Print six illustrated Computer workflows on one page** — Computer wrote an A4 landscape PDF with six real screenshots, eight links and a vector QR. Poppler rendered the page and Apple Vision decoded the printed code from that raster. · `cases/pocket-guide.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/68)
 - **Read four moons of Jupiter offline** — A guest joins Wikidata MCP records with JPL radii and a NASA spacecraft photograph. Download the resulting three-chapter EPUB and read it in your own reader. · `cases/moon-book.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/40)
 - **Repair a bakery site and recheck it in Chrome** — A bakery editor publishes a repaired sales board. Computer calls Chrome DevTools MCP, edits the HTML in WASI Python and assembles the report. Chrome independently checks both pages. · `cases/repair.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/22)
 - **Reschedule a short film festival across three clients** — The TypeScript client publishes the program. Java changes the running time. A separate read-only Python client parses the revised calendar. Its two later screenings start 15 minutes later. · `cases/festival.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/30)
-- **Rewind a shift of observations from four collectors** — WASI Python produced a five-table SQLite database and an offline reader. Rewind to a capture time to compare tides, Oslo bike counts, hosted MCP responses and readbacks from an open Computer session. · `cases/observation-shift.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/72)
+- **Rewind a shift of observations from four collectors** — WASI Python produced a five-table SQLite database and an offline reader. Rewind to a capture time to compare tides, Oslo bike counts, hosted MCP responses and readbacks from an open Computer session. The completed shift covers 49 capture times. · `cases/observation-shift.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/72)
 - **Rotate and slice the Oslofjord** — Computer turns 6,399 Norwegian elevation samples into two closed STL solids. Rotate the terrain or move a cut through the outer walls of both models. · `cases/terrain.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/42)
 - **Search 94 cases across three hosted MCP cohorts** — Look up an endpoint, open its actual checks, or inspect the four missed cases. Explore a museum journey and compare the same licensed wildlife records in two catalogs. · `cases/hosted-fieldwork.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/51)
 - **Sit down at the Computer prompt** — A real pseudo-terminal session exercises command and file completion, tool arguments, history, and the working directory. The embedded agent segment uses a deterministic model fixture. · `cases/terminal.html`
 - **Take six satellite colors into a designer’s palette** — The official Swift MCP client uses all four Computer tools. Select a real source pixel and export Adobe, GIMP, CSS or native macOS color files. · `cases/venice-palette.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/49)
+- **Take the twelve chapter cues into a projection booth** — A second Computer downloaded the public screening kit and verified its digest before writing a 572-byte cue sheet. An independent ffprobe read both MP4 files and matched every title and start time to the millisecond. · `cases/projection-cues.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/87)
+- **Take two narrated films and the interactive map to a screening** — Two independent Computer runs assembled the same 16-file screening kit. Both films play from disk, and an independent reader compared each original with its source. · `cases/screening-room.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/86)
+- **Trace 23 interfaces to the work Computer actually performed** — Choose a client, upstream server, store or receiving application. Each view identifies Computer’s job, links the result to a real capture and downloads the original evidence bytes. · `cases/integration-map.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/83)
 - **Try two edits to the same timetable** — A Go application supplies a read-only base and a writable memory layer per Computer. An edit at noon and an edit in the evening coexist. Each shell sees its own schedule. · `cases/plans.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/19)
 - **Turn a tool result into a browser artifact** — DuckDB MCP aggregates synthetic orders. Computer passes the result into a local dashboard. Playwright MCP operates the browser and captures the dashboard. The host assembles eleven real browser captures into an animation. · `cases/browser.html`
+- **Watch six Computer files arrive in working applications** — An 82-second film follows a visitor’s postcard, virtual print job, updated lesson, recovered radio cue, lunch order and a book-club amendment. It includes the real recovered audio, English narration and captions. · `cases/working-files-film.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/81)
 - **Watch six Computer workflows in 79 seconds** — Follow the ferry records, satellite windows, native colors, terrain, wardrobe and original score. Each chapter links a visible result to Computer or the independent tool that produced it. · `cases/field-film.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/62)
 - **Write an A6 museum postcard in a browser MCP client** — A visitor issued one painting, changed the order and downloaded both signed-off SVGs. Another official client read the same memory-backed desk, verified the source and rendered the exact phone download. · `cases/postcard-press.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/76)
 
@@ -59,6 +65,7 @@ The paths below are relative to the extracted archive. Public replay links open 
 - **Pipe a script, inputs and deadlines through Computer** — The CLI reads a script on stdin, passes process arguments, preserves exit codes and applies call timeout limits. A Go host exercises the public package surface. · `cases/stream-input.html`
 - **Read the field guide from an MCP client** — The first published field guide is an offline stdio MCP. Computer searches it and retrieves the bakery score and image. A Python client reads the exact dispatch PDF as an MCP resource. · `cases/guide-server.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/25)
 - **Set the number of Python workers** — The same bounded pipeline runs with one, two and unlimited Python workers. Recorded guest timestamps show which programs overlap. A separate finite loop exercises the opt-in runtime mode. · `cases/python-workers.html`
+- **Take a guide asset into a native application** — The official client downloaded all 216 embedded assets from the 242-exhibit guide and compared their 28,760,154 uncompressed bytes with the ZIP. Native readers opened the saved deck and database. · `cases/asset-downloads.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/79)
 - **Watch an agent compact a conversation** — The real embedded agent calls a deterministic loopback model. A smaller context triggers a recorded summarization request. A resumed turn reads the resulting summary. · `cases/agent-context.html`
 
 ## Recipes
@@ -164,14 +171,14 @@ The paths below are relative to the extracted archive. Public replay links open 
 
 - **A Warsaw sky-watching brief: tonight verdict, moon, sun and a Geminids countdown, checked against NOAA solar maths and a synodic-month model** — kosmos.info.pl and time.memoryapi.org, with independent arithmetic · `cases/hosted2-story-warsaw-sky-night.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **Ask Cohere docs about the Rerank endpoint** — Cohere docs · `cases/hosted-cohere-docs.html`
-- **Audit the coverage of a national census subset** — kwekuanansi.ai ghana-numbers · `cases/hosted4-ghana-census-total.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
-- **Check two arithmetic claims** — humanitieshelpinghands.com · `cases/hosted4-humanities-check-claim.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
+- **Audit the coverage of a national census subset** — kwekuanansi.ai ghana-numbers · `cases/hosted4-ghana-census-total.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
+- **Check two arithmetic claims** — humanitieshelpinghands.com · `cases/hosted4-humanities-check-claim.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
 - **Code-mode API call: Bitcoin and Ethereum USD price** — CoinGecko · `cases/hosted-coingecko-price.html`
 - **Community earthquake MCP result cross-checked against the USGS public GeoJSON feed (curl through Computer)** — olyport earthquake MCP vs USGS · `cases/hosted-usgs-cross-check.html`
-- **Compare Greater Accra with the published census** — kwekuanansi.ai ghana-numbers · `cases/hosted4-ghana-census-accra.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
-- **Convert a ten-digit ISBN to ISBN-13** — eancheck.com · `cases/hosted4-eancheck-isbn.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
-- **Count days across a leap February** — apished.com · `cases/hosted4-apished-datediff.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
-- **Detect the missing spring-forward hour** — gumballtools timezone-truth · `cases/hosted4-gumball-spring-gap.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
+- **Compare Greater Accra with the published census** — kwekuanansi.ai ghana-numbers · `cases/hosted4-ghana-census-accra.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
+- **Convert a ten-digit ISBN to ISBN-13** — eancheck.com · `cases/hosted4-eancheck-isbn.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
+- **Count days across a leap February** — apished.com · `cases/hosted4-apished-datediff.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
+- **Detect the missing spring-forward hour** — gumballtools timezone-truth · `cases/hosted4-gumball-spring-gap.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
 - **Find a provider/model record, then fetch the matching doc page by tool** — LiteLLM docs · `cases/hosted2-docs-litellm.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **Find a Seurat painting, read its record and licence, compare creator and holding museum with Wikidata (the Art Institute's own API sat behind a Cloudflare challenge)** — Artnap (public-domain art from museum open access) · `cases/hosted3-artnap-seurat.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/51)
 - **Find an identifiable museum object (Mona Lisa), read its record, check the creator against Wikidata** — Wikioo art encyclopedia · `cases/hosted2-wikioo-mona-lisa.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
@@ -179,7 +186,7 @@ The paths below are relative to the extracted archive. Public replay links open 
 - **Find R2 presigned-URL documentation** — Cloudflare Docs · `cases/hosted-cloudflare-docs-search.html`
 - **Find Rynok Square stop, read the tram route, check the stop lies at Lviv's Wikidata coordinates** — Lviv public transport (city timetable-api, api.lad.lviv.ua) · `cases/hosted3-lviv-transit-rynok.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/51)
 - **Find the Federal Constitution (RS 101) and read Article 8** — Fedlex connector (Swiss federal law) · `cases/hosted2-fedlex-bundesverfassung.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
-- **Find the weekday of 1 March 2028** — apished.com · `cases/hosted4-apished-dayofweek.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
+- **Find the weekday of 1 March 2028** — apished.com · `cases/hosted4-apished-dayofweek.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
 - **First-name statistics: profile vs side-by-side comparison must agree** — Swiss first names (BFS, opendata.ch) · `cases/hosted2-opendata-ch-vornamen.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **Full-text search of Swiss Federal Supreme Court decisions** — opencaselaw.ch (Swiss court decisions) · `cases/hosted-opencaselaw-ch.html`
 - **hf-fs: list trending models as structured JSON** — Hugging Face · `cases/hosted-huggingface-trending-fs.html`
@@ -188,24 +195,24 @@ The paths below are relative to the extracted archive. Public replay links open 
 - **Lint a Svelte 5 component with the official autofixer, then verify the fix** — Svelte · `cases/hosted-svelte-autofixer.html`
 - **Lisbon July climate vs Open-Meteo ERA5 reanalysis for 2021-2023** — hexplace.org (European town climate) · `cases/hosted2-hexplace-lisbon-climate.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **List AWS regions and check regional availability** — AWS Knowledge MCP · `cases/hosted-aws-knowledge-regions.html`
-- **List the available mathematics programs** — lemmapark.com · `cases/hosted4-lemmapark-programs.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
-- **List up to three poems without publishing** — developerpoetry.com · `cases/hosted4-developerpoetry-read.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
+- **List the available mathematics programs** — lemmapark.com · `cases/hosted4-lemmapark-programs.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
+- **List up to three poems without publishing** — developerpoetry.com · `cases/hosted4-developerpoetry-read.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
 - **Look up a named artist, fetch the full record, compare with Wikidata** — Artlist (Czech contemporary art archive) · `cases/hosted2-artlist-kolar.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **Look up 银行, check its pinyin against Wiktionary and its documented Tatoeba sentence source** — Dengdeng Chinese-English dictionary (CC-CEDICT, Tatoeba) · `cases/hosted3-dengdeng-yinhang.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/51)
 - **Match Iberian lynx on the GBIF backbone and count its occurrence records, compare with api.gbif.org** — GBIF hosted MCP (cyanheads server on caseyjhand.com) · `cases/hosted3-gbif-lynx.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/51)
 - **Meteor-shower calendar: Geminids maximum must be 13/14 December and fall inside the active window** — kosmos.info.pl (Night sky in Poland) · `cases/hosted2-kosmos-meteor-showers.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **Museum opening hours: Louvre closed Tuesday, open Wednesday, weekdays checked independently** — travel.art · `cases/hosted2-travel-art-louvre-hours.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
-- **Name the seven notes of E-flat Dorian** — MusoKit · `cases/hosted4-musokit-eb-dorian.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
+- **Name the seven notes of E-flat Dorian** — MusoKit · `cases/hosted4-musokit-eb-dorian.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
 - **Portugal 2027 public holidays vs independently computed Easter-based dates** — 50nos.pt public holidays · `cases/hosted2-pt-feriados-2027.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **Read a plenary roll-call, compare totals and split with HowTheyVote and arithmetic** — EP Votes (European Parliament open data) · `cases/hosted3-epvotes-proxy-voting.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/51)
-- **Read two dates from the Korean holiday calendar** — OpenCurrent kr-calendar · `cases/hosted4-opencurrent-kr-holidays.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
+- **Read two dates from the Korean holiday calendar** — OpenCurrent kr-calendar · `cases/hosted4-opencurrent-kr-holidays.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
 - **Read-only flight search LHR to BCN on 15 Mar 2027** — Kiwi.com · `cases/hosted-kiwi-flights.html`
 - **Regex-grep and search the Bun docs** — Bun docs · `cases/hosted-bun-docs.html`
 - **Resolve a library id then query its docs (two-call chain)** — Context7 (Upstash) · `cases/hosted-context7-resolve-query.html`
 - **Resolve a Met Museum object URL, then compare every field with The Met's own Open Access API** — STILL open-art credits · `cases/hosted2-still-met-van-gogh.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **Resolve Fulton County, GA to its FIPS code and verify against the US Census county code list** — Georgia Civic Data (education & census) · `cases/hosted2-georgia-civic-fulton.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **Resolve Iberian lynx, read its conservation listing and research-grade count, compare with iNaturalist REST and Wikidata** — iNaturalist hosted MCP (cyanheads server on caseyjhand.com) · `cases/hosted3-inat-lynx.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/51)
-- **Resolve the two New York 01:30 instants** — gumballtools timezone-truth · `cases/hosted4-gumball-fallback-hour.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
+- **Resolve the two New York 01:30 instants** — gumballtools timezone-truth · `cases/hosted4-gumball-fallback-hour.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
 - **Search a museum collection, open one exhibit, check the accession record and the primary source** — The Agent Museum · `cases/hosted2-agentmuseum-exhibit.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **Search docs for “access keys”, then read the top page back** — NEAR docs · `cases/hosted-docs-near.html`
 - **Search docs for “add memories with metadata”, then read the top page back** — Mem0 docs · `cases/hosted-docs-mem0.html`
@@ -260,7 +267,7 @@ The paths below are relative to the extracted archive. Public replay links open 
 - **Semantic item search, then a SPARQL cross-check of the same entity** — Wikidata (Wikimedia) · `cases/hosted-wikidata-search-sparql.html`
 - **Sunrise/sunset for Warsaw on the 2026 solstice vs an independent NOAA solar calculation** — time.memoryapi.org · `cases/hosted2-memoryapi-warsaw-sun.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **The same Iberian lynx sightings in two catalogs: iNaturalist open-licence research-grade vs the iNaturalist dataset inside GBIF** — STORY: iNaturalist + GBIF (hosted MCP) + Wikidata · `cases/hosted3-story-lynx-two-catalogs.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/51)
-- **Transpose a four-chord progression** — MusoKit · `cases/hosted4-musokit-transpose.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/75)
+- **Transpose a four-chord progression** — MusoKit · `cases/hosted4-musokit-transpose.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/80)
 - **Verify Good Friday rows for 2021-2025 against independently computed Easter dates** — publicdata.au (Australian government open data) · `cases/hosted2-publicdata-au-holidays.html` · [Replay](https://github.com/Lakeshore-Labs/computer/pull/48)
 - **Web search with highlights (keyless endpoint)** — Exa · `cases/hosted-exa-web-search.html`
 - **Wikipedia summary through a community MCP** — Faceabot (Wikipedia wrapper) · `cases/hosted-faceabot-wikipedia.html`

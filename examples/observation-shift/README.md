@@ -6,7 +6,7 @@
 
 Move the clock to a capture time. Each panel uses the latest data it had received by that time. The first capture has water levels only. Later captures add bike availability at three Oslo stations, timed responses from three hosted MCPs, and a Computer client that stayed connected while tide files arrived.
 
-The interim sample runs from 16:55:13 to 23:25:17 UTC on November 22, 2026. It contains 14 tide batches, 10 Oslo feeds, 12 hosted operations and eight readbacks by one persistent client. A fresh read-only Computer independently verified each resulting file. The four collectors started at different times. The database retains collection and source timestamps where available.
+The completed sample runs from 16:55:13 UTC on November 22 to 00:39:18 UTC on November 23, 2026. It contains 18 tide batches (54 readings at 51 distinct station and observation-time pairs), 14 Oslo feeds, 18 hosted operations and 11 readbacks by one persistent client. Chromium checked 196 time and group-size combinations against SQLite. A fresh read-only Computer independently verified every persistent-client readback. The four collectors started at different times. The database retains collection and source timestamps where available.
 
 ## What Computer did
 

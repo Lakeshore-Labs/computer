@@ -4,7 +4,7 @@
 
 [Download the field guide](computer-field-guide.zip?raw=true) · [Browse the full exhibit index on GitHub](catalog.md)
 
-Extract the ZIP and open `index.html` in a browser. Search for a tool, file store or task. Each exhibit includes an observed result and its evidence. The six-chapter film, engraved rehearsal score, wardrobe recount, satellite pixel reader, GIS models and other exhibits work from disk. Public replay and attribution links open external sites.
+Extract the ZIP and open `index.html` in a browser. Search for a tool, file store or task. Each exhibit includes an observed result and its evidence. Both narrated films, the interactive integration map, the engraved rehearsal score, wardrobe recount, satellite pixel reader, GIS models and other exhibits work from disk. Public replay and attribution links open external sites.
 
 | Try this | What Computer does | What another interface verifies |
 | --- | --- | --- |
@@ -28,9 +28,11 @@ Extract the ZIP and open `index.html` in a browser. Search for a tool, file stor
 | Try two dispatch plans | Runs the same shell over separate writable in-memory filesystems with a shared base. | A Go host reopens and compares all three schedules. |
 | Read a changing blob selection | Mounts a Go Cloud bucket backed by the official local Azure Blob emulator. | Independent rclone reads match the files used for both thumbnails. |
 
+For a shorter presentation, the [screening kit](../screening-kit/) includes both chapter players, English captions, the interactive integration map and the print guide.
+
 ## What the numbers count
 
-The November 22, 2026 edition contains 242 exhibits. There are 37 featured stories, 12 runtime chapters, 48 command recipes, 30 storage exhibits, 12 local MCP workflows and 103 successful hosted cases. Several exhibits can exercise the same client, API or filesystem.
+The November 22, 2026 edition contains 249 exhibits. There are 43 featured stories, 13 runtime chapters, 48 command recipes, 30 storage exhibits, 12 local MCP workflows and 103 successful hosted cases. Several exhibits can exercise the same client, API or filesystem.
 
 The four-cohort hosted survey contains 107 final cases, of which 103 passed across 95 distinct endpoint URLs. Thirty-three passing cases share a documentation search-and-read pattern. Repeated tools or shared operators do not establish independent protocol implementations. The archive’s scope page and the [four-cohort fieldwork](../hosted-fieldwork/cohort4/) describe the checks, four final misses and capture times. The catalog also records the editor’s native confirmation prompt and partial storage results.
 

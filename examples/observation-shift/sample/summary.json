@@ -1,14 +1,14 @@
 {
-  "times": 36,
-  "tide_rows": 42,
-  "tide_batches": 14,
-  "bike_feeds": 10,
-  "hosted_operations": 12,
-  "hosted_passed": 12,
-  "persistent_client_reads": 8,
+  "times": 49,
+  "tide_rows": 54,
+  "tide_batches": 18,
+  "bike_feeds": 14,
+  "hosted_operations": 18,
+  "hosted_passed": 18,
+  "persistent_client_reads": 11,
   "oldest": "2026-11-22T16:55:13+00:00",
-  "newest": "2026-11-22T23:25:17+00:00",
+  "newest": "2026-11-23T00:39:18+00:00",
   "one_persistent_session": true,
-  "capture_ended": false,
-  "source_sha256": "d8581861a184a616d626c6d4d7230f5da4fec95ff99a631a2d971a21107fab8d"
+  "capture_ended": true,
+  "source_sha256": "e4d99daad47ad99a8ecfe70de04e9b868b1c23fa261de90555a1a523eae0de5b"
 }

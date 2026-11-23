@@ -12,10 +12,10 @@
     "guide://observations/great-lakes",
     "guide://observations/pacific-listening-room"
   ],
-  "exact_downloadable_assets": 216,
-  "downloadable_asset_bytes": 28760154,
+  "exact_downloadable_assets": 239,
+  "downloadable_asset_bytes": 45436953,
   "exhibit_template": "guide://exhibits/{id}",
-  "exact_exhibit_receipts": 242,
+  "exact_exhibit_receipts": 249,
   "documents": {
     "guide://festival/original": {
       "bytes": 679,
@@ -30,8 +30,8 @@
       "sha256": "ebeef91aff90dbd13f00efe4ac5d98f6e10a316e8de1c37f1b2b94a845e5a319"
     },
     "guide://observations/pacific-listening-room": {
-      "bytes": 995078,
-      "sha256": "42ab5090018b0f190d0886781f9066f7f30c748ec2623188e3c0a5ecba1968f3"
+      "bytes": 1169365,
+      "sha256": "a6e9590c0ffd7db3a3833b8ff5163c805c42227f604e4db10b94a305c1e81c4d"
     }
   },
   "outer_tools": [
