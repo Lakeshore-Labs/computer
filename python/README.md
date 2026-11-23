@@ -25,7 +25,7 @@ From an empty working directory, on Linux or macOS:
 
 It writes `downloads/`, `src/`, `build/` and `dist/` there, and takes a few minutes. It needs `curl`, `tar`,
 `unzip`, `make` and a C compiler; on Debian or Ubuntu, `apt-get install build-essential ca-certificates curl unzip`.
-It downloads wasi-sdk 33, CPython 3.15.2, zlib 1.3.1, SQLite 3.46.1 and the packages in `requirements.txt`, each
+It downloads wasi-sdk 33, CPython 3.15.2, zlib 1.3.1, SQLite 3.54.1 and the packages in `requirements.txt`, each
 pinned to a version and checked against a SHA-256 written in the script or in that file.
 
 ## What differs from a stock CPython build
