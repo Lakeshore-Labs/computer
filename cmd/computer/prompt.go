@@ -9,9 +9,12 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"syscall"
+	"time"
 
 	"github.com/ewhauser/gbash"
+	"golang.org/x/sys/unix"
 	"golang.org/x/term"
 
 	"github.com/Lakeshore-Labs/computer"
@@ -22,16 +25,63 @@ import (
 // variables carry from one to the next. A program that serves a terminal to a browser, such as gotty or ttyd, makes
 // this the computer's web terminal.
 func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
-	fd := int(os.Stdin.Fd())
+	fd := syscall.Stdin // os.Stdin.Fd would put a non-blocking terminal into blocking mode
+	// SIGTERM and SIGHUP put the terminal back and then end the process as they would have, without waiting for the
+	// command that is running. One the parent had this process ignore, as nohup does, stays ignored. They are caught
+	// before the terminal is changed, so there is no moment when one would leave it changed.
+	ended := make(chan os.Signal, 1)
+	for _, sig := range []os.Signal{syscall.SIGTERM, syscall.SIGHUP} {
+		if !signal.Ignored(sig) {
+			signal.Notify(ended, sig)
+		}
+	}
+	// mu is held while the terminal's settings change. Putting them back for good takes it and keeps it, so nothing
+	// changes them after.
+	var mu sync.Mutex
+	mu.Lock()
 	cooked, err := term.MakeRaw(fd)
+	if err != nil {
+		signal.Stop(ended)
+		return err
+	}
+	// Each reader of the terminal below has its own duplicate of the descriptor in non-blocking mode, which Go's
+	// poller manages, so gbash's read deadlines work and closing one ends a read under way without taking input.
+	// The mode belongs to the terminal, which the program that started this one shares, so the mode it had is put
+	// back, as are the terminal's line settings.
+	flags, err := unix.FcntlInt(uintptr(fd), unix.F_GETFL, 0)
+	if err != nil {
+		_ = term.Restore(fd, cooked)
+		signal.Stop(ended)
+		return err
+	}
+	err = syscall.SetNonblock(fd, true)
+	restore := func() {
+		mu.Lock()
+		_ = syscall.SetNonblock(fd, flags&syscall.O_NONBLOCK != 0)
+		_ = term.Restore(fd, cooked)
+	}
+	mu.Unlock()
+	defer func() {
+		restore()
+		signal.Stop(ended)
+	}()
 	if err != nil {
 		return err
 	}
-	defer func() { _ = term.Restore(fd, cooked) }()
+	go func() {
+		sig := (<-ended).(syscall.Signal)
+		restore()
+		signal.Reset(syscall.SIGTERM, syscall.SIGHUP)
+		_ = syscall.Kill(os.Getpid(), sig)
+	}()
+	input, err := openTerminal(fd)
+	if err != nil {
+		return err
+	}
 	t := term.NewTerminal(struct {
 		io.Reader
 		io.Writer
-	}{os.Stdin, os.Stdout}, "")
+	}{input, os.Stdout}, "")
 	resize := func() {
 		if w, h, err := term.GetSize(fd); err == nil {
 			_ = t.SetSize(w, h)
@@ -76,23 +126,61 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 			continue
 		}
 		// The command has the terminal as it was, so its output is laid out as it expects, and Ctrl-C stops it.
+		mu.Lock()
 		_ = term.Restore(fd, cooked)
+		mu.Unlock()
 		running, stop := signal.NotifyContext(ctx, os.Interrupt)
-		res, err := c.Exec(running, &gbash.ExecutionRequest{Script: line, Stdin: os.Stdin, Stdout: os.Stdout, Stderr: os.Stderr})
+		// The command reads the terminal through its own descriptor. Ctrl-C sets a deadline that ends a read under way,
+		// as gbash's read builtin expects, and closing the descriptor when the command ends stops one a program left
+		// behind, so neither takes what is typed next, which is the prompt's.
+		in, err := openTerminal(fd)
+		if err != nil {
+			stop()
+			return err
+		}
+		stopInterrupt := context.AfterFunc(running, func() { _ = in.SetReadDeadline(time.Now()) })
+		res, err := c.Exec(running, &gbash.ExecutionRequest{Script: line, Stdin: terminal{in}, Stdout: os.Stdout, Stderr: os.Stderr})
+		interrupted := running.Err() != nil
+		stopInterrupt()
+		_ = in.Close()
 		stop()
-		if _, rawErr := term.MakeRaw(fd); rawErr != nil {
+		mu.Lock()
+		_, rawErr := term.MakeRaw(fd)
+		mu.Unlock()
+		if rawErr != nil {
 			return rawErr
 		}
 		switch {
 		case err != nil:
-			fmt.Fprintf(t, "computer: %v\n", err)
-		case res.ShellExited:
+			if !interrupted {
+				fmt.Fprintf(t, "computer: %v\n", err)
+			}
+		case res.ShellExited && !interrupted:
 			return nil
 		case res.FinalEnv["PWD"] != "":
 			cwd = res.FinalEnv["PWD"]
 		}
 	}
 }
+
+// openTerminal is a new descriptor for the terminal fd, as a file Go's poller manages, since fd is in non-blocking mode.
+func openTerminal(fd int) (*os.File, error) {
+	d, err := syscall.Dup(fd)
+	if err != nil {
+		return nil, err
+	}
+	syscall.CloseOnExec(d)
+	return os.NewFile(uintptr(d), "/dev/stdin"), nil
+}
+
+// terminal is a command's view of the terminal: gbash's StdinReader, and nothing else of the *os.File. gbash copies a
+// reader without Close or SetReadDeadline through a goroutine that never stops reading. Close does nothing because
+// the prompt closes the file itself, once the command has ended. os.File.Fd would put the terminal into blocking mode.
+type terminal struct{ file *os.File }
+
+func (t terminal) Read(p []byte) (int, error)        { return t.file.Read(p) }
+func (t terminal) Close() error                      { return nil }
+func (t terminal) SetReadDeadline(d time.Time) error { return t.file.SetReadDeadline(d) }
 
 // quote is word as one word of a shell command, whatever it holds.
 func quote(word string) string { return "'" + strings.ReplaceAll(word, "'", `'\''`) + "'" }

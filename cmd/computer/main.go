@@ -264,7 +264,7 @@ func run(ctx context.Context) error {
 	}
 	defer c.Close()
 
-	if *script == "" && flag.NArg() == 0 && term.IsTerminal(int(os.Stdin.Fd())) {
+	if *script == "" && flag.NArg() == 0 && term.IsTerminal(syscall.Stdin) {
 		return prompt(ctx, c, cfg.WorkDir) // which gives an interrupt to the command that is running, and goes on
 	}
 	// An interrupt ends what is running as a deadline would: the agent records its run as aborted, and the
