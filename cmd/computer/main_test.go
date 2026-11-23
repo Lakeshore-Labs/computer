@@ -138,9 +138,13 @@ func TestInterruptReturnsToThePrompt(t *testing.T) {
 	if out, err := exec.Command("go", "build", "-o", binary, ".").CombinedOutput(); err != nil {
 		t.Fatalf("build CLI: %v: %s", err, out)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
-	defer cancel()
-	if out, err := exec.CommandContext(ctx, python, "testdata/interrupt.py", binary, t.TempDir()).CombinedOutput(); err != nil {
-		t.Fatalf("interactive shell: %v: %s", err, out)
+	for _, mode := range []string{"blocking", "nonblocking"} {
+		t.Run(mode, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+			defer cancel()
+			if out, err := exec.CommandContext(ctx, python, "testdata/interrupt.py", binary, t.TempDir(), mode).CombinedOutput(); err != nil {
+				t.Fatalf("interactive shell: %v: %s", err, out)
+			}
+		})
 	}
 }

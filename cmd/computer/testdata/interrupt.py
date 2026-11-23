@@ -9,10 +9,12 @@ import sys
 import termios
 import time
 
-binary, directory = sys.argv[1:]
+binary, directory, mode = sys.argv[1:]
 pid, terminal = pty.fork()
 if pid == 0:
     fcntl.ioctl(0, termios.TIOCSWINSZ, struct.pack('HHHH', 24, 100, 0, 0))
+    if mode == 'nonblocking':
+        os.set_blocking(0, False)
     os.execv(binary, [binary, '-mount', directory + ':/work'])
 
 pending = bytearray()
@@ -36,6 +38,21 @@ def expect(marker):
 
 try:
     expect(b'$ ')
+    if mode == 'nonblocking':
+        os.write(terminal, b'read -t 0.1 x; echo timed-out\r')
+        expect(b'\r\ntimed-out\r\n')
+        expect(b'$ ')
+    os.write(terminal, b'echo waiting; read line\r')
+    expect(b'\r\nwaiting\r\n')
+    time.sleep(0.05)
+    os.write(terminal, b'\x03')
+    expect(b'$ ')
+    os.write(terminal, b'echo taking-one; read -n 1 x; echo took-one; sleep 30\r')
+    expect(b'\r\ntaking-one\r\n')
+    os.write(terminal, b'xecho leftover > /work/unexpected.txt\n')
+    expect(b'took-one\r\n')
+    os.write(terminal, b'\x03')
+    expect(b'$ ')
     os.write(terminal, b"echo ready; sleep 30\r")
     expect(b'\r\nready\r\n')
     os.write(terminal, b'\x03')
@@ -55,6 +72,7 @@ try:
     _, status = os.waitpid(pid, 0)
     pid = None
     assert os.waitstatus_to_exitcode(status) == 0
+    assert not os.path.exists(os.path.join(directory, 'unexpected.txt')), 'canceled input ran as a command'
 finally:
     os.close(terminal)
     if pid is not None:
