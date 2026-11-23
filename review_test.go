@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"testing"
 	"time"
@@ -67,9 +68,12 @@ func TestALinkSwappedInDuringARunLeadsNowhere(t *testing.T) {
 		t.Fatal(err)
 	}
 	// The host swaps the directory d for a link out of the mount, over and over, while a script reads through d.
+	// The test waits for it to stop, or t.TempDir's cleanup races its renames and fails the test.
 	stop := make(chan struct{})
+	var swapper sync.WaitGroup
+	defer swapper.Wait()
 	defer close(stop)
-	go func() {
+	swapper.Go(func() {
 		d, link, aside := filepath.Join(home, "d"), filepath.Join(home, "lnk"), filepath.Join(home, "aside")
 		_ = os.Symlink(outside, link)
 		for {
@@ -83,7 +87,7 @@ func TestALinkSwappedInDuringARunLeadsNowhere(t *testing.T) {
 				_ = os.Rename(aside, d)
 			}
 		}
-	}()
+	})
 	c := newComputer(t, Config{Python: python(t), Mounts: []Mount{{Guest: "/data", Host: home}}})
 	res := exec(t, c, `cd /data; python3 -c "
 import time
