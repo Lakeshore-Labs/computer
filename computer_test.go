@@ -463,3 +463,32 @@ func TestAnEmbeddersFilesAreUnderTheShellsRules(t *testing.T) {
 		t.Fatalf("the shell read %q", got)
 	}
 }
+
+// uploadOnClose is a filesystem whose writable files store their contents only when closed, and fail to.
+type uploadOnClose struct{ afero.Fs }
+
+type failedUpload struct{ afero.File }
+
+func (f failedUpload) Close() error {
+	_ = f.File.Close()
+	return &os.PathError{Op: "close", Path: f.Name(), Err: errors.New("upload failed")}
+}
+
+func (fs uploadOnClose) OpenFile(name string, flag int, perm os.FileMode) (afero.File, error) {
+	f, err := fs.Fs.OpenFile(name, flag, perm)
+	if err != nil || flag&(os.O_WRONLY|os.O_RDWR) == 0 {
+		return f, err
+	}
+	return failedUpload{f}, nil
+}
+
+func TestARedirectReportsAFileThatFailsToClose(t *testing.T) {
+	c := newComputer(t, Config{Mounts: []Mount{{Guest: "/archive", FS: uploadOnClose{afero.NewMemMapFs()}}}})
+	res, err := c.Exec(context.Background(), &gbash.ExecutionRequest{Script: "set -e; echo Sunday > /archive/notice.txt; echo archived"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.ExitCode != 1 || res.Stdout != "" || !strings.Contains(res.Stderr, "upload failed") {
+		t.Errorf("exit %d, stdout %q, stderr %q", res.ExitCode, res.Stdout, res.Stderr)
+	}
+}
