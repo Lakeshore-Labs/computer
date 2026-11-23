@@ -247,7 +247,8 @@ func TestPythonSleeps(t *testing.T) {
 	}
 }
 
-// A sort larger than SQLite's sorter memory, at least 250 pages, spills to a temporary file, which this build cannot create (#28).
+// A sort larger than SQLite's sorter memory, at least 250 pages, used to spill to a temporary file, which WASI
+// cannot create (#28).
 func TestPythonSQLiteSortsMoreThanFitsInMemory(t *testing.T) {
 	c := newComputer(t, Config{Python: python(t)})
 	got := run(t, c, `python3 -c "
