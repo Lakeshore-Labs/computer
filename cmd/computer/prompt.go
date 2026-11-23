@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -9,7 +10,9 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"syscall"
+	"time"
 
 	"github.com/ewhauser/gbash"
 	"golang.org/x/term"
@@ -28,10 +31,11 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 		return err
 	}
 	defer func() { _ = term.Restore(fd, cooked) }()
+	input := &terminalInput{terminalDescriptor: os.Stdin, reader: bufio.NewReader(os.Stdin)}
 	t := term.NewTerminal(struct {
 		io.Reader
 		io.Writer
-	}{os.Stdin, os.Stdout}, "")
+	}{commandInput{input, ctx}, os.Stdout}, "")
 	resize := func() {
 		if w, h, err := term.GetSize(fd); err == nil {
 			_ = t.SetSize(w, h)
@@ -76,17 +80,16 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 			continue
 		}
 		// The command has the terminal as it was, so its output is laid out as it expects, and Ctrl-C stops it.
-		_ = term.Restore(fd, cooked)
 		running, stop := signal.NotifyContext(ctx, os.Interrupt)
-		res, err := c.Exec(running, &gbash.ExecutionRequest{Script: line, Stdin: os.Stdin, Stdout: os.Stdout, Stderr: os.Stderr})
+		_ = term.Restore(fd, cooked)
+		res, err := c.Exec(running, &gbash.ExecutionRequest{Script: line, Stdin: commandInput{input, running}, Stdout: os.Stdout, Stderr: os.Stderr})
 		interrupted := running.Err() != nil
+		_, rawErr := term.MakeRaw(fd)
 		stop()
-		if _, rawErr := term.MakeRaw(fd); rawErr != nil {
+		if rawErr != nil {
 			return rawErr
 		}
 		switch {
-		case ctx.Err() != nil:
-			return ctx.Err()
 		case err != nil:
 			if !interrupted {
 				fmt.Fprintf(t, "computer: %v\n", err)
@@ -96,6 +99,60 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 		case res.FinalEnv["PWD"] != "":
 			cwd = res.FinalEnv["PWD"]
 		}
+	}
+}
+
+// An interrupted terminal read can still receive the next line. Both the command and
+// the prompt use the same pending read so those bytes reach whoever reads next.
+type terminalInput struct {
+	terminalDescriptor
+	mu     sync.Mutex
+	reader *bufio.Reader
+	ready  chan error
+}
+
+// Forward terminal metadata without exposing os.File.WriteTo, which bypasses Read during io.Copy.
+type terminalDescriptor interface {
+	Fd() uintptr
+	Stat() (os.FileInfo, error)
+	SetReadDeadline(time.Time) error
+}
+
+type commandInput struct {
+	*terminalInput
+	ctx context.Context
+}
+
+func (in commandInput) Close() error { return nil } // the prompt owns the terminal
+
+func (in commandInput) Read(p []byte) (int, error) {
+	in.mu.Lock()
+	defer in.mu.Unlock()
+	if err := in.ctx.Err(); err != nil || len(p) == 0 {
+		return 0, err
+	}
+	if in.ready == nil {
+		if in.ctx.Done() == nil || in.reader.Buffered() > 0 {
+			return in.reader.Read(p)
+		}
+		in.ready = make(chan error, 1)
+		go func(ready chan<- error) {
+			_, err := in.reader.Peek(1)
+			ready <- err
+		}(in.ready)
+	}
+	select {
+	case <-in.ctx.Done():
+		return 0, in.ctx.Err()
+	case err := <-in.ready:
+		in.ready = nil
+		if err != nil {
+			return 0, err
+		}
+		if err := in.ctx.Err(); err != nil {
+			return 0, err
+		}
+		return in.reader.Read(p)
 	}
 }
 

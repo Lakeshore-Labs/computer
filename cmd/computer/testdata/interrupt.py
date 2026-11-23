@@ -40,6 +40,14 @@ try:
     expect(b'\r\nready\r\n')
     os.write(terminal, b'\x03')
     expect(b'$ ')
+    # cat reads directly; pr copies stdin with Go's io.Copy.
+    for command, output in [(b'cat -n', b'1\tfirst line\r\n'), (b'pr', b'first line\r\n' * 2)]:
+        os.write(terminal, b'echo reading; ' + command + b'\r')
+        expect(b'\r\nreading\r\n')
+        os.write(terminal, b'first line\n')
+        expect(output)
+        os.write(terminal, b'\x03')
+        expect(b'$ ')
     os.write(terminal, b'echo resumed\r')
     expect(b'\r\nresumed\r\n')
     expect(b'$ ')
