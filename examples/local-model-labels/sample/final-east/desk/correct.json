@@ -1,0 +1,8 @@
+{
+  "mode": "correct",
+  "decision": "corrected from source",
+  "source_label": "EAST-42 COPPER",
+  "draft": "Shelf: EAST-42\nPickup ribbon: COPPER",
+  "queue_file_exists": true,
+  "zpl_sha256": "554354fce9931d0823e309fef77c470cfca7414d3fe3ddabc68ecb4f1a59c0fb"
+}

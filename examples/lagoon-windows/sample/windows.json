@@ -1,0 +1,80 @@
+{
+  "width": 10980,
+  "height": 10980,
+  "tile_width": 1024,
+  "tile_height": 1024,
+  "tile_columns": 11,
+  "windows": [
+    {
+      "id": "san-marco",
+      "name": "San Marco",
+      "lon": 12.338,
+      "lat": 45.434,
+      "east_m": 761089.6986593677,
+      "north_m": 5036585.628163036,
+      "x": 5984,
+      "y": 6213,
+      "width": 256,
+      "height": 256,
+      "tiles": [
+        71,
+        72
+      ],
+      "rgb_sha256": "a2969b4eb939a5de236217ec0923f87f03cf5694860a77751e57218ff3ff88a9",
+      "png_sha256": "e04d0dcf407156d0435bd09d995800272368bd9d8299c997f702adef22929c2f"
+    },
+    {
+      "id": "burano",
+      "name": "Burano",
+      "lon": 12.4165,
+      "lat": 45.4854,
+      "east_m": 766986.6809175008,
+      "north_m": 5042553.966645449,
+      "x": 6574,
+      "y": 5616,
+      "width": 256,
+      "height": 256,
+      "tiles": [
+        61
+      ],
+      "rgb_sha256": "ada105d6a5722969b2499c6f9779cd54f9cd4984a23d341e3fda480ce8933e92",
+      "png_sha256": "17ef08ea3aacc239f1eca12f083377a4f3393ec3df4123adf5d37f5dbd836d45"
+    },
+    {
+      "id": "lido",
+      "name": "Lido",
+      "lon": 12.3711,
+      "lat": 45.4158,
+      "east_m": 763763.4899112928,
+      "north_m": 5034671.851762064,
+      "x": 6252,
+      "y": 6404,
+      "width": 256,
+      "height": 256,
+      "tiles": [
+        72
+      ],
+      "rgb_sha256": "e74368341e33f1d2ffd2c23bb60e8a4f8b254726e6a7590a39f2c19808e43f46",
+      "png_sha256": "c58c6ba4f633b3e3e1508c79ae7f2c6d2ae60d15d9d6e40cb14aedd741b27d97"
+    }
+  ],
+  "tiles": {
+    "61": {
+      "start": 82346709,
+      "size": 1995232,
+      "sha256": "ab34d78351ed1cce283bd987e48f29e370d0daca58f3bbc9dc75117dd6e73bb4"
+    },
+    "71": {
+      "start": 90240562,
+      "size": 988871,
+      "sha256": "2961e3169479e94fa35f4911026fc162e877650b6a518f116eef67bb60fb88d2"
+    },
+    "72": {
+      "start": 91229433,
+      "size": 1725253,
+      "sha256": "3fa7c53522f33f01d001e5df405455350f4aabbeefd4fbcae7d1d5b09a3e581b"
+    }
+  },
+  "image_range_bytes": 4725740,
+  "full_cog_bytes": 129604455
+}

@@ -1,0 +1,11 @@
+{
+  "tools": [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ],
+  "read": "Evening ferry: Pier",
+  "checksum": "6bbd577c977608ad96e0135d73fc5aabf691b6f8e78c5b152f397154630ac9e8  handoff.txt",
+  "pass": true
+}

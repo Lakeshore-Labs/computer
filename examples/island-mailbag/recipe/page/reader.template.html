@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Island mailbag · where and when to meet</title>
+<style>
+:root{
+  --sand:#f3ead8; --paper:#fffaf0; --ink:#17262b; --mute:#566a6f; --teal:#0e4f5c; --sea:#1b7f8c; --foam:#d7ebe9;
+  --orange:#c8431b; --orange-bg:#fde7dc; --green:#216b43; --green-bg:#dff1e5; --stitch:#b8a886; --line:#d9ccb0;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--sand);color:var(--ink);font:16px/1.5 var(--sans)}
+a{color:var(--teal)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.top{background:var(--teal);color:#f5f1e6;padding:14px 0}
+.top .wrap{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;justify-content:space-between}
+.brand{font:700 19px var(--serif);letter-spacing:.2px}
+.top small{font-size:13px;opacity:.9}
+h1,h2,h3{font-family:var(--serif);line-height:1.15;margin:0}
+h2{font-size:25px;margin-bottom:6px}
+.lede{color:var(--mute);margin:0 0 16px;max-width:70ch}
+section{padding:30px 0;border-top:2px dashed var(--stitch)}
+section:first-of-type{border-top:0}
+.kicker{font:700 13px var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--sea);margin:0 0 8px}
+
+/* hero */
+#hero{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:start;padding-top:34px}
+#where{font-size:clamp(34px,5.2vw,56px);letter-spacing:-.5px}
+.when{font:700 clamp(24px,3.4vw,34px) var(--serif);margin:10px 0 0;color:var(--teal)}
+.when .t{background:var(--orange-bg);color:var(--orange);padding:0 8px;border-radius:6px;white-space:nowrap}
+.was{margin:8px 0 0;color:var(--mute)}
+.was s{color:var(--orange)}
+.seg{display:inline-flex;margin:22px 0 10px;border:2px solid var(--teal);border-radius:999px;overflow:hidden;background:var(--paper)}
+.seg button{border:0;background:transparent;padding:10px 20px;cursor:pointer;font-weight:700;min-height:44px}
+.seg button[aria-pressed=true]{background:var(--teal);color:#fff}
+.note{margin:0;color:var(--mute);max-width:56ch}
+.note b{color:var(--ink)}
+.tag{margin:0;position:relative;background:var(--paper);border:2px solid var(--stitch);border-radius:16px 16px 16px 16px;padding:26px 24px 20px 56px;box-shadow:0 2px 0 #cdbf9f,0 10px 22px -12px rgba(23,38,43,.45)}
+.tag:before{content:"";position:absolute;left:18px;top:24px;width:20px;height:20px;border-radius:50%;background:var(--sand);border:2px solid var(--stitch);box-shadow:inset 0 2px 3px rgba(0,0,0,.2)}
+.tag:after{content:"";position:absolute;left:27px;top:-18px;width:3px;height:44px;background:var(--stitch);transform:rotate(8deg);border-radius:2px}
+.tag h3{font-size:20px}
+.tag .sub{color:var(--mute);font-size:14px;margin:2px 0 12px}
+.tag dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 12px}
+.tag dt{font-weight:700;color:var(--mute);font-size:14px}
+.tag dd{margin:0}
+.tag dd.hot{background:var(--orange-bg);color:var(--orange);font-weight:700;border-radius:5px;padding:0 6px}
+.tag ol{margin:10px 0 12px;padding-left:20px}
+.tag .stamp{display:inline-block;border:2px solid var(--orange);color:var(--orange);font:700 13px var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border-radius:5px;transform:rotate(-2deg);margin-top:8px}
+.tag .old{border-color:var(--mute);color:var(--mute)}
+.fine{font-size:13px;color:var(--mute);margin:12px 0 0}
+
+/* pockets */
+.pockets{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+.pocket{background:var(--paper);border:2px dashed var(--stitch);border-radius:14px;padding:14px 16px;position:relative}
+.pocket h3{font-size:18px}
+.badge{display:inline-block;font:700 12px var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.b-new{background:var(--foam);color:var(--teal)}
+.b-reused{background:var(--green-bg);color:var(--green)}
+.b-changed{background:var(--orange-bg);color:var(--orange)}
+.pocket p{margin:6px 0 0;font-size:14px}
+.cid{font:13px/1.45 var(--mono);word-break:break-all;color:var(--ink)}
+.pocket details{margin-top:8px;font-size:13px}
+.pocket summary{cursor:pointer;color:var(--teal);font-weight:600;min-height:28px;padding:3px 0}
+.pocket dl{margin:6px 0 0;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:13px}
+.pocket dt{color:var(--mute)}.pocket dd{margin:0;word-break:break-all}
+
+/* saved */
+.bars{display:grid;gap:12px;margin:16px 0}
+.bar{display:grid;grid-template-columns:230px 1fr;gap:14px;align-items:center}
+.bar .lab{font-size:14px}.bar .lab b{display:block;font-size:15px}
+.track{background:#e8dec6;border-radius:8px;height:34px;position:relative;overflow:hidden}
+.fill{height:100%;border-radius:8px;display:flex;align-items:center;padding:0 10px;font:700 13px var(--sans);color:#fff;white-space:nowrap;min-width:max-content}
+.fill.sea{background:var(--sea)}.fill.ghost{background:repeating-linear-gradient(45deg,#c9bd9f,#c9bd9f 8px,#d8ccb0 8px,#d8ccb0 16px);color:var(--ink)}
+.fill.tiny{background:var(--orange)}
+.ribbon{background:var(--green-bg);border:2px solid var(--green);color:#143f28;border-radius:12px;padding:12px 16px;font-size:16px}
+.ribbon b{font-family:var(--serif);font-size:19px}
+
+/* handoff */
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}
+.steps button{border:2px solid var(--teal);background:var(--paper);border-radius:999px;min-width:44px;min-height:44px;padding:6px 14px;cursor:pointer;font-weight:700}
+.steps button[aria-current=step]{background:var(--teal);color:#fff}
+.steps .nav{border-color:var(--stitch)}
+.stepcard{background:var(--paper);border:2px solid var(--stitch);border-radius:14px;padding:14px 18px;margin-bottom:14px}
+.stepcard h3{font-size:20px}
+.stepcard p{margin:6px 0 0}
+.stage{display:grid;grid-template-columns:1fr 210px 1fr;gap:14px;align-items:stretch}
+.store{background:var(--paper);border:2px solid var(--teal);border-radius:14px;padding:12px 14px}
+.store h3{font-size:18px;color:var(--teal)}
+.store .meta{font-size:13px;color:var(--mute);margin:2px 0 10px}
+.chips{display:grid;gap:7px}
+.chip{border:2px solid var(--sea);background:var(--foam);border-radius:10px;padding:5px 9px;font-size:13px;display:flex;justify-content:space-between;gap:8px;align-items:baseline;transition:opacity .25s}
+.chip .cid{font-size:12px}
+.chip.absent{opacity:.28;border-style:dashed;background:transparent}
+.chip.card2,.chip.root2{border-color:var(--orange);background:var(--orange-bg)}
+.chip.book{border-color:var(--green);background:var(--green-bg)}
+.chip .n{font-weight:700}
+.count{font:700 13px var(--sans);color:var(--teal);margin-top:8px}
+.boat{border:2px dashed var(--sea);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;justify-content:center;background:repeating-linear-gradient(90deg,transparent 0 11px,rgba(27,127,140,.08) 11px 12px)}
+.boat h3{font-size:15px;color:var(--sea);text-align:center}
+.file{background:var(--paper);border:2px solid var(--sea);border-radius:10px;padding:6px 8px;font-size:13px;text-align:center}
+.file .arrow{font-size:20px;line-height:1;color:var(--sea);display:block}
+.file code{font:12px var(--mono);word-break:break-all}
+.file.ghost{border-color:var(--stitch);border-style:dashed;color:var(--mute);background:transparent}
+.file.ghost .arrow{color:var(--orange)}
+.empty{color:var(--mute);font-size:13px;text-align:center}
+
+/* checked */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.tile{background:var(--paper);border:2px solid var(--stitch);border-radius:12px;padding:12px 14px}
+.tile b{font:700 28px var(--serif);display:block;color:var(--green)}
+.tile span{font-size:14px}
+.verify{background:var(--paper);border:2px solid var(--teal);border-radius:14px;padding:16px 18px;margin:14px 0}
+.btn{background:var(--teal);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;min-height:44px}
+.verify label.btn{display:inline-flex;align-items:center;background:var(--paper);color:var(--teal);border:2px solid var(--teal)}
+.verify input[type=file]{position:absolute;opacity:0;width:1px;height:1px}
+.verify input[type=file]:focus-visible+label{outline:3px solid var(--orange);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#vout{margin:12px 0 0;display:grid;gap:6px}
+#vout .l{font-size:14px;border-left:5px solid var(--stitch);padding:3px 10px;background:#fff}
+#vout .l.ok{border-color:var(--green)}#vout .l.bad{border-color:var(--orange)}
+#vout code{font:12.5px var(--mono);word-break:break-all}
+details.all{margin-top:10px}
+details.all summary{cursor:pointer;font-weight:700;color:var(--teal);min-height:32px}
+details.all ul{margin:8px 0 0;padding:0;list-style:none;columns:2;column-gap:24px}
+details.all li{font-size:13.5px;padding:2px 0 2px 22px;position:relative;break-inside:avoid}
+details.all li:before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700}
+details.all li.f:before{content:"✗";color:var(--orange)}
+
+/* format */
+.two{display:grid;grid-template-columns:1.2fr .8fr;gap:24px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{width:34%;color:var(--mute);font-weight:600}
+td code,.mono{font:12.5px var(--mono);word-break:break-word}
+.links a{display:inline-block;margin:3px 12px 3px 0;font-size:14px;padding:3px 0;min-height:24px}
+footer{padding:26px 0 40px;border-top:2px dashed var(--stitch);font-size:14px;color:var(--mute)}
+@media (max-width:860px){
+  #hero,.two{grid-template-columns:1fr}
+  .pockets{grid-template-columns:1fr}
+  .stage{grid-template-columns:1fr}
+  .tiles{grid-template-columns:1fr 1fr}
+  .bar{grid-template-columns:1fr;gap:6px}
+  details.all ul{columns:1}
+  .tag{padding-left:50px}
+}
+@media (max-width:420px){ .wrap{padding:0 14px} .seg button{padding:10px 14px} .tiles{grid-template-columns:1fr} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <span class="brand">Island mailbag</span>
+  <small>Gull Island Library is made up for this exhibit · all data synthetic or public · everything ran on one Mac, offline</small>
+</div></header>
+
+<noscript><div class="wrap"><p>This page needs JavaScript to switch editions and verify hashes. The files it describes are linked at the bottom.</p></div></noscript>
+
+<main class="wrap">
+
+<section id="hero" aria-labelledby="where">
+  <div>
+    <p class="kicker" id="kick"></p>
+    <h1 id="where"></h1>
+    <p class="when" id="when"></p>
+    <p class="was" id="was"></p>
+    <div class="seg" role="group" aria-label="Choose an edition of the bag">
+      <button type="button" data-ed="1" aria-pressed="false">Edition 1</button>
+      <button type="button" data-ed="2" aria-pressed="true">Edition 2</button>
+    </div>
+    <p class="note" id="heroNote"></p>
+  </div>
+  <figure class="tag" aria-live="polite"><div id="card"></div></figure>
+</section>
+
+<section id="bag" aria-labelledby="bagH">
+  <h2 id="bagH">What is in the bag</h2>
+  <p class="lede" id="bagLede"></p>
+  <div class="pockets" id="pockets"></div>
+</section>
+
+<section id="saved" aria-labelledby="savedH">
+  <h2 id="savedH">The one book transfer that was saved</h2>
+  <p class="lede">Store B already held the book from edition 1, so the amended edition was sent as two blocks. The third bar is what a full resend would have weighed; it was written only to measure, never sent.</p>
+  <div class="bars" id="bars"></div>
+  <div class="ribbon" id="ribbon"></div>
+</section>
+
+<section id="handoff" aria-labelledby="handH">
+  <h2 id="handH">How the bag crossed between two stores</h2>
+  <p class="lede">Store A (island, Node, flat files) and Store B (mainland, Python, SQLite) share no directory, no code and no process (they sit on the same Mac, in different folders). Only three files crossed. Step through it.</p>
+  <div class="steps" id="steps" role="group" aria-label="Steps of the handoff"></div>
+  <div class="stepcard" id="stepcard"></div>
+  <div class="stage">
+    <div class="store" id="storeA"></div>
+    <div class="boat" id="boat"></div>
+    <div class="store" id="storeB"></div>
+  </div>
+</section>
+
+<p class="note"><a href="car/edition-1.car" download>Save the original CAR</a> · <a href="car/edition-2.delta.car" download>Save the amendment CAR</a></p>
+
+<section id="checked" aria-labelledby="chkH">
+  <h2 id="chkH">What was checked, and by whom</h2>
+  <p class="lede">Each layer was read back by something that did not write it.</p>
+  <div class="tiles" id="tiles"></div>
+  <div class="verify">
+    <h3>Check it yourself, in this browser</h3>
+    <p class="note">This page recomputes SHA-256 with your browser's own crypto and compares it with the digest inside each CID. Nothing is uploaded; the book is read from your disk only if you choose it.</p>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="vcards" type="button">Verify both cards</button>
+      <input type="file" id="vbook" accept=".epub,application/epub+zip">
+      <label class="btn" for="vbook">Check a copy of the book…</label>
+    </div>
+    <div id="vout" aria-live="polite"></div>
+  </div>
+  <details class="all"><summary id="allSum"></summary><ul id="allList"></ul></details>
+</section>
+
+<section id="format" aria-labelledby="fmtH">
+  <h2 id="fmtH">Exact format and credits</h2>
+  <div class="two">
+    <div>
+      <table id="fmt"></table>
+    </div>
+    <div>
+      <h3>Credits</h3>
+      <p>The book is the pocket astronomy EPUB <i>Four moons of Jupiter</i> published in Lakeshore-Labs/computer, commit <span class="mono" id="commit"></span>. It carries the NASA/JPL/DLR photograph PIA00601, JPL's planetary satellite table and Wikidata entities.</p>
+      <p>CAR and CID tooling: <a href="https://github.com/ipld/js-car">@ipld/car</a>, <a href="https://github.com/multiformats/js-multiformats">multiformats</a>, <a href="https://github.com/ipld/js-dag-cbor">@ipld/dag-cbor</a>, <a href="https://github.com/ipfs/js-stores/tree/main/packages/blockstore-fs">blockstore-fs</a> (writer, Store A); <a href="https://github.com/jbn/carbox">carbox</a> and <a href="https://github.com/MarshalX/python-libipld">libipld</a> (independent reader, Store B). Specs: <a href="https://ipld.io/specs/transport/car/carv1/">CARv1</a>, <a href="https://github.com/multiformats/cid">CID</a>, <a href="https://ipld.io/specs/codecs/dag-cbor/spec/">DAG-CBOR</a>. Full list with versions and licenses: <a id="credLink" href="SOURCES.md">SOURCES.md</a>.</p>
+    </div>
+  </div>
+  <p class="links" id="links"></p>
+</section>
+</main>
+
+<footer><div class="wrap">
+  No public IPFS node, gateway, pinning service or swarm was contacted: the CAR files are ordinary local files, and this page makes no network requests. Read <a href="README.md">README.md</a> for the replay commands and what was not done.
+</div></footer>
+
+<script>
+"use strict";
+const D = /*__DATA__*/null;
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === "class") e.className = v; else if (k === "text") e.textContent = v; else e.setAttribute(k, v); }
+  for (const k of kids) e.append(k);
+  return e;
+};
+const fmt = (n) => n.toLocaleString("en-US");
+const short = (cid) => cid.slice(0, 12) + "…" + cid.slice(-6);
+const link = (path, text, dl) => { const a = el("a", { href: D.base + path, text }); if (dl) a.setAttribute("download", ""); return a; };
+const byRole = (role, ed) => D.blocks.find((b) => b.role === role && (b.edition === ed || b.edition === 0));
+const BLOCK = { book: byRole("book", 0), card1: byRole("card", 1), card2: byRole("card", 2), root1: byRole("manifest", 1), root2: byRole("manifest", 2) };
+const NAMES = { book: "Book", card1: "Card 1", card2: "Card 2", root1: "Root 1", root2: "Root 2" };
+let ed = location.hash === "#edition-1" ? 1 : 2;
+let step = 5;
+
+/* ---------- hero and card ---------- */
+function renderCard(text, editionNo) {
+  const box = $("#card"); box.textContent = "";
+  const lines = text.replace(/\n$/, "").split("\n");
+  let dl = null, ol = null;
+  const flush = () => { dl = null; ol = null; };
+  for (const ln of lines) {
+    let m;
+    if (ln.startsWith("# ")) { flush(); box.append(el("h3", { text: ln.slice(2) })); }
+    else if (ln === "") { flush(); }
+    else if ((m = ln.match(/^(Edition|Book|Inside|Where|When|Changed): (.*)$/))) {
+      if (!dl) { dl = el("dl"); box.append(dl); }
+      const hot = (m[1] === "When" && editionNo === 2) || m[1] === "Changed";
+      dl.append(el("dt", { text: m[1] }), el("dd", { class: hot ? "hot" : "", text: m[2] }));
+    } else if ((m = ln.match(/^\d+\. (.*)$/))) {
+      if (!ol) { ol = el("ol"); box.append(ol); }
+      ol.append(el("li", { text: m[1] }));
+    } else if (/^Before we meet/.test(ln)) { flush(); box.append(el("p", { class: "sub", text: ln })); }
+    else if (box.children.length === 1) { box.append(el("p", { class: "sub", text: ln })); }
+    else { flush(); box.append(el("p", { text: ln })); }
+  }
+  box.append(el("span", { class: "stamp" + (editionNo === 1 ? " old" : ""), text: editionNo === 1 ? "Edition 1 · superseded" : "Edition 2 · latest" }));
+}
+function renderHero() {
+  const d = D.decision, e = D.editions[ed];
+  const card = ed === 1 ? { where: d.was_where, when: d.was_when } : { where: d.where, when: d.when };
+  $("#kick").textContent = "Take-home astronomy bag · edition " + ed + (ed === 2 ? " (latest)" : " (superseded)");
+  $("#where").textContent = card.where;
+  const when = $("#when"); when.textContent = "";
+  const [day, time] = [card.when.replace(/, [0-9:]+$/, ""), card.when.match(/[0-9:]+$/)[0]];
+  when.append(day + ", ", el("span", { class: "t", text: time }));
+  const was = $("#was"); was.textContent = "";
+  if (ed === 2) was.append("Moved from ", el("s", { text: d.was_when.match(/[0-9:]+$/)[0] }), ". Same place. Only the time changed.");
+  else was.append("This was the first plan. Edition 2 moves the time to ", el("b", { text: d.when.match(/[0-9:]+$/)[0] }), ".");
+  $("#heroNote").innerHTML = ed === 2
+    ? "<b>Use edition 2.</b> It was restored by the receiving store from verified blocks and read in a new read-only Computer guest."
+    : "<b>Do not use this one.</b> It is kept because the handoff sent it first; edition 2 supersedes it.";
+  renderCard(e.card_text, ed);
+  document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.ed === ed)));
+}
+
+/* ---------- pockets ---------- */
+function renderPockets() {
+  const cards = { 1: BLOCK.card1, 2: BLOCK.card2 }, roots = { 1: BLOCK.root1, 2: BLOCK.root2 };
+  const items = [
+    { name: "Book", file: "four-moons.epub", b: BLOCK.book, status: ed === 2 ? "reused" : "new", blurb: "Four moons of Jupiter, the original EPUB, unmodified." },
+    { name: "Reading card", file: "reading-card.md", b: cards[ed], status: ed === 2 ? "changed" : "new", blurb: ed === 2 ? "Written by amending edition 1's card: one time changed." : "Written in a Computer guest from facts read out of the book." },
+    { name: "Manifest", file: "DAG-CBOR root", b: roots[ed], status: ed === 2 ? "changed" : "new", blurb: "Links the two files by CID. This block is the CAR's root." },
+  ];
+  $("#bagLede").textContent = ed === 2
+    ? "Edition 2 has the same book block as edition 1. Its card and its root are new blocks."
+    : "Edition 1 is three new blocks: the book, a card and the manifest that links them.";
+  const wrap = $("#pockets"); wrap.textContent = "";
+  for (const it of items) {
+    const label = { new: "New", reused: "Reused", changed: "Changed" }[it.status];
+    const p = el("div", { class: "pocket" },
+      el("h3", { text: it.name }, ), el("p", { text: it.blurb }),
+      el("p", { class: "cid", text: it.b.cid }),
+      el("p", { text: fmt(it.b.bytes) + " bytes · " + it.b.codec }));
+    p.querySelector("h3").append(el("span", { class: "badge b-" + it.status, text: label }));
+    const arrival = it.b.arrived_in ? it.b.arrived_in + ", block " + it.b.arrival_seq + " in Store B's arrival log" : "";
+    p.append(el("details", {}, el("summary", { text: "Where it came from" }),
+      el("dl", {}, el("dt", { text: "file" }), el("dd", { text: it.file }), el("dt", { text: "arrived" }), el("dd", { text: arrival }),
+        el("dt", { text: "sent in" }), el("dd", { text: it.b.role === "book" ? "edition-1.car only; edition 2 did not send it again" : (it.b.edition === 1 ? "edition-1.car" : "edition-2.delta.car") }))));
+    wrap.append(p);
+  }
+}
+
+/* ---------- saved ---------- */
+function renderSaved() {
+  const c = D.cars, max = c.standalone.bytes;
+  const rows = [
+    { lab: "Edition 1, sent", sub: "edition-1.car · " + c.one.blocks + " blocks", v: c.one.bytes, cls: "sea" },
+    { lab: "Edition 2, sent", sub: "edition-2.delta.car · " + c.delta.blocks + " blocks", v: c.delta.bytes, cls: "tiny" },
+    { lab: "Edition 2, if sent whole", sub: "never sent · measured · " + c.standalone.blocks + " blocks", v: c.standalone.bytes, cls: "ghost" },
+  ];
+  const box = $("#bars"); box.textContent = "";
+  for (const r of rows) {
+    const fill = el("div", { class: "fill " + r.cls, style: "width:" + Math.max(r.v / max * 100, 0.4) + "%", text: r.v / max < 0.1 ? "" : fmt(r.v) + " bytes" });
+    const track = el("div", { class: "track" }, fill);
+    const row = el("div", { class: "bar" }, el("div", { class: "lab" }, el("b", { text: r.lab }), document.createTextNode(r.sub)), el("div", {}, track));
+    if (r.v / max < 0.1) row.lastChild.append(el("div", { class: "fine", style: "margin:4px 0 0", text: fmt(r.v) + " bytes" }));
+    box.append(row);
+  }
+  const framing = D.saved_bytes - D.book.bytes;
+  $("#ribbon").innerHTML = "<b>" + fmt(D.saved_bytes) + " bytes did not travel again.</b> That is the book (" + fmt(D.book.bytes) + " bytes) plus " + framing + " bytes of CAR framing for its section. Across both CARs " + D.counts.sent + " blocks crossed, all different; one block, the book, is shared by both editions.";
+}
+
+/* ---------- handoff ---------- */
+const STEPS = () => {
+  const c = D.cars, d = D.decision;
+  return [
+    { t: "Computer packs edition 1", d: "A guest of Computer mounts the original book read-only, writes the reading card from facts in the book and copies the book into edition 1. Nothing is stored or sent yet.", a: [], b: [], boat: [], log: ["receipts/edition-1.guest.json", "digests the Computer guest reported for edition 1"] },
+    { t: "Store A seals it", d: "Store A (Node, blockstore-fs) turns the two files into raw blocks, links them from a DAG-CBOR manifest and writes edition-1.car with the manifest as root.", a: ["book", "card1", "root1"], b: [], boat: [{ f: "edition-1.car", dir: "→", n: fmt(c.one.bytes) + " B · " + c.one.blocks + " blocks" }] , log: ["receipts/send-1.json", "sender report"] },
+    { t: "Store B verifies and keeps it", d: "Store B (Python, SQLite) reads the CAR with a different library, re-hashes all three blocks, then stores them in one transaction. It restores edition 1 from its own blocks.", a: ["book", "card1", "root1"], b: ["book", "card1", "root1"], boat: [{ f: "edition-1.car", dir: "→", n: "arrived" }], log: ["receipts/ingest-1.json", "Store B ingest report"] },
+    { t: "Computer amends the time", d: "A second guest mounts edition 1 read-only, changes one line (time " + d.was_when.match(/[0-9:]+$/)[0] + " to " + d.when.match(/[0-9:]+$/)[0] + ") and writes edition 2. Store A takes the new card and root. Store B answers with the three CIDs it holds.", a: ["book", "card1", "root1", "card2", "root2"], b: ["book", "card1", "root1"], boat: [{ f: "receiver-have-after-1.txt", dir: "←", n: "3 CIDs held by Store B" }], log: ["receipts/edition-2.guest.json", "digests the Computer guest reported for edition 2"] },
+    { t: "Only what is new crosses", d: "Store A leaves out every block Store B said it holds. The book stays home; the delta CAR carries the new card and the new root.", a: ["book", "card1", "root1", "card2", "root2"], b: ["book", "card1", "root1"], boat: [{ f: "edition-2.delta.car", dir: "→", n: fmt(c.delta.bytes) + " B · " + c.delta.blocks + " blocks" }, { ghost: true, f: "the book block", n: "not sent: " + fmt(D.book.bytes) + " B already in Store B" }], log: ["receipts/send-2.json", "delta report"] },
+    { t: "Restore, then read in a new read-only guest", d: "Store B refuses a delta with one flipped byte, accepts the real one, and rebuilds edition 2 using its own copy of the book. A new Computer guest, with the editions and Store B mounted read-only, reads both, checks every hash and reports where and when to meet.", a: ["book", "card1", "root1", "card2", "root2"], b: ["book", "card1", "root1", "card2", "root2"], boat: [{ f: "edition-2.delta.car", dir: "→", n: "arrived" }], log: ["receipts/decision.json", "the new guest's decision and its own checks"] },
+  ];
+};
+function renderSteps() {
+  const S = STEPS(), s = S[step - 1];
+  const nav = $("#steps"); nav.textContent = "";
+  nav.append(el("button", { class: "nav", type: "button", id: "prev", "aria-label": "Previous step", text: "←" }));
+  S.forEach((_, i) => { const b = el("button", { type: "button", "data-step": i + 1, text: String(i + 1) }); if (i + 1 === step) b.setAttribute("aria-current", "step"); nav.append(b); });
+  nav.append(el("button", { class: "nav", type: "button", id: "next", "aria-label": "Next step", text: "→" }));
+  const card = $("#stepcard"); card.textContent = "";
+  card.append(el("h3", { text: step + ". " + s.t }), el("p", { text: s.d }));
+  const lp = el("p", { class: "fine" }); lp.append("Evidence: ", link(s.log[0], s.log[1])); card.append(lp);
+  const chips = (have) => { const box = el("div", { class: "chips" }); for (const k of ["book", "card1", "root1", "card2", "root2"]) {
+    const b = BLOCK[k], on = have.includes(k);
+    box.append(el("div", { class: "chip " + k + (on ? "" : " absent") }, el("span", { class: "n", text: NAMES[k] }), el("span", { class: "cid", text: short(b.cid) }), el("span", { text: fmt(b.bytes) + " B" }))); }
+    return box; };
+  const store = (id, h, meta, have) => { const n = $(id); n.textContent = ""; n.append(el("h3", { text: h }), el("div", { class: "meta", text: meta }), chips(have), el("div", { class: "count", text: have.length + " of 5 blocks" })); };
+  store("#storeA", "Store A · island", "Node · blockstore-fs · one flat file per block", s.a);
+  store("#storeB", "Store B · mainland", "Python · SQLite · one row per block", s.b);
+  const boat = $("#boat"); boat.textContent = ""; boat.append(el("h3", { text: "The boat" }));
+  if (!s.boat.length) boat.append(el("div", { class: "empty", text: "nothing has crossed yet" }));
+  for (const f of s.boat) boat.append(el("div", { class: "file" + (f.ghost ? " ghost" : "") }, el("span", { class: "arrow", text: f.ghost ? "✕" : f.dir }), el("code", { text: f.f }), el("div", { text: f.n })));
+}
+
+/* ---------- checked ---------- */
+function renderChecked() {
+  const C = D.checks;
+  const t = [
+    [C.passed + "/" + C.total, "independent checks passed, re-read from bytes on disk"],
+    ["2 of 2", "CARs read identically by the JavaScript and the Python decoders"],
+    [C.guest.passed + "/" + C.guest.total, "checks passed inside the new read-only Computer guest"],
+    ["4 of 4", "writes refused in read-only guests; 1 flipped byte refused by Store B"],
+  ];
+  const box = $("#tiles"); box.textContent = "";
+  for (const [b, s] of t) box.append(el("div", { class: "tile" }, el("b", { text: b }), el("span", { text: s })));
+  $("#allSum").textContent = "All " + C.total + " checks (" + C.list.filter((x) => x.p).length + " pass)";
+  const ul = $("#allList"); ul.textContent = "";
+  for (const x of C.list) ul.append(el("li", { class: x.p ? "" : "f", text: x.t }));
+}
+
+/* ---------- browser verification ---------- */
+const B32 = "abcdefghijklmnopqrstuvwxyz234567";
+function cidDigestHex(cid) {            // 'b' + base32; bytes are 0x01, codec, 0x12, 0x20, then 32 digest bytes
+  let bits = 0, val = 0; const out = [];
+  for (const ch of cid.slice(1)) { val = (val << 5) | B32.indexOf(ch); bits += 5; if (bits >= 8) { out.push((val >>> (bits - 8)) & 255); bits -= 8; } }
+  if (out[0] !== 1 || out[2] !== 0x12 || out[3] !== 0x20) throw new Error("not a CIDv1 with sha2-256");
+  return out.slice(4, 36).map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+async function sha256Hex(bytes) {
+  const d = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(d)].map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+function vline(ok, html) { const l = el("div", { class: "l " + (ok ? "ok" : "bad") }); l.innerHTML = html; $("#vout").append(l); }
+async function verifyCards() {
+  $("#vout").textContent = "";
+  for (const n of ["1", "2"]) {
+    const e = D.editions[n], got = await sha256Hex(new TextEncoder().encode(e.card_text)), want = cidDigestHex(e.card_cid);
+    vline(got === want, (got === want ? "✓ " : "✗ ") + "Edition " + n + " card (" + fmt(new TextEncoder().encode(e.card_text).length) + " bytes): SHA-256 computed here <code>" + got.slice(0, 16) + "…</code> " + (got === want ? "equals" : "DIFFERS FROM") + " the digest inside <code>" + short(e.card_cid) + "</code>");
+  }
+}
+async function verifyBook(file) {
+  const bytes = new Uint8Array(await file.arrayBuffer()), got = await sha256Hex(bytes), want = cidDigestHex(D.book.cid), ok = got === want;
+  vline(ok, (ok ? "✓ " : "✗ ") + "“" + file.name.replace(/[<>&]/g, "") + "” (" + fmt(bytes.length) + " bytes): SHA-256 <code>" + got.slice(0, 16) + "…</code> " + (ok ? "equals" : "DIFFERS FROM") + " the digest inside the book's CID <code>" + short(D.book.cid) + "</code>");
+}
+
+/* ---------- format, links ---------- */
+function renderFormat() {
+  const rows = [
+    ["Transport", "CARv1: a DAG-CBOR header {version: 1, roots: [root CID]}, then one section per block: varint(length of CID + data), the CID bytes, the block bytes"],
+    ["CIDs", "CIDv1, written in multibase base32 lowercase (prefix b); multihash sha2-256 (0x12, 32 bytes)"],
+    ["File blocks", "codec raw (0x55): bafkrei… The whole file is one block, no chunking"],
+    ["Manifest", "codec dag-cbor (0x71): bafyrei… A map {schema, library, edition, files: [{name, mediaType, size, link}]}; each link is a CID (CBOR tag 42)"],
+    ["Edition 1 CAR", D.cars.one.blocks + " blocks, root first: manifest, card, book · " + fmt(D.cars.one.bytes) + " bytes"],
+    ["Edition 2 CAR", D.cars.delta.blocks + " blocks: manifest, card · " + fmt(D.cars.delta.bytes) + " bytes. The book is a link to a block Store B already held"],
+    ["Root CIDs", "<span class='mono'>" + D.editions[1].root + "</span><br><span class='mono'>" + D.editions[2].root + "</span>"],
+    ["Book CID", "<span class='mono'>" + D.book.cid + "</span> (sha256 " + D.book.sha256.slice(0, 12) + "…)"],
+  ];
+  const t = $("#fmt"); t.textContent = "";
+  for (const [k, v] of rows) { const tr = el("tr", {}, el("th", { text: k })); const td = el("td"); td.innerHTML = v; tr.append(td); t.append(tr); }
+  $("#commit").textContent = D.book.commit;
+  const L = $("#links"); L.textContent = "";
+  const files = [["car/edition-1.car", "edition-1.car", 1], ["car/edition-2.delta.car", "edition-2.delta.car", 1],
+    ["receipts/edition-1.manifest.json", "edition 1 manifest (JSON)"], ["receipts/edition-2.manifest.json", "edition 2 manifest (JSON)"],
+    ["receipts/checks.json", "checks.json (measured numbers and all checks)"], ["receipts/store-b-dump.json", "Store B contents"],
+    ["receipts/libipld-decode-car-probe.txt", "libipld probe"], ["receipts/decision.json", "new-guest decision"]];
+  for (const [p, t2, dl] of files) L.append(link(p, t2, dl));
+  $("#credLink").setAttribute("href", "SOURCES.md");
+}
+
+/* ---------- wiring ---------- */
+document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => { ed = +b.dataset.ed; history.replaceState(null, "", "#edition-" + ed); renderHero(); renderPockets(); }));
+$("#steps").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id === "prev") step = Math.max(1, step - 1); else if (b.id === "next") step = Math.min(6, step + 1); else step = +b.dataset.step;
+  renderSteps();
+  const cur = $("#steps [aria-current=step]"); if (cur && document.activeElement === document.body) cur.focus();
+});
+$("#vcards").addEventListener("click", () => verifyCards().catch((e) => vline(false, "✗ " + e.message)));
+$("#vbook").addEventListener("change", (e) => { if (e.target.files[0]) { verifyBook(e.target.files[0]).catch((x) => vline(false, "✗ " + x.message)); } });
+renderHero(); renderPockets(); renderSaved(); renderSteps(); renderChecked(); renderFormat();
+window.__reader = { D, setEdition: (n) => { ed = n; renderHero(); renderPockets(); } };
+</script>
+</body>
+</html>

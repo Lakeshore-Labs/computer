@@ -1,0 +1,33 @@
+{
+  "before": {
+    "file": "index.html",
+    "sha256": "e798bd618329f2f68ced6f72b68a59dd4d965e9dd8928636db1ee51ed07f69c4",
+    "lighthouse": "13.6.0",
+    "scores": {
+      "Accessibility": 100,
+      "Best Practices": 96,
+      "SEO": 90,
+      "Agentic Browsing": 100
+    },
+    "checks": {
+      "meta-description": 0,
+      "errors-in-console": 0
+    }
+  },
+  "after": {
+    "file": "index-v2.html",
+    "sha256": "6fac64111595c937af24a5cdae1cb69f980a9c7dc0ae65e6952871ceedfcfcc3",
+    "lighthouse": "13.6.0",
+    "scores": {
+      "Accessibility": 100,
+      "Best Practices": 100,
+      "SEO": 100,
+      "Agentic Browsing": 100
+    },
+    "checks": {
+      "meta-description": 1,
+      "errors-in-console": 1
+    }
+  },
+  "orders": 4800
+}

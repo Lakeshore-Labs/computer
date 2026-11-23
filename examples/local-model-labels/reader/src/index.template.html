@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wardrobe pickup print desk</title>
+  <style>
+/*CSS*/
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Wardrobe pickup print desk</h1>
+    <p>Saved jobs pass an inspection gate. A draft that matches the source is accepted; otherwise it is held and then corrected. This page only previews and downloads the ZPL file; it never prints.</p>
+  </header>
+  <main>
+    <section aria-label="Ticket printer">
+      <div class="desk">
+        <div class="slot" aria-hidden="true"></div>
+        <div class="paper" id="paper">
+          <div class="stripe" id="stripe"></div>
+          <div class="stamp" id="stamp" aria-hidden="true"></div>
+          <div id="labelbox"></div>
+        </div>
+      </div>
+      <p class="safe">No physical printing happens here. A queue file is evidence from the desk gate; the button only saves that file to your computer.</p>
+    </section>
+    <section aria-label="Job controls and facts">
+      <fieldset>
+        <legend>Job</legend>
+        <div class="seg" id="jobs" role="radiogroup" aria-label="Job"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Stage</legend>
+        <div class="seg" id="stages" role="radiogroup" aria-label="Stage"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Facts</legend>
+        <dl id="facts"></dl>
+      </fieldset>
+      <button id="dl" type="button" disabled>Download ZPL</button>
+      <p id="status" role="status" aria-live="polite"></p>
+      <pre id="zpl" tabindex="0" aria-label="ZPL payload"></pre>
+    </section>
+  </main>
+  <script id="jobs-data" type="application/json">
+/*DATA*/
+  </script>
+  <script>
+/*JS*/
+  </script>
+</body>
+</html>

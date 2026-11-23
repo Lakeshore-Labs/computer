@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="604" viewBox="0 0 1100 604">
+<title>Stage lighting cue sheet, rehearsal and opening night</title>
+<rect width="1100" height="604" fill="#171b29"/>
+<g font-family="sans-serif" fill="#eeecdf"><text x="38" y="42" fill="#bfbdcb" font-size="17">STAGE MANAGEMENT / LIGHTING</text>
+<text x="36" y="110" font-family="serif" font-size="55">From rehearsal to opening night</text>
+<text x="38" y="149" fill="#c2c2cf" font-size="18">Cue duration in seconds. Bar color follows the lighting plan in each tagged edition.</text>
+<path d="M38 176H1062" stroke="#696e82"/><text x="270" y="216" font-size="21">Rehearsal</text><text x="690" y="216" font-size="21">Opening night</text>
+<text x="38" y="251" font-size="19">House open</text>
+<rect class="cue" x="270" y="228" width="280" height="30" fill="#edac50"/><text x="560" y="250" font-size="17">40 s</text>
+<rect class="cue" x="690" y="228" width="210" height="30" fill="#edac50"/><text x="910" y="250" font-size="17">30 s</text>
+<text x="38" y="309" font-size="19">Overture</text>
+<rect class="cue" x="270" y="286" width="168" height="30" fill="#666ab4"/><text x="448" y="308" font-size="17">24 s</text>
+<rect class="cue" x="690" y="286" width="196" height="30" fill="#7565b1"/><text x="896" y="308" font-size="17">28 s</text>
+<text x="38" y="367" font-size="19">Lantern walk</text>
+<rect class="cue" x="270" y="344" width="245" height="30" fill="#bd686b"/><text x="525" y="366" font-size="17">35 s</text>
+<rect class="cue" x="690" y="344" width="245" height="30" fill="#bd686b"/><text x="945" y="366" font-size="17">35 s</text>
+<text x="38" y="425" font-size="19">Moonrise</text>
+<rect class="cue" x="270" y="402" width="126" height="30" fill="#718fb2"/><text x="406" y="424" font-size="17">18 s</text>
+<rect class="cue" x="690" y="402" width="182" height="30" fill="#507aae"/><text x="882" y="424" font-size="17">26 s</text>
+<text x="38" y="483" font-size="19">Curtain</text>
+<rect class="cue" x="270" y="460" width="112" height="30" fill="#e2b75a"/><text x="392" y="482" font-size="17">16 s</text>
+<rect class="cue" x="690" y="460" width="98" height="30" fill="#e2b75a"/><text x="798" y="482" font-size="17">14 s</text>
+<path d="M38 532H1062" stroke="#696e82"/>
+<text x="38" y="572" font-size="19">Total cue time</text><text x="270" y="572" font-size="22">133 seconds</text><text x="690" y="572" font-size="22">133 seconds</text></g></svg>

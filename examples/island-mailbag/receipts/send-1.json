@@ -1,0 +1,79 @@
+{
+  "edition": 1,
+  "root": "bafyreiapfhcpiwovzncwwbior2xd2dkppzem64nnc2ygvofdkxvmthc2v4",
+  "blocks": [
+    {
+      "cid": "bafyreiapfhcpiwovzncwwbior2xd2dkppzem64nnc2ygvofdkxvmthc2v4",
+      "codec": "dag-cbor",
+      "bytes": 316,
+      "role": "manifest"
+    },
+    {
+      "cid": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u",
+      "codec": "raw",
+      "bytes": 121382,
+      "role": "book"
+    },
+    {
+      "cid": "bafkreih7gkzykdplnejv7jzen4nntjbtdeoanbi4gw4ny4d7667ll2nddi",
+      "codec": "raw",
+      "bytes": 523,
+      "role": "card"
+    }
+  ],
+  "sent": [
+    {
+      "cid": "bafyreiapfhcpiwovzncwwbior2xd2dkppzem64nnc2ygvofdkxvmthc2v4",
+      "codec": "dag-cbor",
+      "bytes": 316,
+      "role": "manifest"
+    },
+    {
+      "cid": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u",
+      "codec": "raw",
+      "bytes": 121382,
+      "role": "book"
+    },
+    {
+      "cid": "bafkreih7gkzykdplnejv7jzen4nntjbtdeoanbi4gw4ny4d7667ll2nddi",
+      "codec": "raw",
+      "bytes": 523,
+      "role": "card"
+    }
+  ],
+  "withheld": [],
+  "car": {
+    "file": "edition-1.car",
+    "bytes": 122395,
+    "sha256": "1368425b5aa1173afec64750f2e347ebb3f574de59d1f5c50b401fbeaf53e22c",
+    "blocks": 3,
+    "roots": [
+      "bafyreiapfhcpiwovzncwwbior2xd2dkppzem64nnc2ygvofdkxvmthc2v4"
+    ]
+  },
+  "standalone": null,
+  "storeA": {
+    "library": "blockstore-fs 4.0.1 (FsBlockstore)",
+    "blocksNow": 3,
+    "roundTripFromStoreA": true
+  },
+  "manifestValue": {
+    "schema": "island-mailbag/edition/v1",
+    "library": "Gull Island Library (made up for this exhibit)",
+    "edition": 1,
+    "files": [
+      {
+        "name": "four-moons.epub",
+        "mediaType": "application/epub+zip",
+        "size": 121382,
+        "link": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u"
+      },
+      {
+        "name": "reading-card.md",
+        "mediaType": "text/markdown",
+        "size": 523,
+        "link": "bafkreih7gkzykdplnejv7jzen4nntjbtdeoanbi4gw4ny4d7667ll2nddi"
+      }
+    ]
+  }
+}

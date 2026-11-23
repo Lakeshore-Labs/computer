@@ -1,0 +1,6 @@
+{
+  "status": 206,
+  "content_range": "bytes 0-16383/129604455",
+  "etag": "\"61735d37e3729f6aefb261a7e74810fe-16\"",
+  "url": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/32/T/QR/2024/6/S2B_32TQR_20240628_0_L2A/TCI.tif"
+}

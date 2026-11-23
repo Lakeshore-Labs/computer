@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Wardrobe call · Computer</title
+  ><link rel="stylesheet" href="/style.css" />
+  <main>
+    <header><b>Wardrobe department</b><span>Sunday matinee</span></header>
+    <h1>Seven ushers.<br />One jacket rack.</h1>
+    <p class="intro">
+      The wardrobe desk keeps its inventory in this browser. Computer reads the
+      rack count and writes a fitting plan back to the same store.
+    </p>
+    <section class="desk">
+      <article class="stock">
+        <h2>Jackets on hand</h2>
+        <p>Navy house jacket · by size</p>
+        <div id="stock"></div>
+        <form id="count">
+          <label for="medium">Update medium stock</label>
+          <div>
+            <input
+              id="medium"
+              type="number"
+              min="0"
+              max="99"
+              required
+            /><button>Save count</button>
+          </div>
+        </form>
+        <p id="saved" role="status"></p>
+      </article>
+      <article class="plan">
+        <h2>Medium fitting list</h2>
+        <p id="plan-summary">Run Computer to make the first plan.</p>
+        <ol id="cast"></ol>
+        <div class="actions">
+          <button type="button" id="connect" disabled>Connect this tab</button
+          ><button type="button" id="run" disabled>Run Computer</button>
+        </div>
+        <p id="status" role="status"></p>
+      </article>
+    </section>
+    <footer>
+      <b>Files in this browser</b><span id="files"></span>
+      <details>
+        <summary>Show the stored plan</summary>
+        <pre id="json"></pre>
+      </details>
+    </footer>
+  </main>
+  <script type="module" src="/wardrobe.js"></script>
+</html>

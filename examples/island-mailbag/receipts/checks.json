@@ -1,0 +1,328 @@
+{
+  "run": "run one",
+  "pass": true,
+  "passed": 51,
+  "total": 51,
+  "checks": [
+    {
+      "title": "original book is 121,382 bytes with the published SHA-256",
+      "pass": true,
+      "detail": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5"
+    },
+    {
+      "title": "the input is byte-identical to the book in commit 71684674a052 (git show)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "edition 1 and edition 2 each hold exactly a book and a card",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the book in both editions is byte-identical to the original",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the cards differ only in the Edition, When and Changed lines",
+      "pass": true,
+      "detail": "['Changed', 'Edition', 'When']"
+    },
+    {
+      "title": "the meeting place is unchanged and the time moved from 10:00 to 14:30",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "edition 1: the digests the guest reported equal ours",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "edition 2: the digests the guest reported equal ours",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "Computer's guest wrote the first edition from a read-only shelf (guest-a1 exit 0)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "no guest transcript contains 'command not found'",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "title": "guest-a2 compared the book with edition 1 and found it identical",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "only three files crossed the boat: the two CARs and the receiver's have-list",
+      "pass": true,
+      "detail": "['edition-1.car', 'edition-2.delta.car', 'receiver-have-after-1.txt']"
+    },
+    {
+      "title": "every block in both CARs hashes to its CID (hashlib) and the CID re-derives from the spec's bytes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "every CID is version 1 with sha2-256, codec raw (0x55) or dag-cbor (0x71)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "CAR 1 has one root and 3 blocks; the delta CAR has one root and 2 blocks; the standalone CAR 3",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "each root is the first block of its CAR and is DAG-CBOR",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the book has the same CID in both manifests",
+      "pass": true,
+      "detail": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u"
+    },
+    {
+      "title": "the book CID is the raw CIDv1 of the original bytes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the card CID and the root CID changed",
+      "pass": true,
+      "detail": "card bafkreih7gkzyk\u2026 -> bafkreig7pry4k\u2026, root bafyreiapfhcpi\u2026 -> bafyreiefwkzm6\u2026"
+    },
+    {
+      "title": "the book block is in CAR 1 and NOT in the delta CAR",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the delta CAR carries exactly the new card and the new root",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "across both CARs 5 blocks were sent, all different; 6 are needed to describe both editions, 1 reused",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "a standalone edition-2 CAR (measured, never sent) holds the book too",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the manifests' sizes equal the block sizes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the manifests are canonical DAG-CBOR (decode then encode gives the same bytes)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the card blocks are the card files, byte for byte",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the book's transfer saved on edition 2 equals standalone minus delta CAR, and exceeds the book's own bytes by only its framing",
+      "pass": true,
+      "detail": "121421 bytes saved; book payload 121382; framing 39"
+    },
+    {
+      "title": "Store B holds 5 blocks, each hashing to its CID",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "Store B's arrival log: 3 new blocks from CAR 1, then 2 new from the delta, no duplicates",
+      "pass": true,
+      "detail": "[('edition-1.car', 3, 0), ('edition-2.delta.car', 2, 0)]"
+    },
+    {
+      "title": "Store B's block set equals the union of the two CARs",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "Store B has no second copy of the book: it arrived once, in CAR 1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "Store A (blockstore-fs, flat files) holds 5 blocks; Store B (SQLite) holds the same 5 CIDs; no path is shared",
+      "pass": true,
+      "detail": "5 .data files in 5 shard dirs"
+    },
+    {
+      "title": "Store A rebuilt each edition from its own blocks before sending",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "restored edition 1 is byte-identical to the edition Computer wrote",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "restored edition 2 is byte-identical to the edition Computer wrote",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "restored edition 2's book is the original, restored from Store B's copy",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the restore wrote each root CID next to its edition",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "a delta with one flipped byte was refused by Store B (exit 3)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "\u2026and Store B held exactly what it held before",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "\u2026and the JavaScript reader also flags the flipped byte (exit 3)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the delta alone cannot restore edition 2: exit 4, naming the missing book block",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "\u2026and the failed restore wrote no files",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "edition-1.car: the JavaScript and Python decoders report the same root, the same CIDs and sizes, and all hashes ok",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "edition-2.delta.car: the JavaScript and Python decoders report the same root, the same CIDs and sizes, and all hashes ok",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the new guest passed all of its own checks",
+      "pass": true,
+      "detail": "21/21"
+    },
+    {
+      "title": "the guest's decision matches the cards: Ferry Landing Reading Room, 14:30, was 10:00, only the time changed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the guest's raw CIDs derived with the standard library match the manifests (book, both cards)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the guest read Store B from inside Computer: 5 blocks, same CIDs",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "every write in a read-only guest was refused (append, remove, mkdir: nonzero exit)",
+      "pass": true,
+      "detail": "{'probe-append': '126', 'probe-remove': '1', 'probe-mkdir': '1', 'probe-sqlite': '1'}"
+    },
+    {
+      "title": "\u2026and the restored editions are still byte-identical afterwards",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "\u2026and Store B still holds the same 5 blocks afterwards (a DELETE through the read-only mount did nothing)",
+      "pass": true,
+      "detail": "sqlite probe exit 1"
+    }
+  ],
+  "observations": [
+    {
+      "title": "libipld 4.0.0 decode_car refuses CARs that contain raw blocks",
+      "observed": true,
+      "evidence": "reports/libipld-decode-car-probe.txt",
+      "consequence": "carbox reads the CAR framing; libipld is used for CIDs and DAG-CBOR"
+    }
+  ],
+  "numbers": {
+    "book": {
+      "bytes": 121382,
+      "sha256": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5",
+      "cid": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u",
+      "commit": "71684674a05273f6c689b5d3c78d8e8f19d8191c"
+    },
+    "roots": {
+      "1": "bafyreiapfhcpiwovzncwwbior2xd2dkppzem64nnc2ygvofdkxvmthc2v4",
+      "2": "bafyreiefwkzm6lj6p5giwtpx6r7jmqwojjdm6xz7uriexhq7q2kcunewpe"
+    },
+    "cards": {
+      "1": "bafkreih7gkzykdplnejv7jzen4nntjbtdeoanbi4gw4ny4d7667ll2nddi",
+      "2": "bafkreig7pry4kvsi73vfgleat3z7hqfhyseatvebziov5eavb2l3phd3ji"
+    },
+    "blocks": {
+      "bafyreiapfhcpiwovzncwwbior2xd2dkppzem64nnc2ygvofdkxvmthc2v4": {
+        "bytes": 316,
+        "codec": "dag-cbor"
+      },
+      "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u": {
+        "bytes": 121382,
+        "codec": "raw"
+      },
+      "bafkreih7gkzykdplnejv7jzen4nntjbtdeoanbi4gw4ny4d7667ll2nddi": {
+        "bytes": 523,
+        "codec": "raw"
+      },
+      "bafyreiefwkzm6lj6p5giwtpx6r7jmqwojjdm6xz7uriexhq7q2kcunewpe": {
+        "bytes": 316,
+        "codec": "dag-cbor"
+      },
+      "bafkreig7pry4kvsi73vfgleat3z7hqfhyseatvebziov5eavb2l3phd3ji": {
+        "bytes": 584,
+        "codec": "raw"
+      }
+    },
+    "cars": {
+      "edition-1.car": 122395,
+      "edition-2.delta.car": 1035,
+      "edition-2.standalone.car": 122456
+    },
+    "car_sha256": {
+      "edition-1.car": "1368425b5aa1173afec64750f2e347ebb3f574de59d1f5c50b401fbeaf53e22c",
+      "edition-2.delta.car": "2ae01f20f9ae816c4694ed3eac83cd353ffa53e8df9998baf42e502147aa74e5",
+      "edition-2.standalone.car": "ea3d610590f886bca7da6ac994237988fe3f8d1467f09118cedd1c28da0de2dc"
+    },
+    "saved_bytes": 121421,
+    "blocks_sent": 5,
+    "blocks_reused": 1,
+    "blocks_changed": 2,
+    "blocks_unique": 5,
+    "manifest_sizes": {
+      "1": 316,
+      "2": 316
+    }
+  }
+}

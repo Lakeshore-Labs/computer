@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Great Lakes observation desk</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: #102324;
+        margin: 0;
+        color: #edf2de;
+        font: 17px/1.5 system-ui;
+      }
+      main {
+        width: min(1150px, 100%);
+        margin: auto;
+        padding: 28px 4vw 45px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 15px;
+        border-bottom: 1px solid #739185;
+        padding-bottom: 12px;
+      }
+      header strong {
+        font:
+          28px Georgia,
+          serif;
+      }
+      header span,
+      small {
+        font:
+          13px ui-monospace,
+          monospace;
+        color: #c7d7bd;
+      }
+      h1 {
+        font:
+          clamp(40px, 6vw, 72px) / 1 Georgia,
+          serif;
+        letter-spacing: -0.04em;
+        margin: 28px 0 10px;
+      }
+      p {
+        margin: 8px 0 14px;
+        max-width: 800px;
+      }
+      select,
+      input {
+        accent-color: #f4bf67;
+      }
+      select {
+        background: #173233;
+        color: #edf2de;
+        border: 1px solid #9caf99;
+        border-radius: 3px;
+        padding: 8px 12px;
+        font: inherit;
+      }
+      label {
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 20px 0 12px;
+      }
+      .scene {
+        --split: 50%;
+        aspect-ratio: 680/400;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        background: #223737;
+        box-shadow: 0 0 0 1px #678779;
+      }
+      .scene img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .scene #left {
+        clip-path: inset(0 calc(100% - var(--split)) 0 0);
+      }
+      .edge {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: var(--split);
+        border-left: 2px solid #f4bf67;
+        pointer-events: none;
+      }
+      .tag {
+        position: absolute;
+        top: 12px;
+        background: #102324dd;
+        padding: 4px 10px;
+        font:
+          14px ui-monospace,
+          monospace;
+      }
+      .a {
+        left: 12px;
+      }
+      .b {
+        right: 12px;
+      }
+      .slider {
+        display: grid;
+        grid-template-columns: max-content 1fr 3em;
+        align-items: center;
+        gap: 15px;
+        margin: 12px 0 20px;
+      }
+      .slider input {
+        width: 100%;
+      }
+      footer {
+        color: #cad6c6;
+        border-top: 1px solid #678779;
+        font-size: 14px;
+        padding-top: 12px;
+      }
+      a {
+        color: #d4e7cb;
+      }
+      :focus-visible {
+        outline: 3px solid #f4bf67;
+      }
+      @media (max-width: 600px) {
+        main {
+          padding: 18px 15px;
+        }
+        .controls label {
+          flex-direction: column;
+          align-items: start;
+        }
+        .tag {
+          font-size: 11px;
+          padding: 3px 6px;
+          top: 6px;
+        }
+        .a {
+          left: 6px;
+        }
+        .b {
+          right: 6px;
+        }
+        .slider {
+          gap: 8px;
+        }
+        .slider label {
+          font-size: 13px;
+        }
+        header span {
+          font-size: 11px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <strong>Observation desk</strong><span>NASA / TERRA MODIS</span>
+      </header>
+      <h1>Great Lakes, four dates.</h1>
+      <p>
+        Compare true-color satellite imagery from the same geographic frame.
+        Choose two dates and move the divider to inspect the difference.
+      </p>
+      <div class="controls">
+        <label>Left image<select id="a"></select></label
+        ><label>Right image<select id="b"></select></label>
+      </div>
+      <div class="scene" id="scene">
+        <img id="right" alt="Right-side observation" /><img
+          id="left"
+          alt="Left-side observation"
+        />
+        <div class="edge"></div>
+        <span class="tag a" id="ad"></span><span class="tag b" id="bd"></span>
+      </div>
+      <div class="slider">
+        <label for="slide">Image divider</label
+        ><input type="range" id="slide" min="0" max="100" value="50" /><output
+          id="position"
+          >50%</output
+        >
+      </div>
+      <footer>
+        Source: NASA Global Imagery Browse Services. MODIS Terra corrected
+        reflectance, true color. Bounding box 92°W to 75°W, 40°N to 50°N. Cloud
+        cover and surface conditions both affect what is visible. All four
+        images are embedded for offline use.
+        <a href="https://nasa-gibs.github.io/gibs-api-docs/access-basics/"
+          >NASA service documentation</a
+        >
+      </footer>
+    </main>
+    <script>
+      const scenes = __SCENES__;
+      const byId = (id) => document.getElementById(id);
+      const a = byId("a"),
+        b = byId("b"),
+        slider = byId("slide");
+      for (const [i, scene] of scenes.entries()) {
+        const label = scene.label + ", " + scene.date.slice(0, 4);
+        a.add(new Option(label, String(i)));
+        b.add(new Option(label, String(i)));
+      }
+      b.value = "2";
+      function show() {
+        const left = scenes[Number(a.value)],
+          right = scenes[Number(b.value)];
+        byId("left").src = left.image;
+        byId("right").src = right.image;
+        byId("left").alt = "Terra MODIS image on " + left.date;
+        byId("right").alt = "Terra MODIS image on " + right.date;
+        byId("ad").textContent = left.date;
+        byId("bd").textContent = right.date;
+        byId("scene").style.setProperty("--split", slider.value + "%");
+        byId("position").textContent = slider.value + "%";
+      }
+      a.addEventListener("change", show);
+      b.addEventListener("change", show);
+      slider.addEventListener("input", show);
+      show();
+    </script>
+  </body>
+</html>

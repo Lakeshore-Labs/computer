@@ -1,0 +1,19 @@
+{
+  "edition": "first",
+  "paper_mm": [
+    297,
+    210
+  ],
+  "slots": [
+    "getty",
+    "getty",
+    "getty",
+    "cleveland"
+  ],
+  "copies": {
+    "cleveland": 1,
+    "getty": 3
+  },
+  "pdf_bytes": 302365,
+  "pdf_sha256": "154f25d89d8f6195529cbb2557050734ad60d192009be2973ae3c1e3bb9b0212"
+}

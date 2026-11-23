@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Io",
+    "id": "Q3123",
+    "code": "501",
+    "radius_km": "1821.49",
+    "sigma_km": "0.50",
+    "density": "3.5276"
+  },
+  {
+    "name": "Europa",
+    "id": "Q3143",
+    "code": "502",
+    "radius_km": "1560.80",
+    "sigma_km": "0.30",
+    "density": "3.0130"
+  },
+  {
+    "name": "Ganymede",
+    "id": "Q3169",
+    "code": "503",
+    "radius_km": "2631.20",
+    "sigma_km": "1.70",
+    "density": "1.9416"
+  },
+  {
+    "name": "Callisto",
+    "id": "Q3134",
+    "code": "504",
+    "radius_km": "2410.30",
+    "sigma_km": "1.50",
+    "density": "1.8340"
+  }
+]

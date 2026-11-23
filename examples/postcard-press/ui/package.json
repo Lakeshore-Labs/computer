@@ -1,0 +1,17 @@
+{
+  "name": "postcard-press-ui",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "license": "Apache-2.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "esbuild": "0.28.2"
+  },
+  "devDependencies": {
+    "playwright-core": "1.65.1"
+  }
+}

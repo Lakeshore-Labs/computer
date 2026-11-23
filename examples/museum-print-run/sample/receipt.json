@@ -1,0 +1,57 @@
+{
+  "backend": "CUPS ippeveprinter",
+  "submitter": "CUPS ipptool",
+  "guest": "Computer WASI Python and pypdf",
+  "media": "A4 landscape; four A6 cards",
+  "first": {
+    "edition": "first",
+    "paper_mm": [
+      297,
+      210
+    ],
+    "slots": [
+      "getty",
+      "getty",
+      "getty",
+      "cleveland"
+    ],
+    "copies": {
+      "cleveland": 1,
+      "getty": 3
+    },
+    "pdf_bytes": 302365,
+    "pdf_sha256": "154f25d89d8f6195529cbb2557050734ad60d192009be2973ae3c1e3bb9b0212"
+  },
+  "amended": {
+    "edition": "amended",
+    "paper_mm": [
+      297,
+      210
+    ],
+    "slots": [
+      "getty",
+      "cleveland",
+      "cleveland",
+      "cleveland"
+    ],
+    "copies": {
+      "cleveland": 3,
+      "getty": 1
+    },
+    "pdf_bytes": 303235,
+    "pdf_sha256": "f4bb8d8879f83d8b052b0f3f9b510c32b45ced9cb5770ecec8ab3d96d1a117d1"
+  },
+  "submitted_editions": [
+    "amended"
+  ],
+  "completed_jobs": [
+    {
+      "job-name": "Amended-postcards",
+      "job-originating-user-name": "museum-desk",
+      "job-id": 1,
+      "job-state": 9
+    }
+  ],
+  "spool_pdf_sha256": "f4bb8d8879f83d8b052b0f3f9b510c32b45ced9cb5770ecec8ab3d96d1a117d1",
+  "physical_output": false
+}

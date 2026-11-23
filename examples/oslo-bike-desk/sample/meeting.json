@@ -1,0 +1,35 @@
+{
+  "from": "Jernbanetorget",
+  "starting_bikes": 8,
+  "group_size": 10,
+  "feed_utc": "2026-11-22 21:01 UTC",
+  "total_features": 261,
+  "eligible_stations": 63,
+  "nearest": [
+    {
+      "id": "545",
+      "name": "Arkaden Sør",
+      "bikes": 12,
+      "distance_m": 122.382,
+      "east_m": -122.359,
+      "north_m": -2.353
+    },
+    {
+      "id": "2330",
+      "name": "Stjerneplassen",
+      "bikes": 12,
+      "distance_m": 150.53,
+      "east_m": -4.189,
+      "north_m": 150.471
+    },
+    {
+      "id": "6026",
+      "name": "Østbanehallen",
+      "bikes": 23,
+      "distance_m": 156.946,
+      "east_m": 34.43,
+      "north_m": -153.123
+    }
+  ],
+  "distance": "straight-line metres in EPSG:25832"
+}

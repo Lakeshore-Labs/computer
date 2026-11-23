@@ -1,0 +1,326 @@
+{
+ "all_pass": true,
+ "tag": "verified",
+ "checks": [
+  {
+   "name": "[desktop] offline: every request is file://",
+   "ok": true,
+   "detail": "1"
+  },
+  {
+   "name": "[desktop] no page/console errors",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "name": "[desktop] no horizontal overflow",
+   "ok": true,
+   "detail": "[1440, 1440]"
+  },
+  {
+   "name": "[desktop] both engraved scores visible (1 svg each)",
+   "ok": true,
+   "detail": "[1, 1]"
+  },
+  {
+   "name": "[desktop] score width usable",
+   "ok": true,
+   "detail": "1100"
+  },
+  {
+   "name": "[desktop] select flute: state + radio + highlighted sheet",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[desktop] flute.musicxml download == original bytes",
+   "ok": true,
+   "detail": "94791b09d1758063 flute.musicxml"
+  },
+  {
+   "name": "[desktop] flute.mid download == original bytes",
+   "ok": true,
+   "detail": "9098ba67dc8393ab flute.mid"
+  },
+  {
+   "name": "[desktop] flute synth WAV downloads (RIFF)",
+   "ok": true,
+   "detail": "656044"
+  },
+  {
+   "name": "[desktop] flute play: AudioContext running, 22 tones scheduled",
+   "ok": true,
+   "detail": "{'s': 'running', 'e': 2.485333333333333, 'p': 0.2421875, 'pl': True, 'n': 22, 'now': 2, 'txt': '\u266a note 3/22 \u00b7 G4 sounding'}"
+  },
+  {
+   "name": "[desktop] flute play: clock advanced ~2.5s",
+   "ok": true,
+   "detail": "2.49"
+  },
+  {
+   "name": "[desktop] flute play: analyser heard signal (peak>0.02)",
+   "ok": true,
+   "detail": "0.2421875"
+  },
+  {
+   "name": "[desktop] flute play: a note is highlighted",
+   "ok": true,
+   "detail": "\u266a note 3/22 \u00b7 G4 sounding"
+  },
+  {
+   "name": "[desktop] flute pause: clock frozen",
+   "ok": true,
+   "detail": "[2.6666666666666665, 2.6666666666666665]"
+  },
+  {
+   "name": "[desktop] flute resume: clock moves again",
+   "ok": true,
+   "detail": "3.3386666666666667"
+  },
+  {
+   "name": "[desktop] flute stop: reset",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[desktop] flute click note 21: seeks & plays",
+   "ok": true,
+   "detail": "20"
+  },
+  {
+   "name": "[desktop] flute: playback ran to the end and finished",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[desktop] select clarinet: state + radio + highlighted sheet",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[desktop] clarinet.musicxml download == original bytes",
+   "ok": true,
+   "detail": "861a78d286d68b7d clarinet.musicxml"
+  },
+  {
+   "name": "[desktop] clarinet.mid download == original bytes",
+   "ok": true,
+   "detail": "8f937d1d8666641b clarinet.mid"
+  },
+  {
+   "name": "[desktop] clarinet synth WAV downloads (RIFF)",
+   "ok": true,
+   "detail": "656044"
+  },
+  {
+   "name": "[desktop] clarinet play: AudioContext running, 22 tones scheduled",
+   "ok": true,
+   "detail": "{'s': 'running', 'e': 2.517333333333333, 'p': 0.2421875, 'pl': True, 'n': 22, 'now': 2, 'txt': '\u266a note 4/22 \u00b7 A4 sounding \u00b7 written B4'}"
+  },
+  {
+   "name": "[desktop] clarinet play: clock advanced ~2.5s",
+   "ok": true,
+   "detail": "2.52"
+  },
+  {
+   "name": "[desktop] clarinet play: analyser heard signal (peak>0.02)",
+   "ok": true,
+   "detail": "0.2421875"
+  },
+  {
+   "name": "[desktop] clarinet play: a note is highlighted",
+   "ok": true,
+   "detail": "\u266a note 4/22 \u00b7 A4 sounding \u00b7 written B4"
+  },
+  {
+   "name": "[desktop] clarinet pause: clock frozen",
+   "ok": true,
+   "detail": "[2.703999999999999, 2.703999999999999]"
+  },
+  {
+   "name": "[desktop] clarinet resume: clock moves again",
+   "ok": true,
+   "detail": "3.381333333333332"
+  },
+  {
+   "name": "[desktop] clarinet stop: reset",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[desktop] clarinet click note 21: seeks & plays",
+   "ok": true,
+   "detail": "20"
+  },
+  {
+   "name": "[desktop] clarinet: playback ran to the end and finished",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[desktop] clarinet readout shows sounding and written pitch",
+   "ok": true,
+   "detail": "\u266a note 1/22 \u00b7 C4 sounding \u00b7 written D4"
+  },
+  {
+   "name": "[mobile390] offline: every request is file://",
+   "ok": true,
+   "detail": "1"
+  },
+  {
+   "name": "[mobile390] no page/console errors",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "name": "[mobile390] no horizontal overflow",
+   "ok": true,
+   "detail": "[390, 390]"
+  },
+  {
+   "name": "[mobile390] both engraved scores visible (1 svg each)",
+   "ok": true,
+   "detail": "[1, 1]"
+  },
+  {
+   "name": "[mobile390] score width usable",
+   "ok": true,
+   "detail": "326"
+  },
+  {
+   "name": "[mobile390] select flute: state + radio + highlighted sheet",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[mobile390] flute.musicxml download == original bytes",
+   "ok": true,
+   "detail": "94791b09d1758063 flute.musicxml"
+  },
+  {
+   "name": "[mobile390] flute.mid download == original bytes",
+   "ok": true,
+   "detail": "9098ba67dc8393ab flute.mid"
+  },
+  {
+   "name": "[mobile390] flute synth WAV downloads (RIFF)",
+   "ok": true,
+   "detail": "656044"
+  },
+  {
+   "name": "[mobile390] flute play: AudioContext running, 22 tones scheduled",
+   "ok": true,
+   "detail": "{'s': 'running', 'e': 2.490666666666667, 'p': 0.2421875, 'pl': True, 'n': 22, 'now': 2, 'txt': '\u266a note 3/22 \u00b7 G4 sounding'}"
+  },
+  {
+   "name": "[mobile390] flute play: clock advanced ~2.5s",
+   "ok": true,
+   "detail": "2.49"
+  },
+  {
+   "name": "[mobile390] flute play: analyser heard signal (peak>0.02)",
+   "ok": true,
+   "detail": "0.2421875"
+  },
+  {
+   "name": "[mobile390] flute play: a note is highlighted",
+   "ok": true,
+   "detail": "\u266a note 3/22 \u00b7 G4 sounding"
+  },
+  {
+   "name": "[mobile390] flute pause: clock frozen",
+   "ok": true,
+   "detail": "[2.7253333333333334, 2.7253333333333334]"
+  },
+  {
+   "name": "[mobile390] flute resume: clock moves again",
+   "ok": true,
+   "detail": "3.397333333333333"
+  },
+  {
+   "name": "[mobile390] flute stop: reset",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[mobile390] flute click note 21: seeks & plays",
+   "ok": true,
+   "detail": "20"
+  },
+  {
+   "name": "[mobile390] flute: playback ran to the end and finished",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[mobile390] select clarinet: state + radio + highlighted sheet",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[mobile390] clarinet.musicxml download == original bytes",
+   "ok": true,
+   "detail": "861a78d286d68b7d clarinet.musicxml"
+  },
+  {
+   "name": "[mobile390] clarinet.mid download == original bytes",
+   "ok": true,
+   "detail": "8f937d1d8666641b clarinet.mid"
+  },
+  {
+   "name": "[mobile390] clarinet synth WAV downloads (RIFF)",
+   "ok": true,
+   "detail": "656044"
+  },
+  {
+   "name": "[mobile390] clarinet play: AudioContext running, 22 tones scheduled",
+   "ok": true,
+   "detail": "{'s': 'running', 'e': 2.517333333333333, 'p': 0.2421875, 'pl': True, 'n': 22, 'now': 2, 'txt': '\u266a note 4/22 \u00b7 A4 sounding \u00b7 written B4'}"
+  },
+  {
+   "name": "[mobile390] clarinet play: clock advanced ~2.5s",
+   "ok": true,
+   "detail": "2.52"
+  },
+  {
+   "name": "[mobile390] clarinet play: analyser heard signal (peak>0.02)",
+   "ok": true,
+   "detail": "0.2421875"
+  },
+  {
+   "name": "[mobile390] clarinet play: a note is highlighted",
+   "ok": true,
+   "detail": "\u266a note 4/22 \u00b7 A4 sounding \u00b7 written B4"
+  },
+  {
+   "name": "[mobile390] clarinet pause: clock frozen",
+   "ok": true,
+   "detail": "[2.751999999999999, 2.751999999999999]"
+  },
+  {
+   "name": "[mobile390] clarinet resume: clock moves again",
+   "ok": true,
+   "detail": "3.4293333333333322"
+  },
+  {
+   "name": "[mobile390] clarinet stop: reset",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[mobile390] clarinet click note 21: seeks & plays",
+   "ok": true,
+   "detail": "20"
+  },
+  {
+   "name": "[mobile390] clarinet: playback ran to the end and finished",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "[mobile390] clarinet readout shows sounding and written pitch",
+   "ok": true,
+   "detail": "\u266a note 1/22 \u00b7 C4 sounding \u00b7 written D4"
+  }
+ ]
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "museum": "getty",
+    "title": "Irises",
+    "inscription": "For Mira · 90.PA.20 · 1889",
+    "credit": "The J. Paul Getty Museum",
+    "accession": "90.PA.20",
+    "source_jpeg_sha256": "4c16c696862dba006aa27a643f8d4ba750e83351789050abc860c755b9cded76",
+    "thumbnail_sha256": "b6c2bf5775273490c92346c9deb591024392213fda36fcf7c1bc4feaec25f6ca",
+    "svg_bytes": 35741,
+    "svg_sha256": "75fda67b362c38b28386e82569518374cdbd25763efb043aba513d6ffe53174c"
+  },
+  {
+    "museum": "getty",
+    "title": "Irises",
+    "inscription": "For Tobias · 90.PA.20 · 1889",
+    "credit": "The J. Paul Getty Museum",
+    "accession": "90.PA.20",
+    "source_jpeg_sha256": "4c16c696862dba006aa27a643f8d4ba750e83351789050abc860c755b9cded76",
+    "thumbnail_sha256": "b6c2bf5775273490c92346c9deb591024392213fda36fcf7c1bc4feaec25f6ca",
+    "svg_bytes": 35745,
+    "svg_sha256": "e6bd66f7875798c61c54c5429b41b0ea4ed7991158df3f7017a28d111b168588"
+  },
+  {
+    "museum": "cleveland",
+    "title": "The Large Plane Trees (Road Menders at Saint-Rémy)",
+    "inscription": "For Ines · 1947.209 · 1889",
+    "credit": "The Cleveland Museum of Art",
+    "accession": "1947.209",
+    "source_jpeg_sha256": "3a9337e095805241fb86be7c6eb9235d69a062d541719f5a74143995e0214042",
+    "thumbnail_sha256": "b105f920c9ef2ff2224f2804c1b3209ce1b9af820d0ff266e1f90ebf700174cb",
+    "svg_bytes": 31330,
+    "svg_sha256": "fa04e7e277759db8eb90a3b11eb10da485ef886c93b0c0aafe7fe99d978c518c"
+  }
+]

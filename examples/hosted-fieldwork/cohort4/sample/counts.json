@@ -1,0 +1,22 @@
+{
+  "cases": 107,
+  "passed": 103,
+  "distinct_passing_urls": 95,
+  "cases_per_cohort": {
+    "1": 59,
+    "2": 26,
+    "3": 9,
+    "4": 13
+  },
+  "fourth_cohort_urls": [
+    "https://apished.com/mcp/v1/datemath",
+    "https://developerpoetry.com/mcp",
+    "https://eancheck.com/api/mcp",
+    "https://humanitieshelpinghands.com/mcp",
+    "https://kwekuanansi.ai/mcp/ghana-numbers",
+    "https://lemmapark.com/mcp",
+    "https://musokit.com/mcp",
+    "https://opencurrent.ai/mcp/kr-calendar",
+    "https://timezone-truth.gumballtools.com/api/mcp"
+  ]
+}

@@ -1,0 +1,22 @@
+local: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+alias: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+combine: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+union: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+hasher: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+compress: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+chunker: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+crypt: 2 files, 2 browser-hash matches, 22 notes drawn, 6 ✓ cells
+memory: 2 files, 2 browser-hash matches, 22 notes drawn, 6 ✓ cells
+desktop: playback started on crypt, 1 note(s) highlighted at 0.7s
+desktop: inventory 69 rows, 9 tested, filter 'crypt' shows 1; viewport width 1280, scrollWidth 1280
+local: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+alias: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+combine: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+union: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+hasher: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+compress: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+chunker: 2 files, 2 browser-hash matches, 22 notes drawn, 8 ✓ cells
+crypt: 2 files, 2 browser-hash matches, 22 notes drawn, 6 ✓ cells
+memory: 2 files, 2 browser-hash matches, 22 notes drawn, 6 ✓ cells
+phone: playback started on chunker, 1 note(s) highlighted at 0.7s
+phone: inventory 69 rows, 9 tested, filter 'crypt' shows 1; viewport width 390, scrollWidth 390

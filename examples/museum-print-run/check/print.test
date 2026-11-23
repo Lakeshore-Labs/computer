@@ -1,0 +1,34 @@
+{
+ NAME "Submit the amended postcard sheet"
+ OPERATION Print-Job
+ GROUP operation-attributes-tag
+ ATTR charset attributes-charset utf-8
+ ATTR language attributes-natural-language en
+ ATTR uri printer-uri $uri
+ ATTR name requesting-user-name museum-desk
+ ATTR name job-name Amended-postcards
+ ATTR mimeMediaType document-format application/pdf
+ GROUP job-attributes-tag
+ ATTR integer copies 1
+ FILE $filename
+ STATUS successful-ok
+ EXPECT job-id
+ EXPECT job-uri
+ DISPLAY job-id
+}
+{
+ NAME "Observe completion of the same job"
+ OPERATION Get-Job-Attributes
+ GROUP operation-attributes-tag
+ ATTR charset attributes-charset utf-8
+ ATTR language attributes-natural-language en
+ ATTR uri printer-uri $uri
+ ATTR integer job-id $job-id
+ ATTR name requesting-user-name museum-desk
+ STATUS successful-ok
+ EXPECT job-id
+ EXPECT job-state WITH-VALUE 9 REPEAT-NO-MATCH REPEAT-LIMIT 30
+ DISPLAY job-state
+ DISPLAY job-name
+ DISPLAY job-id
+}

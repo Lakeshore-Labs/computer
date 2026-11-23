@@ -1,0 +1,11 @@
+# Python reader (Store B and verify.py). Exact versions the published receipts were made with; wheels only.
+#   python3 -m venv recipe/.venv && recipe/.venv/bin/pip install --only-binary :all: -r recipe/requirements.txt
+bases==0.3.0
+carbox==0.3
+cbor2==5.9.0
+dag-cbor==0.3.3
+libipld==4.0.0
+multiformats==0.3.1.post4
+multiformats-config==0.3.1
+typing-extensions==4.16.0
+typing-validation==2.3.0

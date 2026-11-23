@@ -1,0 +1,68 @@
+[
+  {
+    "name" : "Roof terracotta",
+    "rgb" : [
+      198,
+      125,
+      92
+    ],
+    "site" : "san-marco",
+    "x" : 30,
+    "y" : 80
+  },
+  {
+    "name" : "Canal teal",
+    "rgb" : [
+      40,
+      80,
+      73
+    ],
+    "site" : "san-marco",
+    "x" : 50,
+    "y" : 210
+  },
+  {
+    "name" : "Marsh olive",
+    "rgb" : [
+      95,
+      105,
+      80
+    ],
+    "site" : "burano",
+    "x" : 40,
+    "y" : 66
+  },
+  {
+    "name" : "Pale reed",
+    "rgb" : [
+      169,
+      174,
+      130
+    ],
+    "site" : "burano",
+    "x" : 71,
+    "y" : 79
+  },
+  {
+    "name" : "Lido sand",
+    "rgb" : [
+      247,
+      215,
+      166
+    ],
+    "site" : "lido",
+    "x" : 202,
+    "y" : 94
+  },
+  {
+    "name" : "Adriatic green",
+    "rgb" : [
+      56,
+      99,
+      92
+    ],
+    "site" : "lido",
+    "x" : 216,
+    "y" : 127
+  }
+]

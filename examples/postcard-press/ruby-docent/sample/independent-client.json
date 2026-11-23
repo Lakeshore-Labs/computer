@@ -1,0 +1,29 @@
+{
+  "tool_names": [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ],
+  "order": {
+    "museum": "cleveland",
+    "inscription": "For Ines · 1947.209 · 1889"
+  },
+  "guest": {
+    "museum": "cleveland",
+    "title": "The Large Plane Trees (Road Menders at Saint-Rémy)",
+    "inscription": "For Ines · 1947.209 · 1889",
+    "credit": "The Cleveland Museum of Art",
+    "accession": "1947.209",
+    "source_jpeg_sha256": "3a9337e095805241fb86be7c6eb9235d69a062d541719f5a74143995e0214042",
+    "thumbnail_sha256": "b105f920c9ef2ff2224f2804c1b3209ce1b9af820d0ff266e1f90ebf700174cb",
+    "svg_bytes": 31330,
+    "svg_sha256": "fa04e7e277759db8eb90a3b11eb10da485ef886c93b0c0aafe7fe99d978c518c"
+  },
+  "independent_svg_sha256": "fa04e7e277759db8eb90a3b11eb10da485ef886c93b0c0aafe7fe99d978c518c",
+  "original_museum_jpeg_matches": true,
+  "embedded_jpeg_matches": true,
+  "native_renderer": "librsvg",
+  "raster_sha256": "840e3652528acb25cc2bc36b2585ef759a20d0d9fc15020da244866360bda64a",
+  "browser_download_matched": true
+}

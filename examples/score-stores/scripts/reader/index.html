@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Storage lab: Last Boat Home through nine rclone backends</title>
+<style>
+:root{--ink:#1d2430;--mut:#5b6575;--line:#d9d4c7;--bg:#f7f4ec;--card:#fffdf8;--ok:#1f7a4d;--warn:#a05a00;--bad:#a1262b;--acc:#1c4f8a;--meta:#8a8f99}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:1060px;margin:0 auto;padding:20px 16px 56px}
+h1{font-size:1.65rem;line-height:1.2;margin:.2em 0 .3em}
+h2{font-size:1.2rem;margin:1.8em 0 .5em}
+h3{font-size:1rem;margin:1.2em 0 .4em}
+p{margin:.4em 0}
+.lede{color:var(--mut);max-width:62ch}
+.counts{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.counts div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.counts b{display:block;font-size:1.4rem}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.tabs button{font:inherit;padding:8px 12px;border:1px solid var(--line);background:var(--card);border-radius:8px;cursor:pointer;min-height:44px;color:var(--ink)}
+.tabs button[aria-selected=true]{background:var(--acc);color:#fff;border-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+.badge{display:inline-block;font-size:.78rem;font-weight:600;padding:1px 8px;border-radius:99px;border:1px solid currentColor;vertical-align:middle}
+.b-ok{color:var(--ok)}.b-part{color:var(--warn)}.b-bad{color:var(--bad)}.b-meta{color:var(--meta)}.b-test{color:var(--acc)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+.scroll{overflow-x:auto}
+code,.mono{font:.82rem ui-monospace,Menlo,monospace;word-break:break-all}
+.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.88rem;margin:8px 0}
+.chain span{background:#ece7d8;border-radius:6px;padding:3px 8px}
+.chain i{font-style:normal;color:var(--mut)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.btn{font:inherit;padding:9px 14px;border-radius:8px;border:1px solid var(--acc);background:var(--acc);color:#fff;cursor:pointer;min-height:44px;text-decoration:none}
+.btn.alt{background:var(--card);color:var(--acc)}
+svg.score{width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:8px}
+svg.score .n.on{fill:#c1432b;stroke:#c1432b}
+input[type=search]{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;width:100%;max-width:360px;min-height:44px}
+.ok{color:var(--ok)}.na{color:var(--meta)}.no{color:var(--bad)}
+.note{font-size:.88rem;color:var(--mut)}
+tr.tested td{background:#eef4fb}
+@media(max-width:560px){h1{font-size:1.35rem}th,td{padding:5px 5px}.counts b{font-size:1.15rem}}
+</style>
+</head>
+<body>
+<main>
+<h1>Last Boat Home, delivered to nine account-free rclone backends</h1>
+<p class="lede">The original flute MIDI and MusicXML from the Computer rehearsal-room sample were copied into synthetic stores by stock Computer, through the <code>rclone-mcp</code> server, to a loopback rclone. Pick a backend to see which bytes arrived, how they are stored on disk, and to hear and read the score exactly as it came back.</p>
+<div class="counts" id="counts"></div>
+<h2>Tested backends</h2>
+<div class="tabs" role="tablist" aria-label="Tested backends" id="tabs"></div>
+<section id="panel" aria-live="polite"></section>
+<h2>What did not work as first tried</h2>
+<div id="findings"></div>
+<h2>All 69 provider names advertised by this rclone</h2>
+<p class="note" id="invnote"></p>
+<p><input type="search" id="q" placeholder="Filter provider names" aria-label="Filter provider names"></p>
+<div class="scroll"><table id="inv"><thead><tr><th>#</th><th>Name</th><th>Description</th><th>Status in this lab</th></tr></thead><tbody></tbody></table></div>
+<h2>Reproduce</h2>
+<div id="repro" class="card"></div>
+</main>
+<script src="evidence.js"></script>
+<script>
+"use strict";
+const L=window.LAB,E=L.evidence,$=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const hex=u=>[...u].map(x=>x.toString(16).padStart(2,"0")).join("");
+function sha256js(m){const K=new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+let h=new Uint32Array([0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]);
+const l=m.length,n=((l+9+63)>>6)<<6,p=new Uint8Array(n);p.set(m);p[l]=128;new DataView(p.buffer).setUint32(n-4,l*8>>>0);new DataView(p.buffer).setUint32(n-8,Math.floor(l/0x20000000));
+const w=new Uint32Array(64),r=(x,k)=>(x>>>k)|(x<<(32-k));
+for(let o=0;o<n;o+=64){const v=new DataView(p.buffer,o,64);for(let i=0;i<16;i++)w[i]=v.getUint32(i*4);
+for(let i=16;i<64;i++){const a=r(w[i-15],7)^r(w[i-15],18)^(w[i-15]>>>3),b=r(w[i-2],17)^r(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+a+w[i-7]+b)>>>0}
+let [a,b,c,d,e,f,g,hh]=h;
+for(let i=0;i<64;i++){const t1=(hh+(r(e,6)^r(e,11)^r(e,25))+((e&f)^(~e&g))+K[i]+w[i])>>>0,t2=((r(a,2)^r(a,13)^r(a,22))+((a&b)^(a&c)^(b&c)))>>>0;hh=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0}
+h=h.map((x,i)=>(x+[a,b,c,d,e,f,g,hh][i])>>>0)}
+return [...h].map(x=>x.toString(16).padStart(8,"0")).join("")}
+async function sha256(u){try{if(crypto&&crypto.subtle)return hex(new Uint8Array(await crypto.subtle.digest("SHA-256",u)))}catch(e){}return sha256js(u)}
+const NAMES=["C","D","E","F","G","A","B"];
+/* ---- MIDI ---- */
+function parseMidi(u){const dv=new DataView(u.buffer,u.byteOffset,u.byteLength);let p=14;const div=dv.getUint16(12);
+ if(String.fromCharCode(...u.slice(0,4))!=="MThd")throw Error("not MIDI");
+ const notes=[];let tempo=500000,prog=null;const on={};
+ while(p<u.length){const id=String.fromCharCode(...u.slice(p,p+4)),len=dv.getUint32(p+4);p+=8;const end=p+len;if(id!=="MTrk"){p=end;continue}
+ let t=0,run=0;const vlq=()=>{let v=0,b;do{b=u[p++];v=(v<<7)|(b&127)}while(b&128);return v};
+ while(p<end){t+=vlq();let s=u[p];if(s<0x80)s=run;else{p++;if(s<0xf0)run=s}
+  if(s===0xff){const ty=u[p++],ln=vlq();if(ty===0x51)tempo=(u[p]<<16)|(u[p+1]<<8)|u[p+2];p+=ln}
+  else if(s===0xf0||s===0xf7){p+=vlq()}
+  else{const k=s>>4;if(k===9||k===8){const key=u[p++],vel=u[p++];if(k===9&&vel>0)on[key]=t;else if(on[key]!==undefined){notes.push({key,t0:on[key],t1:t});delete on[key]}}
+   else if(k===0xc){prog=u[p++]}else if(k===0xd)p++;else p+=2}}
+ p=end}
+ notes.sort((a,b)=>a.t0-b.t0);return{div,tempo,prog,notes,bpm:Math.round(6e7/tempo)}}
+let actx=null,timers=[],voices=[];
+function stopPlay(){timers.forEach(clearTimeout);timers=[];voices.forEach(o=>{try{o.stop()}catch(e){}});voices=[];document.querySelectorAll("svg.score .n.on").forEach(n=>n.classList.remove("on"));const b=$("#play");if(b)b.textContent="▶ Play the MIDI"}
+function play(m){if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();actx.resume();const sec=t=>t*m.tempo/1e6/m.div;const t0=actx.currentTime+.08;
+ m.notes.forEach((n,i)=>{const f=440*Math.pow(2,(n.key-69)/12),a=t0+sec(n.t0),z=t0+sec(n.t1);const o=actx.createOscillator(),g=actx.createGain();o.type="triangle";o.frequency.value=f;
+  g.gain.setValueAtTime(0,a);g.gain.linearRampToValueAtTime(.28,a+.03);g.gain.setValueAtTime(.28,z-.06);g.gain.linearRampToValueAtTime(0,z);o.connect(g).connect(actx.destination);o.start(a);o.stop(z+.02);voices.push(o);
+  timers.push(setTimeout(()=>{const e=document.querySelector('svg.score .n[data-i="'+i+'"]');if(e)e.classList.add("on")},(a-actx.currentTime)*1000+ (actx.currentTime-actx.currentTime)));
+  timers.push(setTimeout(()=>{const e=document.querySelector('svg.score .n[data-i="'+i+'"]');if(e)e.classList.remove("on")},(z-actx.currentTime)*1000))});
+ const end=sec(Math.max(...m.notes.map(n=>n.t1)));timers.push(setTimeout(stopPlay,(end+.3)*1000));$("#play").textContent="■ Stop"}
+/* ---- MusicXML staff ---- */
+function drawXml(xmlText){const doc=new DOMParser().parseFromString(xmlText,"application/xml");if(doc.querySelector("parsererror"))return"<p class=no>MusicXML did not parse.</p>";
+ const title=doc.querySelector("work-title")?.textContent||"",part=doc.querySelector("part-name")?.textContent||"";
+ const ms=[...doc.querySelectorAll("part > measure")];let idx=0;const sp=9,perRow=4,mw=185,left=60,rowH=120;let svg="";const rows=Math.ceil(ms.length/perRow);
+ ms.forEach((m,mi)=>{const row=Math.floor(mi/perRow),col=mi%perRow,x0=left+col*mw,top=34+row*rowH,bot=top+4*sp;
+  const dur=[...m.querySelectorAll("note > duration")].reduce((s,d)=>s+ +d.textContent,0)||4;let t=0;
+  svg+=`<line x1="${x0+mw}" y1="${top}" x2="${x0+mw}" y2="${bot}" stroke="#333"/>`;
+  if(col===0){for(let i=0;i<5;i++)svg+=`<line x1="${x0-left+20}" y1="${top+i*sp}" x2="${x0+mw*0+ (perRow*mw)}" y2="${top+i*sp}" stroke="#333"/>`;svg+=`<text x="${x0-left+26}" y1="0" y="${bot-3}" font-size="46" font-family="serif">𝄞</text>`;
+   svg+=`<line x1="${x0-left+20}" y1="${top}" x2="${x0-left+20}" y2="${bot}" stroke="#333"/>`}
+  svg+=`<text x="${x0+4}" y="${top-8}" font-size="10" fill="#777">${m.getAttribute("number")}</text>`;
+  m.querySelectorAll("note").forEach(nt=>{const st=nt.querySelector("pitch > step")?.textContent,oc=nt.querySelector("pitch > octave")?.textContent,d=+nt.querySelector("duration").textContent,ty=nt.querySelector("type")?.textContent;
+   const x=x0+14+(t/dur)*(mw-26);t+=d;if(!st)return;const dd=(+oc)*7+NAMES.indexOf(st),y=bot-(dd-30)*sp/2;const filled=ty==="quarter"||ty==="eighth";
+   for(let k=28;k>=dd&&k<=28;k-=2){const ly=bot-(k-30)*sp/2;svg+=`<line x1="${x-9}" y1="${ly}" x2="${x+9}" y2="${ly}" stroke="#333"/>`}
+   const i=idx++;svg+=`<g class="n" data-i="${i}" fill="none" stroke="#111"><ellipse cx="${x}" cy="${y}" rx="5.6" ry="4.2" transform="rotate(-20 ${x} ${y})" class="h" style="fill:${filled?"#111":"#fff"}"/>`;
+   if(ty!=="whole")svg+=`<line x1="${x+(dd>=34?-5:5)}" y1="${y}" x2="${x+(dd>=34?-5:5)}" y2="${y+(dd>=34?30:-30)}"/>`;svg+=`<title>${st}${oc} ${ty}</title></g>`})});
+ return`<svg class="score" viewBox="0 0 ${left+perRow*mw+10} ${34+rows*rowH}" role="img" aria-label="Notation of ${esc(title)} for ${esc(part)}, drawn from the MusicXML bytes returned by this backend">${svg}</svg>`}
+/* ---- UI ---- */
+const bytesOf=(id,f)=>b64(L.files[id][f]);
+const mark=v=>v===true?'<span class="ok">✓ match</span>':v===null?'<span class="na">n/a</span>':'<span class="no">✗ differs</span>';
+const nativeWhy={compress:"plain gzip, decompressed in Python",chunker:"chunk files concatenated in Python",crypt:"ciphertext: only rclone can decrypt",memory:"no physical file exists",};
+function badge(s){return`<span class="badge ${s==="complete"?"b-ok":s==="partial"?"b-part":"b-bad"}">${s}</span>`}
+function counts(){const t=E.backends.length,n=E.inventory.length;$("#counts").innerHTML=`<div><b>${t}</b>backends actually tested</div><div><b>${E.backends.filter(b=>b.status==="complete").length}</b>delivered both files</div><div><b>${n-t}</b>provider names left as metadata only</div><div><b>${n}</b>names advertised by rclone ${esc(E.rclone.version)}</div>`}
+function tabs(){$("#tabs").innerHTML=E.backends.map(b=>`<button role="tab" id="t-${b.id}" aria-selected="false" data-id="${b.id}">${b.id}</button>`).join("");$("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)select(b.dataset.id,true)};
+ $("#tabs").onkeydown=e=>{const bs=[...document.querySelectorAll("#tabs button")],i=bs.indexOf(document.activeElement);if(i<0)return;if(e.key==="ArrowRight"||e.key==="ArrowLeft"){const j=(i+(e.key==="ArrowRight"?1:bs.length-1))%bs.length;bs[j].focus();select(bs[j].dataset.id,true)}}}
+async function select(id,push){stopPlay();const b=E.backends.find(x=>x.id===id)||E.backends[0];document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.id===b.id));if(push)history.replaceState(null,"","#"+b.id);
+ const rows=await Promise.all(b.files.map(async f=>{const u=bytesOf(b.id,f.name),h=await sha256(u);return{f,u,h}}));
+ const midi=rows.find(r=>r.f.name.endsWith(".mid")),xml=rows.find(r=>r.f.name.endsWith(".musicxml"));
+ const allOk=rows.every(r=>r.h===r.f.source_sha256);
+ let m=null,mErr="";try{m=parseMidi(midi.u)}catch(e){mErr=e.message}
+ const phys=b.physical.length?`<div class="scroll"><table><thead><tr><th>Physical root</th><th>File on disk</th><th>Bytes</th><th>First bytes</th></tr></thead><tbody>${b.physical.map(p=>`<tr><td>${esc(p.root)}</td><td class="mono">${esc(p.path)}</td><td>${p.bytes}</td><td class="mono">${p.first8_hex}</td></tr>`).join("")}</tbody></table></div>`:`<p>No files on disk. The objects live only in the memory of the rclone rcd process.</p>`;
+ const extra=[];
+ if(b.extra.crypt_names)extra.push(`<p><b>Name mapping</b> (<code>rclone cryptdecode --reverse</code>): ${b.extra.crypt_names.mapping.map(x=>`<code>${esc(x.replace(/\s+/g," "))}</code>`).join(", ")}</p>`);
+ if(b.extra.standalone_memory_observation)extra.push(`<p><b>Separate-process check</b>: <code>rclone lsf lab-memory:</code> in another process listed ${b.extra.standalone_memory_observation.listing.length} objects. ${esc(b.extra.standalone_memory_observation.note)}.</p>`);
+ $("#panel").innerHTML=`<div class="card"><h3 style="margin-top:0">${esc(b.id)} <span class="badge b-test">tested</span> ${badge(b.status)} <span class="note">${b.files_arrived} of ${b.files_expected} files</span></h3>
+ <p>${esc(b.what)}</p>
+ <div class="chain" aria-label="Adapter chain"><span>stock Computer</span><i>→ MCP stdio →</i><span>rclone-mcp ${esc(E.rclone_mcp.version)}</span><i>→ RC HTTP loopback →</i><span>rclone rcd ${esc(E.rclone.version)}</span><i>→</i><span>${esc(b.rclone_type)} backend</span></div>
+ <p class="note">Write server <code>${b.write_server}</code> (copy tools); read server <code>${b.read_server}</code> (read-only tools). Separate read path: ${esc(b.separate_read_path)}.</p></div>
+ <h3>Files that got through</h3><div class="scroll"><table><thead><tr><th>File</th><th>Path in backend</th><th>Bytes</th><th>SHA-256 (first 16)</th><th>rclone-mcp hash</th><th>Separate read</th><th>Native, no rclone</th><th>Your browser</th></tr></thead><tbody>
+ ${rows.map(({f,u,h})=>`<tr><td class="mono">${esc(f.name)}</td><td class="mono">${esc(f.remote_path)}</td><td>${u.length} of ${f.source_bytes}</td><td class="mono">${h.slice(0,16)}</td><td>${mark(f.verified_mcp)}</td><td>${mark(f.verified_separate)}</td><td>${mark(f.verified_native)}${f.verified_native===null?`<br><span class="note">${esc(nativeWhy[b.id]||"")}</span>`:""}</td><td>${h===f.source_sha256?'<span class="ok">✓ match</span>':'<span class="no">✗ differs</span>'}</td></tr>`).join("")}</tbody></table></div>
+ <h3>As listed through the MCP read tool</h3><div class="scroll"><table><thead><tr><th>Path</th><th>Size</th><th>Kind</th></tr></thead><tbody>${b.mcp_list.map(i=>`<tr><td class="mono">${esc(i.Path)}</td><td>${i.IsDir?"":i.Size}</td><td>${i.IsDir?"directory":"file"}${i.Path==="SEED-NOTE.txt"?" (synthetic pre-seeded note, not part of the score)":""}</td></tr>`).join("")}</tbody></table></div>
+ <p class="note">Check: ${b.mcp_check?esc(b.mcp_check.status)+" (rclone check --download, source vs backend)":"not run for this layout (the backend re-routes paths)"} · MCP size: ${b.mcp_size?b.mcp_size.count+" objects, "+b.mcp_size.bytes+" bytes":"-"}</p>
+ <h3>Physical representation</h3>${phys}${extra.join("")}
+ <p class="note">Raw tool calls and replies: <a href="raw/${b.id}-computer-script.sh">script</a> · <a href="raw/${b.id}-computer-output.txt">Computer output</a></p>
+ <h3>Open the score from this backend</h3><div class="card">
+ <p>${allOk?'<span class="ok">The bytes below were read back from this backend and re-hashed in your browser.</span>':'<span class="no">Hash mismatch: do not trust these bytes.</span>'}</p>
+ <div class="row"><button class="btn" id="play" ${m?"":"disabled"}>▶ Play the MIDI</button><a class="btn alt" id="dlm" download="${esc(midi.f.name)}">Download .mid</a><a class="btn alt" id="dlx" download="${esc(xml.f.name)}">Download .musicxml</a></div>
+ <p class="note">${m?`${m.notes.length} notes · ${m.bpm} bpm · program ${m.prog} · synthesised in the browser with a triangle oscillator, not an instrument sample.`:esc(mErr)}</p>
+ ${drawXml(new TextDecoder().decode(xml.u))}</div>`;
+ $("#dlm").href=URL.createObjectURL(new Blob([midi.u],{type:"audio/midi"}));$("#dlx").href=URL.createObjectURL(new Blob([xml.u],{type:"application/vnd.recordare.musicxml+xml"}));
+ const pb=$("#play");if(pb&&m)pb.onclick=()=>{if(timers.length)stopPlay();else play(m)}}
+function findings(){const P=E.probes,M=E.memory_root_path_attempt;
+ $("#findings").innerHTML=`<div class="card"><h3 style="margin-top:0">Which rclone-mcp release would run against rclone ${esc(E.rclone.version)}</h3><div class="scroll"><table><thead><tr><th>rclone-mcp</th><th>Outcome</th><th>Detail</th></tr></thead><tbody>
+ ${P.map(p=>`<tr><td>${esc(p.rclone_mcp)} (as published)</td><td>${esc(p.outcome)}</td><td class="mono">${esc(p.stderr&&p.outcome.startsWith("refused")?p.stderr:p.operations_list_result||"")}</td></tr>`).join("")}
+ <tr><td>${esc(E.rclone_mcp.version)} with rclone-sdk and rclone-openapi pinned to ${esc(E.rclone_mcp.pinned_deps["rclone-sdk"])}</td><td>worked (used for every result above)</td><td class="mono">server self-reports ${esc(E.rclone_mcp.self_reported_server_version)}; ${E.tool_surface["rclone-copy"].published_tools.length} tools in the copy server, ${E.tool_surface["rclone-read"].published_tools.length} in the read-only server</td></tr></tbody></table></div>
+ <p class="note">The latest release (2.1.0) was therefore not used. The lab uses the oldest release, 1.0.0, with its two generated-API packages pinned to the 1.74.x line; unpinned, the newest allowed packages make every tool call fail with 431.</p></div>
+ <div class="card"><h3 style="margin-top:0">Memory backend: root-level paths</h3><p>${esc(M.summary)}</p></div>
+ <div class="card"><h3 style="margin-top:0">Restriction boundary</h3><p>The read server is limited by <code>--read-only</code>, which the server enforces. The copy server offers the <code>operations</code> and <code>sync</code> toolsets, and those still include delete, move and sync tools. They were not called; that restriction rests on the fixed call plan and the recorded scripts, not on the server.</p></div>`}
+function inventory(){const tested=new Map(E.backends.map(b=>[b.rclone_type,b.id]));$("#invnote").innerHTML=`Source: <code>rclone-providers.json</code>, from <code>rclone --config /dev/null config providers</code> on ${esc(E.rclone.version)}; identical to the live output when this page was built: <b>${E.inventory_matches_live?"yes":"no"}</b>. Only the highlighted rows were exercised. Every other row is name and description metadata. Listing a name does not run that backend.`;
+ const tb=$("#inv tbody");tb.innerHTML=E.inventory.map((p,i)=>{const t=tested.get(p.name);return`<tr class="${t?"tested":""}" data-n="${esc(p.name.toLowerCase())}"><td>${i+1}</td><td class="mono">${esc(p.name)}</td><td>${esc(p.description)}</td><td>${t?`<a href="#${t}" data-go="${t}"><span class="badge b-test">tested</span></a> ${badge(E.backends.find(b=>b.id===t).status)}`:'<span class="badge b-meta">metadata only</span>'}</td></tr>`}).join("");
+ tb.onclick=e=>{const a=e.target.closest("a[data-go]");if(a){e.preventDefault();select(a.dataset.go,true);$("#tabs").scrollIntoView()}};
+ $("#q").oninput=e=>{const q=e.target.value.toLowerCase();tb.querySelectorAll("tr").forEach(r=>r.hidden=q&&!r.dataset.n.includes(q)&&!r.textContent.toLowerCase().includes(q))}}
+function repro(){$("#repro").innerHTML=`<p>Computer <code>${esc(E.computer.revision.slice(0,12))}</code> (binary sha256 <code>${esc(E.computer.sha256.slice(0,16))}</code>), score source <code>${esc(E.source.commit.slice(0,7))}</code> <code>${esc(E.source.path)}</code>, rclone ${esc(E.rclone.version)}, node ${esc(E.node)}. Generated ${esc(E.generated_utc)}.</p><p>Replay: <code>python3 -I scripts/run-lab.py --computer /path/to/computer --source source --lab NEW_EMPTY_DIR --out OUT</code>. See PUBLIC-HANDOFF.md for boundaries.</p>`}
+counts();tabs();findings();inventory();repro();select(location.hash.slice(1)||E.backends[0].id,false);
+addEventListener("hashchange",()=>select(location.hash.slice(1),false));
+</script>
+</body>
+</html>

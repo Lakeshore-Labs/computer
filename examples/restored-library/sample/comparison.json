@@ -1,0 +1,41 @@
+{
+  "changed_files": [
+    "hours.csv"
+  ],
+  "changed_days": [
+    "Friday",
+    "Saturday",
+    "Sunday"
+  ],
+  "verified": {
+    "original": {
+      "books.csv": true,
+      "hours.csv": true,
+      "notice.md": true
+    },
+    "changed": {
+      "books.csv": true,
+      "hours.csv": true,
+      "notice.md": true
+    }
+  },
+  "sha256": {
+    "original": {
+      "books.csv": "dd8154db2a795984dc6ccd15ac1ed4cd25aedb4434aa55e35187b394dbc80046",
+      "hours.csv": "40502e0e2cee15e56ac2f5b32822945148c9ef1914fdd69f84100936045ddac1",
+      "notice.md": "3f776b9d9804126199c94411cbca415e54614910a62dc2f842fb6dc4308a82b5"
+    },
+    "changed": {
+      "books.csv": "dd8154db2a795984dc6ccd15ac1ed4cd25aedb4434aa55e35187b394dbc80046",
+      "hours.csv": "d69f82d64788b930f279eaea7e099fcd9705ff8e1659375e6a8a7c58dd65499a",
+      "notice.md": "3f776b9d9804126199c94411cbca415e54614910a62dc2f842fb6dc4308a82b5"
+    }
+  },
+  "weekly_hours": {
+    "original": 47.0,
+    "changed": 56.0
+  },
+  "titles": 24,
+  "copies": 67,
+  "books_identical": true
+}

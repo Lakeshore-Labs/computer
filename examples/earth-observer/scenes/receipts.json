@@ -1,0 +1,26 @@
+[
+  {
+    "date": "2024-01-21",
+    "label": "Jan 21",
+    "bytes": 65227,
+    "sha256": "d6340707e8e053d646e5f869bc11104d85aba6f74c964d6461694d99ab40d7a3"
+  },
+  {
+    "date": "2024-04-06",
+    "label": "Apr 06",
+    "bytes": 76939,
+    "sha256": "d232ece8d66535aab8f0b3bc92646080a2f1bcfeaf27acc7fb151f91fadf5ee9"
+  },
+  {
+    "date": "2024-07-15",
+    "label": "Jul 15",
+    "bytes": 69816,
+    "sha256": "4a3e4d8bba653938b7675c0b16bf3773644713ec96c52f684b381ea13fd2e541"
+  },
+  {
+    "date": "2024-10-05",
+    "label": "Oct 05",
+    "bytes": 56602,
+    "sha256": "30ff8c46ff345a15a3809e71969726beeb76f78935df9a65d3b3d2d7ae979f5e"
+  }
+]

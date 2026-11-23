@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Four moons of Jupiter · reading room</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#16222e;color:#f2eadb;font:16px/1.4 system-ui,sans-serif}
+header{max-width:970px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}header strong{font:23px Georgia,serif}
+label{font-size:14px}select{font:inherit;max-width:50vw;padding:6px;border:1px solid #aab7bd;color:#eef5f7;background:#233443;border-radius:4px}
+main{max-width:925px;margin:0 auto;background:#f8f5ee}#reader{width:100%;height:calc(100dvh - 72px);min-height:450px}
+@media(max-width:550px){header{padding:12px}label>span{display:none}header strong{font-size:17px}#reader{height:calc(100dvh - 60px)}}
+</style><header><strong>Field guide reader</strong><label><span>Chapter </span><select aria-label="Chapter" id="chapter"></select></label></header>
+<main><div id="reader" aria-label="EPUB content"></div></main><script src="jszip.min.js"></script><script src="epub.min.js"></script>
+<script>
+(async () => {
+ const response=await fetch('four-moons.epub');
+ if (!response.ok) throw Error('The local book is unavailable');
+ const book=ePub(await response.arrayBuffer());
+ const nav=await book.loaded.navigation;
+ const choice=document.querySelector('#chapter');
+ for (const item of nav.toc) choice.add(new Option(item.label.trim(),item.href));
+ const rendition=book.renderTo('reader',{width:'100%',height:'100%',flow:'scrolled-doc',spread:'none'});
+ await rendition.display();
+ choice.addEventListener('change',()=>rendition.display(choice.value));
+})().catch(error=>{document.querySelector('#reader').textContent=error.message;});
+</script></html>

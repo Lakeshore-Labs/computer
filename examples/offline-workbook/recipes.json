@@ -1,0 +1,429 @@
+[
+  {
+    "id": "archive-checksum",
+    "title": "Archive the timetable and verify its contents",
+    "group": "Shell and SQL",
+    "expect": [
+      "day.csv",
+      "routes.yaml"
+    ],
+    "files": [
+      "route-inputs.tar.gz"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "awk-peak",
+    "title": "Find the busiest departure across three routes",
+    "group": "Shell and SQL",
+    "expect": [
+      "18:00 136 riders"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "chart-bar",
+    "title": "Compare ferry routes by departure",
+    "group": "Charts and images",
+    "expect": [
+      "bar.png PNG 800x500"
+    ],
+    "files": [
+      "bar.png"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "chart-line",
+    "title": "Plot a day of passenger traffic",
+    "group": "Charts and images",
+    "expect": [
+      "line.png PNG 800x500"
+    ],
+    "files": [
+      "line.png"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "chart-pie",
+    "title": "Show the distribution of Pier passengers by time",
+    "group": "Charts and images",
+    "expect": [
+      "pie.png PNG 800x500"
+    ],
+    "files": [
+      "pie.png"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "chart-scatter",
+    "title": "Show each route’s passenger counts by departure",
+    "group": "Charts and images",
+    "expect": [
+      "scatter.png PNG 800x500"
+    ],
+    "files": [
+      "scatter.png"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "chart-vector",
+    "title": "Write a vector chart to standard output",
+    "group": "Charts and images",
+    "expect": [
+      "<svg"
+    ],
+    "files": [
+      "departures.svg"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "compressed-stream",
+    "title": "Read gzipped manifests without expanding them to disk",
+    "group": "Python",
+    "expect": [
+      "Departure rows: 8",
+      "SHA-256:"
+    ],
+    "files": [
+      "timetable.csv.gz"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "docx-reading",
+    "title": "Turn a Word briefing into text and HTML",
+    "group": "Documents",
+    "expect": [
+      "Harborside operations brief",
+      "eight departures"
+    ],
+    "files": [
+      "word-brief.html"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "image-cut",
+    "title": "Crop and rotate part of the transit map",
+    "group": "Charts and images",
+    "expect": [
+      "PNG 230x440"
+    ],
+    "files": [
+      "section-turn.png"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "image-formats",
+    "title": "Transcode a map to GIF, TIFF and BMP",
+    "group": "Charts and images",
+    "expect": [
+      "GIF 240x135",
+      "TIFF 240x135",
+      "BMP 240x135"
+    ],
+    "files": [
+      "map.gif",
+      "map.tiff",
+      "map.bmp"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "image-mirror",
+    "title": "Flip a route map on its horizontal and vertical axes",
+    "group": "Charts and images",
+    "expect": [
+      "PNG 480x270"
+    ],
+    "files": [
+      "mirrored.png"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "image-thumbnail",
+    "title": "Make a WebP map small enough for an email",
+    "group": "Charts and images",
+    "expect": [
+      "WEBP 960x540",
+      "JPEG 360x203"
+    ],
+    "files": [
+      "harbor-thumb.jpg"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "image-transparency",
+    "title": "Flatten a transparent ferry icon onto a chosen background",
+    "group": "Charts and images",
+    "expect": [
+      "JPEG 300x200"
+    ],
+    "files": [
+      "boat-card.jpg"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "join-routes",
+    "title": "Join route names and capacities across formats",
+    "group": "Shell and SQL",
+    "expect": [
+      "Museum 225 56",
+      "Pier 310 80"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "library-search",
+    "title": "Search a PDF briefing through SQLite full-text indexing",
+    "group": "Documents",
+    "expect": [
+      "Page 2",
+      "[detail]"
+    ],
+    "files": [
+      "brief-search.db"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "markdown-roundtrip",
+    "title": "Convert Markdown to HTML and back",
+    "group": "Documents",
+    "expect": [
+      "# Last departure",
+      "**Pier**"
+    ],
+    "files": [
+      "last-departure.html"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "million-records",
+    "title": "Summarize a million trips before returning an answer",
+    "group": "Field notes",
+    "expect": [
+      "333334",
+      "333333",
+      "Summary bytes:",
+      "PNG 800x500"
+    ],
+    "files": [
+      "million-summary.csv",
+      "million.png"
+    ],
+    "timeout": 150,
+    "wasi_python": false
+  },
+  {
+    "id": "notice-to-markdown",
+    "title": "Convert the public timetable to Markdown",
+    "group": "Documents",
+    "expect": [
+      "# Harborside timetable",
+      "**06:00**"
+    ],
+    "files": [
+      "notice.md"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "pdf-brief",
+    "title": "Typeset a two-page operations brief inside WebAssembly",
+    "group": "Documents",
+    "expect": [
+      "2 pages",
+      "Harborside"
+    ],
+    "files": [
+      "operations.pdf",
+      "operations-1.png"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "pdf-split",
+    "title": "Extract and render one page from a PDF",
+    "group": "Documents",
+    "expect": [
+      "Selected page 2 of 2",
+      "Route detail",
+      "JPEG"
+    ],
+    "files": [
+      "route-detail.pdf",
+      "detail-1.jpg"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "python-statistics",
+    "title": "Summarize ridership with the Python standard library",
+    "group": "Python",
+    "expect": [
+      "Pier    median 38.0",
+      "peak 64"
+    ],
+    "files": [],
+    "wasi_python": true
+  },
+  {
+    "id": "readonly",
+    "title": "Keep the source timetable read-only",
+    "group": "File stores",
+    "expect": [
+      "hour,Pier,Museum,North",
+      "06:00,18,12,11",
+      "Write refused"
+    ],
+    "files": [
+      "working-copy.csv"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "route-selector",
+    "title": "Find departures carrying at least 45 riders",
+    "group": "Shell and SQL",
+    "expect": [
+      "18:00\tPier\t64",
+      "16:00\tMuseum\t48"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "service-yaml",
+    "title": "Read the largest ferry capacity from YAML",
+    "group": "Shell and SQL",
+    "expect": [
+      "Pier",
+      "80"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "shell-inventory",
+    "title": "List the command binaries available in this mount",
+    "group": "Runtime",
+    "expect": [
+      "sqlite3",
+      "jq",
+      "chart",
+      "pdftotext"
+    ],
+    "files": [
+      "commands.txt"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "sonify",
+    "title": "Hear eight departures as a three-note harbor score",
+    "group": "Field notes",
+    "expect": [
+      "8 departures",
+      "4.96 seconds",
+      "16000 Hz"
+    ],
+    "files": [
+      "harbor.wav",
+      "harbor-score.svg"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "sqlite-handoff",
+    "title": "Create a database in Python and query it from the shell",
+    "group": "Shell and SQL",
+    "expect": [
+      "Inserted 24",
+      "719"
+    ],
+    "files": [
+      "harbor.db"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "sqlite-window",
+    "title": "Rank ferry traffic with a SQL window function",
+    "group": "Shell and SQL",
+    "expect": [
+      "rank",
+      "Museum",
+      "310"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "template-report",
+    "title": "Render a shareable service notice from YAML",
+    "group": "Documents",
+    "expect": [
+      "Pier · capacity 80",
+      "North · capacity 40"
+    ],
+    "files": [
+      "service-notice.html"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "time-zones",
+    "title": "Publish a daylight-saving-aware departure time",
+    "group": "Python",
+    "expect": [
+      "08:00 PDT",
+      "16:00 BST",
+      "00:00 JST"
+    ],
+    "files": [],
+    "wasi_python": true
+  },
+  {
+    "id": "toml-roundtrip",
+    "title": "Write and validate a TOML service manifest",
+    "group": "Python",
+    "expect": [
+      "[ferry]",
+      "departures = 24"
+    ],
+    "files": [
+      "service.toml"
+    ],
+    "wasi_python": true
+  },
+  {
+    "id": "xan-profile",
+    "title": "Aggregate three routes directly from a CSV",
+    "group": "Shell and SQL",
+    "expect": [
+      "310,225,184"
+    ],
+    "wasi_python": false
+  },
+  {
+    "id": "xlsx-brief",
+    "title": "Build a workbook with formulas and a chart, then read it back",
+    "group": "Documents",
+    "expect": [
+      "8 departures",
+      "18:00 total: 136"
+    ],
+    "files": [
+      "timetable.xlsx"
+    ],
+    "wasi_python": true
+  }
+]

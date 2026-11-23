@@ -1,0 +1,44 @@
+[
+  {
+    "width": 1280,
+    "visitor": "Mira",
+    "file": "01-getty-a-mira.svg",
+    "bytes": 35741,
+    "sha256": "75fda67b362c38b28386e82569518374cdbd25763efb043aba513d6ffe53174c"
+  },
+  {
+    "width": 1280,
+    "visitor": "Tobias",
+    "file": "02-getty-b-tobias.svg",
+    "bytes": 35745,
+    "sha256": "e6bd66f7875798c61c54c5429b41b0ea4ed7991158df3f7017a28d111b168588"
+  },
+  {
+    "width": 1280,
+    "visitor": "Ines",
+    "file": "03-cleveland-a-ines.svg",
+    "bytes": 31330,
+    "sha256": "fa04e7e277759db8eb90a3b11eb10da485ef886c93b0c0aafe7fe99d978c518c"
+  },
+  {
+    "width": 390,
+    "visitor": "Mira",
+    "file": "01-getty-a-mira.svg",
+    "bytes": 35741,
+    "sha256": "75fda67b362c38b28386e82569518374cdbd25763efb043aba513d6ffe53174c"
+  },
+  {
+    "width": 390,
+    "visitor": "Tobias",
+    "file": "02-getty-b-tobias.svg",
+    "bytes": 35745,
+    "sha256": "e6bd66f7875798c61c54c5429b41b0ea4ed7991158df3f7017a28d111b168588"
+  },
+  {
+    "width": 390,
+    "visitor": "Ines",
+    "file": "03-cleveland-a-ines.svg",
+    "bytes": 31330,
+    "sha256": "fa04e7e277759db8eb90a3b11eb10da485ef886c93b0c0aafe7fe99d978c518c"
+  }
+]

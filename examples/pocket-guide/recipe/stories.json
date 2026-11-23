@@ -1,0 +1,8 @@
+[
+  {"title":"Ferry dispatch","image":"four-tools/sample/report.png","pr":16,"lines":["50,000 trips enter a WASI Python program.","SQLite and a chart stay in the workspace."],"role":"UPSTREAM MCP  /  SQLITE"},
+  {"title":"Venice in pixels","image":"lagoon-windows/sample/desktop.png","pr":47,"lines":["Four HTTP range reads supply three windows.","Independent GDAL reads match every pixel."],"role":"HTTP RANGES  /  RASTER DATA"},
+  {"title":"A rehearsal score","image":"rehearsal-room/sample/desktop.png","pr":53,"lines":["One melody yields flute and clarinet parts.","Apple reads both MIDI files at concert pitch."],"role":"WASI COMMAND  /  MIDI + MUSICXML"},
+  {"title":"An island mailbag","image":"island-mailbag/sample/desktop.png","pr":59,"lines":["A 1,035-byte amendment moves a meeting.","The receiver reuses the 121,382-byte book."],"role":"CAR FILES  /  CONTENT-ADDRESSED STORAGE"},
+  {"title":"A radio cue","image":"radio-jetstream/evidence/run-2/desktop.png","pr":65,"lines":["Computer publishes a 1.5-second radio cue.","A receiver recovers it after a server restart."],"role":"NATS JETSTREAM  /  WAV"},
+  {"title":"A lunch delivery","image":"canteen-loadout/evidence/desktop-quay-after.png","pr":66,"lines":["Two SQL sources agree on 150 meals.","Four transfers resolve 13 misplaced portions."],"role":"POSTGRESQL  /  DUCKDB + PARQUET"}
+]

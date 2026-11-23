@@ -1,0 +1,15 @@
+{
+ "object_size_chars": 32060,
+ "object_digest": "SHA-256=DCj2uGjvOnuWIgNOf2Z-d-qIQmYOf3jLymLXB64jyfM=",
+ "decoded_bytes": 24044,
+ "sha256": "85dc11e4486cc68a7702d8888ac5a4c9054709361317170701a5f6056646cfdf",
+ "stream_storage": "file",
+ "stream_msgs": 1,
+ "consumer": {
+  "ack_floor": 1,
+  "num_pending": 0,
+  "num_ack_pending": 0,
+  "num_redelivered": 0
+ },
+ "pass": true
+}

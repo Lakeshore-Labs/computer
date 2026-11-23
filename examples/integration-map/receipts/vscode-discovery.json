@@ -1,0 +1,17 @@
+{
+  "title": "Inspect Computer tools in the native VS Code extension API",
+  "group": "Runtime behavior",
+  "summary": "Starting Computer added four tools to the signed-out editor’s global language-model tool registry. When the extension invoked read, VS Code displayed its native confirmation dialog.",
+  "evidence": {
+    "VS Code version": "1.140.0",
+    "Registry entries before": 36,
+    "Registry entries after": 40,
+    "New tools": [
+      "mcp_computer_bash",
+      "mcp_computer_edit",
+      "mcp_computer_read",
+      "mcp_computer_write"
+    ],
+    "Observed endpoint": "The read remained pending at confirmation. The synthetic notice was unchanged."
+  }
+}

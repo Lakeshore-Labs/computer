@@ -1,0 +1,37 @@
+{
+  "mcp_tools": [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ],
+  "registry": "loopback crane registry serve",
+  "tags": [
+    "amended",
+    "original"
+  ],
+  "editions": [
+    {
+      "edition": "original",
+      "manifest": "sha256:8567895f31d7525234cfc53bc0e1c4d693cd1b95ccf4cfe40f3fa461d76d7e4f",
+      "book": "sha256:db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5",
+      "calendar": "sha256:720b6cc5103f21eb6ec529872c530b83d9ff914d2fdae0a6dd527fb4f018e314",
+      "start": "2026-11-24T17:30:00+00:00",
+      "bytes_epub": 121382,
+      "bytes_calendar": 290,
+      "registry_manifest_digest": "sha256:8567895f31d7525234cfc53bc0e1c4d693cd1b95ccf4cfe40f3fa461d76d7e4f"
+    },
+    {
+      "edition": "amended",
+      "manifest": "sha256:9f1f14e678ec9e0a25d12e0a56c7b5dc95c3f621d63a4386c6b50b4354043a91",
+      "book": "sha256:db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5",
+      "calendar": "sha256:c6f0b535e3c1f0a7da9fe56bbe53568e54e5fa7dcee7201259f7c69e31720391",
+      "start": "2026-11-24T18:00:00+00:00",
+      "bytes_epub": 121382,
+      "bytes_calendar": 290,
+      "registry_manifest_digest": "sha256:9f1f14e678ec9e0a25d12e0a56c7b5dc95c3f621d63a4386c6b50b4354043a91"
+    }
+  ],
+  "physical_blobs": 6,
+  "distinct_book_layers": 1
+}

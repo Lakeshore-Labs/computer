@@ -1,0 +1,25 @@
+{
+  "mount": "in-process rclone combine backend and vfs.VFS through afero.FromIOFS",
+  "mount_mode": "read only",
+  "images": [
+    {
+      "museum": "cleveland",
+      "title": "The Large Plane Trees (Road Menders at Saint-Rémy)",
+      "accession": "1947.209",
+      "source_bytes": 332102,
+      "source_sha256": "3a9337e095805241fb86be7c6eb9235d69a062d541719f5a74143995e0214042",
+      "embedded_bytes": 116689,
+      "embedded_sha256": "e95bd8a137028889ecb9ed5fc844357c8f97f8e7c029e5298a5e9150c16dfb2e"
+    },
+    {
+      "museum": "getty",
+      "title": "Irises",
+      "accession": "90.PA.20",
+      "source_bytes": 172425,
+      "source_sha256": "4c16c696862dba006aa27a643f8d4ba750e83351789050abc860c755b9cded76",
+      "embedded_bytes": 143341,
+      "embedded_sha256": "883f0076ec34bab002f1aa4cfa3ece243ed1d8c708b2b0baaa1c8dbda3140564"
+    }
+  ],
+  "html_bytes": 349258
+}

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rehearsal Stand · offline score reader</title>
+<style>
+:root{--wood1:#2a1810;--wood2:#4a2c1a;--brass:#d9b25f;--brass2:#8a6a2a;--paper:#fbf6e9;--ink:#1d1812;--lamp:#ffe2a6;--accent:#e0653a}
+*{box-sizing:border-box}
+html{background:#22130a}html,body{margin:0}
+body{min-height:100vh;color:#f3e7d0;font:15px/1.45 "Avenir Next",Avenir,"Helvetica Neue",system-ui,sans-serif;
+ background:
+  radial-gradient(ellipse 70% 55% at 50% 38%,rgba(255,214,140,.30),transparent 70%),
+  repeating-linear-gradient(92deg,rgba(0,0,0,.10) 0 2px,transparent 2px 9px),
+  linear-gradient(180deg,var(--wood2),var(--wood1) 70%);
+}
+header{max-width:1240px;margin:0 auto;padding:26px 24px 8px;display:flex;flex-wrap:wrap;gap:6px 24px;align-items:baseline;justify-content:space-between}
+.eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--brass)}
+h1{font:400 clamp(28px,4.6vw,52px)/1.05 Georgia,"Iowan Old Style",serif;margin:2px 0 0;color:#fff4dc;text-shadow:0 2px 18px rgba(255,200,110,.35)}
+.meta{color:#cdb894;font-size:13px;text-align:right}
+.meta b{color:#fff4dc;font-weight:600}
+main{max-width:1240px;margin:0 auto;padding:8px 24px 40px}
+.selector{display:flex;gap:10px;justify-content:center;margin:10px 0 18px;flex-wrap:wrap}
+.selector label{cursor:pointer}
+.selector input{position:absolute;opacity:0;pointer-events:none}
+.selector span{display:block;padding:11px 22px;border-radius:999px;border:1.5px solid var(--brass2);background:rgba(0,0,0,.28);color:#e8d6b0;font-weight:600;letter-spacing:.02em;transition:.2s}
+.selector span small{display:block;font-weight:400;font-size:11px;opacity:.75;letter-spacing:.04em}
+.selector input:checked+span{background:linear-gradient(180deg,#f0cf7c,#b98a35);color:#2a1a08;border-color:#ffe7a8;box-shadow:0 0 24px rgba(255,205,110,.45)}
+.selector input:focus-visible+span{outline:3px solid #fff;outline-offset:3px}
+.stand{position:relative;display:grid;gap:22px;padding:28px 26px 34px;border-radius:18px;
+ background:linear-gradient(180deg,#1a1a1d,#0e0e10);border:2px solid #3b3b40;box-shadow:0 30px 70px rgba(0,0,0,.6),inset 0 0 0 6px #111,inset 0 0 0 8px var(--brass2)}
+.stand::before{content:"";position:absolute;left:50%;bottom:-46px;width:14px;height:46px;background:linear-gradient(90deg,#6c5524,#e5c46f,#6c5524);transform:translateX(-50%)}
+.sheet{position:relative;background:var(--paper);color:var(--ink);border-radius:4px;padding:14px 18px 10px;
+ box-shadow:0 14px 34px rgba(0,0,0,.55);transition:transform .35s,opacity .35s,filter .35s;cursor:pointer;
+ background-image:linear-gradient(180deg,rgba(255,255,255,.7),transparent 30%),repeating-linear-gradient(0deg,rgba(120,90,40,.025) 0 1px,transparent 1px 3px)}
+.sheet.inactive{opacity:.55;filter:saturate(.6) brightness(.9);transform:scale(.975)}
+.sheet.active{outline:3px solid rgba(224,101,58,.9);outline-offset:2px}
+.sheet h2{margin:0 0 4px;font:600 12px/1.2 "Avenir Next",system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#7a5a24;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sheet h2 em{font-style:normal;letter-spacing:.04em;text-transform:none;color:#6d6657;font-weight:500}
+.sheet svg{display:block;width:100%;height:auto}
+.sheet .narrow{display:none}
+.sheet svg g.note.played{fill:#9a6a1e;stroke:#9a6a1e}
+.sheet svg g.note.now{fill:var(--accent);stroke:var(--accent)}
+.sheet svg g.note{cursor:pointer}
+.tray{margin-top:46px;display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;padding:16px 22px;border-radius:14px;
+ background:linear-gradient(180deg,#3a2415,#22130a);border:1.5px solid var(--brass2);box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.btns{display:flex;gap:12px}
+button.round{width:64px;height:64px;border-radius:50%;border:2px solid #ffe7a8;background:radial-gradient(circle at 35% 30%,#f7da8d,#b0822f);color:#2a1a08;font-size:26px;cursor:pointer;box-shadow:0 5px 16px rgba(0,0,0,.5)}
+button.round.small{width:46px;height:46px;font-size:18px;align-self:center;background:radial-gradient(circle at 35% 30%,#5b4a33,#2a2015);color:#f0cf7c;border-color:var(--brass2)}
+button:focus-visible,a:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.prog{min-width:0}
+.bar{height:10px;border-radius:5px;background:#120a05;overflow:hidden;border:1px solid #5a4020;cursor:pointer}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brass),var(--accent))}
+.now{display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-variant-numeric:tabular-nums;font-size:13px;color:#e9d9b7;flex-wrap:wrap}
+.now b{color:#fff4dc}
+.dl{display:flex;flex-direction:column;gap:6px}
+.dl a{color:#2a1a08;background:var(--brass);text-decoration:none;font-weight:700;font-size:13px;padding:6px 12px;border-radius:7px;display:flex;justify-content:space-between;gap:12px;white-space:nowrap}
+.dl a code{font-weight:500;opacity:.7;font-size:11px}
+.note-line{margin:10px 0 0;text-align:center;color:#cdb894;font-size:13px}
+.credits{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:30px}
+.credits section{background:rgba(0,0,0,.32);border:1px solid #5a4020;border-radius:12px;padding:14px 16px}
+.credits h3{margin:0 0 6px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass)}
+.credits p{margin:0;font-size:13px;color:#e2d3b3}
+.hash{font:11px ui-monospace,Menlo,monospace;color:#bda57a;word-break:break-all;margin-top:6px}
+@media (max-width:760px){
+ header{padding:18px 16px 4px}.meta{text-align:left}
+ main{padding:6px 12px 30px}
+ .stand{padding:16px 10px 22px;gap:14px;border-radius:12px}
+ .sheet{padding:10px 8px 6px}
+ .sheet .wide{display:none}.sheet .narrow{display:block}
+ .tray{grid-template-columns:1fr;gap:14px;padding:14px;margin-top:40px}
+ .btns{justify-content:center}
+ .dl{flex-direction:row;flex-wrap:wrap}.dl a{flex:1 1 140px}
+ .selector{flex-wrap:nowrap;gap:8px}.selector label{flex:1}.selector span{padding:9px 8px;text-align:center;border-radius:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head>
+<body>
+<header>
+ <div><div class="eyebrow">Rehearsal Room · offline part reader</div><h1 id="title">Rehearsal Stand</h1></div>
+ <div class="meta" id="meta"></div>
+</header>
+<main>
+ <div class="selector" role="radiogroup" aria-label="Instrument" id="selector"></div>
+ <div class="stand" id="stand"></div>
+ <div class="tray" role="group" aria-label="Playback and downloads">
+  <div class="btns">
+   <button class="round" id="play" aria-label="Play">▶</button>
+   <button class="round small" id="stop" aria-label="Stop">■</button>
+  </div>
+  <div class="prog">
+   <div class="bar" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="fill"></i></div>
+   <div class="now"><span id="nowtxt">Ready — <b>synthesized tones</b> from decoded MIDI events</span><span id="clock">0:00.0 / 0:00.0</span></div>
+  </div>
+  <div class="dl" id="dl"></div>
+ </div>
+ <p class="note-line">Playback uses synthesized tones from the decoded MIDI notes. Select a note to start there.</p>
+ <div class="credits">
+  <section><h3>Computer wrote the parts</h3><p>The Go host registered a WASI program as a shell command. Two Computer shells used it to turn <code>score.csv</code> into the flute and clarinet MusicXML and MIDI files.</p></section>
+  <section><h3>Verovio <span id="vv"></span> engraved</h3><p>External open-source engraver. Typeset both original MusicXML files to the SVG scores you see (clarinet at written pitch, +2 over concert, key signature &amp; transposition from the file).</p></section>
+  <section><h3>mido <span id="mv"></span> decoded</h3><p>External MIDI library. Independently read every sounding pitch, tick, tempo, time signature and GM program from the original .mid files that drive playback.</p></section>
+  <section><h3>Playback and downloads</h3><p>The reader checks pitch and timing against the source and offers the original files alongside a synthesized WAV.</p><div class="hash" id="srcsha"></div></section>
+ </div>
+</main>
+<script>
+const DATA=/*__DATA__*/null;
+const $=s=>document.querySelector(s);
+const NAMES=["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"];
+const pn=m=>NAMES[m%12]+(Math.floor(m/12)-1);
+const fmt=t=>{t=Math.max(0,t);return Math.floor(t/60)+":"+(t%60).toFixed(1).padStart(4,"0")};
+const keys=Object.keys(DATA.parts);
+const S={active:keys[0],playing:false,paused:false,idx:-1,elapsed:0,peak:0,ctx:null,ctxState:null,scheduled:0,started:0,log:[]};
+window.__stand=S; window.__DATA_SUMMARY={rows:DATA.rows,duration:DATA.duration};
+const P0=DATA.parts[keys[0]];
+$("#title").textContent=P0.title||"Rehearsal Stand";
+$("#meta").innerHTML=`<b>${DATA.rows}</b> notes · <b>${DATA.measures}</b> measures · 4/4 · <b>${DATA.bpm}</b> bpm · ${fmt(DATA.duration)}<br>${DATA.n_checks} proof checks ${DATA.all_ok?"pass":"<b>FAIL</b>"}`;
+$("#vv").textContent=DATA.verovio.split("-")[0];$("#mv").textContent=DATA.mido;
+$("#srcsha").textContent="score.csv sha256 "+DATA.source_sha;
+const sel=$("#selector"),stand=$("#stand");
+for(const k of keys){const p=DATA.parts[k];
+ sel.insertAdjacentHTML("beforeend",`<label><input type="radio" name="inst" value="${k}" ${k===S.active?"checked":""}><span>${p.label}<small>${p.shift?"written +"+p.shift+" · sounds concert":"concert pitch"} · GM ${p.program}</small></span></label>`);
+ stand.insertAdjacentHTML("beforeend",`<div class="sheet" data-k="${k}"><h2><span>${p.label}</span><em>${p.shift?"transposing: written a major 2nd above sounding (transpose −2)":"non-transposing, concert pitch"} · engraved by Verovio</em></h2><div class="wide">${p.svg_wide}</div><div class="narrow">${p.svg_narrow}</div></div>`);}
+const sheets={};document.querySelectorAll(".sheet").forEach(s=>{sheets[s.dataset.k]=s;
+ s.querySelectorAll("svg").forEach(svg=>{svg.querySelectorAll("g.note").forEach((g,i)=>g.dataset.i=i);
+  svg.addEventListener("click",e=>{let best=-1,bd=40;svg.querySelectorAll("g.note").forEach(g=>{const r=g.getBoundingClientRect(),dx=Math.max(r.left-e.clientX,0,e.clientX-r.right),dy=Math.max(r.top-e.clientY,0,e.clientY-r.bottom),d=Math.hypot(dx,dy);if(d<bd){bd=d;best=+g.dataset.i}});
+   if(best>=0){e.stopPropagation();choose(s.dataset.k);play(best)}})});
+ s.addEventListener("click",()=>choose(s.dataset.k));});
+const noteEls=()=>[...sheets[S.active].querySelectorAll("g.note")];
+function choose(k){if(k===S.active)return;stop();S.active=k;document.querySelector(`input[value=${k}]`).checked=true;refresh();}
+sel.addEventListener("change",e=>choose(e.target.value));
+function refresh(){const p=DATA.parts[S.active];
+ for(const k of keys){sheets[k].classList.toggle("active",k===S.active);sheets[k].classList.toggle("inactive",k!==S.active)}
+ $("#dl").innerHTML=[["xml","musicxml","MusicXML","application/vnd.recordare.musicxml+xml",p.sha_xml],["mid","mid","MIDI","audio/midi",p.sha_mid],["wav","wav","Synth WAV","audio/wav",p.sha_wav]]
+  .map(([k,ext,lab,mime,h])=>`<a id="dl-${k}" download="${k==="wav"?S.active+"-synth.wav":S.active+"."+ext}" data-sha="${h}" href="#">${lab} <code title="sha256 ${h}">${h.slice(0,10)}</code></a>`).join("");
+ for(const [k,mime] of [["xml","application/vnd.recordare.musicxml+xml"],["mid","audio/midi"],["wav","audio/wav"]]){const a=$("#dl-"+k),bin=Uint8Array.from(atob(p.b64[k]),c=>c.charCodeAt(0));
+  a.href=URL.createObjectURL(new Blob([bin],{type:mime}));
+  if(crypto.subtle)crypto.subtle.digest("SHA-256",bin).then(d=>{const h=[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("");a.dataset.verified=(h===a.dataset.sha);if(h===a.dataset.sha)a.querySelector("code").textContent="✓ "+h.slice(0,8)})}
+ const e=p.events;$("#clock").textContent=`0:00.0 / ${fmt(e[e.length-1].t+e[e.length-1].d)}`;
+ $("#nowtxt").innerHTML=`${p.label} · ${e.length} notes · <b>synthesized tones</b>`;
+ mark(-1);}
+function mark(i){S.idx=i;const els=noteEls?noteEls():[];
+ for(const svg of sheets[S.active].querySelectorAll("svg"))svg.querySelectorAll("g.note").forEach((g,j)=>{g.classList.toggle("now",j===i);g.classList.toggle("played",j<i)});}
+/* ---- WebAudio synthesis (flute: soft, clarinet: odd harmonics) ---- */
+const HARM={flute:[1,.25,.08],clarinet:[1,0,.55,0,.30,0,.14,0,.07]};
+function wave(ctx,k){const h=HARM[k],re=new Float32Array(h.length+1),im=new Float32Array(h.length+1);h.forEach((a,i)=>im[i+1]=a);return ctx.createPeriodicWave(re,im)}
+let nodes=[],master=null,analyser=null,startAt=0,timer=0,pausedAt=0;
+function total(){const e=DATA.parts[S.active].events;return e[e.length-1].t+e[e.length-1].d}
+async function play(from){
+ const ctx=S.ctx||(S.ctx=new (window.AudioContext||window.webkitAudioContext)());
+ if(S.playing&&from===undefined){ if(ctx.state==="running"){await ctx.suspend();S.paused=true;$("#play").textContent="▶";$("#play").setAttribute("aria-label","Resume");}else{await ctx.resume();S.paused=false;$("#play").textContent="❚❚";$("#play").setAttribute("aria-label","Pause")} S.ctxState=ctx.state;return}
+ haltNodes();if(ctx.state!=="running")await ctx.resume();
+ const p=DATA.parts[S.active],ev=p.events,off=from!==undefined?ev[from].t:0,pw=wave(ctx,S.active);
+ master=ctx.createGain();master.gain.value=.9;analyser=ctx.createAnalyser();analyser.fftSize=1024;master.connect(analyser);analyser.connect(ctx.destination);
+ const t0=ctx.currentTime+.08;startAt=t0-off;S.scheduled=0;
+ for(const e of ev){if(e.t+e.d<=off)continue;const f=440*2**((e.p-69)/12),s=t0+Math.max(0,e.t-off),d=e.d*.97;
+  const o=ctx.createOscillator();o.setPeriodicWave(pw);o.frequency.value=f;
+  const lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=5;lg.gain.value=S.active==="flute"?7:3;lfo.connect(lg);lg.connect(o.detune);
+  const g=ctx.createGain();g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.2,s+.045);g.gain.setValueAtTime(.2,s+d);g.gain.linearRampToValueAtTime(0,s+d+.1);
+  o.connect(g);g.connect(master);o.start(s);lfo.start(s);o.stop(s+d+.12);lfo.stop(s+d+.12);nodes.push(o,lfo,g);S.scheduled++;}
+ S.playing=true;S.paused=false;S.started++;S.ctxState=ctx.state;S.log.push({k:S.active,from:from??null});
+ $("#play").textContent="❚❚";$("#play").setAttribute("aria-label","Pause");
+ cancelAnimationFrame(timer);tick();}
+function haltNodes(){nodes.forEach(n=>{try{n.stop&&n.stop()}catch(e){}try{n.disconnect()}catch(e){}});nodes=[];if(master){try{master.disconnect()}catch(e){}}}
+function stop(){cancelAnimationFrame(timer);haltNodes();S.playing=false;S.paused=false;S.elapsed=0;S.peak=0;
+ if(S.ctx&&S.ctx.state==="suspended")S.ctx.resume();
+ $("#play").textContent="▶";$("#play").setAttribute("aria-label","Play");$("#fill").style.width="0";$("#bar").setAttribute("aria-valuenow",0);
+ if(sheets)refresh();}
+const buf=new Uint8Array(1024);
+function tick(){const ctx=S.ctx,t=Math.max(0,ctx.currentTime-startAt),T=total();S.elapsed=t;S.ctxState=ctx.state;
+ analyser.getByteTimeDomainData(buf);let m=0;for(const v of buf)m=Math.max(m,Math.abs(v-128)/128);S.peak=Math.max(m,S.peak*.0+m);S.maxPeak=Math.max(S.maxPeak||0,m);
+ const ev=DATA.parts[S.active].events;let i=-1;for(let j=0;j<ev.length;j++)if(ev[j].t<=t)i=j;
+ const inNote=i>=0&&t<ev[i].t+ev[i].d;if(i!==S.idx)mark(i);
+ $("#fill").style.width=Math.min(100,t/T*100)+"%";$("#bar").setAttribute("aria-valuenow",Math.round(t/T*100));$("#clock").textContent=`${fmt(t)} / ${fmt(T)}`;
+ if(i>=0)$("#nowtxt").innerHTML=`${inNote?"♪":"·"} note ${i+1}/${ev.length} · <b>${pn(ev[i].p)}</b> sounding${ev[i].w!==ev[i].p?` · written <b>${pn(ev[i].w)}</b>`:""}`;
+ if(t>=T+.2){S.finished=(S.finished||0)+1;stop();return}
+ timer=requestAnimationFrame(tick)}
+$("#play").addEventListener("click",()=>play());
+$("#stop").addEventListener("click",stop);
+$("#bar").addEventListener("click",e=>{const r=e.currentTarget.getBoundingClientRect(),t=(e.clientX-r.left)/r.width*total(),ev=DATA.parts[S.active].events;let i=0;for(let j=0;j<ev.length;j++)if(ev[j].t<=t)i=j;play(i)});
+document.addEventListener("keydown",e=>{if(e.code==="Space"&&e.target.tagName!=="BUTTON"&&e.target.tagName!=="INPUT"){e.preventDefault();play()}});
+refresh();
+</script></body></html>

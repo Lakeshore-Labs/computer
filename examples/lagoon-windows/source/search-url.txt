@@ -1,0 +1,1 @@
+https://earth-search.aws.element84.com/v1/search?collections=sentinel-2-l2a&bbox=12.33%2C45.43%2C12.34%2C45.44&datetime=2024-06-01T00%3A00%3A00Z%2F2024-06-30T23%3A59%3A59Z&limit=22

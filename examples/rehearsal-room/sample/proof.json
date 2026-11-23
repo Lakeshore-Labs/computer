@@ -1,0 +1,660 @@
+{
+ "mode": "Computer score outputs",
+ "source_file": "score.csv",
+ "source_sha256": "4cbcb7d25dbb6a93ec4737dfd8ec7badb5bf04f20073e6ab1cd88884969eea78",
+ "rows": 22,
+ "measures": 8,
+ "bpm": 96,
+ "total_duration_s": 20.0,
+ "all_checks_pass": true,
+ "checks": [
+  {
+   "name": "source rows counted from CSV (not hardcoded)",
+   "ok": true,
+   "detail": "22 notes"
+  },
+  {
+   "name": "source: every measure sums to 4 beats",
+   "ok": true,
+   "detail": "{1: 4.0, 2: 4.0, 3: 4.0, 4: 4.0, 5: 4.0, 6: 4.0, 7: 4.0, 8: 4.0}"
+  },
+  {
+   "name": "source: 8 measures",
+   "ok": true,
+   "detail": "8 found"
+  },
+  {
+   "name": "flute.musicxml sha256 matches computer.json",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "flute.mid sha256 matches computer.json",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "flute: MIDI note count == CSV rows",
+   "ok": true,
+   "detail": "22 vs 22"
+  },
+  {
+   "name": "flute: MusicXML note count == CSV rows",
+   "ok": true,
+   "detail": "22"
+  },
+  {
+   "name": "flute: MIDI pitches == CSV concert_midi",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "flute: MusicXML sounding pitch (written + transpose) == MIDI",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "flute: written - sounding offset == +0 semitones",
+   "ok": true,
+   "detail": "[0]"
+  },
+  {
+   "name": "flute: MusicXML transpose chromatic == 0",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "name": "flute: MIDI tempo == 96",
+   "ok": true,
+   "detail": "[96.0]"
+  },
+  {
+   "name": "flute: MusicXML tempo == 96",
+   "ok": true,
+   "detail": "96.0"
+  },
+  {
+   "name": "flute: time signature 4/4 in MIDI and MusicXML",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "flute: MIDI program 73 (zero-based)",
+   "ok": true,
+   "detail": "[73]"
+  },
+  {
+   "name": "flute: MusicXML midi-program is 1-based 74",
+   "ok": true,
+   "detail": "74"
+  },
+  {
+   "name": "flute: MIDI onsets/durations match CSV beat grid @ 96 (<1ms)",
+   "ok": true,
+   "detail": "max dev 0.0000 ms"
+  },
+  {
+   "name": "flute: MIDI onsets match MusicXML grid (<1ms)",
+   "ok": true,
+   "detail": "max dev 0.0000 ms"
+  },
+  {
+   "name": "flute: Verovio engraved note count == MIDI",
+   "ok": true,
+   "detail": "22"
+  },
+  {
+   "name": "flute: Verovio timemap onsets match mido (<1ms)",
+   "ok": true,
+   "detail": "max dev 0.0000 ms"
+  },
+  {
+   "name": "flute: wide SVG has 22 note glyph groups, 1 page",
+   "ok": true,
+   "detail": "22 notes, 1 pages"
+  },
+  {
+   "name": "flute: narrow SVG has 22 note glyph groups, 1 page",
+   "ok": true,
+   "detail": "22 notes, 1 pages"
+  },
+  {
+   "name": "clarinet.musicxml sha256 matches computer.json",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "clarinet.mid sha256 matches computer.json",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "clarinet: MIDI note count == CSV rows",
+   "ok": true,
+   "detail": "22 vs 22"
+  },
+  {
+   "name": "clarinet: MusicXML note count == CSV rows",
+   "ok": true,
+   "detail": "22"
+  },
+  {
+   "name": "clarinet: MIDI pitches == CSV concert_midi",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "clarinet: MusicXML sounding pitch (written + transpose) == MIDI",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "clarinet: written - sounding offset == +2 semitones",
+   "ok": true,
+   "detail": "[2]"
+  },
+  {
+   "name": "clarinet: MusicXML transpose chromatic == -2",
+   "ok": true,
+   "detail": "-2"
+  },
+  {
+   "name": "clarinet: MIDI tempo == 96",
+   "ok": true,
+   "detail": "[96.0]"
+  },
+  {
+   "name": "clarinet: MusicXML tempo == 96",
+   "ok": true,
+   "detail": "96.0"
+  },
+  {
+   "name": "clarinet: time signature 4/4 in MIDI and MusicXML",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "clarinet: MIDI program 71 (zero-based)",
+   "ok": true,
+   "detail": "[71]"
+  },
+  {
+   "name": "clarinet: MusicXML midi-program is 1-based 72",
+   "ok": true,
+   "detail": "72"
+  },
+  {
+   "name": "clarinet: MIDI onsets/durations match CSV beat grid @ 96 (<1ms)",
+   "ok": true,
+   "detail": "max dev 0.0000 ms"
+  },
+  {
+   "name": "clarinet: MIDI onsets match MusicXML grid (<1ms)",
+   "ok": true,
+   "detail": "max dev 0.0000 ms"
+  },
+  {
+   "name": "clarinet: Verovio engraved note count == MIDI",
+   "ok": true,
+   "detail": "22"
+  },
+  {
+   "name": "clarinet: Verovio timemap onsets match mido (<1ms)",
+   "ok": true,
+   "detail": "max dev 0.0000 ms"
+  },
+  {
+   "name": "clarinet: wide SVG has 22 note glyph groups, 1 page",
+   "ok": true,
+   "detail": "22 notes, 1 pages"
+  },
+  {
+   "name": "clarinet: narrow SVG has 22 note glyph groups, 1 page",
+   "ok": true,
+   "detail": "22 notes, 1 pages"
+  },
+  {
+   "name": "both MIDI files carry identical sounding pitch+timing",
+   "ok": true,
+   "detail": ""
+  }
+ ],
+ "parts": {
+  "flute": {
+   "files": {
+    "flute.musicxml": "94791b09d17580631fb9e427aede257bd32ab9ca5f17edb2584ee5c5c7bfb82a",
+    "flute.mid": "9098ba67dc8393ab21c0c4f77dae74cc591ba170eb6ee3343e7ecdbeea015e47",
+    "flute-synth.wav": "f91e18cc20d347a1e26880193f5755b6c5f17be57d78abcd07acbd0d1fc06f12"
+   },
+   "midi": {
+    "ppq": 480,
+    "bpm": [
+     96.0
+    ],
+    "time_sig": [
+     "4/4"
+    ],
+    "gm_program_zero_based": [
+     73
+    ],
+    "notes": 22,
+    "first_onset_s": 0.0,
+    "end_s": 20.0
+   },
+   "musicxml": {
+    "title": "Last Boat Home",
+    "part": "Flute",
+    "bpm": 96.0,
+    "time_sig": "4/4",
+    "transpose_chromatic": 0,
+    "key_fifths": 0,
+    "notes": 22
+   },
+   "verovio": {
+    "version": "6.4.1-fbe8f46",
+    "notes_engraved": 22
+   },
+   "max_dev_ms": {
+    "midi_vs_csv": 0.0,
+    "midi_vs_musicxml": 0.0,
+    "midi_vs_verovio": 0.0
+   },
+   "notes": [
+    {
+     "n": 1,
+     "measure": 1,
+     "concert": 60,
+     "written": 60,
+     "onset_s": 0.0,
+     "dur_s": 0.625
+    },
+    {
+     "n": 2,
+     "measure": 1,
+     "concert": 64,
+     "written": 64,
+     "onset_s": 0.625,
+     "dur_s": 0.625
+    },
+    {
+     "n": 3,
+     "measure": 1,
+     "concert": 67,
+     "written": 67,
+     "onset_s": 1.25,
+     "dur_s": 1.25
+    },
+    {
+     "n": 4,
+     "measure": 2,
+     "concert": 69,
+     "written": 69,
+     "onset_s": 2.5,
+     "dur_s": 0.625
+    },
+    {
+     "n": 5,
+     "measure": 2,
+     "concert": 67,
+     "written": 67,
+     "onset_s": 3.125,
+     "dur_s": 0.625
+    },
+    {
+     "n": 6,
+     "measure": 2,
+     "concert": 64,
+     "written": 64,
+     "onset_s": 3.75,
+     "dur_s": 1.25
+    },
+    {
+     "n": 7,
+     "measure": 3,
+     "concert": 62,
+     "written": 62,
+     "onset_s": 5.0,
+     "dur_s": 0.625
+    },
+    {
+     "n": 8,
+     "measure": 3,
+     "concert": 65,
+     "written": 65,
+     "onset_s": 5.625,
+     "dur_s": 0.625
+    },
+    {
+     "n": 9,
+     "measure": 3,
+     "concert": 69,
+     "written": 69,
+     "onset_s": 6.25,
+     "dur_s": 0.625
+    },
+    {
+     "n": 10,
+     "measure": 3,
+     "concert": 72,
+     "written": 72,
+     "onset_s": 6.875,
+     "dur_s": 0.625
+    },
+    {
+     "n": 11,
+     "measure": 4,
+     "concert": 71,
+     "written": 71,
+     "onset_s": 7.5,
+     "dur_s": 1.25
+    },
+    {
+     "n": 12,
+     "measure": 4,
+     "concert": 67,
+     "written": 67,
+     "onset_s": 8.75,
+     "dur_s": 1.25
+    },
+    {
+     "n": 13,
+     "measure": 5,
+     "concert": 64,
+     "written": 64,
+     "onset_s": 10.0,
+     "dur_s": 0.625
+    },
+    {
+     "n": 14,
+     "measure": 5,
+     "concert": 67,
+     "written": 67,
+     "onset_s": 10.625,
+     "dur_s": 0.625
+    },
+    {
+     "n": 15,
+     "measure": 5,
+     "concert": 72,
+     "written": 72,
+     "onset_s": 11.25,
+     "dur_s": 1.25
+    },
+    {
+     "n": 16,
+     "measure": 6,
+     "concert": 74,
+     "written": 74,
+     "onset_s": 12.5,
+     "dur_s": 0.625
+    },
+    {
+     "n": 17,
+     "measure": 6,
+     "concert": 72,
+     "written": 72,
+     "onset_s": 13.125,
+     "dur_s": 0.625
+    },
+    {
+     "n": 18,
+     "measure": 6,
+     "concert": 69,
+     "written": 69,
+     "onset_s": 13.75,
+     "dur_s": 1.25
+    },
+    {
+     "n": 19,
+     "measure": 7,
+     "concert": 65,
+     "written": 65,
+     "onset_s": 15.0,
+     "dur_s": 0.625
+    },
+    {
+     "n": 20,
+     "measure": 7,
+     "concert": 64,
+     "written": 64,
+     "onset_s": 15.625,
+     "dur_s": 0.625
+    },
+    {
+     "n": 21,
+     "measure": 7,
+     "concert": 62,
+     "written": 62,
+     "onset_s": 16.25,
+     "dur_s": 1.25
+    },
+    {
+     "n": 22,
+     "measure": 8,
+     "concert": 60,
+     "written": 60,
+     "onset_s": 17.5,
+     "dur_s": 2.5
+    }
+   ]
+  },
+  "clarinet": {
+   "files": {
+    "clarinet.musicxml": "861a78d286d68b7dae1acc423c0c76f96a3828161a1f6ec5e076ab40577973c4",
+    "clarinet.mid": "8f937d1d8666641b8e392adba303918651143e4b4471465046d991c771543398",
+    "clarinet-synth.wav": "b5d6653ebbc579f6f66d3840cca3d9009ed7cb31673cdfcd5b62947616eb4466"
+   },
+   "midi": {
+    "ppq": 480,
+    "bpm": [
+     96.0
+    ],
+    "time_sig": [
+     "4/4"
+    ],
+    "gm_program_zero_based": [
+     71
+    ],
+    "notes": 22,
+    "first_onset_s": 0.0,
+    "end_s": 20.0
+   },
+   "musicxml": {
+    "title": "Last Boat Home",
+    "part": "B-flat clarinet",
+    "bpm": 96.0,
+    "time_sig": "4/4",
+    "transpose_chromatic": -2,
+    "key_fifths": 2,
+    "notes": 22
+   },
+   "verovio": {
+    "version": "6.4.1-fbe8f46",
+    "notes_engraved": 22
+   },
+   "max_dev_ms": {
+    "midi_vs_csv": 0.0,
+    "midi_vs_musicxml": 0.0,
+    "midi_vs_verovio": 0.0
+   },
+   "notes": [
+    {
+     "n": 1,
+     "measure": 1,
+     "concert": 60,
+     "written": 62,
+     "onset_s": 0.0,
+     "dur_s": 0.625
+    },
+    {
+     "n": 2,
+     "measure": 1,
+     "concert": 64,
+     "written": 66,
+     "onset_s": 0.625,
+     "dur_s": 0.625
+    },
+    {
+     "n": 3,
+     "measure": 1,
+     "concert": 67,
+     "written": 69,
+     "onset_s": 1.25,
+     "dur_s": 1.25
+    },
+    {
+     "n": 4,
+     "measure": 2,
+     "concert": 69,
+     "written": 71,
+     "onset_s": 2.5,
+     "dur_s": 0.625
+    },
+    {
+     "n": 5,
+     "measure": 2,
+     "concert": 67,
+     "written": 69,
+     "onset_s": 3.125,
+     "dur_s": 0.625
+    },
+    {
+     "n": 6,
+     "measure": 2,
+     "concert": 64,
+     "written": 66,
+     "onset_s": 3.75,
+     "dur_s": 1.25
+    },
+    {
+     "n": 7,
+     "measure": 3,
+     "concert": 62,
+     "written": 64,
+     "onset_s": 5.0,
+     "dur_s": 0.625
+    },
+    {
+     "n": 8,
+     "measure": 3,
+     "concert": 65,
+     "written": 67,
+     "onset_s": 5.625,
+     "dur_s": 0.625
+    },
+    {
+     "n": 9,
+     "measure": 3,
+     "concert": 69,
+     "written": 71,
+     "onset_s": 6.25,
+     "dur_s": 0.625
+    },
+    {
+     "n": 10,
+     "measure": 3,
+     "concert": 72,
+     "written": 74,
+     "onset_s": 6.875,
+     "dur_s": 0.625
+    },
+    {
+     "n": 11,
+     "measure": 4,
+     "concert": 71,
+     "written": 73,
+     "onset_s": 7.5,
+     "dur_s": 1.25
+    },
+    {
+     "n": 12,
+     "measure": 4,
+     "concert": 67,
+     "written": 69,
+     "onset_s": 8.75,
+     "dur_s": 1.25
+    },
+    {
+     "n": 13,
+     "measure": 5,
+     "concert": 64,
+     "written": 66,
+     "onset_s": 10.0,
+     "dur_s": 0.625
+    },
+    {
+     "n": 14,
+     "measure": 5,
+     "concert": 67,
+     "written": 69,
+     "onset_s": 10.625,
+     "dur_s": 0.625
+    },
+    {
+     "n": 15,
+     "measure": 5,
+     "concert": 72,
+     "written": 74,
+     "onset_s": 11.25,
+     "dur_s": 1.25
+    },
+    {
+     "n": 16,
+     "measure": 6,
+     "concert": 74,
+     "written": 76,
+     "onset_s": 12.5,
+     "dur_s": 0.625
+    },
+    {
+     "n": 17,
+     "measure": 6,
+     "concert": 72,
+     "written": 74,
+     "onset_s": 13.125,
+     "dur_s": 0.625
+    },
+    {
+     "n": 18,
+     "measure": 6,
+     "concert": 69,
+     "written": 71,
+     "onset_s": 13.75,
+     "dur_s": 1.25
+    },
+    {
+     "n": 19,
+     "measure": 7,
+     "concert": 65,
+     "written": 67,
+     "onset_s": 15.0,
+     "dur_s": 0.625
+    },
+    {
+     "n": 20,
+     "measure": 7,
+     "concert": 64,
+     "written": 66,
+     "onset_s": 15.625,
+     "dur_s": 0.625
+    },
+    {
+     "n": 21,
+     "measure": 7,
+     "concert": 62,
+     "written": 64,
+     "onset_s": 16.25,
+     "dur_s": 1.25
+    },
+    {
+     "n": 22,
+     "measure": 8,
+     "concert": 60,
+     "written": 62,
+     "onset_s": 17.5,
+     "dur_s": 2.5
+    }
+   ]
+  }
+ }
+}

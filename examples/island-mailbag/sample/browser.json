@@ -1,0 +1,18 @@
+[
+  {
+    "kind": "desktop",
+    "width": 1280,
+    "editionButtons": 2,
+    "visitedHandoffSteps": 5,
+    "verification": "✓ Edition 1 card (523 bytes): SHA-256 computed here ff32b3850deb6913… equals the digest inside bafkreih7gkz…l2nddi\n✓ Edition 2 card (584 bytes): SHA-256 computed here df7c71c55648feea… equals the digest inside bafkreig7pry…phd3ji\n✓ “four-moons.epub” (121,382 bytes): SHA-256 db45721e5c875bc1… equals the digest inside the book's CID bafkreig3ivz…nc4o4u",
+    "overflow": false
+  },
+  {
+    "kind": "phone",
+    "width": 390,
+    "editionButtons": 2,
+    "visitedHandoffSteps": 5,
+    "verification": "✓ Edition 1 card (523 bytes): SHA-256 computed here ff32b3850deb6913… equals the digest inside bafkreih7gkz…l2nddi\n✓ Edition 2 card (584 bytes): SHA-256 computed here df7c71c55648feea… equals the digest inside bafkreig7pry…phd3ji\n✓ “four-moons.epub” (121,382 bytes): SHA-256 db45721e5c875bc1… equals the digest inside the book's CID bafkreig3ivz…nc4o4u",
+    "overflow": false
+  }
+]

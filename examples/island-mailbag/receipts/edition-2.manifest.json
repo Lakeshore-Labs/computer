@@ -1,0 +1,22 @@
+{
+  "root": "bafyreiefwkzm6lj6p5giwtpx6r7jmqwojjdm6xz7uriexhq7q2kcunewpe",
+  "schema": "island-mailbag/edition/v1",
+  "library": "Gull Island Library (made up for this exhibit)",
+  "edition": 2,
+  "files": [
+    {
+      "name": "four-moons.epub",
+      "mediaType": "application/epub+zip",
+      "bytes": 121382,
+      "cid": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u",
+      "sha256": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5"
+    },
+    {
+      "name": "reading-card.md",
+      "mediaType": "text/markdown",
+      "bytes": 584,
+      "cid": "bafkreig7pry4kvsi73vfgleat3z7hqfhyseatvebziov5eavb2l3phd3ji",
+      "sha256": "df7c71c55648feea532c809ef3f3c0a7c48809d481ca1d5e90150e97b79c7b4a"
+    }
+  ]
+}

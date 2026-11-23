@@ -1,0 +1,1963 @@
+{
+  "revision": "ea7bf2356c679b2b2ebddf0498be4616da22ec83",
+  "rows": [
+    {
+      "key": "go-function:agent.Command",
+      "name": "agent.Command",
+      "category": "Go function",
+      "task": "Register the embedded model-driven `agent` shell command.",
+      "check": "Registered under the name `probe-agent` (not `agent`), the command printed a usage text naming that name and, with `--list`, printed the two pre-made conversation directories of its Config.State newest first. Neither call created a directory. Names never registered, including `agent`, exit 127. Earlier evidence, kept: No gallery Go code calls it; the CLI does (computer.go:333). Runs of `agent` on a loopback fixture model made 14 requests to /v1/chat/completions, answered, and kept a state directory per conversation. The upstream test that builds it directly, TestTheAgentsEnvironmentConformsToPiDurable, passed (80 pass, 0 fail, 20 skip in that run).",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:additional-probe",
+      "also": [
+        "receipt:agent-fixture",
+        "repo:agent_test.go#L226",
+        "receipt:upstream-go-test"
+      ],
+      "declared_at": "agent/agent.go:83",
+      "invoked_by": "CLI `agent` command and upstream tests; also called directly by the additional probe",
+      "gap": "Only the `--help` and `--list` branches ran. No message was sent, no engine or model was configured, so the conversation-starting path stays at the earlier fixture-model runtime exercise. The `Config.Agent` route that registers the name `agent` (computer.go:333) was not run here; the control only shows `agent` is absent when it is unset.",
+      "prior_evidence_level": "runtime exercise",
+      "prior_gap": "No direct call outside upstream tests; the model was a rule-based fixture, not an LLM.",
+      "prior_check": "No gallery Go code calls it; the CLI does (computer.go:333). Runs of `agent` on a loopback fixture model made 14 requests to /v1/chat/completions, answered, and kept a state directory per conversation. The upstream test that builds it directly, TestTheAgentsEnvironmentConformsToPiDurable, passed (80 pass, 0 fail, 20 skip in that run).",
+      "expanded": {
+        "observed": {
+          "installed_as": "probe-agent via computer.Config.Commands",
+          "help": {
+            "exit": 0,
+            "stderr": "",
+            "stdout": "usage: probe-agent [-q] [--json] [-c | -r NAME] \"message\"\n       probe-agent --list\n\nAnswers one message in a new conversation and prints the answer; the steps taken go to standard error.\n  -q        show no steps\n  --json    print the whole run as JSON lines\n  -c        continue the latest conversation\n  -r NAME   continue the conversation NAME\n  --list    print the conversations' names, newest first\n"
+          },
+          "list": {
+            "exit": 0,
+            "stderr": "",
+            "stdout": "20260101T000000.000002\n20260101T000000.000001\n"
+          },
+          "state_dirs_before_after": {
+            "after": [
+              "20260101T000000.000001",
+              "20260101T000000.000002"
+            ],
+            "before": [
+              "20260101T000000.000001",
+              "20260101T000000.000002"
+            ]
+          },
+          "unregistered_controls": {
+            "agent": {
+              "exit": 127,
+              "stderr": "agent: command not found\n",
+              "stdout": ""
+            },
+            "other-agent": {
+              "exit": 127,
+              "stderr": "other-agent: command not found\n",
+              "stdout": ""
+            }
+          }
+        },
+        "measured_change": "Registered under the name `probe-agent` (not `agent`), the command printed a usage text naming that name and, with `--list`, printed the two pre-made conversation directories of its Config.State newest first. Neither call created a directory. Names never registered, including `agent`, exit 127."
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/agent/agent.go#L83"
+    },
+    {
+      "key": "go-function:computer.New",
+      "name": "computer.New",
+      "category": "Go function",
+      "task": "Create a computer from mounts, tools, Python and commands.",
+      "check": "Built with 3 mounts (host rw, in-memory, host ro): `ls /` printed bin, dev, home, reference, scratch, tmp, usr. A second call with a files.Dir mount, a named MCP tool source and Python returned without error.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:embed-run",
+      "also": [
+        "receipt:api-check"
+      ],
+      "declared_at": "computer.go:105",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/computer.go#L105"
+    },
+    {
+      "key": "go-function:computer.LoadPython",
+      "name": "computer.LoadPython",
+      "category": "Go function",
+      "task": "Load a CPython-for-WASI build for a computer.",
+      "check": "Loaded with MemoryPages 8192, MaxRuns 2 and HostModule computer; python3 run through Environment.Run then printed `cwd /home/user` and `tool 42` and wrote a file the embedder read back.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:api-check",
+      "declared_at": "computer.go:69",
+      "invoked_by": "direct call by a probe",
+      "gap": "One Python build only; the failure path (a bad binary or lib path) was not probed.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/computer.go#L69"
+    },
+    {
+      "key": "go-function:extra.Commands",
+      "name": "extra.Commands",
+      "category": "Go function",
+      "task": "Add the extra document and image commands to a computer.",
+      "check": "Passed as Config.Commands in the embed run; Describe then listed chart, identify, magick, convert, pdftotext and pdftoppm.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:embed-run",
+      "declared_at": "extra/extra.go:16",
+      "invoked_by": "direct call by a probe",
+      "gap": "The probe checked the advertised list, not each command; other sections run chart, identify and the pdf tools.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/extra/extra.go#L16"
+    },
+    {
+      "key": "go-function:files.Dir",
+      "name": "files.Dir",
+      "category": "Go function",
+      "task": "Open a host folder as a root-confined file system.",
+      "check": "Opened a fresh temp directory; Name() returned `Root`. As a mount it let afero.WriteFile create from-afero.txt, which python3 read, and python's from-python.txt came back to the embedder.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "also": [
+        "receipt:api-check"
+      ],
+      "declared_at": "files/dir.go:25",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L25"
+    },
+    {
+      "key": "go-function:tools.Call",
+      "name": "tools.Call",
+      "category": "Go function",
+      "task": "Call one MCP tool and get its JSON result.",
+      "check": "library_getHours returned {\"day\":\"Sunday\",\"closes\":\"16:00\"}.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:tools-probe",
+      "declared_at": "tools/tools.go:66",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/tools/tools.go#L66"
+    },
+    {
+      "key": "go-function:tools.Command",
+      "name": "tools.Command",
+      "category": "Go function",
+      "task": "Turn a group of MCP tools into one shell command.",
+      "check": "`library get-hours --json '{}'` in a computer printed the same JSON and exited 0, matching the Go and host-call results.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:tools-probe",
+      "also": [
+        "receipt:mcp-refresh"
+      ],
+      "declared_at": "tools/tools.go:340",
+      "invoked_by": "direct call by a probe",
+      "gap": "The first draft of this probe failed once with `--json needs a value`; the current probe passes, and a re-run at the pinned commit passed. The earlier command line was not kept.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/tools/tools.go#L340"
+    },
+    {
+      "key": "go-function:tools.Groups",
+      "name": "tools.Groups",
+      "category": "Go function",
+      "task": "Group listed tools by command name.",
+      "check": "One tool gave one group, library. A bare-prefix source with calc_sum, notes_add, notes_list and ping gave groups calc, notes and tool.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:tools-probe",
+      "also": [
+        "receipt:api-check"
+      ],
+      "declared_at": "tools/tools.go:271",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/tools/tools.go#L271"
+    },
+    {
+      "key": "go-function:tools.Host",
+      "name": "tools.Host",
+      "category": "Go function",
+      "task": "Answer a Python-to-host tool call.",
+      "check": "Request {source:0, tool:library_getHours, arguments:{}} returned OK true with {Sunday, 16:00}.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:tools-probe",
+      "declared_at": "tools/tools.go:181",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/tools/tools.go#L181"
+    },
+    {
+      "key": "go-function:tools.Kebab",
+      "name": "tools.Kebab",
+      "category": "Go function",
+      "task": "Spell a tool name as a command argument.",
+      "check": "getHours became get-hours; readWikiStructure became read-wiki-structure; HTTPServer2Go became h-t-t-p-server2-go, so acronyms split letter by letter.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:tools-probe",
+      "also": [
+        "receipt:api-check"
+      ],
+      "declared_at": "tools/tools.go:306",
+      "invoked_by": "direct call by a probe",
+      "gap": "The acronym splitting is an observed quirk, not a documented rule.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/tools/tools.go#L306"
+    },
+    {
+      "key": "go-function:tools.List",
+      "name": "tools.List",
+      "category": "Go function",
+      "task": "List the tools of MCP sources.",
+      "check": "An in-memory server gave 1 tool, library_getHours, in group library; a stdio fixture gave 4 tools.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:tools-probe",
+      "also": [
+        "receipt:api-check"
+      ],
+      "declared_at": "tools/tools.go:42",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/tools/tools.go#L42"
+    },
+    {
+      "key": "go-function:tools.Modules",
+      "name": "tools.Modules",
+      "category": "Go function",
+      "task": "Choose Python module names for tool groups.",
+      "check": "[library] stayed library; [notes, my-wiki, calc] became notes, my_wiki, calc.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:tools-probe",
+      "also": [
+        "receipt:api-check"
+      ],
+      "declared_at": "tools/python.go:60",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/tools/python.go#L60"
+    },
+    {
+      "key": "go-function:tools.With",
+      "name": "tools.With",
+      "category": "Go function",
+      "task": "Attach tool sources to a context for host calls.",
+      "check": "The context it returned was the only one passed to tools.Host, which answered OK true. Nothing separate inspects With's own return value.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:tools-probe",
+      "declared_at": "tools/tools.go:174",
+      "invoked_by": "direct call by a probe",
+      "gap": "Observed only through tools.Host.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/tools/tools.go#L174"
+    },
+    {
+      "key": "go-function:tools.WritePython",
+      "name": "tools.WritePython",
+      "category": "Go function",
+      "task": "Write the generated Python tool package.",
+      "check": "library.py contained `def get_hours(`; a 4-tool fixture wrote __init__.py, calc.py, notes.py and tool.py.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:tools-probe",
+      "also": [
+        "receipt:api-check"
+      ],
+      "declared_at": "tools/python.go:74",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/tools/python.go#L74"
+    },
+    {
+      "key": "go-function:wasm.Compile",
+      "name": "wasm.Compile",
+      "category": "Go function",
+      "task": "Compile a WASI program once for repeated runs.",
+      "check": "QuickJS-WASI compiled in 289 ms; two modules (MaxRuns 1 and 2) were built from one binary.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:wasm-standalone",
+      "also": [
+        "receipt:wasm-maxruns"
+      ],
+      "declared_at": "wasm/wasm.go:64",
+      "invoked_by": "direct call by a probe",
+      "gap": "Features, CacheDir and the Unstoppable option were not varied by a Go probe; -python-unstoppable passes the option through the CLI.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/wasm/wasm.go#L64"
+    },
+    {
+      "key": "go-method:computer.Computer.About",
+      "name": "computer.Computer.About",
+      "category": "Go method",
+      "task": "Describe a computer's tools to an agent without relisting.",
+      "check": "About(ToolCommands(), ToolModules()) == Describe(): true. The upstream test asserts the text contains `from tools import my_server` for a tool named my-server and passed.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:api-check",
+      "also": [
+        "receipt:upstream-go-test"
+      ],
+      "declared_at": "computer.go:370",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/computer.go#L370"
+    },
+    {
+      "key": "go-method:computer.Computer.Close",
+      "name": "computer.Computer.Close",
+      "category": "Go method",
+      "task": "Shut a computer down.",
+      "check": "Close() returned nil, and nil again on a second call.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:api-check",
+      "also": [
+        "receipt:embed-run"
+      ],
+      "declared_at": "computer.go:154",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/computer.go#L154"
+    },
+    {
+      "key": "go-method:computer.Computer.Describe",
+      "name": "computer.Computer.Describe",
+      "category": "Go method",
+      "task": "Get the prompt text that explains the computer.",
+      "check": "Started `You work on a computer through a shell. Your files are under /home/user. There is no network.` and listed jq, yq, awk, sqlite3, magick, convert, identify, chart, pdftotext, pdftoppm.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:embed-run",
+      "also": [
+        "receipt:api-check"
+      ],
+      "declared_at": "environment.go:34",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L34"
+    },
+    {
+      "key": "go-method:computer.Computer.Environment",
+      "name": "computer.Computer.Environment",
+      "category": "Go method",
+      "task": "Get the typed file and command interface.",
+      "check": "Returned the Environment used for every Environment.* call in the embed and API runs.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:embed-run",
+      "also": [
+        "receipt:api-check"
+      ],
+      "declared_at": "environment.go:31",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L31"
+    },
+    {
+      "key": "go-method:computer.Computer.Exec",
+      "name": "computer.Computer.Exec",
+      "category": "Go method",
+      "task": "Run shell scripts in the computer's own session.",
+      "check": "State carried between calls: after `export STAGE=one` in /scratch, the next call printed /scratch and STAGE=one. Stdin, Env and WorkDir were honored: /home/user, `hi from Env`, STDIN GIVEN BY THE EMBEDDER.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:embed-run",
+      "also": [
+        "receipt:api-check"
+      ],
+      "declared_at": "computer.go:172",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/computer.go#L172"
+    },
+    {
+      "key": "go-method:computer.Computer.MCPServer",
+      "name": "computer.Computer.MCPServer",
+      "category": "Go method",
+      "task": "Serve the four-tool MCP interface from inside a Go program.",
+      "check": "An in-memory client's bash call printed /scratch, STAGE=one, alpha, so it shared Exec's session; its read tool returned alpha.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:embed-run",
+      "also": [
+        "receipt:outer-tools-wire"
+      ],
+      "declared_at": "mcp.go:31",
+      "invoked_by": "direct call by a probe",
+      "gap": "Only a 10 s limit was used by a Go probe; the CLI -timeout path was measured separately.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/mcp.go#L31"
+    },
+    {
+      "key": "go-method:computer.Computer.Mounts",
+      "name": "computer.Computer.Mounts",
+      "category": "Go method",
+      "task": "List the mounts of a computer.",
+      "check": "With Python configured it returned /home/user, /tmp, /lib and /usr/lib/python-tools, so it includes mounts the caller did not name.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:api-check",
+      "declared_at": "computer.go:151",
+      "invoked_by": "direct call by a probe",
+      "gap": "No run recorded the list without Python.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/computer.go#L151"
+    },
+    {
+      "key": "go-method:computer.Computer.Options",
+      "name": "computer.Computer.Options",
+      "category": "Go method",
+      "task": "Get gbash options for the computer's runtime.",
+      "check": "Returned 4 options; gbash.New(opts...).Run printed runtime-from-options, from-afero.txt and pong, so mounts and a tool command came through.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:api-check",
+      "declared_at": "computer.go:276",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/computer.go#L276"
+    },
+    {
+      "key": "go-method:computer.Computer.Session",
+      "name": "computer.Computer.Session",
+      "category": "Go method",
+      "task": "Get the shell session that refreshes tools on each call.",
+      "check": "Two direct calls with an unchanged (empty) tool listing returned the identical *gbash.Session pointer; a script run on it exited 0 and its file write reached the host mount. Earlier evidence, kept: No gallery probe calls it. Exec, Describe, Environment.Run and MCPServer call it (computer.go:173, environment.go:35 and :48, mcp.go:39). Through those, tools refreshed on the next command (9 tools/list requests) but stayed fixed inside one -c script. Upstream tests call it directly (computer_test.go:297, :307) and passed.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:additional-probe",
+      "also": [
+        "receipt:mcp-refresh",
+        "receipt:upstream-go-test",
+        "repo:computer_test.go#L297"
+      ],
+      "declared_at": "computer.go:203",
+      "invoked_by": "Exec, Describe, Environment.Run, MCPServer; direct only in upstream tests; also called directly by the additional probe",
+      "gap": "The listing never changed (no tool source), so the branch that builds a new session when tools change was not observed here; the earlier MCP-refresh receipt shows it only through Exec/Describe/MCPServer.",
+      "prior_evidence_level": "runtime exercise",
+      "prior_gap": "Never invoked directly by a gallery probe; its returned *gbash.Session was not examined.",
+      "prior_check": "No gallery probe calls it. Exec, Describe, Environment.Run and MCPServer call it (computer.go:173, environment.go:35 and :48, mcp.go:39). Through those, tools refreshed on the next command (9 tools/list requests) but stayed fixed inside one -c script. Upstream tests call it directly (computer_test.go:297, :307) and passed.",
+      "expanded": {
+        "observed": {
+          "same_pointer_calls_1_2": true,
+          "same_pointer_after_Exec": true,
+          "exec_in_returned_session": {
+            "exit": 0,
+            "stderr": "",
+            "stdout": "session-says-hi\n/work\ndata\n"
+          },
+          "file_seen_on_host": "data\n"
+        },
+        "measured_change": "Two direct calls with an unchanged (empty) tool listing returned the identical *gbash.Session pointer; a script run on it exited 0 and its file write reached the host mount."
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/computer.go#L203"
+    },
+    {
+      "key": "go-method:computer.Computer.ToolCommands",
+      "name": "computer.Computer.ToolCommands",
+      "category": "Go method",
+      "task": "List the tool command names.",
+      "check": "After Describe it returned [fx].",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:api-check",
+      "also": [
+        "receipt:upstream-go-test"
+      ],
+      "declared_at": "computer.go:261",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/computer.go#L261"
+    },
+    {
+      "key": "go-method:computer.Computer.ToolModules",
+      "name": "computer.Computer.ToolModules",
+      "category": "Go method",
+      "task": "List the Python module names for tools.",
+      "check": "After Describe it returned [fx].",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:api-check",
+      "also": [
+        "receipt:upstream-go-test"
+      ],
+      "declared_at": "computer.go:268",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/computer.go#L268"
+    },
+    {
+      "key": "go-method:computer.Environment.List",
+      "name": "computer.Environment.List",
+      "category": "Go method",
+      "task": "List a folder in name order.",
+      "check": "/home/user gave `a (dir, 96 bytes)`, `moved.txt (file, 5 bytes)`; a read-only /reference gave `README.txt (file, 14 bytes)`; listing a file gave ENOTDIR.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:embed-run",
+      "declared_at": "environment.go:195",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L195"
+    },
+    {
+      "key": "go-method:computer.Environment.Mkdir",
+      "name": "computer.Environment.Mkdir",
+      "category": "Go method",
+      "task": "Make a folder, with parents if asked.",
+      "check": "Mkdir without parents created one missing folder under an existing parent; it listed empty. Earlier evidence, kept: parents true created /home/user/a/b/c; parents false on the existing /home/user/a returned fs.ErrExist.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:additional-probe",
+      "declared_at": "environment.go:219",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "prior_evidence_level": "direct probe",
+      "prior_gap": "Creating a missing single folder without parents was not recorded.",
+      "prior_check": "parents true created /home/user/a/b/c; parents false on the existing /home/user/a returned fs.ErrExist.",
+      "also": [
+        "receipt:embed-run"
+      ],
+      "expanded": {
+        "observed": {
+          "entries": 0,
+          "err": "<nil>"
+        },
+        "measured_change": "Mkdir without parents created one missing folder under an existing parent; it listed empty."
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L219"
+    },
+    {
+      "key": "go-method:computer.Environment.Read",
+      "name": "computer.Environment.Read",
+      "category": "Go method",
+      "task": "Read a file or a byte range.",
+      "check": "Whole file: `alpha\\nbeta\\ngamma\\n`; offset 6 length 4: `beta`; missing: fs.ErrNotExist; a directory: EISDIR; offset -1: fs.ErrInvalid.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:embed-run",
+      "declared_at": "environment.go:124",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L124"
+    },
+    {
+      "key": "go-method:computer.Environment.Remove",
+      "name": "computer.Environment.Remove",
+      "category": "Go method",
+      "task": "Remove a file or folder, optionally recursively.",
+      "check": "Non-recursive Remove deleted an empty folder and an ordinary file; both were then not found. Earlier evidence, kept: A non-empty folder without recursive gave ENOTEMPTY; recursive removed it; removing it again returned fs.ErrNotExist.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:additional-probe",
+      "declared_at": "environment.go:239",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "prior_evidence_level": "direct probe",
+      "prior_gap": "Non-recursive removal of a file or empty folder was not recorded.",
+      "prior_check": "A non-empty folder without recursive gave ENOTEMPTY; recursive removed it; removing it again returned fs.ErrNotExist.",
+      "also": [
+        "receipt:embed-run"
+      ],
+      "expanded": {
+        "observed": {
+          "empty_folder": {
+            "err": "<nil>",
+            "not_exist_after": true
+          },
+          "file": {
+            "err": "<nil>",
+            "not_exist_after": true
+          }
+        },
+        "measured_change": "Non-recursive Remove deleted an empty folder and an ordinary file; both were then not found."
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L239"
+    },
+    {
+      "key": "go-method:computer.Environment.Rename",
+      "name": "computer.Environment.Rename",
+      "category": "Go method",
+      "task": "Move a file.",
+      "check": "An empty folder was renamed: the old name was not found afterwards, the new name was a directory. Earlier evidence, kept: data.txt moved to /home/user/moved.txt; the next List showed moved.txt (5 bytes).",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:additional-probe",
+      "declared_at": "environment.go:251",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "prior_evidence_level": "direct probe",
+      "prior_gap": "Renaming a folder was not recorded.",
+      "prior_check": "data.txt moved to /home/user/moved.txt; the next List showed moved.txt (5 bytes).",
+      "also": [
+        "receipt:embed-run"
+      ],
+      "expanded": {
+        "observed": {
+          "err": "<nil>",
+          "new_is_dir": true,
+          "old_not_exist": true
+        },
+        "measured_change": "An empty folder was renamed: the old name was not found afterwards, the new name was a directory."
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L251"
+    },
+    {
+      "key": "go-method:computer.Environment.Run",
+      "name": "computer.Environment.Run",
+      "category": "Go method",
+      "task": "Run a command in a fresh shell with its own directory and environment.",
+      "check": "With replaceEnv false the shell kept its own HOME (/work) and gained A=1; with replaceEnv true HOME was gone and A=1 stayed. PATH was still set to /usr/bin:/bin in both, so the replacement is not a fully empty environment. Earlier evidence, kept: In /scratch with NAME=env-run it printed /scratch, STAGE=unset NAME=env-run and seed.txt (no state from Exec); `ls /nope` exited 2; an unknown command exited 127; `sleep 3` under a 500 ms context returned after 502 ms with `context deadline exceeded`.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:additional-probe",
+      "also": [
+        "receipt:embed-run",
+        "receipt:api-check"
+      ],
+      "declared_at": "environment.go:47",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "prior_evidence_level": "direct probe",
+      "prior_gap": "replaceEnv=true was not run.",
+      "prior_check": "In /scratch with NAME=env-run it printed /scratch, STAGE=unset NAME=env-run and seed.txt (no state from Exec); `ls /nope` exited 2; an unknown command exited 127; `sleep 3` under a 500 ms context returned after 502 ms with `context deadline exceeded`.",
+      "expanded": {
+        "observed": {
+          "false": {
+            "err": "<nil>",
+            "exit": 0,
+            "out": "A=1 B=unset HOME=/work PATH=set/usr/bin:/bin PWD=/work\n"
+          },
+          "true": {
+            "err": "<nil>",
+            "exit": 0,
+            "out": "A=1 B=unset HOME=unset PATH=set/usr/bin:/bin PWD=/work\n"
+          }
+        },
+        "measured_change": "With replaceEnv false the shell kept its own HOME (/work) and gained A=1; with replaceEnv true HOME was gone and A=1 stayed. PATH was still set to /usr/bin:/bin in both, so the replacement is not a fully empty environment."
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L47"
+    },
+    {
+      "key": "go-method:computer.Environment.Stat",
+      "name": "computer.Environment.Stat",
+      "category": "Go method",
+      "task": "Describe a file.",
+      "check": "On a relative symlink inside the mount, follow=true described the 12-byte target (regular file) and follow=false described the link (symlink mode, size 10 = length of its target name `target.txt`). Earlier evidence, kept: data.txt: name data.txt, size 17, not a directory (follow true).",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:additional-probe",
+      "declared_at": "environment.go:110",
+      "invoked_by": "direct call by a probe",
+      "gap": "The link was made on the host: the computer's own `ln -s` was refused (`Permission denied`), so Environment cannot be used to make one. A link pointing outside the tree was not tried.",
+      "prior_evidence_level": "direct probe",
+      "prior_gap": "follow=false on a symbolic link was not run through this method.",
+      "prior_check": "data.txt: name data.txt, size 17, not a directory (follow true).",
+      "also": [
+        "receipt:embed-run"
+      ],
+      "expanded": {
+        "observed": {
+          "follow_false": {
+            "mode": "Lrwxr-xr-x",
+            "name": "link.txt",
+            "regular": false,
+            "size": 10,
+            "symlink": true
+          },
+          "follow_true": {
+            "mode": "-rw-r--r--",
+            "name": "link.txt",
+            "regular": true,
+            "size": 12,
+            "symlink": false
+          },
+          "link_made_by": "host os.Symlink (shell ln -s exit 1: ln: failed to create symbolic link '/work/link.txt': Permission denied)"
+        },
+        "measured_change": "On a relative symlink inside the mount, follow=true described the 12-byte target (regular file) and follow=false described the link (symlink mode, size 10 = length of its target name `target.txt`)."
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L110"
+    },
+    {
+      "key": "go-method:computer.Environment.Truncate",
+      "name": "computer.Environment.Truncate",
+      "category": "Go method",
+      "task": "Cut a file to a size.",
+      "check": "A 3-byte file truncated to 10 read back as `abc` plus seven zero bytes; truncated to 0 it stayed present with size 0. Earlier evidence, kept: Truncate to 5 then Read returned `alpha`.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:additional-probe",
+      "declared_at": "environment.go:175",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "prior_evidence_level": "direct probe",
+      "prior_gap": "Growing a file with zero bytes was not run.",
+      "prior_check": "Truncate to 5 then Read returned `alpha`.",
+      "also": [
+        "receipt:embed-run"
+      ],
+      "expanded": {
+        "observed": {
+          "grow": {
+            "err": "<nil>",
+            "hex": "61626300000000000000",
+            "size": 10
+          },
+          "zero": {
+            "err": "<nil>",
+            "read_bytes": 0,
+            "size": 0
+          }
+        },
+        "measured_change": "A 3-byte file truncated to 10 read back as `abc` plus seven zero bytes; truncated to 0 it stayed present with size 0."
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L175"
+    },
+    {
+      "key": "go-method:computer.Environment.Write",
+      "name": "computer.Environment.Write",
+      "category": "Go method",
+      "task": "Write or append to a file.",
+      "check": "Write `alpha\\nbeta\\n` then append `gamma\\n` gave a 17-byte file; a write to the in-memory mount was visible to the embedder's afero.Fs; a write into a read-only mount gave fs.ErrPermission.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:embed-run",
+      "declared_at": "environment.go:157",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/environment.go#L157"
+    },
+    {
+      "key": "go-method:files.File.IsAppend",
+      "name": "files.File.IsAppend",
+      "category": "Go method",
+      "task": "Ask whether a file descriptor is in append mode.",
+      "check": "Observed false, then true after SetAppend(true), then false.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/append_unix.go:11",
+      "invoked_by": "direct call by a probe",
+      "gap": "Unix only (files/append_unix.go); not run on other systems.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/append_unix.go#L11"
+    },
+    {
+      "key": "go-method:files.File.SetAppend",
+      "name": "files.File.SetAppend",
+      "category": "Go method",
+      "task": "Turn append mode on or off for an open file.",
+      "check": "After SetAppend(true), Seek(0) and a write, `Sunday 16:00` still landed after `Friday 17:00`; then SetAppend(false) was observed.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/append_unix.go:17",
+      "invoked_by": "direct call by a probe",
+      "gap": "Unix only; reached through a type assertion on the opened file.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/append_unix.go#L17"
+    },
+    {
+      "key": "go-method:files.Root.Chmod",
+      "name": "files.Root.Chmod",
+      "category": "Go method",
+      "task": "Change a file's mode.",
+      "check": "0640 set; Stat().Mode().Perm() equalled 0640.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:122",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L122"
+    },
+    {
+      "key": "go-method:files.Root.Chown",
+      "name": "files.Root.Chown",
+      "category": "Go method",
+      "task": "Change a file's owner or group.",
+      "check": "Called with -1, -1 (keep both) and returned nil.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:126",
+      "invoked_by": "direct call by a probe",
+      "gap": "No-op call only: no owner or group was changed, and the probe does not read the owner back.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L126"
+    },
+    {
+      "key": "go-method:files.Root.Chtimes",
+      "name": "files.Root.Chtimes",
+      "category": "Go method",
+      "task": "Set a file's times.",
+      "check": "Set 2026-11-22T12:00:00Z; Stat().ModTime() equalled it.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:130",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L130"
+    },
+    {
+      "key": "go-method:files.Root.Close",
+      "name": "files.Root.Close",
+      "category": "Go method",
+      "task": "Close a rooted folder.",
+      "check": "Returned nil at the end of the probe.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:33",
+      "invoked_by": "direct call by a probe",
+      "gap": "No call after Close was tried.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L33"
+    },
+    {
+      "key": "go-method:files.Root.Create",
+      "name": "files.Root.Create",
+      "category": "Go method",
+      "task": "Create a file.",
+      "check": "Created drafts/2026/times.txt with `Friday 17:00\\n`; it later read back as the first line of the notice.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:74",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L74"
+    },
+    {
+      "key": "go-method:files.Root.Link",
+      "name": "files.Root.Link",
+      "category": "Go method",
+      "task": "Make a hard link.",
+      "check": "archive/counterfoil.txt and archive/notice.txt satisfied os.SameFile.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:164",
+      "invoked_by": "direct call by a probe",
+      "gap": "Linking to a symbolic link, which the source refuses (files/dir.go:164), was not tried.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L164"
+    },
+    {
+      "key": "go-method:files.Root.LstatIfPossible",
+      "name": "files.Root.LstatIfPossible",
+      "category": "Go method",
+      "task": "Stat a name without following a symbolic link.",
+      "check": "available true and the symlink bit set on archive/current.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:144",
+      "invoked_by": "direct call by a probe",
+      "gap": "The symlink was made by the probe with os.Symlink on the host, since Root cannot create links.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L144"
+    },
+    {
+      "key": "go-method:files.Root.Mkdir",
+      "name": "files.Root.Mkdir",
+      "category": "Go method",
+      "task": "Make one folder.",
+      "check": "archive created; archive/notice.txt was later renamed into it.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:102",
+      "invoked_by": "direct call by a probe",
+      "gap": "Success is inferred from the later rename; the folder was not stat'd right away.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L102"
+    },
+    {
+      "key": "go-method:files.Root.MkdirAll",
+      "name": "files.Root.MkdirAll",
+      "category": "Go method",
+      "task": "Make a folder and its parents.",
+      "check": "drafts/2026 created; times.txt was created inside it.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:106",
+      "invoked_by": "direct call by a probe",
+      "gap": "Success is inferred from the later create.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L106"
+    },
+    {
+      "key": "go-method:files.Root.Name",
+      "name": "files.Root.Name",
+      "category": "Go method",
+      "task": "Name the file system.",
+      "check": "Returned `Root`; the source returns that constant (files/dir.go:34).",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:34",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L34"
+    },
+    {
+      "key": "go-method:files.Root.Open",
+      "name": "files.Root.Open",
+      "category": "Go method",
+      "task": "Open a file for reading.",
+      "check": "archive/notice.txt read `Friday 17:00\\nSunday 16:00\\n`.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:78",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L78"
+    },
+    {
+      "key": "go-method:files.Root.OpenFile",
+      "name": "files.Root.OpenFile",
+      "category": "Go method",
+      "task": "Open a file with flags and a mode.",
+      "check": "Opened the existing draft with O_RDWR and mode 0600; the append flag was off at open, and a later write succeeded.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:80",
+      "invoked_by": "direct call by a probe",
+      "gap": "The mode argument only applies when a file is created, so 0600 was not observed.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L80"
+    },
+    {
+      "key": "go-method:files.Root.ReadlinkIfPossible",
+      "name": "files.Root.ReadlinkIfPossible",
+      "category": "Go method",
+      "task": "Read a symbolic link's target.",
+      "check": "archive/current returned notice.txt.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:154",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L154"
+    },
+    {
+      "key": "go-method:files.Root.Remove",
+      "name": "files.Root.Remove",
+      "category": "Go method",
+      "task": "Remove one file or empty folder.",
+      "check": "archive/current was removed.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:110",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L110"
+    },
+    {
+      "key": "go-method:files.Root.RemoveAll",
+      "name": "files.Root.RemoveAll",
+      "category": "Go method",
+      "task": "Remove a folder tree.",
+      "check": "drafts was removed; Stat then returned fs.ErrNotExist.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:114",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L114"
+    },
+    {
+      "key": "go-method:files.Root.Rename",
+      "name": "files.Root.Rename",
+      "category": "Go method",
+      "task": "Move a file within the root.",
+      "check": "drafts/2026/times.txt moved to archive/notice.txt and read back.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:118",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L118"
+    },
+    {
+      "key": "go-method:files.Root.Stat",
+      "name": "files.Root.Stat",
+      "category": "Go method",
+      "task": "Stat a file.",
+      "check": "Mode().Perm() was 0640 and ModTime was 2026-11-22T12:00:00Z.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:files-probe",
+      "declared_at": "files/dir.go:134",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L134"
+    },
+    {
+      "key": "go-method:wasm.Module.Close",
+      "name": "wasm.Module.Close",
+      "category": "Go method",
+      "task": "Release a compiled module.",
+      "check": "After Compile and one Run of a 36-byte module whose `_start` does nothing, Close returned a nil error. Earlier evidence, kept: Called with `defer m.Close(ctx)` in the standalone program, which exited normally. The return value was not examined and nothing ran after it.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:additional-probe",
+      "declared_at": "wasm/wasm.go:123",
+      "invoked_by": "direct call by a probe; also called directly by the additional probe",
+      "gap": "Only the returned status is observed. What Close freed was not measured, and no second Close or Run-after-Close was tried (deliberate: misuse is not a normal lifecycle).",
+      "prior_evidence_level": "runtime exercise",
+      "prior_gap": "Invoked but unobserved: no check shows what Close did.",
+      "prior_check": "Called with `defer m.Close(ctx)` in the standalone program, which exited normally. The return value was not examined and nothing ran after it.",
+      "also": [
+        "receipt:wasm-standalone"
+      ],
+      "expanded": {
+        "observed": {
+          "run_before_close": {
+            "err": "<nil>",
+            "exit": 0
+          },
+          "close_returned_nil": true
+        },
+        "measured_change": "After Compile and one Run of a 36-byte module whose `_start` does nothing, Close returned a nil error."
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/wasm/wasm.go#L123"
+    },
+    {
+      "key": "go-method:wasm.Module.Run",
+      "name": "wasm.Module.Run",
+      "category": "Go method",
+      "task": "Run a compiled program with args, env, stdin and directories.",
+      "check": "Printed {\"hello\":\"Ada\",\"greeting\":\"hej\",\"stdin\":\"from stdin\",\"sum\":15}, exit 0; a 1 s context stopped a busy loop at 1000 ms with exit 124; with MaxRuns 1 a second job waiting under a 400 ms deadline never started and returned 124 after 400.0-402.0 ms (5 of 5 runs).",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:wasm-standalone",
+      "also": [
+        "receipt:wasm-maxruns"
+      ],
+      "declared_at": "wasm/wasm.go:144",
+      "invoked_by": "direct call by a probe",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/wasm/wasm.go#L144"
+    },
+    {
+      "key": "go-method:wasm.Module.Sum",
+      "name": "wasm.Module.Sum",
+      "category": "Go method",
+      "task": "Identify a compiled program and its settings.",
+      "check": "Returned 804d07e6...4f66c55, which equals sha256(binary plus bytes 0x00 0x00) that I recomputed from the binary; the binary's plain sha256 is 2c218412...a71eaaa, so Sum is not a bare file hash.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:wasm-standalone",
+      "also": [
+        "repo:wasm/wasm.go#L79"
+      ],
+      "declared_at": "wasm/wasm.go:61",
+      "invoked_by": "direct call by a probe",
+      "gap": "Only the default Features and Unstoppable bytes were observed.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/wasm/wasm.go#L61"
+    },
+    {
+      "key": "cli-flag:-agent",
+      "name": "-agent",
+      "category": "CLI flag",
+      "task": "Choose the folder that holds the agent bundle.",
+      "check": "The CLI loaded the agent bundle (agent.js sha256 4816601754e5...46d046) and `agent` answered on a fixture model: 21 of 21 checks.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:agent-fixture",
+      "declared_at": "cmd/computer/main.go:132",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Fixture model only; no live-model run is in this evidence.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-agent-engine",
+      "name": "-agent-engine",
+      "category": "CLI flag",
+      "task": "Choose the QuickJS-WASI build that runs the agent.",
+      "check": "Loaded engine sha256 2c218412cb8b...1eaaa (1,571,399 bytes); `agent` ran on it.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:agent-fixture",
+      "also": [
+        "receipt:wasm-standalone"
+      ],
+      "declared_at": "cmd/computer/main.go:133",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Fixture model only.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-agent-max-turns",
+      "name": "-agent-max-turns",
+      "category": "CLI flag",
+      "task": "Cap the agent's tool rounds.",
+      "check": "-agent-max-turns 3 sent exactly 3 model requests, then {\"unanswered\":\"turn_limit\"}, exit 1; 1 sent exactly 1.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:agent-limits",
+      "declared_at": "cmd/computer/main.go:139",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Fixture model; the default of 50 was not run.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-agent-state",
+      "name": "-agent-state",
+      "category": "CLI flag",
+      "task": "Keep agent conversations in a chosen folder outside the mounts.",
+      "check": "State was one directory per conversation outside the mount; --list showed 3 newest first, and -r NAME resumed the first with 3 user messages.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:agent-fixture",
+      "declared_at": "cmd/computer/main.go:134",
+      "invoked_by": "pinned CLI binary",
+      "gap": "The default location was not examined; the rule that it must be outside every mount (main.go:253-255) is source only.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-allow-url",
+      "name": "-allow-url",
+      "category": "CLI flag",
+      "task": "Let the computer's curl fetch listed URL prefixes.",
+      "check": "The same request to https://example.com/ returned exit 127 before registration. With the exact public prefix, curl returned exit 0, 577 bytes and the Example Domain title.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:allowed-fetch",
+      "declared_at": "cmd/computer/main.go:123",
+      "invoked_by": "pinned CLI binary",
+      "gap": "One ordinary public HTTPS request and its baseline were compared.",
+      "prior_evidence_level": "runtime exercise",
+      "prior_gap": "One positive fetch, no control without the flag, none outside the prefix and none for a private address (source sets DenyPrivateRanges, main.go:155). A section's own note says -allow-url was not exercised there, and the cloud-store capture it cites does not record the flag.",
+      "prior_check": "A recipe run with `-allow-url https://example.com/` fetched the page: exit 0, 0.652 s, text starting `This domain is for use in documentation examples`.",
+      "also": [
+        "receipt:recipe-curl-allowed"
+      ],
+      "expanded": {
+        "observed": {
+          "without_flag": {
+            "fixture_requests": 0,
+            "run": {
+              "args": [
+                "-mount",
+                "<tmp>/work:/work",
+                "-c",
+                "curl -sS http://<loopback>:<port>/hello; echo \"curl-exit=$?\""
+              ],
+              "exit": 0,
+              "stdout": "curl-exit=127\n",
+              "stderr": "curl: command not found\n",
+              "seconds": 0.01
+            }
+          },
+          "with_flag_loopback_prefix": {
+            "fixture_requests": 0,
+            "run": {
+              "args": [
+                "-mount",
+                "<tmp>/work:/work",
+                "-allow-url",
+                "http://<loopback>:<port>/",
+                "-c",
+                "curl -sS http://<loopback>:<port>/hello; echo \"curl-exit=$?\""
+              ],
+              "exit": 0,
+              "stdout": "curl-exit=7\n",
+              "stderr": "curl: (7) Network access denied: private or loopback host blocked: http://<loopback>:<port>/hello\n",
+              "seconds": 0.01
+            }
+          }
+        },
+        "measured_change": "The flag changed one thing here: without it `curl` is not a command (exit 127, fixture saw 0 requests); with it `curl` exists and the network layer refuses the loopback host, by message, before any request reached the fixture (0 requests).",
+        "claims": [
+          {
+            "claim": "flag makes `curl` a command in the computer",
+            "level": "direct probe",
+            "control": "same command without the flag: exit 127"
+          },
+          {
+            "claim": "a loopback host under an allowed prefix is still refused",
+            "level": "direct probe",
+            "control": "fixture request counter stayed 0"
+          },
+          {
+            "claim": "a fetch under an allowed prefix succeeds",
+            "level": "runtime exercise",
+            "control": "none; only the earlier external-site receipt"
+          }
+        ],
+        "accepted_vs_measured": {
+          "accepted": "the CLI parsed `-allow-url <prefix>` and ran (exit 0)",
+          "measured": "curl present (127 -> 7); loopback denied; 0 fixture requests"
+        }
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-c",
+      "name": "-c",
+      "category": "CLI flag",
+      "task": "Run one command and exit with its status.",
+      "check": "`-c 'exit 7'` made the process exit 7; positional args after -- printed 0=name 1=first 2=second.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:cli-runs",
+      "declared_at": "cmd/computer/main.go:140",
+      "invoked_by": "pinned CLI binary",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-config",
+      "name": "-config",
+      "category": "CLI flag",
+      "task": "Load mounts and MCP servers from a JSON file.",
+      "check": "File and flags combined; ${GALLERY_FIXTURE_LOG} expanded; a misspelt key, a missing file, a server named twice and a malformed mount were each rejected.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:config-file",
+      "declared_at": "cmd/computer/main.go:141",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Expansion was probed only in a stdio server's env value (${GALLERY_FIXTURE_LOG}); the HTTP header form and an unset variable were not.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-mcp",
+      "name": "-mcp",
+      "category": "CLI flag",
+      "task": "Turn an MCP server's tools into shell commands.",
+      "check": "Bare grouping gave commands notes, calc and tool; `-mcp fx=...` gave one command fx with kebab-case subcommands; a tool added upstream appeared on the next command.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:mcp-refresh",
+      "also": [
+        "receipt:config-file"
+      ],
+      "declared_at": "cmd/computer/main.go:125",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Local stdio fixture only in this receipt; the URL form is not covered by it.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-model",
+      "name": "-model",
+      "category": "CLI flag",
+      "task": "Name the model the agent asks for.",
+      "check": "Every recorded request carried model `fixture-model`.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:agent-fixture",
+      "declared_at": "cmd/computer/main.go:136",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Fixture only.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-model-context",
+      "name": "-model-context",
+      "category": "CLI flag",
+      "task": "Tell the agent how large the model's context is.",
+      "check": "At 40000 tokens with about 160 KB of tool output Pi sent 2 summarisation requests and recorded a compaction; at the default 200,000 it sent none. At 4000 it asked for max_completion_tokens 1, at 12000 for 7013.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:agent-limits",
+      "declared_at": "cmd/computer/main.go:137",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Fixture model; the compaction threshold itself is not settable from the CLI.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-model-max-tokens",
+      "name": "-model-max-tokens",
+      "category": "CLI flag",
+      "task": "Cap the tokens in one model reply.",
+      "check": "-model-max-tokens 123 arrived as max_completion_tokens 123; the default arrived as 16384.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:agent-limits",
+      "declared_at": "cmd/computer/main.go:138",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Fixture model.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-model-url",
+      "name": "-model-url",
+      "category": "CLI flag",
+      "task": "Point the agent at an OpenAI-compatible endpoint.",
+      "check": "All 14 requests went to a loopback fixture at /v1/chat/completions, streamed, with no Authorization header.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:agent-fixture",
+      "declared_at": "cmd/computer/main.go:135",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Loopback fixture only; no hosted model, no key.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-mount",
+      "name": "-mount",
+      "category": "CLI flag",
+      "task": "Mount host folders, read-only or under another name.",
+      "check": "A flag mount combined with a file's mounts; a write into a :ro mount was denied and ended the script with status 126; `-mount a:b:c:d` was rejected; a bare mount was seen at its own path, but under /tmp it failed with `would contain existing mount`.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:config-file",
+      "also": [
+        "receipt:cli-runs"
+      ],
+      "declared_at": "cmd/computer/main.go:122",
+      "invoked_by": "pinned CLI binary",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-python",
+      "name": "-python",
+      "category": "CLI flag",
+      "task": "Give the computer a CPython-for-WASI build for python3.",
+      "check": "python3 reported 3.15.2; an outer `bash` call ran Python that imported tools.source and tools.reference, read a 50,000-row, 738,912-byte CSV through MCP and wrote SQLite; the chart read back as 800x500.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:four-tools-trace",
+      "also": [
+        "receipt:python-flags"
+      ],
+      "declared_at": "cmd/computer/main.go:126",
+      "invoked_by": "pinned CLI binary",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-python-host",
+      "name": "-python-host",
+      "category": "CLI flag",
+      "task": "Name the module the Python build imports its host call from.",
+      "check": "With the default `computer`, plain python and tools.calc.sum (42) worked; with `nothere` every python3 failed `module[computer] not instantiated`, exit 70.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:python-flags",
+      "declared_at": "cmd/computer/main.go:128",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Only the default name and one wrong name were tried; no Python build importing from another module name was run.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-python-lib",
+      "name": "-python-lib",
+      "category": "CLI flag",
+      "task": "Give the directory of the Python build's standard library.",
+      "check": "With the real library, `import colorsys` (pure Python, not built into the interpreter) loaded from /lib/python3.15/colorsys.py and printed (0.0, 1.0, 1). With an empty directory the interpreter died at start (`No module named 'encodings'`, exit 1). With the flag omitted but -python given, the CLI itself exited 1 (`open : no such file or directory`) before running anything. Earlier evidence, kept: The same python runs that import tools and sqlite3 resolved their standard library from it.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:additional-cli",
+      "also": [
+        "receipt:four-tools-trace",
+        "receipt:python-flags"
+      ],
+      "declared_at": "cmd/computer/main.go:127",
+      "invoked_by": "pinned CLI binary",
+      "gap": "One module, one Python build (CPython 3.15.2 WASI), one host. Whether a library directory with only some modules works was not tried.",
+      "prior_evidence_level": "runtime exercise",
+      "prior_gap": "Never run without it or with a wrong path, so only the working case is observed.",
+      "prior_check": "The same python runs that import tools and sqlite3 resolved their standard library from it.",
+      "expanded": {
+        "observed": {
+          "supplied": {
+            "args": [
+              "-mount",
+              "<tmp>/work:/work",
+              "-python",
+              "<python.wasm>",
+              "-python-lib",
+              "<python-lib>",
+              "-c",
+              "python3 -c \"import colorsys; print(colorsys.__file__); print(colorsys.rgb_to_hsv(1, 0, 0))\""
+            ],
+            "exit": 0,
+            "stdout": "/lib/python3.15/colorsys.py\n(0.0, 1.0, 1)\n",
+            "stderr": "",
+            "seconds": 2.49
+          },
+          "empty_directory": {
+            "args": [
+              "-mount",
+              "<tmp>/work:/work",
+              "-python",
+              "<python.wasm>",
+              "-python-lib",
+              "<tmp>/emptylib",
+              "-c",
+              "python3 -c \"import colorsys; print(colorsys.__file__); print(colorsys.rgb_to_hsv(1, 0, 0))\""
+            ],
+            "exit": 1,
+            "stdout": "",
+            "stderr": "WARN: Could not find the standard library directory! The Python 'home' directory was set to '/', is this correct?\nPython path configuration:\n  PYTHONHOME = '/'\n  PYTHONPATH = '/usr/lib/python-tools'\n  program name = 'python3'\n  isolated = 0\n  environment = 1\n  user site = 1\n  safe_path = 0\n  import site = 1\n  is in build tree = 0\n  stdlib dir = '/lib/python3.15'\n  sys.path[0] = (not set)\n  sys._base_executable = ''\n  sys.base_prefix = '/'\n  sys.base_exec_prefix = '/'\n  sys.platlibdir = 'lib'\n  sys.executable = ''\n  sys.prefix = '/'\n  sys.exec_prefix = '/'\n  sys.path = [\n    '/usr/lib/python-tools',\n    '/lib/python315.zip',\n    '/lib/python3.15',\n    '/lib/python3.15/lib-dynload',\n  ]\nFatal Python error: Failed to import encodings module\nPython runtime state: core initialized\nModuleNotFoundError: No module named 'encodings'\n\nCurrent thread 0x0133c760 (most recent call first):\n",
+            "seconds": 0.11
+          },
+          "omitted": {
+            "args": [
+              "-mount",
+              "<tmp>/work:/work",
+              "-python",
+              "<python.wasm>",
+              "-c",
+              "python3 -c \"import colorsys; print(colorsys.__file__); print(colorsys.rgb_to_hsv(1, 0, 0))\""
+            ],
+            "exit": 1,
+            "stdout": "",
+            "stderr": "computer: open : no such file or directory\n",
+            "seconds": 0.09
+          }
+        },
+        "measured_change": "With the real library, `import colorsys` (pure Python, not built into the interpreter) loaded from /lib/python3.15/colorsys.py and printed (0.0, 1.0, 1). With an empty directory the interpreter died at start (`No module named 'encodings'`, exit 1). With the flag omitted but -python given, the CLI itself exited 1 (`open : no such file or directory`) before running anything.",
+        "accepted_vs_measured": {
+          "accepted": "all three command lines were accepted by the flag parser",
+          "measured": "stdlib import succeeds only with the real directory; the control directory and the omitted flag both fail, in different ways"
+        }
+      },
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-python-runs",
+      "name": "-python-runs",
+      "category": "CLI flag",
+      "task": "Limit how many python3 run at once.",
+      "check": "Four 1 s sleeps took 4.396 s and never overlapped at 1, and about 2.24-2.27 s with about 1.0 s overlap at 2 and at 0. At 1 a producer|consumer pair of python3 never finished in 6 s; at 2 it finished in 0.174 s.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:python-flags",
+      "declared_at": "cmd/computer/main.go:129",
+      "invoked_by": "pinned CLI binary",
+      "gap": "Each setting ran once; the default 8 and the 512 MiB per-run size were not measured. The help text does not warn about the pipe stall.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-python-unstoppable",
+      "name": "-python-unstoppable",
+      "category": "CLI flag",
+      "task": "Run Python faster by giving up the ability to stop it.",
+      "check": "Setup: one pure-Python loop, no other workload. A 3,000,000-step loop took 1.681-1.81 s normally and 0.535-0.542 s with the flag (3 runs each, ratio 3.22). A 12,000,000-step loop under the shell's `timeout 1`: without the flag, status 124 after 1.118 s and no output; with it, the loop printed `finished` at 2.357 s and then status 124 after 2.498 s. Accepting the flag is not what was tested; the stop behavior of this one workload is.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:python-flags",
+      "also": [
+        "repo:wasm/wasm.go#L67"
+      ],
+      "declared_at": "cmd/computer/main.go:130",
+      "invoked_by": "pinned CLI binary",
+      "gap": "One workload, one run per setting, one host. Not tested: the MCP -timeout path, a Go context deadline through the CLI, or other kinds of script (blocking sleeps, I/O).",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-timeout",
+      "name": "-timeout",
+      "category": "CLI flag",
+      "task": "Set the default time limit for an MCP bash call.",
+      "check": "In mcp mode with -timeout 1s: `sleep 3` with no timeout_ms ended in 1.003 s with exit 124; timeout_ms 5000 still ended at 1.002 s; timeout_ms 300 ended at 0.302 s; a quick command was unaffected.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:cli-runs",
+      "declared_at": "cmd/computer/main.go:131",
+      "invoked_by": "pinned CLI binary",
+      "gap": "The default of 2 minutes was not run; it applies in mcp mode only.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "cli-flag:-workdir",
+      "name": "-workdir",
+      "category": "CLI flag",
+      "task": "Choose where commands start.",
+      "check": "`-workdir sub` printed /home/user/sub; without it the first mount is the working directory.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:cli-runs",
+      "also": [
+        "receipt:config-file"
+      ],
+      "declared_at": "cmd/computer/main.go:124",
+      "invoked_by": "pinned CLI binary",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/cmd/computer/main.go"
+    },
+    {
+      "key": "mcp-tool:bash",
+      "name": "bash",
+      "category": "MCP tool",
+      "task": "Run a shell command and read its text result.",
+      "check": "State carried across calls (cwd and variables); timeout_ms 1000 stopped `sleep 5` with exit 124 after about 1000 ms and the shell stayed alive; a missing file was exit code 1 in the text; an empty command was a tool error. One call returned `Upstream input: 738912 bytes, 50000 trips` plus the per-route totals.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:outer-tools-wire",
+      "also": [
+        "receipt:four-tools-trace"
+      ],
+      "declared_at": "mcp.go:43",
+      "invoked_by": "MCP client over stdio",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/mcp.go"
+    },
+    {
+      "key": "mcp-tool:edit",
+      "name": "edit",
+      "category": "MCP tool",
+      "task": "Replace exact text in a mounted file.",
+      "check": "`Successfully replaced text in notes/plan.md.`, and a shell call then saw the new line; an edit with text that did not match was a tool error. A second client's edit left the shared file reading `Evening ferry: Pier`.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:outer-tools-wire",
+      "also": [
+        "receipt:clients-handoff"
+      ],
+      "declared_at": "mcp.go:77",
+      "invoked_by": "MCP client over stdio",
+      "gap": "The shared file's text before the second client's edit was not recorded.",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/mcp.go"
+    },
+    {
+      "key": "mcp-tool:read",
+      "name": "read",
+      "category": "MCP tool",
+      "task": "Read a text or image file.",
+      "check": "Text came back with offset and limit giving lines 3-4 and a continuation hint; report.png came back as image/png, 800x500, 18,156 bytes (sha256 8f1a8e38...ff35f) and an 11,146-byte PNG in another run; four other clients read `Evening ferry: Pier`.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:outer-tools-wire",
+      "also": [
+        "receipt:four-tools-trace",
+        "receipt:clients-handoff"
+      ],
+      "declared_at": "mcp.go:77",
+      "invoked_by": "MCP client over stdio",
+      "gap": null,
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/mcp.go"
+    },
+    {
+      "key": "mcp-tool:write",
+      "name": "write",
+      "category": "MCP tool",
+      "task": "Create a file in the writable mount.",
+      "check": "`Successfully wrote 66 bytes to notes/plan.md`, and the file appeared in the host mount; a separate client wrote 19 bytes to handoff.txt.",
+      "evidence_level": "direct probe",
+      "evidence_source": "receipt:outer-tools-wire",
+      "also": [
+        "receipt:clients-handoff"
+      ],
+      "declared_at": "mcp.go:77",
+      "invoked_by": "MCP client over stdio",
+      "gap": "Writing into a read-only mount through this tool was not run in these receipts (the shell's own denial was).",
+      "source_url": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/mcp.go"
+    }
+  ],
+  "receipts": {
+    "upstream-go-test": {
+      "what": "Upstream `go test ./...` at the pinned commit with the agent engine configured and no Python build.",
+      "values": {
+        "pass": 80,
+        "fail": 0,
+        "skip": 20,
+        "skip_reason": "all 20 are Python tests (PYTHON_WASM and PYTHON_LIB unset)",
+        "named_passes": [
+          "TestTheAgentIsToldEachToolModuleByItsPythonName",
+          "TestThePythonPackageIsNotRewrittenWhenTheToolsAreUnchanged",
+          "TestTheAgentsEnvironmentConformsToPiDurable",
+          "TestTheComputerDescribesItsFolderAndItsOwnCommands",
+          "TestTheComputerIsAnMCPServerForAnAgentInThisProcess",
+          "TestAnEnvironmentRunsCommandsAndKeepsFilesUnderTheShellsRules"
+        ],
+        "direct_session_callers": "computer_test.go:297 and :307 call Computer.Session; agent_test.go:226 and agent_pipe_test.go:30 call agent.Command"
+      }
+    },
+    "embed-run": {
+      "what": "Go program embedding the library: computer.New with 3 mounts (host read-write, in-memory, host read-only) and extra.Commands(); every call below was made by that program.",
+      "values": {
+        "exec_state": "`cd /scratch && export STAGE=one && pwd` then `pwd; echo STAGE=$STAGE; cat seed.txt` printed /scratch, STAGE=one, seeded text",
+        "describe_start": "You work on a computer through a shell. Your files are under /home/user. There is no network. The shell has the usual commands, and also: jq, yq, awk, sqlite3, magick, convert, identify, chart, pdftotext, pdftoppm.",
+        "environment_run": {
+          "own_shell": "/scratch, STAGE=unset NAME=env-run, seed.txt",
+          "failing_ls": "exit 2",
+          "unknown_command": "exit 127",
+          "deadline": "sleep 3 under a 500 ms context returned after 502 ms with `context deadline exceeded`"
+        },
+        "files": {
+          "mkdir_parents": "/home/user/a/b/c created",
+          "mkdir_again_no_parents": "fs.ErrExist",
+          "write_then_append_read": "alpha\\nbeta\\ngamma\\n (17 bytes)",
+          "read_offset6_len4": "beta",
+          "stat": {
+            "name": "data.txt",
+            "size": 17,
+            "dir": false
+          },
+          "truncate_5_read": "alpha",
+          "rename_list": [
+            "a (dir)",
+            "moved.txt (file, 5 bytes)"
+          ],
+          "memory_mount_write": "visible to the embedder's afero.Fs: `in memory\\n`",
+          "readonly_list": "README.txt (file, 14 bytes)"
+        },
+        "error_kinds": {
+          "read_missing": "fs.ErrNotExist",
+          "read_directory": "EISDIR",
+          "list_file": "ENOTDIR",
+          "write_readonly_mount": "fs.ErrPermission",
+          "remove_nonempty_nonrecursive": "ENOTEMPTY",
+          "remove_missing": "fs.ErrNotExist",
+          "read_negative_offset": "fs.ErrInvalid"
+        },
+        "mcp_in_memory": {
+          "limit": "10 s",
+          "bash": "/scratch, STAGE=one, alpha (shares Exec's session)",
+          "read_moved_txt": "alpha"
+        },
+        "checks": "24 of 24"
+      }
+    },
+    "api-check": {
+      "what": "Go program for the public API the embed run did not cover: files.Dir as a mount, tools package on its own, LoadPython, Mounts, ToolCommands, ToolModules, About, Options, Exec with Stdin/Env/WorkDir, Close twice.",
+      "values": {
+        "files_dir": {
+          "name": "Root",
+          "afero_write_then_python_read": "from-afero.txt read inside python3; python wrote from-python.txt read back by the embedder"
+        },
+        "tools_list_bare": [
+          "calc_sum -> group calc",
+          "notes_add -> group notes",
+          "notes_list -> group notes",
+          "ping -> group tool"
+        ],
+        "tools_groups": [
+          "calc",
+          "notes",
+          "tool"
+        ],
+        "tools_kebab": {
+          "readWikiStructure": "read-wiki-structure",
+          "notes_add": "notes-add",
+          "HTTPServer2Go": "h-t-t-p-server2-go"
+        },
+        "tools_modules": [
+          "notes",
+          "my_wiki",
+          "calc"
+        ],
+        "tools_writepython_files": [
+          "__init__.py",
+          "calc.py",
+          "notes.py",
+          "tool.py"
+        ],
+        "load_python": {
+          "memory_pages": 8192,
+          "max_runs": 2,
+          "host_module": "computer",
+          "python3_result": "cwd /home/user; tool 42"
+        },
+        "mounts": [
+          "/home/user",
+          "/tmp",
+          "/lib",
+          "/usr/lib/python-tools"
+        ],
+        "tool_commands_modules": {
+          "commands": [
+            "fx"
+          ],
+          "modules": [
+            "fx"
+          ]
+        },
+        "about_equals_describe": true,
+        "exec_stdin_env_workdir": "/home/user, `hi from Env`, STDIN GIVEN BY THE EMBEDDER",
+        "options_count": 4,
+        "options_run": "runtime-from-options, from-afero.txt, pong",
+        "close": "nil, and nil again on the second call",
+        "checks": "29 of 29 in the same pass (with the CLI runs)"
+      }
+    },
+    "wasm-standalone": {
+      "what": "Go program using the wasm package alone, with QuickJS built for WASI.",
+      "values": {
+        "compile_ms": 289,
+        "module_sum": "804d07e67bdd00a3e3f39505e916b7004c14faeefe18f4b698d1fb6da4f66c55",
+        "binary_sha256": "2c218412cb8b17e46ee91bea7556ec38f5b9b6bd6312fddd3ceeed14aa71eaaa",
+        "binary_bytes": 1571399,
+        "sum_recomputed": "sha256(binary + 0x00 + 0x00) equals module_sum; the two bytes are Features and Unstoppable (wasm.go:79)",
+        "run_stdout": "{\"hello\":\"Ada\",\"greeting\":\"hej\",\"stdin\":\"from stdin\",\"sum\":15}",
+        "run_exit": 0,
+        "uncaught_error_exit": 1,
+        "readonly_dir_write": "refused",
+        "deadline": "busy loop under a 1 s context ended at 1000 ms with exit 124 and `context deadline exceeded`; the module ran again afterwards",
+        "close": "called with `defer m.Close(ctx)`; its return value is not examined",
+        "checks": "9 of 9"
+      }
+    },
+    "wasm-maxruns": {
+      "what": "Compiled QuickJS-WASI with MaxRuns 1 and 2, guest barriers over controlled stdin pipes, 5 runs.",
+      "values": {
+        "maxruns1_second_job_with_400ms_deadline": "never started; exit 124 and deadline exceeded after 400.0-402.0 ms in 5 of 5 runs",
+        "maxruns1_waiter_without_deadline": "entered 1.7-2.45 ms after the holder's done barrier in 5 of 5 runs",
+        "maxruns2": "two jobs were both inside before either was released in 5 of 5 runs",
+        "checks": "21 of 21"
+      }
+    },
+    "python-flags": {
+      "what": "CLI runs of the pinned binary with CPython 3.15.2 for WASI and finite workloads.",
+      "values": {
+        "python_version": "3.15.2",
+        "python_runs": {
+          "1": {
+            "elapsed_s": 4.396,
+            "overlap_s": [
+              -0.088,
+              -0.065
+            ]
+          },
+          "2": {
+            "elapsed_s": 2.236,
+            "overlap_s": [
+              1.001,
+              1.0
+            ]
+          },
+          "0": {
+            "elapsed_s": 2.274,
+            "overlap_s": [
+              1.0,
+              1.002
+            ]
+          },
+          "workload": "4 sleeps of 1 s in a pipeline and in the background",
+          "runs1_deadlock": "producer|consumer pipe of two python3 never finished within a 6 s host timeout; with runs 2 it finished in 0.174 s"
+        },
+        "python_unstoppable": {
+          "speed_workload": "3,000,000-step pure-Python loop, 3 runs each",
+          "seconds_false": [
+            1.681,
+            1.712,
+            1.81
+          ],
+          "seconds_true": [
+            0.542,
+            0.539,
+            0.535
+          ],
+          "ratio": 3.22,
+          "timeout_workload": "12,000,000-step pure-Python loop run under the shell's `timeout 1`, once per setting",
+          "false_result": "no output, status 124, 1.118 s wall",
+          "true_result": "loop printed finished (2.357 s) then status 124, 2.498 s wall",
+          "source": "wasm/wasm.go:67 Compile sets WithCloseOnContextDone(!Unstoppable)"
+        },
+        "python_host": {
+          "computer": "plain python ok; tools.calc.sum -> 42; tool.ping -> pong",
+          "nothere": "every python3 fails `module[computer] not instantiated`, exit 70"
+        },
+        "checks": "12 of 12"
+      }
+    },
+    "agent-fixture": {
+      "what": "Embedded agent (QuickJS-WASI engine + JS bundle) driven against a deterministic rule-based chat-completions fixture on loopback. Not an LLM; no key set.",
+      "values": {
+        "engine_sha256": "2c218412cb8b17e46ee91bea7556ec38f5b9b6bd6312fddd3ceeed14aa71eaaa",
+        "bundle_agent_js_sha256": "4816601754e5ce066d9f8dd8217ad401cc9d11e0d17e83c12963cc20df20d046",
+        "requests": {
+          "count": 14,
+          "path": "/v1/chat/completions",
+          "model_field": "fixture-model",
+          "authorization_header": "absent"
+        },
+        "tools_offered": [
+          "read",
+          "write",
+          "edit",
+          "bash"
+        ],
+        "first_turn_requests": 5,
+        "state": "a directory per conversation outside the mount; --list showed 3 conversations newest first; -r NAME resumed the first (3 user messages)",
+        "observed_quirk": "agent with no message exits 2 but still leaves an empty conversation that --list shows first and -c then continues",
+        "checks": "21 of 21"
+      }
+    },
+    "agent-limits": {
+      "what": "Same fixture model, limit flags.",
+      "values": {
+        "agent_max_turns": {
+          "3": "exactly 3 model requests then {unanswered: turn_limit}, exit 1",
+          "1": "exactly 1 request, exit 1"
+        },
+        "model_max_tokens": {
+          "123": "max_completion_tokens 123",
+          "default": 16384
+        },
+        "model_context": {
+          "4000": "max_completion_tokens 1 (even with -model-max-tokens 500)",
+          "12000": 7013,
+          "40000": "16384 and Pi summarised: 2 summarisation requests with max_completion_tokens 13107; pi.compaction recorded with reason threshold",
+          "default_200000_control": "0 summarisation requests, no compaction (history 159,761 chars kept)"
+        },
+        "checks": "11 of 11"
+      }
+    },
+    "config-file": {
+      "what": "CLI -config with -mount and an MCP server, 14 checks.",
+      "values": {
+        "mounts": "rw home plus ro reference from the file; the file's first mount is the working directory (/home/user)",
+        "flag_plus_file": "a -mount flag is listed first and becomes the working directory (/extra)",
+        "mcp_server_entry": "became the command fixture; calc sum answered 42, ping pong",
+        "variable_expansion": "${GALLERY_FIXTURE_LOG} expanded; the fixture wrote its log there",
+        "readonly": "redirect into a read-only mount was denied (outside allowed roots) and ended the -c script with status 126",
+        "errors": [
+          "unknown key `mcpServer` rejected",
+          "missing file reported",
+          "server named twice rejected",
+          "-mount a:b:c:d rejected"
+        ],
+        "checks": "14 of 14"
+      }
+    },
+    "mcp-refresh": {
+      "what": "Generated stdio MCP fixture server, bare-prefix and named grouping via -mcp.",
+      "values": {
+        "bare_grouping": "commands notes (add, list), calc (sum), tool (ping)",
+        "named": "-mcp fx=... gave one command fx with kebab-case subcommands (calc-sum, notes-add)",
+        "refresh": "notes export appeared on the next command; within one -c script the list stayed fixed; 9 tools/list requests were counted",
+        "unknown_tool": "exit 2 with hint",
+        "structured_result": "{\"count\":2,\"notes\":[\"buy milk\",\"call Ada\"]}",
+        "checks": "12 of 12"
+      }
+    },
+    "cli-runs": {
+      "what": "CLI runs of the pinned binary (stdin, exit codes, workdir, MCP timeout through a raw JSON-RPC client).",
+      "values": {
+        "c_exit_7": "process exit 7",
+        "c_with_stdin": "stdout `3` then `done`",
+        "c_positional_args": "0=name 1=first 2=second",
+        "workdir": "-workdir sub printed /home/user/sub",
+        "bare_mount": "-mount DIR seen at its own absolute path; under /tmp it fails `would contain existing mount`, exit 1",
+        "mcp_timeout": {
+          "no_timeout_ms_sleep_3": "1.003 s, exit 124",
+          "timeout_ms_5000_over_1s_limit": "1.002 s",
+          "timeout_ms_300": "0.302 s",
+          "quick_command": "unaffected"
+        },
+        "version": "commit ea7bf2356c67 (dirty)",
+        "checks": "29 of 29"
+      }
+    },
+    "outer-tools-wire": {
+      "what": "Go SDK MCP client over real stdio against `computer mcp`, wire recorded both ways.",
+      "values": {
+        "tools": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "server_name": "computer",
+        "state_carried": "cwd, exported variable and plain variable carried across bash calls",
+        "write": "`Successfully wrote 66 bytes to notes/plan.md`",
+        "read": "returned the text; offset/limit returned lines 3-4 plus a continuation hint",
+        "edit": "`Successfully replaced text in notes/plan.md.`; shell then saw the edit",
+        "edit_miss": "tool error naming the exact-match rule",
+        "read_image": "image/png content, 11,146 bytes, PNG signature present",
+        "bash_timeout": "timeout_ms 1000 stopped `sleep 5`: exit 124 after about 1000 ms, shell still alive with state kept",
+        "ordinary_failure": "missing file is exit code 1 in the text, not a tool error",
+        "empty_command": "tool error",
+        "host_files": "files landed in the host mount",
+        "checks": "21 of 21"
+      }
+    },
+    "four-tools-trace": {
+      "what": "One outer `bash` call through `computer -python -python-lib -config ... mcp` over 2 upstream stdio MCP servers.",
+      "values": {
+        "list_tools": [
+          "bash",
+          "edit",
+          "read",
+          "write"
+        ],
+        "upstream_servers_listed": 2,
+        "input": {
+          "rows": 50000,
+          "bytes": 738912,
+          "sha256": "6aa3a8633e9af167adf67b68cdc8e0d7113e5b2ec2297d60dc23f3bcfef16e80"
+        },
+        "python_step": "python3 imported tools.source and tools.reference, read the CSV through MCP and wrote SQLite",
+        "bash_text": "Upstream input: 738912 bytes, 50000 trips / Museum,666686 / North,666644 / Pier,666631 / report.png PNG 800x500 / source-logo.png PNG 20x20",
+        "read": {
+          "path": "report.png",
+          "content_type": "image/png",
+          "dimensions": [
+            800,
+            500
+          ],
+          "bytes": 18156,
+          "sha256": "8f1a8e3865879f7ca067a14a2e7040a4a5180cf7c481029d12b8cd47b11ff35f"
+        }
+      }
+    },
+    "clients-handoff": {
+      "what": "Separate clients driving the same `computer mcp` server and one shared file.",
+      "values": {
+        "write": "MCP Inspector CLI: `Successfully wrote 19 bytes to handoff.txt`",
+        "edit": "mcporter: `Successfully replaced text in handoff.txt.`",
+        "final_text": "Evening ferry: Pier",
+        "readers": [
+          "Python MCP SDK (also bash sha256sum 6bbd577c...30ac9e8 matched the read text)",
+          "Claude Code (Haiku)",
+          "Codex app-server",
+          "Gemini CLI (gemini-3.5-flash-lite)"
+        ],
+        "not_recorded": "the file's text before the edit"
+      }
+    },
+    "files-probe": {
+      "what": "Go program calling every files.* method on a fresh temporary directory; re-run here against the pinned commit with no network: 20 of 20 observations identical to the earlier capture.",
+      "values": {
+        "Dir": "temporary directory opened",
+        "Root.Name": "Root (constant in files/dir.go:34)",
+        "Mkdir": "archive created; later received archive/notice.txt",
+        "MkdirAll": "drafts/2026 created and held times.txt",
+        "Create": "wrote `Friday 17:00\\n`",
+        "OpenFile": "O_RDWR on the existing draft; append flag false at open",
+        "IsAppend": "false, true, false",
+        "SetAppend": "on, Seek(0), write landed at the end; then off",
+        "Rename": "drafts/2026/times.txt -> archive/notice.txt",
+        "Open": "read `Friday 17:00\\nSunday 16:00\\n`",
+        "Chmod": "0640; Stat Perm() == 0640",
+        "Chown": "-1, -1 returned nil (owner unchanged by design)",
+        "Chtimes": "2026-11-22T12:00:00Z; Stat ModTime equal",
+        "Link": "archive/counterfoil.txt is the same file (os.SameFile)",
+        "LstatIfPossible": "available=true and ModeSymlink set on a symlink that the probe made on the host with os.Symlink",
+        "ReadlinkIfPossible": "notice.txt",
+        "Remove": "alias removed",
+        "RemoveAll": "drafts removed; Stat then returned fs.ErrNotExist",
+        "Close": "returned nil"
+      }
+    },
+    "tools-probe": {
+      "what": "Go program using tools.* with an in-memory MCP server exposing one tool, library_getHours, returning {day: Sunday, closes: 16:00}; re-run here against the pinned commit: output identical to the earlier capture.",
+      "values": {
+        "List": "1 tool: library_getHours, group library",
+        "Groups": "library has 1 tool",
+        "Kebab": "getHours -> get-hours",
+        "Modules": "[library]",
+        "WritePython": "library.py contains `def get_hours(`",
+        "Call": {
+          "day": "Sunday",
+          "closes": "16:00"
+        },
+        "With_and_Host": "request {source:0, tool:library_getHours, arguments:{}} -> OK true, same result",
+        "Command": "`library get-hours --json '{}'` printed the same JSON, exit 0 (tools.Command registered in computer.New)",
+        "go_host_shell_results_equal": true,
+        "earlier_failed_attempt": "an earlier draft run logged `library get-hours: --json needs a value` and exit 1; the probe was edited about 13 s later and then passed. The earlier draft's command line was not kept."
+      }
+    },
+    "recipe-curl-allowed": {
+      "what": "One recipe run: `-allow-url https://example.com/` then `curl -fsS https://example.com/ | html-to-markdown | head -c 420`.",
+      "values": {
+        "exit": 0,
+        "seconds": 0.652,
+        "stdout_start": "This domain is for use in documentation examples without needing permission.",
+        "source_network_option": "cmd/computer/main.go:154-155 enables gbash network only when -allow-url is non-empty, with DenyPrivateRanges true",
+        "not_recorded": "a fetch without the flag, a fetch outside the prefix, or a private-range address"
+      }
+    },
+    "surface-declarations": {
+      "what": "All 57 declarations re-read with `git show ea7bf235:<file>` and matched to their recorded file, line and signature; an independent regex scan of the non-test Go files in the root, agent, extra, files, tools and wasm packages found the same 57 exported callables.",
+      "values": {
+        "declarations_matched": 57,
+        "extra_in_scan": 0,
+        "missing_in_scan": 0,
+        "functions": 15,
+        "methods": 42,
+        "inventory_rerun_identical": true
+      }
+    },
+    "additional-probe": {
+      "what": "atlasprobe: one Go program, Config.Commands + Session + wasm + Environment, no network.",
+      "file": "additional/out/probe-observations.json",
+      "values": {
+        "passed": 19,
+        "total": 19,
+        "check_ids": [
+          "session-no-error",
+          "session-same-identity",
+          "session-shell-command",
+          "session-file-on-host",
+          "session-same-after-exec",
+          "wasm-run-before-close",
+          "wasm-close-status",
+          "agent-help",
+          "agent-list-reads-state",
+          "agent-help-list-leave-state-alone",
+          "agent-control-unregistered-names",
+          "env-run-replace-false-vs-true",
+          "stat-symlink-follow",
+          "truncate-grow",
+          "truncate-zero",
+          "mkdir-single",
+          "rename-folder",
+          "remove-empty-folder-nonrecursive",
+          "remove-file-nonrecursive"
+        ]
+      }
+    },
+    "additional-cli": {
+      "what": "clitest: the CLI built from the pinned tree, run for -python-lib and -allow-url against a loopback fixture.",
+      "file": "additional/out/cli-observations.json",
+      "values": {
+        "passed": 5,
+        "total": 5,
+        "check_ids": [
+          "python-lib-supplied",
+          "python-lib-wrong-path-control",
+          "python-lib-omitted-control",
+          "allow-url-default-refusal",
+          "allow-url-flag-registers-curl-loopback-still-denied"
+        ]
+      }
+    },
+    "allowed-fetch": {
+      "url": "https://example.com/",
+      "utc": "2026-11-22T23:03:55.454725+00:00",
+      "observations": [
+        {
+          "flag_supplied": false,
+          "exit": 127,
+          "response_bytes": 0,
+          "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "contains_example_domain": false,
+          "curl_unavailable": true
+        },
+        {
+          "flag_supplied": true,
+          "exit": 0,
+          "response_bytes": 577,
+          "response_sha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484",
+          "contains_example_domain": true,
+          "curl_unavailable": false
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "case": "story-holbein-basel-trip",
+  "observed_utc": "2026-11-22T21:47:45.194652+00:00",
+  "exit": 0,
+  "stdout_sha256": "9fc73262b998ac1c413f0d72640a5251de4bc652b0e0ea6cf174e2adadbbba58",
+  "checks": {
+    "= Kunstmuseum Basel": true,
+    "city is Basel in both sources: True$": true,
+    "year within 2 of Wikidata: True$": true,
+    "min equals stated \\d+ min: True$": true
+  },
+  "passed": true
+}

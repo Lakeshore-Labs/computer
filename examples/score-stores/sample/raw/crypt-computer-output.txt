@@ -1,0 +1,80 @@
+@@ copy-flute.mid
+{}
+@@ copy-flute.musicxml
+{}
+@@ list
+{
+  "list": [
+    {
+      "Path": "flute.mid",
+      "Name": "flute.mid",
+      "Size": 242,
+      "MimeType": "audio/midi",
+      "ModTime": "2026-11-22T15:33:39.149330490-08:00",
+      "IsDir": false
+    },
+    {
+      "Path": "flute.musicxml",
+      "Name": "flute.musicxml",
+      "Size": 3271,
+      "MimeType": "application/vnd.recordare.musicxml+xml",
+      "ModTime": "2026-11-22T15:33:39.149513073-08:00",
+      "IsDir": false
+    }
+  ]
+}
+@@ stat-flute.mid
+{
+  "item": {
+    "Path": "flute.mid",
+    "Name": "flute.mid",
+    "Size": 242,
+    "MimeType": "audio/midi",
+    "ModTime": "2026-11-22T15:33:39.149330490-08:00",
+    "IsDir": false
+  }
+}
+@@ sha256-flute.mid
+{
+  "hash": "9098ba67dc8393ab21c0c4f77dae74cc591ba170eb6ee3343e7ecdbeea015e47",
+  "hashType": "sha256"
+}
+@@ stat-flute.musicxml
+{
+  "item": {
+    "Path": "flute.musicxml",
+    "Name": "flute.musicxml",
+    "Size": 3271,
+    "MimeType": "application/vnd.recordare.musicxml+xml",
+    "ModTime": "2026-11-22T15:33:39.149513073-08:00",
+    "IsDir": false
+  }
+}
+@@ sha256-flute.musicxml
+{
+  "hash": "94791b09d17580631fb9e427aede257bd32ab9ca5f17edb2584ee5c5c7bfb82a",
+  "hashType": "sha256"
+}
+@@ size
+{
+  "bytes": 3513,
+  "count": 2,
+  "sizeless": 0
+}
+@@ check
+{
+  "combined": [
+    "= flute.mid",
+    "= flute.musicxml"
+  ],
+  "differ": [],
+  "error": [],
+  "match": [
+    "flute.mid",
+    "flute.musicxml"
+  ],
+  "missingOnDst": [],
+  "missingOnSrc": [],
+  "status": "OK",
+  "success": true
+}

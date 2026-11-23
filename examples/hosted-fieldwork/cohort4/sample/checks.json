@@ -1,0 +1,223 @@
+[
+  {
+    "id": "musokit-eb-dorian",
+    "provider": "MusoKit",
+    "endpoint": "https://musokit.com/mcp",
+    "docs": "https://musokit.com",
+    "command": "mk scale-info --root Eb --scale dorian",
+    "title": "Name the seven notes of E-flat Dorian",
+    "observed_utc": "2026-11-23T00:01:26.211684+00:00",
+    "seconds": 2.3,
+    "stdout_sha256": "bdd7917c22e77cb7b821318f537937e5fa3e5ce168e433d7683b3f11c23bf58c",
+    "exit": 0,
+    "checks": {
+      "seven scale degrees": true,
+      "Dorian intervals": true
+    },
+    "passed": true
+  },
+  {
+    "id": "musokit-transpose",
+    "provider": "MusoKit",
+    "endpoint": "https://musokit.com/mcp",
+    "docs": "https://musokit.com",
+    "command": "mk transpose-chords --chords 'C G Am F' --semitones 2",
+    "title": "Transpose a four-chord progression",
+    "observed_utc": "2026-11-23T00:01:31.019143+00:00",
+    "seconds": 2.15,
+    "stdout_sha256": "02a62e4c32499ce47bca9091f61c7f8f961b1b0006dd08811c2f7c5d4a837ac2",
+    "exit": 0,
+    "checks": {
+      "input chords": true,
+      "up a whole tone": true
+    },
+    "passed": true
+  },
+  {
+    "id": "apished-datediff",
+    "provider": "apished.com",
+    "endpoint": "https://apished.com/mcp/v1/datemath",
+    "docs": "https://apished.com",
+    "command": "dm datemath-diff --from 2026-11-22 --to 2028-03-01",
+    "title": "Count days across a leap February",
+    "observed_utc": "2026-11-23T00:01:35.676323+00:00",
+    "seconds": 2.43,
+    "stdout_sha256": "ec9239ecb815e89f59c0e2069de43430f0731be57f0e54beba7ba202db10df11",
+    "exit": 0,
+    "checks": {
+      "elapsed days equals 465": true
+    },
+    "passed": true
+  },
+  {
+    "id": "apished-dayofweek",
+    "provider": "apished.com",
+    "endpoint": "https://apished.com/mcp/v1/datemath",
+    "docs": "https://apished.com",
+    "command": "dm datemath-dayofweek --date 2028-03-01",
+    "title": "Find the weekday of 1 March 2028",
+    "observed_utc": "2026-11-23T00:01:40.618951+00:00",
+    "seconds": 1.9,
+    "stdout_sha256": "bfd664fca7bca1ade1804ae250f315a6cc6edd16d7df1724c9b3c634df84c7b8",
+    "exit": 0,
+    "checks": {
+      "weekday agrees with Python date": true,
+      "ISO weekday agrees": true
+    },
+    "passed": true
+  },
+  {
+    "id": "gumball-fallback-hour",
+    "provider": "gumballtools timezone-truth",
+    "endpoint": "https://timezone-truth.gumballtools.com/api/mcp",
+    "docs": "https://timezone-truth.gumballtools.com",
+    "command": "tz convert-time --from America/New_York --to Asia/Tokyo --time '2026-11-01 01:30'",
+    "title": "Resolve the two New York 01:30 instants",
+    "observed_utc": "2026-11-23T00:01:45.031128+00:00",
+    "seconds": 2.78,
+    "stdout_sha256": "ad809f34ff148836b36cb8ef57e8c0c6684bc4325026218e8a24da7140ecfc41",
+    "exit": 0,
+    "checks": {
+      "two distinct UTC instants agree with zoneinfo": true
+    },
+    "passed": true
+  },
+  {
+    "id": "gumball-spring-gap",
+    "provider": "gumballtools timezone-truth",
+    "endpoint": "https://timezone-truth.gumballtools.com/api/mcp",
+    "docs": "https://timezone-truth.gumballtools.com",
+    "command": "tz convert-time --from America/New_York --to Asia/Kolkata --time '2026-03-08 02:30'",
+    "title": "Detect the missing spring-forward hour",
+    "observed_utc": "2026-11-23T00:01:50.319213+00:00",
+    "seconds": 1.74,
+    "stdout_sha256": "e04706b18d8d43c13467adca868c765e4e9ee59480a168f188a8e672010c052d",
+    "exit": 0,
+    "checks": {
+      "nonexistent local time has no instant or candidates": true,
+      "reported transition differs by 28.125 s from 07:00 UTC (minute precision only)": true
+    },
+    "passed": true
+  },
+  {
+    "id": "opencurrent-kr-holidays",
+    "provider": "OpenCurrent kr-calendar",
+    "endpoint": "https://opencurrent.ai/mcp/kr-calendar",
+    "docs": "https://opencurrent.ai",
+    "command": "kr kr-holidays --from 2026-09-20 --to 2026-10-15",
+    "title": "Read two dates from the Korean holiday calendar",
+    "observed_utc": "2026-11-23T00:01:54.560302+00:00",
+    "seconds": 1.61,
+    "stdout_sha256": "44603430c1eeb2e7e7f9a5c55b0e7717f332943fefc9f28dec42a4af2dc438e5",
+    "exit": 0,
+    "checks": {
+      "2026-10-03: National Foundation Day on Saturday": true,
+      "2026-10-09: Hangeul Day on Friday": true
+    },
+    "passed": true
+  },
+  {
+    "id": "eancheck-isbn",
+    "provider": "eancheck.com",
+    "endpoint": "https://eancheck.com/api/mcp",
+    "docs": "https://eancheck.com",
+    "command": "ean convert-isbn --isbn 0-306-40615-2",
+    "title": "Convert a ten-digit ISBN to ISBN-13",
+    "observed_utc": "2026-11-23T00:01:58.669341+00:00",
+    "seconds": 1.54,
+    "stdout_sha256": "c384c49cdbbb0680b4db06f9e817a740fcfad1189d8a029754f0757ad6e6c3ef",
+    "exit": 0,
+    "checks": {
+      "ISBN-13 digits and independently calculated check digit": true,
+      "original ISBN-10 retained": true
+    },
+    "passed": true
+  },
+  {
+    "id": "ghana-census-total",
+    "provider": "kwekuanansi.ai ghana-numbers",
+    "endpoint": "https://kwekuanansi.ai/mcp/ghana-numbers",
+    "docs": "https://kwekuanansi.ai",
+    "command": "gh ghana-count-people",
+    "title": "Audit the coverage of a national census subset",
+    "observed_utc": "2026-11-23T00:02:02.718219+00:00",
+    "seconds": 3.41,
+    "stdout_sha256": "98e1e6c5606f81ff1735a0414415df6f0dc3a16152ae758f96137492821abd65",
+    "exit": 0,
+    "checks": {
+      "recorded shortfall 619,239 (2.01%) against official 30,832,019": true,
+      "by-sex counts sum to the reported population": true,
+      "age and schooling counts both sum to the reported subset": true,
+      "provider describes five missing districts": true
+    },
+    "passed": true
+  },
+  {
+    "id": "ghana-census-accra",
+    "provider": "kwekuanansi.ai ghana-numbers",
+    "endpoint": "https://kwekuanansi.ai/mcp/ghana-numbers",
+    "docs": "https://kwekuanansi.ai",
+    "command": "gh ghana-count-people --region 'Greater Accra'",
+    "title": "Compare Greater Accra with the published census",
+    "observed_utc": "2026-11-23T00:02:08.633194+00:00",
+    "seconds": 2.83,
+    "stdout_sha256": "15451247d2da7f793fca1a436c90a358243ba5d4f92edfd75a47791d9a6dfe4b",
+    "exit": 0,
+    "checks": {
+      "recorded shortfall 160,446 (2.94%) against official 5,455,692": true,
+      "by-sex counts sum to the reported population": true,
+      "age and schooling counts both sum to the reported subset": true,
+      "provider describes five missing districts": true
+    },
+    "passed": true
+  },
+  {
+    "id": "humanities-check-claim",
+    "provider": "humanitieshelpinghands.com",
+    "endpoint": "https://humanitieshelpinghands.com/mcp",
+    "docs": "https://humanitieshelpinghands.com",
+    "command": "hm check-claim --text '17*23=391 and 91 is prime'",
+    "title": "Check two arithmetic claims",
+    "observed_utc": "2026-11-23T00:02:13.968174+00:00",
+    "seconds": 2.73,
+    "stdout_sha256": "2038ce66a4b5a23ed8b12ab0504074bd7b64ee96fc3871acc56f587ac236e24e",
+    "exit": 0,
+    "checks": {
+      "multiplication labeled proven": true,
+      "composite labeled false": true
+    },
+    "passed": true
+  },
+  {
+    "id": "developerpoetry-read",
+    "provider": "developerpoetry.com",
+    "endpoint": "https://developerpoetry.com/mcp",
+    "docs": "https://developerpoetry.com",
+    "command": "pt read-poems --limit 3",
+    "title": "List up to three poems without publishing",
+    "observed_utc": "2026-11-23T00:02:19.199179+00:00",
+    "seconds": 3.01,
+    "stdout_sha256": "f3446e7f2d3227ecba2639908273abab65a0ae91d9a40cad6a4adef153f86ca0",
+    "exit": 0,
+    "checks": {
+      "returned a bounded poem list": true
+    },
+    "passed": true
+  },
+  {
+    "id": "lemmapark-programs",
+    "provider": "lemmapark.com",
+    "endpoint": "https://lemmapark.com/mcp",
+    "docs": "https://lemmapark.com",
+    "command": "lp list-programs",
+    "title": "List the available mathematics programs",
+    "observed_utc": "2026-11-23T00:02:24.722804+00:00",
+    "seconds": 2.04,
+    "stdout_sha256": "f1b6e416c72349bbdfc92814239d8431408406df2ac986e60540bf3dc1bdca8a",
+    "exit": 0,
+    "checks": {
+      "program names appear in the returned listing": true
+    },
+    "passed": true
+  }
+]

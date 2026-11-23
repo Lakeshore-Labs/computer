@@ -1,0 +1,82 @@
+[
+  {
+    "Method": "files.Dir",
+    "Result": "Opened a newly created temporary archive"
+  },
+  {
+    "Method": "files.Root.Name",
+    "Result": "Root"
+  },
+  {
+    "Method": "files.Root.Mkdir",
+    "Result": "Created archive"
+  },
+  {
+    "Method": "files.Root.MkdirAll",
+    "Result": "Created drafts/2026"
+  },
+  {
+    "Method": "files.Root.Create",
+    "Result": "Wrote the first closing time"
+  },
+  {
+    "Method": "files.Root.OpenFile",
+    "Result": "Opened the draft for editing"
+  },
+  {
+    "Method": "files.File.SetAppend",
+    "Result": "Enabled and then cleared the file descriptor’s append flag"
+  },
+  {
+    "Method": "files.File.IsAppend",
+    "Result": "Observed false, true, false"
+  },
+  {
+    "Method": "files.Root.Rename",
+    "Result": "Filed the completed notice"
+  },
+  {
+    "Method": "files.Root.Open",
+    "Result": "Read the two closing times after appending at offset zero"
+  },
+  {
+    "Method": "files.Root.Chmod",
+    "Result": "Set the file mode to 0640"
+  },
+  {
+    "Method": "files.Root.Chown",
+    "Result": "Kept the existing owner and group with -1, -1"
+  },
+  {
+    "Method": "files.Root.Chtimes",
+    "Result": "Set the accession timestamp"
+  },
+  {
+    "Method": "files.Root.Stat",
+    "Result": "Verified the exact file mode and timestamp"
+  },
+  {
+    "Method": "files.Root.Link",
+    "Result": "Verified two catalog names for the same file"
+  },
+  {
+    "Method": "files.Root.LstatIfPossible",
+    "Result": "Identified the prepared in-directory alias"
+  },
+  {
+    "Method": "files.Root.ReadlinkIfPossible",
+    "Result": "Read the alias target notice.txt"
+  },
+  {
+    "Method": "files.Root.Remove",
+    "Result": "Removed the temporary alias"
+  },
+  {
+    "Method": "files.Root.RemoveAll",
+    "Result": "Removed the emptied draft directory"
+  },
+  {
+    "Method": "files.Root.Close",
+    "Result": "Closed the archive"
+  }
+]

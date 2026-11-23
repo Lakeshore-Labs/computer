@@ -1,0 +1,30 @@
+[
+  {
+    "width": 1280,
+    "counts": {
+      "Go function": 15,
+      "Go method": 42,
+      "CLI flag": 20,
+      "MCP tool": 4
+    },
+    "limited": 40,
+    "unmatched": 0,
+    "selected": "files.Root.Rename",
+    "source": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L118",
+    "errors": []
+  },
+  {
+    "width": 390,
+    "counts": {
+      "Go function": 15,
+      "Go method": 42,
+      "CLI flag": 20,
+      "MCP tool": 4
+    },
+    "limited": 40,
+    "unmatched": 0,
+    "selected": "files.Root.Rename",
+    "source": "https://github.com/Lakeshore-Labs/computer/blob/ea7bf2356c679b2b2ebddf0498be4616da22ec83/files/dir.go#L118",
+    "errors": []
+  }
+]

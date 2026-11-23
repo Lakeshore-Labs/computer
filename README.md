@@ -18,6 +18,8 @@ servers offer.
 
 ## Use it
 
+[Explore the visual field guide](examples/README.md) for runnable examples with their inputs and captured results.
+
 ```
 go build -o computer ./cmd/computer
 

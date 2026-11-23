@@ -1,0 +1,68 @@
+[
+  {
+    "title": "The ferry ledger",
+    "figure": "50,000",
+    "unit": "boarding records",
+    "source": "four-tools",
+    "credit": "Synthetic timetable · Filesystem MCP · SQLite",
+    "shots": [
+      ["trace.png", "A ferry timetable arrives through an MCP server. Computer reads fifty thousand rows and writes a SQLite database."],
+      ["report.png", "The shell returns the route totals in just one hundred and forty-six bytes of text. A separate read brings back this chart."]
+    ]
+  },
+  {
+    "title": "Windows over Venice",
+    "figure": "3.65%",
+    "unit": "of the satellite file",
+    "source": "lagoon-windows",
+    "credit": "Contains modified Copernicus Sentinel data (2024)",
+    "shots": [
+      ["windows.webm", "Over Venice, four byte-range requests bring three windows of a satellite image into Computer."],
+      ["desktop.png", "An independent reader matches every pixel. The full image is over a hundred megabytes."]
+    ]
+  },
+  {
+    "title": "A designer’s palette",
+    "figure": "6",
+    "unit": "sampled colors",
+    "source": "lagoon-palette",
+    "credit": "Swift MCP client · Native macOS color list",
+    "shots": [
+      ["palette.webm", "A Swift client uses Computer to turn the same satellite pixels into six colors a designer can keep."],
+      ["desktop.png", "The palette opens in native Mac software, and the colors also export to Adobe, GIMP, and CSS."]
+    ]
+  },
+  {
+    "title": "Oslofjord in relief",
+    "figure": "84",
+    "unit": "depositing layers",
+    "source": "terrain-workshop",
+    "credit": "Mapzen Terrarium · Computer · CuraEngine",
+    "shots": [
+      ["rotate.webm", "Near Oslo, Computer turns elevation samples into two solid terrain models."],
+      ["layers.png", "A separate slicer checks both. The taller relief takes eighty-four layers of material."]
+    ]
+  },
+  {
+    "title": "Sunday’s fitting",
+    "figure": "7 + 1",
+    "unit": "ushers fitted + spare jacket",
+    "source": "browser-wardrobe",
+    "credit": "Chrome origin-private files · Upstream wardrobe MCP",
+    "shots": [
+      ["offline.png", "The wardrobe has five jackets for seven ushers. The assistant finds three more and saves the count offline."],
+      ["wardrobe.webm", "Back online, Computer reads the browser’s files and fits everyone. One jacket stays on the rack."]
+    ]
+  },
+  {
+    "title": "Last Boat Home",
+    "figure": "22",
+    "unit": "notes in two parts",
+    "source": "rehearsal-room",
+    "credit": "Original score · Computer WASI command · Verovio",
+    "shots": [
+      ["rehearsal.mp4", "Two Computer shells turn one tune into flute and clarinet parts. Their written pitches differ, but their sounding notes agree."],
+      ["desktop.png", "Here is the opening phrase.", "music"]
+    ]
+  }
+]

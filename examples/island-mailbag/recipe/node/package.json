@@ -1,0 +1,13 @@
+{
+  "name": "island-mailbag-node",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sender-side content-addressed store (Store A) and CAR/CID tooling for the island mailbag recipe",
+  "dependencies": {
+    "@ipld/car": "6.2.0",
+    "@ipld/dag-cbor": "11.0.0",
+    "blockstore-fs": "4.0.1",
+    "multiformats": "14.0.6"
+  }
+}

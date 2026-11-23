@@ -1,0 +1,124 @@
+[
+  {
+    "screen": "desktop",
+    "viewport": {
+      "width": 1260,
+      "height": 850
+    },
+    "stages": {
+      "before": {
+        "stock": {
+          "S": 4,
+          "M": 5,
+          "L": 3
+        },
+        "allocation": {
+          "revision": "93e4d97eca2e66c9f9b02410a7271113e4fc52e77b33b4b49eebb25c0ed909e5",
+          "required": 7,
+          "available": 5,
+          "allocated": 5,
+          "short": 2,
+          "spare": 0
+        },
+        "revision": "93e4d97eca2e66c9f9b02410a7271113e4fc52e77b33b4b49eebb25c0ed909e5"
+      },
+      "offline": {
+        "stock": {
+          "S": 4,
+          "M": 8,
+          "L": 3
+        },
+        "allocation": {
+          "revision": "93e4d97eca2e66c9f9b02410a7271113e4fc52e77b33b4b49eebb25c0ed909e5",
+          "required": 7,
+          "available": 5,
+          "allocated": 5,
+          "short": 2,
+          "spare": 0
+        },
+        "revision": "b5267612d76813f275a1acac4ec7417aa0e447a83730b1536460a71404c91d7e"
+      },
+      "after": {
+        "stock": {
+          "S": 4,
+          "M": 8,
+          "L": 3
+        },
+        "allocation": {
+          "revision": "b5267612d76813f275a1acac4ec7417aa0e447a83730b1536460a71404c91d7e",
+          "required": 7,
+          "available": 8,
+          "allocated": 7,
+          "short": 0,
+          "spare": 1
+        },
+        "revision": "b5267612d76813f275a1acac4ec7417aa0e447a83730b1536460a71404c91d7e"
+      }
+    },
+    "offline_fetch_rejected": true,
+    "reopened_files_match": true,
+    "local_origins": 1,
+    "errors": []
+  },
+  {
+    "screen": "phone",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "stages": {
+      "before": {
+        "stock": {
+          "S": 4,
+          "M": 5,
+          "L": 3
+        },
+        "allocation": {
+          "revision": "93e4d97eca2e66c9f9b02410a7271113e4fc52e77b33b4b49eebb25c0ed909e5",
+          "required": 7,
+          "available": 5,
+          "allocated": 5,
+          "short": 2,
+          "spare": 0
+        },
+        "revision": "93e4d97eca2e66c9f9b02410a7271113e4fc52e77b33b4b49eebb25c0ed909e5"
+      },
+      "offline": {
+        "stock": {
+          "S": 4,
+          "M": 8,
+          "L": 3
+        },
+        "allocation": {
+          "revision": "93e4d97eca2e66c9f9b02410a7271113e4fc52e77b33b4b49eebb25c0ed909e5",
+          "required": 7,
+          "available": 5,
+          "allocated": 5,
+          "short": 2,
+          "spare": 0
+        },
+        "revision": "b5267612d76813f275a1acac4ec7417aa0e447a83730b1536460a71404c91d7e"
+      },
+      "after": {
+        "stock": {
+          "S": 4,
+          "M": 8,
+          "L": 3
+        },
+        "allocation": {
+          "revision": "b5267612d76813f275a1acac4ec7417aa0e447a83730b1536460a71404c91d7e",
+          "required": 7,
+          "available": 8,
+          "allocated": 7,
+          "short": 0,
+          "spare": 1
+        },
+        "revision": "b5267612d76813f275a1acac4ec7417aa0e447a83730b1536460a71404c91d7e"
+      }
+    },
+    "offline_fetch_rejected": true,
+    "reopened_files_match": true,
+    "local_origins": 1,
+    "errors": []
+  }
+]

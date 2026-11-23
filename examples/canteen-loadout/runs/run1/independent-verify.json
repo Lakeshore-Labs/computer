@@ -1,0 +1,39 @@
+{
+ "checks": {
+  "postgres_rows_via_psql": true,
+  "parquet_is_real": true,
+  "parquet_total_150": true,
+  "transfers_match_expected": true,
+  "final_equals_ordered": true,
+  "no_units_short": true
+ },
+ "all_pass": true,
+ "psql_rows": [
+  "Hill,Lunch,Herb pasta,12",
+  "Hill,Lunch,Roast vegetables,18",
+  "Orchard,Lunch,Herb pasta,36",
+  "Orchard,Lunch,Roast vegetables,24",
+  "Quay,Lunch,Herb pasta,22",
+  "Quay,Lunch,Roast vegetables,38"
+ ],
+ "parquet": {
+  "rows": 6,
+  "created_by": "DuckDB version v1.5.6 (build 069cc9f9b5)",
+  "compression": "ZSTD",
+  "bytes": 777,
+  "schema": "hall: string; service: string; meal: string; loaded: int32"
+ },
+ "original_shortages": {
+  "Orchard|Lunch|Herb pasta": 5,
+  "Quay|Lunch|Roast vegetables": 8
+ },
+ "final": {
+  "Hill|Lunch|Herb pasta": 12,
+  "Hill|Lunch|Roast vegetables": 18,
+  "Orchard|Lunch|Herb pasta": 36,
+  "Orchard|Lunch|Roast vegetables": 24,
+  "Quay|Lunch|Herb pasta": 22,
+  "Quay|Lunch|Roast vegetables": 38
+ },
+ "pyarrow": "26.0.1"
+}

@@ -1,0 +1,22 @@
+{
+  "url": "https://example.com/",
+  "utc": "2026-11-22T23:03:55.454725+00:00",
+  "observations": [
+    {
+      "flag_supplied": false,
+      "exit": 127,
+      "response_bytes": 0,
+      "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "contains_example_domain": false,
+      "curl_unavailable": true
+    },
+    {
+      "flag_supplied": true,
+      "exit": 0,
+      "response_bytes": 577,
+      "response_sha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484",
+      "contains_example_domain": true,
+      "curl_unavailable": false
+    }
+  ]
+}

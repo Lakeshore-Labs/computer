@@ -1,0 +1,16 @@
+{
+  "tags": {
+    "rehearsal": "7ffe6b16675f52721ac900464eb93050a123bcb9",
+    "opening": "26ab21c3abb1ccfb046d37d4bf5773761e1bd7a7"
+  },
+  "cues": 5,
+  "verified_svg_bars": 10,
+  "changed_durations": 4,
+  "changed_colors": 2,
+  "total_seconds": [
+    133,
+    133
+  ],
+  "working_tree_preserved": true,
+  "both_guest_files_equal_git_show": true
+}

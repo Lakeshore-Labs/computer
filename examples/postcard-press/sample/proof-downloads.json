@@ -1,0 +1,32 @@
+[
+  {
+    "width": 1280,
+    "file": "desktop-card1-getty.svg",
+    "exact_bytes": 35715
+  },
+  {
+    "width": 1280,
+    "file": "desktop-card2-cleveland.svg",
+    "exact_bytes": 31310
+  },
+  {
+    "width": 1280,
+    "file": "phone-card1-cleveland.svg",
+    "exact_bytes": 31326
+  },
+  {
+    "width": 390,
+    "file": "desktop-card1-getty.svg",
+    "exact_bytes": 35715
+  },
+  {
+    "width": 390,
+    "file": "desktop-card2-cleveland.svg",
+    "exact_bytes": 31310
+  },
+  {
+    "width": 390,
+    "file": "phone-card1-cleveland.svg",
+    "exact_bytes": 31326
+  }
+]

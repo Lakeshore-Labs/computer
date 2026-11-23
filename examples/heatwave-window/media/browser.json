@@ -1,0 +1,20 @@
+[
+  {
+    "viewport": 1280,
+    "page_width": 1280,
+    "cells_in_three_maps": [
+      341,
+      341,
+      341
+    ]
+  },
+  {
+    "viewport": 390,
+    "page_width": 390,
+    "cells_in_three_maps": [
+      341,
+      341,
+      341
+    ]
+  }
+]

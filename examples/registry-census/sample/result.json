@@ -1,0 +1,13 @@
+{
+  "source": "https://registry.modelcontextprotocol.io/v0.1/servers",
+  "observed_utc": "2026-11-22T18:48:21.272539+00:00",
+  "complete_pagination": true,
+  "pages": 703,
+  "registrations": 70222,
+  "distribution": {
+    "Remote only": 42878,
+    "Package only": 21665,
+    "Both": 4974,
+    "Neither declared": 705
+  }
+}

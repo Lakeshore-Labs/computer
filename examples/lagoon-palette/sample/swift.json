@@ -1,0 +1,23 @@
+{
+  "native_keys" : [
+    "Roof terracotta",
+    "Canal teal",
+    "Marsh olive",
+    "Pale reed",
+    "Lido sand",
+    "Adriatic green"
+  ],
+  "native_round_trip" : true,
+  "png_sha256" : {
+    "burano" : "17ef08ea3aacc239f1eca12f083377a4f3393ec3df4123adf5d37f5dbd836d45",
+    "lido" : "c58c6ba4f633b3e3e1508c79ae7f2c6d2ae60d15d9d6e40cb14aedd741b27d97",
+    "san-marco" : "e04d0dcf407156d0435bd09d995800272368bd9d8299c997f702adef22929c2f"
+  },
+  "sdk" : "modelcontextprotocol\/swift-sdk 0.10.0",
+  "tools" : [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ]
+}
