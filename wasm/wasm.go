@@ -6,10 +6,8 @@ package wasm
 import (
 	"context"
 	"crypto/rand"
-	"crypto/sha256"
 	"errors"
 	"io"
-	"slices"
 	"sync"
 	"time"
 
@@ -53,12 +51,7 @@ type Module struct {
 	code    wazero.CompiledModule
 	replies sync.Map      // a running instance to the reply it has not read yet
 	turns   chan struct{} // one place for each run allowed at once; nil when there is no limit
-	sum     [sha256.Size]byte
 }
-
-// Sum identifies the program the module was compiled from, and how: what one module writes for itself to read
-// later, such as an engine's bytecode, is good only for a module with the same sum.
-func (m *Module) Sum() [sha256.Size]byte { return m.sum }
 
 // Compile compiles p once, for every run of it.
 func Compile(ctx context.Context, p Program) (*Module, error) {
@@ -76,7 +69,7 @@ func Compile(ctx context.Context, p Program) (*Module, error) {
 		}
 		cfg = cfg.WithCompilationCache(cache)
 	}
-	m := &Module{runtime: wazero.NewRuntimeWithConfig(ctx, cfg), sum: sha256.Sum256(slices.Concat(p.Binary, []byte{byte(p.Features), b2i(p.Unstoppable)}))}
+	m := &Module{runtime: wazero.NewRuntimeWithConfig(ctx, cfg)}
 	if p.MaxRuns > 0 {
 		m.turns = make(chan struct{}, p.MaxRuns)
 	}
@@ -110,13 +103,6 @@ func Compile(ctx context.Context, p Program) (*Module, error) {
 		return nil, errors.Join(err, m.Close(ctx))
 	}
 	return m, nil
-}
-
-func b2i(b bool) byte {
-	if b {
-		return 1
-	}
-	return 0
 }
 
 // Close frees the compiled code.
@@ -200,8 +186,8 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 
 // stdin is a program's standard input, read for it by a goroutine, so that a program waiting on its input is still
 // stopped when its context ends: a Read of the caller's reader cannot be interrupted, and wazero would make the
-// program wait in that Read. It is pollable, so a program can wait for input with a timeout, as the agent's engine
-// does to keep its timers running.
+// program wait in that Read. It is pollable, so a program can wait for input with a timeout, as Python's select
+// does.
 //
 // The goroutine ends when the reader ends, or, once the run is over, when its pending Read returns. A reader whose
 // Read never returns keeps the goroutine for as long as that Read lasts; nothing in Go can end it sooner.

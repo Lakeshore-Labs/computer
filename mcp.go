@@ -35,7 +35,7 @@ func (c *Computer) MCPServer(ctx context.Context, limit time.Duration) (*mcp.Ser
 		return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: s}}, IsError: failed}, nil
 	}
 
-	// The agent is told what the agent in the computer is told, so the two cannot differ.
+	// The bash tool's description is About, the text Describe gives a harness, so the two cannot differ.
 	if _, err := c.Session(ctx); err != nil {
 		return nil, err
 	}
