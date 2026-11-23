@@ -1,0 +1,26 @@
+[
+  {
+    "width": 1280,
+    "edition": "first",
+    "download_bytes": 302365,
+    "sha256": "154f25d89d8f6195529cbb2557050734ad60d192009be2973ae3c1e3bb9b0212"
+  },
+  {
+    "width": 1280,
+    "edition": "amended",
+    "download_bytes": 303235,
+    "sha256": "f4bb8d8879f83d8b052b0f3f9b510c32b45ced9cb5770ecec8ab3d96d1a117d1"
+  },
+  {
+    "width": 390,
+    "edition": "first",
+    "download_bytes": 302365,
+    "sha256": "154f25d89d8f6195529cbb2557050734ad60d192009be2973ae3c1e3bb9b0212"
+  },
+  {
+    "width": 390,
+    "edition": "amended",
+    "download_bytes": 303235,
+    "sha256": "f4bb8d8879f83d8b052b0f3f9b510c32b45ced9cb5770ecec8ab3d96d1a117d1"
+  }
+]

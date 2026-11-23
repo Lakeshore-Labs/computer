@@ -1,0 +1,19 @@
+{
+  "edition": "amended",
+  "paper_mm": [
+    297,
+    210
+  ],
+  "slots": [
+    "getty",
+    "cleveland",
+    "cleveland",
+    "cleveland"
+  ],
+  "copies": {
+    "cleveland": 3,
+    "getty": 1
+  },
+  "pdf_bytes": 303235,
+  "pdf_sha256": "f4bb8d8879f83d8b052b0f3f9b510c32b45ced9cb5770ecec8ab3d96d1a117d1"
+}

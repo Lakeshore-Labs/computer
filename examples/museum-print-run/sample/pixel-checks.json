@@ -1,0 +1,82 @@
+[
+  {
+    "edition": "first",
+    "position": 1,
+    "expected": "getty",
+    "nearest_original": "getty",
+    "mean_absolute_rgb_difference": {
+      "getty": 0.0,
+      "cleveland": 31.21569069069069
+    }
+  },
+  {
+    "edition": "first",
+    "position": 2,
+    "expected": "getty",
+    "nearest_original": "getty",
+    "mean_absolute_rgb_difference": {
+      "getty": 0.0,
+      "cleveland": 31.21569069069069
+    }
+  },
+  {
+    "edition": "first",
+    "position": 3,
+    "expected": "getty",
+    "nearest_original": "getty",
+    "mean_absolute_rgb_difference": {
+      "getty": 0.0,
+      "cleveland": 31.21569069069069
+    }
+  },
+  {
+    "edition": "first",
+    "position": 4,
+    "expected": "cleveland",
+    "nearest_original": "cleveland",
+    "mean_absolute_rgb_difference": {
+      "getty": 31.21569069069069,
+      "cleveland": 0.0
+    }
+  },
+  {
+    "edition": "amended",
+    "position": 1,
+    "expected": "getty",
+    "nearest_original": "getty",
+    "mean_absolute_rgb_difference": {
+      "getty": 0.0,
+      "cleveland": 31.21569069069069
+    }
+  },
+  {
+    "edition": "amended",
+    "position": 2,
+    "expected": "cleveland",
+    "nearest_original": "cleveland",
+    "mean_absolute_rgb_difference": {
+      "getty": 31.21569069069069,
+      "cleveland": 0.0
+    }
+  },
+  {
+    "edition": "amended",
+    "position": 3,
+    "expected": "cleveland",
+    "nearest_original": "cleveland",
+    "mean_absolute_rgb_difference": {
+      "getty": 31.21569069069069,
+      "cleveland": 0.0
+    }
+  },
+  {
+    "edition": "amended",
+    "position": 4,
+    "expected": "cleveland",
+    "nearest_original": "cleveland",
+    "mean_absolute_rgb_difference": {
+      "getty": 31.21569069069069,
+      "cleveland": 0.0
+    }
+  }
+]
