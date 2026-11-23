@@ -11,7 +11,7 @@ JOBS=${JOBS:-$( (nproc || sysctl -n hw.ncpu || echo 4) 2>/dev/null )}
 PYTHON_VERSION=3.15.2
 PYTHON_SHA256=f74e1db0eabd651cd01e4e2a00201bd41866abe74869ab716f9bf33cbbaa0943
 ZLIB_SHA256=9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23
-SQLITE_SHA256=77823cb110929c2bcb0f5d48e4833b5c59a8a6e40cdea3936b99e199dbbe5784
+SQLITE_SHA256=0a9c8e34352dad46006aa82836d5383bff9dc6bc9ce5a60553c05aa30e6ad1f9
 WASI_SDK_URL=https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-33
 
 case "$(uname -s)-$(uname -m)" in
@@ -34,13 +34,13 @@ fetch() {
 fetch "$WASI_SDK_URL/wasi-sdk-33.0-$SDK.tar.gz" wasi-sdk.tar.gz "$WASI_SDK_SHA256"
 fetch "https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz" python.tgz "$PYTHON_SHA256"
 fetch https://zlib.net/fossils/zlib-1.3.1.tar.gz zlib.tar.gz "$ZLIB_SHA256"
-fetch https://www.sqlite.org/2024/sqlite-amalgamation-3460100.zip sqlite.zip "$SQLITE_SHA256"
+fetch https://www.sqlite.org/2026/sqlite-amalgamation-3540100.zip sqlite.zip "$SQLITE_SHA256"
 
 mkdir -p "$WORK/src" "$WORK/build"
 [ -d "$WORK/src/wasi-sdk" ] || { mkdir "$WORK/src/wasi-sdk.tmp" && tar xzf "$WORK/downloads/wasi-sdk.tar.gz" -C "$WORK/src/wasi-sdk.tmp" --strip-components=1 && mv "$WORK/src/wasi-sdk.tmp" "$WORK/src/wasi-sdk"; }
 [ -d "$WORK/src/Python-$PYTHON_VERSION" ] || tar xzf "$WORK/downloads/python.tgz" -C "$WORK/src"
 [ -d "$WORK/src/zlib-1.3.1" ] || tar xzf "$WORK/downloads/zlib.tar.gz" -C "$WORK/src"
-[ -d "$WORK/src/sqlite-amalgamation-3460100" ] || unzip -q "$WORK/downloads/sqlite.zip" -d "$WORK/src"
+[ -d "$WORK/src/sqlite-amalgamation-3540100" ] || unzip -q "$WORK/downloads/sqlite.zip" -d "$WORK/src"
 
 S=$WORK/src/wasi-sdk
 SRC=$WORK/src/Python-$PYTHON_VERSION
@@ -67,15 +67,16 @@ if [ ! -f "$DEPS/lib/libz.a" ]; then
 		make -j "$JOBS" libz.a AR="$S/bin/llvm-ar" ARFLAGS=rc && make install)
 fi
 
-# 3. SQLite 3.46.1 amalgamation, static. The options were read from the compile-options table of the reference build.
+# 3. SQLite 3.54.1 amalgamation, static. The options were read from the compile-options table of the reference build.
+# Before 3.51.0, a WASI build called a null fchmod whenever it created a temporary file, and trapped.
 if [ ! -f "$DEPS/lib/libsqlite3.a" ]; then
 	mkdir -p "$WORK/build/sqlite" "$DEPS/lib" "$DEPS/include"
 	(cd "$WORK/build/sqlite" &&
 		$WASICC -O2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_OMIT_SHARED_CACHE -DSQLITE_OMIT_WAL \
 			-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_MATH_FUNCTIONS \
-			-c "$WORK/src/sqlite-amalgamation-3460100/sqlite3.c" -o sqlite3.o &&
+			-c "$WORK/src/sqlite-amalgamation-3540100/sqlite3.c" -o sqlite3.o &&
 		"$S/bin/llvm-ar" rcs "$DEPS/lib/libsqlite3.a" sqlite3.o)
-	cp "$WORK/src/sqlite-amalgamation-3460100/sqlite3.h" "$WORK/src/sqlite-amalgamation-3460100/sqlite3ext.h" "$DEPS/include/"
+	cp "$WORK/src/sqlite-amalgamation-3540100/sqlite3.h" "$WORK/src/sqlite-amalgamation-3540100/sqlite3ext.h" "$DEPS/include/"
 fi
 
 # 4. CPython for wasm32-wasip1. configure insists that HOSTRUNNER is set but only records it (in the Makefile and

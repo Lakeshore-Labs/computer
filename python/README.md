@@ -7,7 +7,7 @@ built-in module, `_host`, through which a script calls MCP tools.
 
 Each build is made by the `python` workflow in this repository from `build.sh` and attached to a release:
 
-    gh release download python-3.15.2-2 --repo Lakeshore-Labs/computer --pattern '*.tar.gz*'
+    gh release download python-3.15.2-3 --repo Lakeshore-Labs/computer --pattern '*.tar.gz*'
     shasum -a 256 -c python-3.15.2-wasi.tar.gz.sha256
     mkdir python-wasi && tar -xzf python-3.15.2-wasi.tar.gz -C python-wasi
 
@@ -25,7 +25,7 @@ From an empty working directory, on Linux or macOS:
 
 It writes `downloads/`, `src/`, `build/` and `dist/` there, and takes a few minutes. It needs `curl`, `tar`,
 `unzip`, `make` and a C compiler; on Debian or Ubuntu, `apt-get install build-essential ca-certificates curl unzip`.
-It downloads wasi-sdk 33, CPython 3.15.2, zlib 1.3.1, SQLite 3.46.1 and the packages in `requirements.txt`, each
+It downloads wasi-sdk 33, CPython 3.15.2, zlib 1.3.1, SQLite 3.54.1 and the packages in `requirements.txt`, each
 pinned to a version and checked against a SHA-256 written in the script or in that file.
 
 ## What differs from a stock CPython build
