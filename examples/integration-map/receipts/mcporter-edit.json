@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "io.modelcontextprotocol/serverInfo": {
+      "name": "computer",
+      "version": ""
+    }
+  },
+  "content": [
+    {
+      "type": "text",
+      "text": "Successfully replaced text in handoff.txt."
+    }
+  ]
+}

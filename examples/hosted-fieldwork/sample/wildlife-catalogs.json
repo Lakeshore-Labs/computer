@@ -1,0 +1,31 @@
+{
+  "id": "story-lynx-two-catalogs",
+  "provider": "STORY: iNaturalist + GBIF (hosted MCP) + Wikidata",
+  "servers": {
+    "inat": "https://inaturalist.caseyjhand.com/mcp",
+    "gbif": "https://gbif-biodiversity.caseyjhand.com/mcp"
+  },
+  "started_utc": "2026-11-22T21:51:18.026145+00:00",
+  "seconds": 15.12,
+  "exit": 0,
+  "stdout": "inat_licensed_research=398\ngbif_inat_dataset=394\ndataset_title=iNaturalist Research-grade Observations\ngbif_rest_inat_dataset=394\ninat_rest_licensed_research=398\n",
+  "checks": [
+    {
+      "desc": "output contains 'dataset_title=iNaturalist'",
+      "ok": true
+    },
+    {
+      "desc": "GBIF MCP (iNat dataset) vs GBIF REST (394 vs 394, tol 2%)",
+      "ok": true
+    },
+    {
+      "desc": "iNaturalist MCP vs iNaturalist REST (398 vs 398, tol 3%)",
+      "ok": true
+    },
+    {
+      "desc": "cross-catalog agreement iNaturalist (CC0/CC-BY/CC-BY-NC research-grade) vs GBIF copy (398 vs 394, tol 3%)",
+      "ok": true
+    }
+  ],
+  "sha256": "41635509d074121a314d70d1a9b20b0c61849e06945779ce739045ca2a7ec789"
+}

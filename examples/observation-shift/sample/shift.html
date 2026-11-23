@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  />
+  <title>The observation shift · Computer field guide</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #f5f2e9;
+      color: #213938;
+      font:
+        16px/1.47 system-ui,
+        sans-serif;
+    }
+    main {
+      max-width: 1240px;
+      margin: auto;
+      padding: clamp(16px, 3vw, 44px);
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+      align-items: baseline;
+      border-block: 1px solid #6f8c80;
+      padding: 0.65rem 0;
+    }
+    header b {
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.85rem;
+    }
+    h1 {
+      font:
+        500 clamp(42px, 6vw, 82px) / 1 Georgia,
+        serif;
+      margin: 1.4rem 0 0.6rem;
+      letter-spacing: -0.05em;
+    }
+    .lede {
+      font-size: 1.12rem;
+      max-width: 800px;
+      margin: 0.4rem 0 1.1rem;
+    }
+    .clock {
+      background: #234843;
+      color: #f9f5e9;
+      padding: clamp(15px, 2vw, 25px);
+      display: grid;
+      gap: 0.75rem;
+    }
+    .clock > div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+    #moment {
+      font:
+        600 clamp(20px, 3vw, 34px) ui-monospace,
+        monospace;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: #e8ab6f;
+    }
+    .clock button {
+      background: #f5efdc;
+      color: #1f403c;
+      border: 0;
+      font: inherit;
+      padding: 0.4rem 0.65rem;
+      cursor: pointer;
+    }
+    .clock button:disabled {
+      opacity: 0.5;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .panel {
+      background: #fffef8;
+      border: 1px solid #b8c5b7;
+      padding: clamp(14px, 2vw, 25px);
+      min-width: 0;
+    }
+    h2 {
+      font:
+        500 clamp(25px, 3.2vw, 37px) / 1.12 Georgia,
+        serif;
+      margin: 0 0 0.5rem;
+    }
+    h3 {
+      font: 600 1rem system-ui;
+      margin: 0.8rem 0 0.4rem;
+    }
+    .panel p {
+      margin: 0.4rem 0;
+    }
+    .small,
+    footer {
+      font-size: 0.85rem;
+      color: #455d55;
+    }
+    canvas {
+      width: 100%;
+      height: 150px;
+      display: block;
+      margin: 0.65rem 0;
+      border-bottom: 1px solid #b5c1b8;
+    }
+    .reading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.5rem;
+      border-top: 1px solid #d1d9cf;
+      padding: 0.4rem 0;
+    }
+    .reading strong {
+      font-variant-numeric: tabular-nums;
+    }
+    .dot {
+      display: inline-block;
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 50%;
+      margin-right: 0.45rem;
+    }
+    .num {
+      font:
+        500 clamp(29px, 4vw, 46px) Georgia,
+        serif;
+      letter-spacing: -0.035em;
+    }
+    select {
+      font: inherit;
+      padding: 0.2em 0.4em;
+      margin-left: 0.3em;
+      color: inherit;
+    }
+    a {
+      color: #215e59;
+    }
+    footer {
+      margin: 1rem 0;
+      border-top: 1px solid #95aa9d;
+      padding-top: 0.7rem;
+    }
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid #b46d3e;
+      outline-offset: 3px;
+    }
+    @media (max-width: 740px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .clock {
+        gap: 1rem;
+      }
+      .clock button {
+        font-size: 0.9rem;
+      }
+      header {
+        align-items: start;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+  <main>
+    <header><b>Computer / Observation shift</b><span id="span"></span></header>
+    <h1>What did the desk know?</h1>
+    <p class="lede">
+      Move through the actual collection times. Each panel shows the most recent
+      result available then. The collectors ran at different intervals.
+    </p>
+    <section class="clock" aria-label="Observation time">
+      <div><strong id="moment"></strong><span id="position"></span></div>
+      <input
+        id="time"
+        type="range"
+        min="0"
+        step="1"
+        aria-label="Observation time in UTC"
+      />
+      <div>
+        <button id="prev">← Earlier</button><span>Recorded times · UTC</span
+        ><button id="next">Later →</button>
+      </div>
+    </section>
+    <section class="grid">
+      <article class="panel">
+        <h2>Pacific water levels</h2>
+        <p class="small">
+          Metres above each station’s Mean Lower Low Water datum. NOAA publishes
+          observation and request times separately.
+        </p>
+        <canvas
+          id="plot"
+          aria-label="Water level sequences up to the selected time"
+        ></canvas>
+        <div id="tides"></div>
+        <p class="small" id="tide-time"></p>
+      </article>
+      <article class="panel">
+        <h2>Group bikes in Oslo</h2>
+        <p id="bike-total"></p>
+        <label
+          >Group size
+          <select id="group">
+            <option>5</option>
+            <option selected>10</option>
+            <option>13</option>
+            <option>20</option>
+          </select></label
+        >
+        <div id="stops"></div>
+        <p id="eligible"></p>
+        <p class="small" id="bike-time"></p>
+      </article>
+      <article class="panel">
+        <h2>Three hosted MCPs</h2>
+        <p class="small">
+          Computer repeated an Astro docs search, a Microsoft Learn search and a
+          Svelte component check.
+        </p>
+        <div id="hosted"></div>
+        <p class="small" id="docs-time"></p>
+      </article>
+      <article class="panel">
+        <h2>One open Computer client</h2>
+        <div class="num" id="age"></div>
+        <p id="client"></p>
+        <p class="small" id="client-time"></p>
+      </article>
+    </section>
+    <footer>
+      <a href="timeline.csv">Open the observation log</a> ·
+      <a href="shift.sqlite">Open the SQLite database</a> · NOAA CO-OPS water
+      levels · Oslo City Bike GBFS under NLOD 2.0. Bike availability was
+      observed, and no reservation was made.
+    </footer>
+  </main>
+  <script type="application/json" id="observations">
+    {"times": ["2026-11-22T16:55:13+00:00", "2026-11-22T17:25:13+00:00", "2026-11-22T17:55:13+00:00", "2026-11-22T18:25:12+00:00", "2026-11-22T18:55:12+00:00", "2026-11-22T19:25:11+00:00", "2026-11-22T19:42:00+00:00", "2026-11-22T19:55:11+00:00", "2026-11-22T20:18:55+00:00", "2026-11-22T20:21:04+00:00", "2026-11-22T20:25:11+00:00", "2026-11-22T20:25:15+00:00", "2026-11-22T20:39:00+00:00", "2026-11-22T20:41:04+00:00", "2026-11-22T20:55:11+00:00", "2026-11-22T20:55:36+00:00", "2026-11-22T21:01:04+00:00", "2026-11-22T21:21:04+00:00", "2026-11-22T21:25:11+00:00", "2026-11-22T21:25:16+00:00", "2026-11-22T21:39:00+00:00", "2026-11-22T21:41:04+00:00", "2026-11-22T21:55:10+00:00", "2026-11-22T21:55:16+00:00", "2026-11-22T22:01:04+00:00", "2026-11-22T22:21:04+00:00", "2026-11-22T22:25:09+00:00", "2026-11-22T22:25:16+00:00", "2026-11-22T22:39:00+00:00", "2026-11-22T22:41:04+00:00", "2026-11-22T22:55:08+00:00", "2026-11-22T22:55:16+00:00", "2026-11-22T23:01:04+00:00", "2026-11-22T23:21:04+00:00", "2026-11-22T23:25:08+00:00", "2026-11-22T23:25:17+00:00", "2026-11-22T23:39:00+00:00", "2026-11-22T23:41:04+00:00", "2026-11-22T23:55:08+00:00", "2026-11-22T23:55:17+00:00", "2026-11-23T00:01:04+00:00", "2026-11-23T00:21:04+00:00", "2026-11-23T00:25:07+00:00", "2026-11-23T00:25:17+00:00", "2026-11-23T00:35:00+00:00", "2026-11-23T00:37:00+00:00", "2026-11-23T00:38:59+00:00", "2026-11-23T00:39:03+00:00", "2026-11-23T00:39:18+00:00"], "series": {"tide": [{"capture": "2026-11-22T16:55:13+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 16:48", "metres": 1.863, "quality": "p"}, {"capture": "2026-11-22T16:55:13+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 16:48", "metres": 2.316, "quality": "p"}, {"capture": "2026-11-22T16:55:13+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 16:48", "metres": 2.372, "quality": "p"}, {"capture": "2026-11-22T17:25:13+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 17:12", "metres": 1.756, "quality": "p"}, {"capture": "2026-11-22T17:25:13+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 17:18", "metres": 2.285, "quality": "p"}, {"capture": "2026-11-22T17:25:13+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 17:18", "metres": 2.422, "quality": "p"}, {"capture": "2026-11-22T17:55:13+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 17:48", "metres": 1.465, "quality": "p"}, {"capture": "2026-11-22T17:55:13+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 17:48", "metres": 2.235, "quality": "p"}, {"capture": "2026-11-22T17:55:13+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 17:48", "metres": 2.536, "quality": "p"}, {"capture": "2026-11-22T18:25:12+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 18:18", "metres": 1.234, "quality": "p"}, {"capture": "2026-11-22T18:25:12+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 18:18", "metres": 2.102, "quality": "p"}, {"capture": "2026-11-22T18:25:12+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 18:18", "metres": 2.692, "quality": "p"}, {"capture": "2026-11-22T18:55:12+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 18:48", "metres": 1.011, "quality": "p"}, {"capture": "2026-11-22T18:55:12+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 18:48", "metres": 1.908, "quality": "p"}, {"capture": "2026-11-22T18:55:12+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 18:48", "metres": 2.872, "quality": "p"}, {"capture": "2026-11-22T19:25:11+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 19:18", "metres": 0.758, "quality": "p"}, {"capture": "2026-11-22T19:25:11+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 19:18", "metres": 1.682, "quality": "p"}, {"capture": "2026-11-22T19:25:11+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 19:18", "metres": 3.08, "quality": "p"}, {"capture": "2026-11-22T19:55:11+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 19:48", "metres": 0.588, "quality": "p"}, {"capture": "2026-11-22T19:55:11+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 19:48", "metres": 1.411, "quality": "p"}, {"capture": "2026-11-22T19:55:11+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 19:48", "metres": 3.28, "quality": "p"}, {"capture": "2026-11-22T20:25:11+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 20:18", "metres": 0.4, "quality": "p"}, {"capture": "2026-11-22T20:25:11+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 20:18", "metres": 1.178, "quality": "p"}, {"capture": "2026-11-22T20:25:11+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 20:18", "metres": 3.484, "quality": "p"}, {"capture": "2026-11-22T20:55:11+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 20:48", "metres": 0.294, "quality": "p"}, {"capture": "2026-11-22T20:55:11+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 20:48", "metres": 0.92, "quality": "p"}, {"capture": "2026-11-22T20:55:11+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 20:48", "metres": 3.654, "quality": "p"}, {"capture": "2026-11-22T21:25:11+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 21:18", "metres": 0.211, "quality": "p"}, {"capture": "2026-11-22T21:25:11+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 21:18", "metres": 0.726, "quality": "p"}, {"capture": "2026-11-22T21:25:11+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 21:18", "metres": 3.788, "quality": "p"}, {"capture": "2026-11-22T21:55:10+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 21:48", "metres": 0.212, "quality": "p"}, {"capture": "2026-11-22T21:55:10+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 21:48", "metres": 0.538, "quality": "p"}, {"capture": "2026-11-22T21:55:10+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 21:48", "metres": 3.848, "quality": "p"}, {"capture": "2026-11-22T22:25:09+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 22:18", "metres": 0.237, "quality": "p"}, {"capture": "2026-11-22T22:25:09+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 22:18", "metres": 0.389, "quality": "p"}, {"capture": "2026-11-22T22:25:09+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 22:18", "metres": 3.838, "quality": "p"}, {"capture": "2026-11-22T22:55:08+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 22:48", "metres": 0.375, "quality": "p"}, {"capture": "2026-11-22T22:55:08+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 22:48", "metres": 0.264, "quality": "p"}, {"capture": "2026-11-22T22:55:08+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 22:48", "metres": 3.744, "quality": "p"}, {"capture": "2026-11-22T23:25:08+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 23:18", "metres": 0.491, "quality": "p"}, {"capture": "2026-11-22T23:25:08+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 23:18", "metres": 0.218, "quality": "p"}, {"capture": "2026-11-22T23:25:08+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 23:18", "metres": 3.58, "quality": "p"}, {"capture": "2026-11-22T23:55:08+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-22 23:48", "metres": 0.644, "quality": "p"}, {"capture": "2026-11-22T23:55:08+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-22 23:48", "metres": 0.186, "quality": "p"}, {"capture": "2026-11-22T23:55:08+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-22 23:48", "metres": 3.348, "quality": "p"}, {"capture": "2026-11-23T00:25:07+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-23 00:18", "metres": 0.821, "quality": "p"}, {"capture": "2026-11-23T00:25:07+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-23 00:18", "metres": 0.248, "quality": "p"}, {"capture": "2026-11-23T00:25:07+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-23 00:18", "metres": 3.052, "quality": "p"}, {"capture": "2026-11-23T00:38:59+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-23 00:30", "metres": 0.891, "quality": "p"}, {"capture": "2026-11-23T00:38:59+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-23 00:30", "metres": 0.266, "quality": "p"}, {"capture": "2026-11-23T00:38:59+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-23 00:30", "metres": 2.918, "quality": "p"}, {"capture": "2026-11-23T00:39:03+00:00", "station": "9410170", "city": "San Diego", "observation": "2026-11-23 00:30", "metres": 0.891, "quality": "p"}, {"capture": "2026-11-23T00:39:03+00:00", "station": "9414290", "city": "San Francisco", "observation": "2026-11-23 00:30", "metres": 0.266, "quality": "p"}, {"capture": "2026-11-23T00:39:03+00:00", "station": "9447130", "city": "Seattle", "observation": "2026-11-23 00:30", "metres": 2.918, "quality": "p"}], "bike": [{"capture": "2026-11-22T20:21:04+00:00", "feed_time": "2026-11-22T20:20:45+00:00", "stations": 261, "stations_with_bikes": 208, "bikes": 1541, "digest": "739e0232dc3773b5b467c6c09bbe27bdc56cb496b404e720fc1a44e0bd01cbcd"}, {"capture": "2026-11-22T20:41:04+00:00", "feed_time": "2026-11-22T20:40:45+00:00", "stations": 261, "stations_with_bikes": 209, "bikes": 1543, "digest": "cc7d75faeb9c301d2358d359614ab4d623d471ea25d14f9e479cb714861a4b12"}, {"capture": "2026-11-22T21:01:04+00:00", "feed_time": "2026-11-22T21:01:00+00:00", "stations": 261, "stations_with_bikes": 207, "bikes": 1545, "digest": "82cd499153fb2ca40d19fbe4c449a7a101aced3f4ba693cc940172c9c74c525a"}, {"capture": "2026-11-22T21:21:04+00:00", "feed_time": "2026-11-22T21:20:45+00:00", "stations": 261, "stations_with_bikes": 209, "bikes": 1543, "digest": "d2cbc1d4520533eb2237c29ea173de1b440b716092d7cc7df4de15e40c7f7014"}, {"capture": "2026-11-22T21:41:04+00:00", "feed_time": "2026-11-22T21:40:45+00:00", "stations": 261, "stations_with_bikes": 209, "bikes": 1544, "digest": "967999e5f3a2ee2df90425fde478c3f76e7a7396a91a21c8ea47d29c8aaaaa99"}, {"capture": "2026-11-22T22:01:04+00:00", "feed_time": "2026-11-22T22:00:45+00:00", "stations": 261, "stations_with_bikes": 208, "bikes": 1546, "digest": "43decb6d51e59f07e1a02b3913e8639118f0f0e2aab5721c255f2bbd6ce5f343"}, {"capture": "2026-11-22T22:21:04+00:00", "feed_time": "2026-11-22T22:20:45+00:00", "stations": 261, "stations_with_bikes": 210, "bikes": 1542, "digest": "f1f6aa71361c867bf4ccab234166c71ea46214b532af980d31320629880d30cd"}, {"capture": "2026-11-22T22:41:04+00:00", "feed_time": "2026-11-22T22:40:45+00:00", "stations": 261, "stations_with_bikes": 208, "bikes": 1541, "digest": "e6e988d4810f83776109421d8e5c14ebd68e2c95f68596444af318b637b1ad7c"}, {"capture": "2026-11-22T23:01:04+00:00", "feed_time": "2026-11-22T23:00:45+00:00", "stations": 261, "stations_with_bikes": 209, "bikes": 1538, "digest": "9e5713b4296da1150f8f65262b19c79b24b50db51f163be1f343ebeae073fb5b"}, {"capture": "2026-11-22T23:21:04+00:00", "feed_time": "2026-11-22T23:20:45+00:00", "stations": 261, "stations_with_bikes": 212, "bikes": 1535, "digest": "4f754e75ad3c0aa5d2646f8767bf386a30f9314bd50d12dccdd1759b9d30055a"}, {"capture": "2026-11-22T23:41:04+00:00", "feed_time": "2026-11-22T23:40:45+00:00", "stations": 261, "stations_with_bikes": 212, "bikes": 1542, "digest": "f9a6868443f9ca5b4b93c48aeb48599eccff6bdd1470fcdcd2e7a881f574322e"}, {"capture": "2026-11-23T00:01:04+00:00", "feed_time": "2026-11-23T00:00:45+00:00", "stations": 261, "stations_with_bikes": 211, "bikes": 1539, "digest": "eb347218722e81b268dc44c11fdaa34e453948db199165290090d342ee9ed362"}, {"capture": "2026-11-23T00:21:04+00:00", "feed_time": "2026-11-23T00:21:00+00:00", "stations": 261, "stations_with_bikes": 211, "bikes": 1537, "digest": "501c4256bba8c80d74a904b9c2797bf0d79f15df236c5808d00a405268f6e229"}, {"capture": "2026-11-23T00:37:00+00:00", "feed_time": "2026-11-23T00:36:45+00:00", "stations": 261, "stations_with_bikes": 212, "bikes": 1540, "digest": "8f8315708308080fa3a54b7d0754b912b42decd30348050ed549ad9472e1a740"}], "stop": [{"capture": "2026-11-22T20:21:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 9, "renting": 1}, {"capture": "2026-11-22T20:21:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T20:21:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-22T20:41:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-22T20:41:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T20:41:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-22T21:01:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-22T21:01:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T21:01:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-22T21:21:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-22T21:21:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T21:21:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-22T21:41:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-22T21:41:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T21:41:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-22T22:01:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-22T22:01:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T22:01:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-22T22:21:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-22T22:21:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T22:21:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-22T22:41:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-22T22:41:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T22:41:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-22T23:01:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-22T23:01:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T23:01:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-22T23:21:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-22T23:21:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T23:21:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-22T23:41:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-22T23:41:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-22T23:41:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-23T00:01:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-23T00:01:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-23T00:01:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-23T00:21:04+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-23T00:21:04+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-23T00:21:04+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}, {"capture": "2026-11-23T00:37:00+00:00", "station": "478", "name": "Jernbanetorget", "bikes": 8, "renting": 1}, {"capture": "2026-11-23T00:37:00+00:00", "station": "545", "name": "Arkaden Sør", "bikes": 12, "renting": 1}, {"capture": "2026-11-23T00:37:00+00:00", "station": "6026", "name": "Østbanehallen", "bikes": 23, "renting": 1}], "hosted": [{"capture": "2026-11-22T19:42:00+00:00", "name": "astro", "passed": 1, "seconds": 2.394, "bytes": 28493, "digest": "3a22af67aba9fbac7588042d488d086d049db16c9a231bceb27093c91dc41037"}, {"capture": "2026-11-22T19:42:00+00:00", "name": "mslearn", "passed": 1, "seconds": 3.688, "bytes": 21631, "digest": "ff6e6252c0613c6a0a3513dbb3fae46a1d3489e59c04ab94eed5914be1494b50"}, {"capture": "2026-11-22T19:42:00+00:00", "name": "svelte", "passed": 1, "seconds": 1.763, "bytes": 91, "digest": "5567a16f285a0ae768d11441d7c37b1101b8d3918ca521dfc312799b541c4c96"}, {"capture": "2026-11-22T20:39:00+00:00", "name": "astro", "passed": 1, "seconds": 7.826, "bytes": 28493, "digest": "3a22af67aba9fbac7588042d488d086d049db16c9a231bceb27093c91dc41037"}, {"capture": "2026-11-22T20:39:00+00:00", "name": "mslearn", "passed": 1, "seconds": 5.276, "bytes": 21631, "digest": "ff6e6252c0613c6a0a3513dbb3fae46a1d3489e59c04ab94eed5914be1494b50"}, {"capture": "2026-11-22T20:39:00+00:00", "name": "svelte", "passed": 1, "seconds": 1.655, "bytes": 91, "digest": "5567a16f285a0ae768d11441d7c37b1101b8d3918ca521dfc312799b541c4c96"}, {"capture": "2026-11-22T21:39:00+00:00", "name": "astro", "passed": 1, "seconds": 2.077, "bytes": 28493, "digest": "3a22af67aba9fbac7588042d488d086d049db16c9a231bceb27093c91dc41037"}, {"capture": "2026-11-22T21:39:00+00:00", "name": "mslearn", "passed": 1, "seconds": 3.317, "bytes": 21631, "digest": "ff6e6252c0613c6a0a3513dbb3fae46a1d3489e59c04ab94eed5914be1494b50"}, {"capture": "2026-11-22T21:39:00+00:00", "name": "svelte", "passed": 1, "seconds": 1.692, "bytes": 91, "digest": "5567a16f285a0ae768d11441d7c37b1101b8d3918ca521dfc312799b541c4c96"}, {"capture": "2026-11-22T22:39:00+00:00", "name": "astro", "passed": 1, "seconds": 2.08, "bytes": 28493, "digest": "3a22af67aba9fbac7588042d488d086d049db16c9a231bceb27093c91dc41037"}, {"capture": "2026-11-22T22:39:00+00:00", "name": "mslearn", "passed": 1, "seconds": 3.403, "bytes": 21631, "digest": "ff6e6252c0613c6a0a3513dbb3fae46a1d3489e59c04ab94eed5914be1494b50"}, {"capture": "2026-11-22T22:39:00+00:00", "name": "svelte", "passed": 1, "seconds": 1.636, "bytes": 91, "digest": "5567a16f285a0ae768d11441d7c37b1101b8d3918ca521dfc312799b541c4c96"}, {"capture": "2026-11-22T23:39:00+00:00", "name": "astro", "passed": 1, "seconds": 2.171, "bytes": 28493, "digest": "3a22af67aba9fbac7588042d488d086d049db16c9a231bceb27093c91dc41037"}, {"capture": "2026-11-22T23:39:00+00:00", "name": "mslearn", "passed": 1, "seconds": 3.223, "bytes": 21631, "digest": "ff6e6252c0613c6a0a3513dbb3fae46a1d3489e59c04ab94eed5914be1494b50"}, {"capture": "2026-11-22T23:39:00+00:00", "name": "svelte", "passed": 1, "seconds": 1.636, "bytes": 91, "digest": "5567a16f285a0ae768d11441d7c37b1101b8d3918ca521dfc312799b541c4c96"}, {"capture": "2026-11-23T00:35:00+00:00", "name": "astro", "passed": 1, "seconds": 2.128, "bytes": 28493, "digest": "3a22af67aba9fbac7588042d488d086d049db16c9a231bceb27093c91dc41037"}, {"capture": "2026-11-23T00:35:00+00:00", "name": "mslearn", "passed": 1, "seconds": 3.773, "bytes": 21631, "digest": "ff6e6252c0613c6a0a3513dbb3fae46a1d3489e59c04ab94eed5914be1494b50"}, {"capture": "2026-11-23T00:35:00+00:00", "name": "svelte", "passed": 1, "seconds": 1.594, "bytes": 91, "digest": "5567a16f285a0ae768d11441d7c37b1101b8d3918ca521dfc312799b541c4c96"}], "client": [{"capture": "2026-11-22T20:18:55+00:00", "batch": "20261122T195511Z", "age_seconds": 0, "independent_reader": 1, "digest": "fac5852fde27fdf0e8ee0dbcce148f6344ed4f5c1732fffa8d8fb2f5239c8550"}, {"capture": "2026-11-22T20:25:15+00:00", "batch": "20261122T202511Z", "age_seconds": 380, "independent_reader": 1, "digest": "6be23630152b36ae4eaceb0d646b4b6c28b7399e80d0e05396c7050cd67e41d1"}, {"capture": "2026-11-22T20:55:36+00:00", "batch": "20261122T205511Z", "age_seconds": 2201, "independent_reader": 1, "digest": "1be70f457fdb71ff5cfc93ec66a7575378b08cbd46232f9affa11a8941d45cf6"}, {"capture": "2026-11-22T21:25:16+00:00", "batch": "20261122T212511Z", "age_seconds": 3981, "independent_reader": 1, "digest": "2743b5c408bd55a92fab897d0cbd33963c8db209d65ee2abd57c45040c67ea6e"}, {"capture": "2026-11-22T21:55:16+00:00", "batch": "20261122T215510Z", "age_seconds": 5781, "independent_reader": 1, "digest": "9a3287fdbd14681d0ef623b0526405d3b631ea28ad0ffbb68b8375f13e1b1d49"}, {"capture": "2026-11-22T22:25:16+00:00", "batch": "20261122T222509Z", "age_seconds": 7581, "independent_reader": 1, "digest": "693db179ec5b03d5982530cf9901f277e3f46e4cbc66ec945e59b42409d4489f"}, {"capture": "2026-11-22T22:55:16+00:00", "batch": "20261122T225508Z", "age_seconds": 9382, "independent_reader": 1, "digest": "d3beaa07dd2ff10cbe1be90887906baed8082c84c39efa1c91918ae81a628098"}, {"capture": "2026-11-22T23:25:17+00:00", "batch": "20261122T232508Z", "age_seconds": 11182, "independent_reader": 1, "digest": "bf75a271f99ba2a7a379e27e28a17471daac842b2dce2b5175d58ce3c3ef7477"}, {"capture": "2026-11-22T23:55:17+00:00", "batch": "20261122T235508Z", "age_seconds": 12982, "independent_reader": 1, "digest": "41b8802d396745fedd03c775aa1644206a35131d46f90f696f0ed08a34eaecf4"}, {"capture": "2026-11-23T00:25:17+00:00", "batch": "20261123T002507Z", "age_seconds": 14783, "independent_reader": 1, "digest": "5380ee56b5e0634c08b330bd825ecf9d754a494835ec60608289f83ca89f96d8"}, {"capture": "2026-11-23T00:39:18+00:00", "batch": "20261123T003903Z", "age_seconds": 15623, "independent_reader": 1, "digest": "3a0c2f4b8725315cb0c474a2cd73f41573eb21f844c8983b12ee6c00ce53fb96"}]}, "summary": {"times": 49, "tide_rows": 54, "tide_batches": 18, "bike_feeds": 14, "hosted_operations": 18, "hosted_passed": 18, "persistent_client_reads": 11, "oldest": "2026-11-22T16:55:13+00:00", "newest": "2026-11-23T00:39:18+00:00", "one_persistent_session": true, "capture_ended": true, "source_sha256": "e4d99daad47ad99a8ecfe70de04e9b868b1c23fa261de90555a1a523eae0de5b"}}
+  </script>
+  <script>
+    const model = JSON.parse(
+        document.querySelector("#observations").textContent,
+      ),
+      { series, times } = model,
+      by = (id) => document.getElementById(id),
+      slider = by("time"),
+      group = by("group");
+    const stamp = (s) =>
+      new Date(s).toISOString().replace("T", " ").slice(0, 19) + " UTC";
+    const short = (s) => new Date(s).toISOString().slice(11, 16);
+    const colors = {
+      9410170: "#a45b33",
+      9414290: "#346e91",
+      9447130: "#376951",
+    };
+    const names = {
+      astro: "Astro",
+      mslearn: "Microsoft Learn",
+      svelte: "Svelte",
+    };
+    slider.max = times.length - 1;
+    slider.value = slider.max;
+    by("span").textContent =
+      "First capture " + stamp(times[0]) + " · Last " + stamp(times.at(-1));
+    function recent(rows, at) {
+      const arr = rows.filter((r) => r.capture <= at);
+      const latest = arr.at(-1)?.capture;
+      return arr.filter((r) => r.capture === latest);
+    }
+    function line(root, label, value, color) {
+      const row = document.createElement("div");
+      row.className = "reading";
+      const name = document.createElement("span"),
+        val = document.createElement("strong");
+      if (color) {
+        const dot = document.createElement("i");
+        dot.className = "dot";
+        dot.style.background = color;
+        name.append(dot);
+      }
+      name.append(label);
+      val.textContent = value;
+      row.append(name, val);
+      root.append(row);
+    }
+    function chart(at) {
+      const canvas = by("plot"),
+        w = canvas.clientWidth,
+        h = canvas.clientHeight,
+        dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      const c = canvas.getContext("2d");
+      c.scale(dpr, dpr);
+      const rows = series.tide.filter((r) => r.capture <= at);
+      if (!rows.length) return;
+      const all = rows.map((r) => r.metres),
+        lo = Math.floor(Math.min(...all)),
+        hi = Math.ceil(Math.max(...all));
+      const t0 = Date.parse(times[0]),
+        t1 = Date.parse(times.at(-1));
+      const x = (t) => 32 + ((Date.parse(t) - t0) / (t1 - t0)) * (w - 45),
+        y = (m) => 10 + ((hi - m) / (hi - lo)) * (h - 23);
+      c.font = "11px system-ui";
+      c.fillStyle = "#52645d";
+      for (let k = lo; k <= hi; k++) {
+        c.strokeStyle = "#dbe1d7";
+        c.beginPath();
+        c.moveTo(32, y(k));
+        c.lineTo(w - 11, y(k));
+        c.stroke();
+        c.fillText(k + "m", 2, y(k) + 3);
+      }
+      for (const [station, color] of Object.entries(colors)) {
+        const sel = rows.filter((r) => r.station === station);
+        c.strokeStyle = color;
+        c.fillStyle = color;
+        c.lineWidth = 2;
+        c.beginPath();
+        sel.forEach((r, i) =>
+          i
+            ? c.lineTo(x(r.capture), y(r.metres))
+            : c.moveTo(x(r.capture), y(r.metres)),
+        );
+        c.stroke();
+        for (const r of sel) {
+          c.beginPath();
+          c.arc(x(r.capture), y(r.metres), 2.5, 0, 2 * Math.PI);
+          c.fill();
+        }
+      }
+    }
+    function update() {
+      const i = Number(slider.value),
+        t = times[i];
+      by("moment").textContent = stamp(t);
+      slider.setAttribute("aria-valuetext", stamp(t));
+      by("position").textContent = i + 1 + " / " + times.length;
+      by("prev").disabled = i === 0;
+      by("next").disabled = i === times.length - 1;
+      const water = recent(series.tide, t);
+      by("tides").replaceChildren();
+      for (const r of water)
+        line(
+          by("tides"),
+          r.city,
+          r.metres.toFixed(3) + " m",
+          colors[r.station],
+        );
+      by("tide-time").textContent = water.length
+        ? "Collected " +
+          short(water[0].capture) +
+          " UTC · Station time " +
+          water
+            .map((r) => r.observation.slice(-5))
+            .filter((v, i, a) => a.indexOf(v) === i)
+            .join(", ") +
+          " UTC · " +
+          (water.every((r) => r.quality === "p")
+            ? "preliminary readings"
+            : "see quality flags in the database")
+        : "No tide sample collected yet.";
+      chart(t);
+      const bike = recent(series.bike, t)[0],
+        stops = recent(series.stop, t);
+      by("stops").replaceChildren();
+      by("bike-total").textContent = bike
+        ? bike.bikes + " bikes reported across " + bike.stations + " stations."
+        : "No Oslo feed collected yet.";
+      for (const r of stops) line(by("stops"), r.name, String(r.bikes));
+      const ok = stops.filter(
+        (r) => r.renting && r.bikes >= Number(group.value),
+      );
+      by("eligible").textContent = bike
+        ? "Enough for " +
+          group.value +
+          " at " +
+          (ok.length
+            ? ok.map((r) => r.name).join(" and ")
+            : "none of these three stations") +
+          "."
+        : "";
+      by("bike-time").textContent = bike
+        ? "Feed published " +
+          stamp(bike.feed_time) +
+          " · collected " +
+          short(bike.capture) +
+          " UTC."
+        : "";
+      const docs = recent(series.hosted, t);
+      by("hosted").replaceChildren();
+      for (const r of docs)
+        line(
+          by("hosted"),
+          names[r.name],
+          r.passed ? "Passed · " + r.seconds + " s" : "Check missed",
+        );
+      by("docs-time").textContent = docs.length
+        ? "Round started " + stamp(docs[0].capture) + "."
+        : "No hosted round collected yet.";
+      const saved = series.client.filter((r) => r.capture <= t),
+        client = saved.at(-1);
+      by("age").textContent = client
+        ? Math.floor(client.age_seconds / 3600) +
+          "h " +
+          Math.floor((client.age_seconds % 3600) / 60) +
+          "m"
+        : "";
+      by("client").textContent = client
+        ? saved.length +
+          " tide snapshots read in the same stdio session. A new read-only process independently checked the latest file."
+        : "The persistent client had not started.";
+      by("client-time").textContent = client
+        ? "Latest readback " +
+          stamp(client.capture) +
+          " · SHA-256 " +
+          client.digest.slice(0, 12) +
+          "…"
+        : "";
+    }
+    slider.oninput = update;
+    group.onchange = update;
+    by("prev").onclick = () => {
+      slider.value = Number(slider.value) - 1;
+      update();
+    };
+    by("next").onclick = () => {
+      slider.value = Number(slider.value) + 1;
+      update();
+    };
+    window.addEventListener("resize", () => chart(times[Number(slider.value)]));
+    update();
+  </script>
+</html>

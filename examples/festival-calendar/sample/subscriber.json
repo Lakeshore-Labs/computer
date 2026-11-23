@@ -1,0 +1,56 @@
+{
+  "client": "Python SDK",
+  "server": "computer",
+  "read_only_mount": true,
+  "stable_event_ids": [
+    "reeds@festival.example",
+    "quiet@festival.example",
+    "orbit@festival.example"
+  ],
+  "calendars": {
+    "original": {
+      "read_bytes": 679,
+      "sha256": "e06d6868078deabee0cba257e10146d99453885f34e92f492e8bb3bd7ffba3bc",
+      "schedule_utc": [
+        [
+          "After the Reeds",
+          "18:00",
+          "18:25"
+        ],
+        [
+          "The Quiet Platform",
+          "18:30",
+          "19:02"
+        ],
+        [
+          "Small Orbits",
+          "19:07",
+          "19:25"
+        ]
+      ],
+      "sequence": 0
+    },
+    "amended": {
+      "read_bytes": 679,
+      "sha256": "2c3acb14ea5bfda35d72bcec69e7e249b22828dc738478c9821eaaf007b657ac",
+      "schedule_utc": [
+        [
+          "After the Reeds",
+          "18:00",
+          "18:40"
+        ],
+        [
+          "The Quiet Platform",
+          "18:45",
+          "19:17"
+        ],
+        [
+          "Small Orbits",
+          "19:22",
+          "19:40"
+        ]
+      ],
+      "sequence": 1
+    }
+  }
+}

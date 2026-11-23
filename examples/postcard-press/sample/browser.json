@@ -1,0 +1,290 @@
+{
+  "transport": "loopback Streamable HTTP",
+  "started": "2026-11-22T23:52:14.711Z",
+  "sessions": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "mcp": [
+        {
+          "at": "2026-11-22T23:52:14.991Z",
+          "method": "initialize"
+        },
+        {
+          "at": "2026-11-22T23:52:14.995Z",
+          "method": "notifications/initialized"
+        },
+        {
+          "at": "2026-11-22T23:52:14.995Z",
+          "method": "tools/list"
+        },
+        {
+          "at": "2026-11-22T23:52:18.099Z",
+          "method": "tools/call",
+          "tool": "write",
+          "args": {
+            "path": "/desk/order.json",
+            "content": "{\n  \"museum\": \"getty\",\n  \"inscription\": \"From the garden\"\n}\n"
+          }
+        },
+        {
+          "at": "2026-11-22T23:52:18.134Z",
+          "method": "tools/call",
+          "tool": "bash",
+          "args": {
+            "command": "set -eo pipefail\npython3 /recipe/postcard.py"
+          }
+        },
+        {
+          "at": "2026-11-22T23:52:18.274Z",
+          "method": "tools/call",
+          "tool": "read",
+          "args": {
+            "path": "/desk/postcard.svg"
+          }
+        },
+        {
+          "at": "2026-11-22T23:52:22.132Z",
+          "method": "tools/call",
+          "tool": "edit",
+          "args": {
+            "path": "/desk/order.json",
+            "oldText": "{\n  \"museum\": \"getty\",\n  \"inscription\": \"From the garden\"\n}\n",
+            "newText": "{\n  \"museum\": \"cleveland\",\n  \"inscription\": \"Wish you wer… (67 chars)"
+          }
+        },
+        {
+          "at": "2026-11-22T23:52:22.147Z",
+          "method": "tools/call",
+          "tool": "bash",
+          "args": {
+            "command": "set -eo pipefail\npython3 /recipe/postcard.py"
+          }
+        },
+        {
+          "at": "2026-11-22T23:52:22.286Z",
+          "method": "tools/call",
+          "tool": "read",
+          "args": {
+            "path": "/desk/postcard.svg"
+          }
+        }
+      ],
+      "issued": [
+        {
+          "label": "card1-getty",
+          "t0": "2026-11-22T23:52:18.084Z",
+          "t1": "2026-11-22T23:52:18.330Z",
+          "file": "desktop-card1-getty.svg",
+          "downloaded_bytes": 35715,
+          "downloaded_sha256": "1debb7c502d500c65c7faeb85167972522469b88e4652b8bd522fe92f993f221",
+          "receipt_sha256": "1debb7c502d500c65c7faeb85167972522469b88e4652b8bd522fe92f993f221",
+          "receipt_bytes": "35715 (read 35715, match)",
+          "match": true,
+          "longest_line": 194,
+          "receipt": {
+            "Painting": "Irises",
+            "Credit": "The J. Paul Getty Museum · 90.PA.20",
+            "Inscription": "From the garden",
+            "SVG bytes": "35715 (read 35715, match)",
+            "SHA-256": "1debb7c502d500c65c7faeb85167972522469b88e4652b8bd522fe92f993f221"
+          },
+          "calls": [
+            {
+              "tool": "write",
+              "args": {
+                "path": "/desk/order.json",
+                "content": "{\n  \"museum\": \"getty\",\n  \"inscription\": \"From the garden\"\n}\n"
+              },
+              "ok": true
+            },
+            {
+              "tool": "bash",
+              "args": {
+                "command": "set -eo pipefail\npython3 /recipe/postcard.py"
+              },
+              "ok": true
+            },
+            {
+              "tool": "read",
+              "args": {
+                "path": "/desk/postcard.svg"
+              },
+              "ok": true
+            }
+          ],
+          "facts": "148mm × 105mm · viewBox 888 × 630 · 35,715 bytes"
+        },
+        {
+          "label": "card2-cleveland",
+          "t0": "2026-11-22T23:52:22.122Z",
+          "t1": "2026-11-22T23:52:22.360Z",
+          "file": "desktop-card2-cleveland.svg",
+          "downloaded_bytes": 31310,
+          "downloaded_sha256": "4abfa6a39d5e616aa6b38da95606048cc31474a336b69591cbaec0eeea9adf37",
+          "receipt_sha256": "4abfa6a39d5e616aa6b38da95606048cc31474a336b69591cbaec0eeea9adf37",
+          "receipt_bytes": "31310 (read 31310, match)",
+          "match": true,
+          "longest_line": 194,
+          "receipt": {
+            "Painting": "The Large Plane Trees (Road Menders at Saint-Rémy)",
+            "Credit": "The Cleveland Museum of Art · 1947.209",
+            "Inscription": "Wish you were here",
+            "SVG bytes": "31310 (read 31310, match)",
+            "SHA-256": "4abfa6a39d5e616aa6b38da95606048cc31474a336b69591cbaec0eeea9adf37"
+          },
+          "calls": [
+            {
+              "tool": "edit",
+              "args": {
+                "path": "/desk/order.json",
+                "oldText": "{\n  \"museum\": \"getty\",\n  \"inscription\": \"From the garden\"\n}\n",
+                "newText": "{\n  \"museum\": \"cleveland\",\n  \"inscription\": \"Wish you were here\"\n}\n"
+              },
+              "ok": true
+            },
+            {
+              "tool": "bash",
+              "args": {
+                "command": "set -eo pipefail\npython3 /recipe/postcard.py"
+              },
+              "ok": true
+            },
+            {
+              "tool": "read",
+              "args": {
+                "path": "/desk/postcard.svg"
+              },
+              "ok": true
+            }
+          ],
+          "facts": "148mm × 105mm · viewBox 888 × 630 · 31,310 bytes"
+        }
+      ],
+      "consoleErrors": [],
+      "status": "Connected to computer · 4 tools ready",
+      "tools": [
+        "bash",
+        "edit",
+        "read",
+        "write"
+      ],
+      "allTools": [
+        "write",
+        "bash",
+        "read",
+        "edit"
+      ],
+      "video": "desktop-film.mp4"
+    },
+    {
+      "name": "phone",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mcp": [
+        {
+          "at": "2026-11-22T23:52:25.087Z",
+          "method": "initialize"
+        },
+        {
+          "at": "2026-11-22T23:52:25.090Z",
+          "method": "notifications/initialized"
+        },
+        {
+          "at": "2026-11-22T23:52:25.091Z",
+          "method": "tools/list"
+        },
+        {
+          "at": "2026-11-22T23:52:25.262Z",
+          "method": "tools/call",
+          "tool": "write",
+          "args": {
+            "path": "/desk/order.json",
+            "content": "{\n  \"museum\": \"cleveland\",\n  \"inscription\": \"Greetings fr… (74 chars)"
+          }
+        },
+        {
+          "at": "2026-11-22T23:52:25.273Z",
+          "method": "tools/call",
+          "tool": "bash",
+          "args": {
+            "command": "set -eo pipefail\npython3 /recipe/postcard.py"
+          }
+        },
+        {
+          "at": "2026-11-22T23:52:25.406Z",
+          "method": "tools/call",
+          "tool": "read",
+          "args": {
+            "path": "/desk/postcard.svg"
+          }
+        }
+      ],
+      "issued": [
+        {
+          "label": "card1-cleveland",
+          "t0": "2026-11-22T23:52:25.227Z",
+          "t1": "2026-11-22T23:52:25.466Z",
+          "file": "phone-card1-cleveland.svg",
+          "downloaded_bytes": 31326,
+          "downloaded_sha256": "743a4618637045b5822b54cd481b441c597460b64cc6129dc94902f12c97e08a",
+          "receipt_sha256": "743a4618637045b5822b54cd481b441c597460b64cc6129dc94902f12c97e08a",
+          "receipt_bytes": "31326 (read 31326, match)",
+          "match": true,
+          "longest_line": 194,
+          "receipt": {
+            "Painting": "The Large Plane Trees (Road Menders at Saint-Rémy)",
+            "Credit": "The Cleveland Museum of Art · 1947.209",
+            "Inscription": "Greetings from Saint-Rémy",
+            "SVG bytes": "31326 (read 31326, match)",
+            "SHA-256": "743a4618637045b5822b54cd481b441c597460b64cc6129dc94902f12c97e08a"
+          },
+          "calls": [
+            {
+              "tool": "write",
+              "args": {
+                "path": "/desk/order.json",
+                "content": "{\n  \"museum\": \"cleveland\",\n  \"inscription\": \"Greetings from Saint-Rémy\"\n}\n"
+              },
+              "ok": true
+            },
+            {
+              "tool": "bash",
+              "args": {
+                "command": "set -eo pipefail\npython3 /recipe/postcard.py"
+              },
+              "ok": true
+            },
+            {
+              "tool": "read",
+              "args": {
+                "path": "/desk/postcard.svg"
+              },
+              "ok": true
+            }
+          ],
+          "facts": "148mm × 105mm · viewBox 888 × 630 · 31,326 bytes"
+        }
+      ],
+      "consoleErrors": [],
+      "status": "Connected to computer · 4 tools ready",
+      "tools": [
+        "bash",
+        "edit",
+        "read",
+        "write"
+      ],
+      "allTools": [
+        "write",
+        "bash",
+        "read"
+      ]
+    }
+  ],
+  "finished": "2026-11-22T23:52:27.920Z"
+}

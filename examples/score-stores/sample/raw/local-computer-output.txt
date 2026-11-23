@@ -1,0 +1,110 @@
+@@ copy-flute.mid
+{}
+@@ copy-flute.musicxml
+{}
+@@ list
+{
+  "list": [
+    {
+      "Path": "flute.mid",
+      "Name": "flute.mid",
+      "Size": 242,
+      "MimeType": "audio/midi",
+      "ModTime": "2026-11-22T15:33:39.149330490-08:00",
+      "IsDir": false,
+      "Hashes": {
+        "blake3": "d0c61897f7503f9a0b02dbc454c4537030fd63c1c2aaf46677bd28ebd420cb53",
+        "crc32": "a581d497",
+        "dropbox": "92525366b761d2438dbd078cd218812904e19eb7fc413e1a7fc37da4b4e45b64",
+        "hidrive": "c5892ce3065e812c02453332164b7101f053c0ed",
+        "mailru": "0e57199f079c12c062e18778eef739b5901b1ee8",
+        "md5": "d74116380e986799fc93e11b9c140c01",
+        "quickxor": "0123e11ee0a155a04f50d35ac0f98d31ad3c37ab",
+        "sha1": "a0dd7d8bbb4b4ec579226bc255746b601e0c92eb",
+        "sha256": "9098ba67dc8393ab21c0c4f77dae74cc591ba170eb6ee3343e7ecdbeea015e47",
+        "sha512": "c5baf00822c9b31c9d7375a866e72a16a95536384186f2800cfeebfd7ce961752a711e1d640ad7a7c34cbe37ace0862ea023a17f6fb760b311d97bd9cff2886b",
+        "whirlpool": "56d588c25f14d1b5793f1ef7c8b488e669ba16fb81f36424340dcdd8f6728bf510d135312fc641e1aff234569a99362140537c6aaa8d006840b5065cf0283ac3",
+        "xxh128": "14351f9fbbdc0df287ae565d51f0890e",
+        "xxh3": "87ae565d51f0890e"
+      }
+    },
+    {
+      "Path": "flute.musicxml",
+      "Name": "flute.musicxml",
+      "Size": 3271,
+      "MimeType": "application/vnd.recordare.musicxml+xml",
+      "ModTime": "2026-11-22T15:33:39.149513073-08:00",
+      "IsDir": false,
+      "Hashes": {
+        "blake3": "a8ccaeac1ead69001a17d986b18581bf2df74e21dadb7f9fba151390abd0b4d6",
+        "crc32": "9eb9b08b",
+        "dropbox": "9f7b8e2e4051fb2a3574906f352ce9dd712b916e4619f590d0ff103a4f74c973",
+        "hidrive": "cfe6ddaa835a07ed2ee0b153c0222cd5147de2ea",
+        "mailru": "010879429ec849e3fed8903c443a24309fcf4be1",
+        "md5": "c1863c2bd338e38b6f177556608ee311",
+        "quickxor": "b3f5aa50ae39a18545c0b39592270f5a357e68fc",
+        "sha1": "ab06ee87b36ab5ef1dd10653e32dc98cd45aed69",
+        "sha256": "94791b09d17580631fb9e427aede257bd32ab9ca5f17edb2584ee5c5c7bfb82a",
+        "sha512": "81a5ba7bc4108bfeda6e19c31fe499575a20bd04b098b17d7b161e0b8a6720a7094096a49315a86943e40fd42fa38254de16760e605edb41d72e5021f0299cd3",
+        "whirlpool": "2679e9c2a1fff545783e00121beb82c75d4df8c3e91fb9a21d8f239cf62a2f7bc585054897c2675e7acbd430a4e6d5a17c9501a5ac5093a50d98b38485cda227",
+        "xxh128": "62add8142d1f5ba655f5bf884d04f1fe",
+        "xxh3": "55f5bf884d04f1fe"
+      }
+    }
+  ]
+}
+@@ stat-flute.mid
+{
+  "item": {
+    "Path": "flute.mid",
+    "Name": "flute.mid",
+    "Size": 242,
+    "MimeType": "audio/midi",
+    "ModTime": "2026-11-22T15:33:39.149330490-08:00",
+    "IsDir": false
+  }
+}
+@@ sha256-flute.mid
+{
+  "hash": "9098ba67dc8393ab21c0c4f77dae74cc591ba170eb6ee3343e7ecdbeea015e47",
+  "hashType": "sha256"
+}
+@@ stat-flute.musicxml
+{
+  "item": {
+    "Path": "flute.musicxml",
+    "Name": "flute.musicxml",
+    "Size": 3271,
+    "MimeType": "application/vnd.recordare.musicxml+xml",
+    "ModTime": "2026-11-22T15:33:39.149513073-08:00",
+    "IsDir": false
+  }
+}
+@@ sha256-flute.musicxml
+{
+  "hash": "94791b09d17580631fb9e427aede257bd32ab9ca5f17edb2584ee5c5c7bfb82a",
+  "hashType": "sha256"
+}
+@@ size
+{
+  "bytes": 3513,
+  "count": 2,
+  "sizeless": 0
+}
+@@ check
+{
+  "combined": [
+    "= flute.musicxml",
+    "= flute.mid"
+  ],
+  "differ": [],
+  "error": [],
+  "match": [
+    "flute.musicxml",
+    "flute.mid"
+  ],
+  "missingOnDst": [],
+  "missingOnSrc": [],
+  "status": "OK",
+  "success": true
+}

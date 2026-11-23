@@ -1,0 +1,8 @@
+{
+  "mode": "inspect",
+  "decision": "held",
+  "source_label": "EAST-42 COPPER",
+  "draft": "Shelf: EAST-42\nPickup ribbon: COPPER",
+  "queue_file_exists": false,
+  "zpl_sha256": null
+}

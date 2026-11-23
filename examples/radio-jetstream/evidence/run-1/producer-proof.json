@@ -1,0 +1,37 @@
+{
+ "role": "producer",
+ "runtime": "stock Computer WASI Python",
+ "T1_amendment_published": "2026-11-22T23:03:40.546Z",
+ "wav_bytes": 24044,
+ "b64_chars": 32060,
+ "sha256": "85dc11e4486cc68a7702d8888ac5a4c9054709361317170701a5f6056646cfdf",
+ "calls": [
+  {
+   "binding": "tools.nats.nats_obj_create_bucket",
+   "args": {
+    "bucket": "CUES",
+    "description": "station cues (base64 text of PCM16 WAV)",
+    "storage": "file"
+   },
+   "result": "Created object store bucket \"CUES\""
+  },
+  {
+   "binding": "tools.nats.nats_obj_put",
+   "args": {
+    "bucket": "CUES",
+    "name": "stinger-v2.wav.b64",
+    "data": "<32060 chars>",
+    "description": "encoding=base64(ascii) of audio/wav pcm16 8000Hz mono"
+   },
+   "result": "Stored object \"stinger-v2.wav.b64\" in bucket \"CUES\" (32060 bytes)"
+  },
+  {
+   "binding": "tools.nats.nats_stream_publish",
+   "args": {
+    "subject": "desk.rundown.amend",
+    "payload": "<489 chars>"
+   },
+   "result": "Published to stream \"RUNDOWN\" at sequence 1"
+  }
+ ]
+}

@@ -1,0 +1,164 @@
+{
+ "label": "Historical amendment after independent review 8 (2026-11-22). Counting context for the original survey. The gallery now links the latest published story receipts.",
+ "final_counts": {
+  "final_cases": 94,
+  "passed": 90,
+  "distinct_endpoint_urls_in_passed_cases": 86,
+  "note": "These count final cases only. They exclude earlier failed runs of the same cases (see cohort3_attempts). 'Attempted' on the page was a mislabel and now reads 'final cases'."
+ },
+ "docs_server_pattern": {
+  "predicate": "The recorded case script calls a tool named query-docs-filesystem* (generated docs-server tool; all 36 scripts also call a search-* tool).",
+  "cases": 36,
+  "passed": 33,
+  "share_of_final_cases": "36/94",
+  "share_of_passes": "33/90",
+  "share_of_passing_endpoints": "33/86",
+  "evidence": "Derived by derive_docs_pattern.py from local pass-1 and pass-2 raw scripts (not published; survey rows carry no scripts). Third-cohort scripts are in cohort3/scripts and none match. The id list below is the published result.",
+  "limits": "This is tool-shape evidence only. A platform is confirmed for 4 labelled '(Mintlify)' rows and for Prefect, whose captured result link resolved to a mintlify.dev host. It is not confirmed for the other cases. A URL-shape proxy (host docs.*, path /mcp) matches 40 cases/37 passed, because 4 of them use other tool names (cloudflare-docs-search, cohere-docs, docs-litellm, livekit-docs) and are excluded; the 36/33 figure uses the script predicate.",
+  "ids": [
+   "docs-ag-ui",
+   "docs-agno",
+   "docs-assemblyai",
+   "docs-base",
+   "docs-baseten",
+   "docs-browserbase",
+   "docs-celo",
+   "docs-chroma",
+   "docs-cline",
+   "docs-coinbase-cdp",
+   "docs-crewai",
+   "docs-dify",
+   "docs-e2b",
+   "docs-exa",
+   "docs-firecrawl",
+   "docs-fireworks",
+   "docs-flyio",
+   "docs-helicone",
+   "docs-lancedb",
+   "docs-lovable",
+   "docs-mem0",
+   "docs-modular",
+   "docs-near",
+   "docs-perplexity",
+   "docs-pinecone",
+   "docs-pipecat",
+   "docs-prefect",
+   "docs-replit",
+   "docs-retell",
+   "docs-runpod",
+   "docs-tavily",
+   "docs-together",
+   "docs-turso",
+   "docs-unstructured",
+   "docs-windsurf",
+   "langchain-docs"
+  ]
+ },
+ "cohort3": {
+  "final_cases": 9,
+  "passed": 9,
+  "new_endpoint_urls": 8,
+  "operator_groups": 6,
+  "groups": {
+   "caseyjhand.com": [
+    "inat-lynx",
+    "gbif-lynx",
+    "met-caseyjhand-cypresses",
+    "story-lynx-two-catalogs"
+   ],
+   "artnap.com": [
+    "artnap-seurat"
+   ],
+   "api.lad.lviv.ua": [
+    "lviv-transit-rynok"
+   ],
+   "transit.sitesy.ca": [
+    "sitesy-union-toronto"
+   ],
+   "epvotes.com": [
+    "epvotes-proxy-voting"
+   ],
+   "dengdeng.app": [
+    "dengdeng-yinhang"
+   ]
+  },
+  "note": "Nine cases use eight endpoint URLs because the lynx story reuses the iNaturalist and GBIF endpoints. Three of the eight URLs share the caseyjhand.com operator, so there are six operator groups. An earlier local handoff said seven; that counted those three separately. Grouping by operator is a judgement from the hostnames and provider pages."
+ },
+ "cohort3_attempts": {
+  "source": "Local run_all.log of the cohort-3 runner (not published). It records runner runs only, not earlier ad hoc probing.",
+  "logged_runs": 26,
+  "first_runs": {
+   "cases": 9,
+   "passed": 1,
+   "failed": 8
+  },
+  "reruns": {
+   "runs": 17,
+   "passed": 8,
+   "failed": 9
+  },
+  "final": {
+   "cases": 9,
+   "passed": 9
+  },
+  "observation": "For seven of the eight cases that failed first, the second logged run repeated the first run's failure before a third run passed.",
+  "cases": {
+   "inat-lynx": [
+    "fail: Wikidata item lacked the expected claim",
+    "fail: same",
+    "pass"
+   ],
+   "gbif-lynx": [
+    "fail: compared MCP count (absence records excluded) with the REST total",
+    "fail: same",
+    "pass: compares PRESENT and checks PRESENT+ABSENT equals total"
+   ],
+   "story-lynx-two-catalogs": [
+    "fail: wrong tool argument name; iNaturalist count unfiltered by licence (791 vs 394)",
+    "fail: same",
+    "pass: licence-filtered, tolerance 3%"
+   ],
+   "met-caseyjhand-cypresses": [
+    "fail: wrong tool argument name",
+    "fail: same",
+    "pass"
+   ],
+   "artnap-seurat": [
+    "fail: Art Institute API answered with a non-JSON challenge page",
+    "fail: same",
+    "pass: independent source changed to Wikidata"
+   ],
+   "lviv-transit-rynok": [
+    "fail: wrong tool argument name",
+    "fail: same",
+    "pass"
+   ],
+   "sitesy-union-toronto": [
+    "fail: script parsed the response wrongly",
+    "fail: same",
+    "pass"
+   ],
+   "epvotes-proxy-voting": [
+    "pass"
+   ],
+   "dengdeng-yinhang": [
+    "fail: curl -G unsupported in Computer",
+    "fail: same",
+    "fail: exact example sentence not found in Tatoeba search (0 results)",
+    "pass: condition changed"
+   ]
+  }
+ },
+ "dengdeng_condition_change": {
+  "earlier": "Example sentence for 银行 returned by the dictionary must appear verbatim in a Tatoeba search; this missed.",
+  "final": "Pinyin yínháng also appears on the Wiktionary page, hsk3 band is 2, Tatoeba lists at least 50 Mandarin sentences containing 银行 and at least one result has a translation (observed 104).",
+  "meaning": "The final predicate does not test where the dictionary's example sentence came from. Its pass is a weaker claim than the first predicate."
+ },
+ "warsaw": {
+  "fix": "Own sunset approximation printed with round() (nearest minute): 936.96 min is 15:37, earlier output truncated it to 15:36.",
+  "attribution": "Lines are now tagged [provider] (hosted MCP data; time.memoryapi.org says USNO, not verified here) or [own arithmetic] (NOAA-style solar equations and a synodic-month moon model computed in WASI Python). Provider and own sunset differ by -2 minutes either way; the 5-minute check is unchanged apart from using the rounded value.",
+  "earlier_output": "sample/story-warsaw-sky-night/earlier-truncated-1536/",
+  "corrected_output": "sample/story-warsaw-sky-night/",
+  "live_note": "The provider's night start moved from 22:48 to 23:38 between the two replays (live 'tonight' answer); the sunset and moon values were unchanged."
+ }
+}

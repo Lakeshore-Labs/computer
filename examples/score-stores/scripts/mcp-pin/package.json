@@ -1,0 +1,12 @@
+{
+  "name": "lab-rclone-mcp-pin",
+  "version": "0.0.0",
+  "dependencies": {
+    "rclone-mcp": "1.0.0"
+  },
+  "overrides": {
+    "rclone-openapi": "1.74.2",
+    "rclone-sdk": "1.74.2"
+  },
+  "private": true
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "sha256": "d5a2e1216e30fb7bb31d6401c6aea23240e951c1518c2ef82987e07c7e3f339c",
+    "triangles": 13428,
+    "vertices": 6716,
+    "edges_with_two_opposite_faces": 20142,
+    "components": 1,
+    "dimensions_mm": [
+      110.0,
+      118.81085,
+      6.1002
+    ],
+    "signed_volume_mm3": 43347.145
+  },
+  {
+    "sha256": "093f26eda22a29979a96527d350ddd18177de82018200b59ee08734fb6be3dfa",
+    "triangles": 13428,
+    "vertices": 6716,
+    "edges_with_two_opposite_faces": 20142,
+    "components": 1,
+    "dimensions_mm": [
+      110.0,
+      118.81085,
+      16.90082
+    ],
+    "signed_volume_mm3": 75369.626
+  }
+]

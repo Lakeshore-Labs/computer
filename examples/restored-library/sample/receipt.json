@@ -1,0 +1,67 @@
+{
+  "restic": "restic 0.20.0 compiled with go1.27.4 on darwin/arm64",
+  "rclone": "rclone v1.74.3",
+  "snapshot_ids": {
+    "original": "5ef786eff98b1829f71bcfd14ff309d1dc601e2f68842286a8148c1af98c8c56",
+    "changed": "28abb8b47bc3218b3171cc3a6ff19fad7a8a58fdf2dc72fd0d568a2c5d0880f2"
+  },
+  "changed_files": [
+    "hours.csv"
+  ],
+  "full_data_check": true,
+  "host_and_guest_hashes_agree": true,
+  "steps": [
+    {
+      "step": "restic version",
+      "exit": 0
+    },
+    {
+      "step": "rclone version",
+      "exit": 0
+    },
+    {
+      "step": "Initialize repository",
+      "exit": 0
+    },
+    {
+      "step": "Write original edition",
+      "exit": 0
+    },
+    {
+      "step": "Back up original edition",
+      "exit": 0
+    },
+    {
+      "step": "Write changed edition",
+      "exit": 0
+    },
+    {
+      "step": "Back up changed edition",
+      "exit": 0
+    },
+    {
+      "step": "List snapshots",
+      "exit": 0
+    },
+    {
+      "step": "Restore original edition",
+      "exit": 0
+    },
+    {
+      "step": "Restore changed edition",
+      "exit": 0
+    },
+    {
+      "step": "Compare snapshots",
+      "exit": 0
+    },
+    {
+      "step": "Read and check all repository data",
+      "exit": 0
+    },
+    {
+      "step": "Compare both restored trees",
+      "exit": 0
+    }
+  ]
+}

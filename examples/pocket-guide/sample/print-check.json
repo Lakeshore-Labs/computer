@@ -1,0 +1,105 @@
+{
+  "pdf": "pocket-guide.pdf",
+  "pdf_bytes": 262683,
+  "pdf_sha256": "24acbaca2eb4ff7e940e6d5a6067a1c5b329afa4865bc2fb2978e3134120895c",
+  "png": "pocket-guide-144dpi.png",
+  "png_px": [
+    1684,
+    1191
+  ],
+  "urls": [
+    "https://github.com/Lakeshore-Labs/computer/pull/16",
+    "https://github.com/Lakeshore-Labs/computer/pull/47",
+    "https://github.com/Lakeshore-Labs/computer/pull/53",
+    "https://github.com/Lakeshore-Labs/computer/pull/56",
+    "https://github.com/Lakeshore-Labs/computer/pull/59",
+    "https://github.com/Lakeshore-Labs/computer/pull/62",
+    "https://github.com/Lakeshore-Labs/computer/pull/65",
+    "https://github.com/Lakeshore-Labs/computer/pull/66"
+  ],
+  "checks": {
+    "page_count": {
+      "pass": true,
+      "detail": 1
+    },
+    "a4_landscape": {
+      "pass": true,
+      "detail": "841.89 x 595.28 pt = 297.0 x 210.0 mm"
+    },
+    "no_rotation": {
+      "pass": true,
+      "detail": "0"
+    },
+    "title: Ferry dispatch": {
+      "pass": true,
+      "detail": "found"
+    },
+    "title: Venice in pixels": {
+      "pass": true,
+      "detail": "found"
+    },
+    "title: A rehearsal score": {
+      "pass": true,
+      "detail": "found"
+    },
+    "title: An island mailbag": {
+      "pass": true,
+      "detail": "found"
+    },
+    "title: A radio cue": {
+      "pass": true,
+      "detail": "found"
+    },
+    "title: A lunch delivery": {
+      "pass": true,
+      "detail": "found"
+    },
+    "main_guide_link": {
+      "pass": true,
+      "detail": "https://github.com/Lakeshore-Labs/computer/pull/56"
+    },
+    "six_project_pr_links_plus_film": {
+      "pass": true,
+      "detail": "7 distinct non-guide PR links: ['https://github.com/Lakeshore-Labs/computer/pull/16', 'https://github.com/Lakeshore-Labs/computer/pull/47', 'https://github.com/Lakeshore-Labs/computer/pull/53', 'https://github.com/Lakeshore-Labs/computer/pull/59', 'https://github.com/Lakeshore-Labs/computer/pull/62', 'https://github.com/Lakeshore-Labs/computer/pull/65', 'https://github.com/Lakeshore-Labs/computer/pull/66']"
+    },
+    "exact_link_targets": {
+      "pass": true,
+      "detail": [
+        "https://github.com/Lakeshore-Labs/computer/pull/16",
+        "https://github.com/Lakeshore-Labs/computer/pull/47",
+        "https://github.com/Lakeshore-Labs/computer/pull/53",
+        "https://github.com/Lakeshore-Labs/computer/pull/56",
+        "https://github.com/Lakeshore-Labs/computer/pull/59",
+        "https://github.com/Lakeshore-Labs/computer/pull/62",
+        "https://github.com/Lakeshore-Labs/computer/pull/65",
+        "https://github.com/Lakeshore-Labs/computer/pull/66"
+      ]
+    },
+    "film_text_present": {
+      "pass": true,
+      "detail": "film link text is present"
+    },
+    "link_total": {
+      "pass": true,
+      "detail": "8 distinct, 8 total annotations"
+    },
+    "raster_144dpi": {
+      "pass": true,
+      "detail": [
+        1684,
+        1191
+      ]
+    },
+    "qr_decoded_exactly": {
+      "pass": true,
+      "detail": {
+        "decoder": "Apple Vision VNDetectBarcodesRequest on full-page 144dpi PNG",
+        "payloads": [
+          "https://github.com/Lakeshore-Labs/computer/pull/56"
+        ],
+        "stderr": ""
+      }
+    }
+  },
+  "all_pass": true
+}

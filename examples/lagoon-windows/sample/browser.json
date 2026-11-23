@@ -1,0 +1,60 @@
+[
+  {
+    "name": "desktop",
+    "viewport": {
+      "width": 1320,
+      "height": 850
+    },
+    "images": [
+      {
+        "place": "San Marco",
+        "actual_canvas_rgb_sha256": "a2969b4eb939a5de236217ec0923f87f03cf5694860a77751e57218ff3ff88a9",
+        "verified_pixel": "(129, 129) · RGB 255, 249, 222",
+        "download_sha256": "e04d0dcf407156d0435bd09d995800272368bd9d8299c997f702adef22929c2f"
+      },
+      {
+        "place": "Burano",
+        "actual_canvas_rgb_sha256": "ada105d6a5722969b2499c6f9779cd54f9cd4984a23d341e3fda480ce8933e92",
+        "verified_pixel": "(129, 129) · RGB 193, 163, 157",
+        "download_sha256": "17ef08ea3aacc239f1eca12f083377a4f3393ec3df4123adf5d37f5dbd836d45"
+      },
+      {
+        "place": "Lido",
+        "actual_canvas_rgb_sha256": "e74368341e33f1d2ffd2c23bb60e8a4f8b254726e6a7590a39f2c19808e43f46",
+        "verified_pixel": "(129, 129) · RGB 133, 110, 91",
+        "download_sha256": "c58c6ba4f633b3e3e1508c79ae7f2c6d2ae60d15d9d6e40cb14aedd741b27d97"
+      }
+    ],
+    "outside": [],
+    "errors": []
+  },
+  {
+    "name": "phone",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "images": [
+      {
+        "place": "San Marco",
+        "actual_canvas_rgb_sha256": "a2969b4eb939a5de236217ec0923f87f03cf5694860a77751e57218ff3ff88a9",
+        "verified_pixel": "(129, 129) · RGB 255, 249, 222",
+        "download_sha256": "e04d0dcf407156d0435bd09d995800272368bd9d8299c997f702adef22929c2f"
+      },
+      {
+        "place": "Burano",
+        "actual_canvas_rgb_sha256": "ada105d6a5722969b2499c6f9779cd54f9cd4984a23d341e3fda480ce8933e92",
+        "verified_pixel": "(129, 129) · RGB 193, 163, 157",
+        "download_sha256": "17ef08ea3aacc239f1eca12f083377a4f3393ec3df4123adf5d37f5dbd836d45"
+      },
+      {
+        "place": "Lido",
+        "actual_canvas_rgb_sha256": "e74368341e33f1d2ffd2c23bb60e8a4f8b254726e6a7590a39f2c19808e43f46",
+        "verified_pixel": "(129, 129) · RGB 133, 110, 91",
+        "download_sha256": "c58c6ba4f633b3e3e1508c79ae7f2c6d2ae60d15d9d6e40cb14aedd741b27d97"
+      }
+    ],
+    "outside": [],
+    "errors": []
+  }
+]

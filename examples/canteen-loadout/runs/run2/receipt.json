@@ -1,0 +1,41 @@
+{
+ "steps": [
+  {
+   "name": "prepare (initdb, psql \\copy, DuckDB COPY TO parquet)",
+   "exit": 0,
+   "stdout": "41626\n",
+   "stderr": ""
+  },
+  {
+   "name": "generated upstream commands",
+   "exit": 0,
+   "stdout": "usage: orders-pg <tool> [--argument value ...]   (orders-pg <tool> --help for its arguments)\n\ntools:\n  query                        Run a read-only SQL query\nusage: loads-duck <tool> [--argument value ...]   (loads-duck <tool> --help for its arguments)\n\ntools:\n  execute-query                Execute a SQL query on the DuckDB or MotherDuck database. Unqualified table names resolve to current_database() and current_schema() automatically. Fully qualified names (database.schema.table) are only needed when multiple DuckDB databases are attached or when connected to MotherDuck.\n  list-columns                 List all columns of a table or view with their types and comments. If database/schema are not specified, uses the current database/schema.\n  list-databases               List all databases available in the connection. Useful when multiple DuckDB databases are attached or when connected to MotherDuck.\n  list-tables                  List all tables and views in a database with their comments. If database is not specified, uses the current database.\n",
+   "stderr": ""
+  },
+  {
+   "name": "SQL engines refuse writes",
+   "exit": 0,
+   "stdout": "orders-pg query: calling \"tools/call\": cannot execute DELETE in a read-only transaction\nloads-duck execute-query: Error calling tool 'execute_query': {\n  \"success\": false,\n  \"error\": \"Invalid Input Error: Cannot execute statement of type \\\"CREATE\\\" on database \\\"loads\\\" which is attached in read-only mode!\",\n  \"errorType\": \"InvalidInputException\"\n}\n",
+   "stderr": ""
+  },
+  {
+   "name": "DuckDB view references the Parquet file",
+   "exit": 0,
+   "stdout": "{\n  \"success\": true,\n  \"columns\": [\n    \"sql\"\n  ],\n  \"columnTypes\": [\n    \"VARCHAR\"\n  ],\n  \"rows\": [\n    [\n      \"CREATE VIEW loaded_totals AS SELECT hall, service, meal, CAST(sum(loaded) AS INTEGER) AS loaded FROM read_parquet('<RUN>/loaded.parquet') GROUP BY hall, service, meal;\"\n    ]\n  ],\n  \"rowCount\": 1\n}\n{\n  \"success\": true,\n  \"columns\": [\n    \"num_rows\",\n    \"created_by\"\n  ],\n  \"columnTypes\": [\n    \"BIGINT\",\n    \"VARCHAR\"\n  ],\n  \"rows\": [\n    [\n      6,\n      \"DuckDB version v1.5.6 (build 069cc9f9b5)\"\n    ]\n  ],\n  \"rowCount\": 1\n}\n",
+   "stderr": ""
+  },
+  {
+   "name": "guest (WASI Python) retrieves both tables, joins, writes transfers",
+   "exit": 0,
+   "stdout": "source ordered (PostgreSQL MCP): 150  source loaded (DuckDB/Parquet MCP): 150\noriginal shortages: [('Orchard', 'Herb pasta', 5), ('Quay', 'Roast vegetables', 8)]\ntransfer Herb pasta Quay -> Orchard 3\ntransfer Herb pasta Hill -> Orchard 2\ntransfer Roast vegetables Orchard -> Quay 5\ntransfer Roast vegetables Hill -> Quay 3\nunits still short: 0\nfinal Hill     Herb pasta        ordered= 12 loaded= 14 final= 12\nfinal Hill     Roast vegetables  ordered= 18 loaded= 21 final= 18\nfinal Orchard  Herb pasta        ordered= 36 loaded= 31 final= 36\nfinal Orchard  Roast vegetables  ordered= 24 loaded= 29 final= 24\nfinal Quay     Herb pasta        ordered= 22 loaded= 25 final= 22\nfinal Quay     Roast vegetables  ordered= 38 loaded= 30 final= 38\nservice,meal,from_hall,to_hall,units\nLunch,Herb pasta,Quay,Orchard,3\nLunch,Herb pasta,Hill,Orchard,2\nLunch,Roast vegetables,Orchard,Quay,5\nLunch,Roast vegetables,Hill,Quay,3\n",
+   "stderr": ""
+  },
+  {
+   "name": "independent verify (psql + pyarrow)",
+   "exit": 0,
+   "stdout": "{\"postgres_rows_via_psql\": true, \"parquet_is_real\": true, \"parquet_total_150\": true, \"transfers_match_expected\": true, \"final_equals_ordered\": true, \"no_units_short\": true}\n",
+   "stderr": "WARN `--no-project` was provided, but no project was found\n"
+  }
+ ],
+ "pass": true
+}

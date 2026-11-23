@@ -1,0 +1,12 @@
+STEP 1  wikioo.search_artworks -> artwork
+   The Body of the Dead Christ in the Tomb | Hans Holbein the Younger | 1521
+STEP 2  wikioo.get_detail_artwork -> museum
+   Öffentliche Kunstsammlung | Basel , Switzerland
+  museum search in same city: Kunstmuseum Basel | pk 3184
+STEP 3  transport.opendata.ch.connections -> Zürich HB to Basel, Kunstmuseum
+   1. Sun 2026-11-22 23:08 Zürich HB, platform 15 → 00:29 Basel, Kunstmuseum · 1 h 21 min · direct
+STEP 4  independent checks
+   Wikidata: collection of Q4310527 = Q194626 = Kunstmuseum Basel | inception 1520
+   city is Basel in both sources: True
+   year within 2 of Wikidata: True
+   arrival minus delayed departure = 81 min equals stated 81 min: True

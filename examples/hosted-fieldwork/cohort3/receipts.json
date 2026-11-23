@@ -1,0 +1,343 @@
+{
+ "label": "Cohort 3 replay receipts, observed 2026-11-22 (UTC) after the survey runs; one run per case; keep only listed keys, no full stdout",
+ "receipts": [
+  {
+   "case": "inat-lynx",
+   "observed_utc": "2026-11-22T22:39:04.983513+00:00",
+   "exit": 0,
+   "stdout_sha256": "3ee246b52e57505dc509d628777ef6720a2137a9ab97d946af2e7250fd5dda3e",
+   "observed": {
+    "taxon_id": "41975",
+    "mcp_global_status": "VU",
+    "mcp_research_obs": "926",
+    "rest_research_obs": "926",
+    "wikidata_iucn_item": "Q278113"
+   },
+   "checks": [
+    {
+     "check": "output contains 'taxon_id=41975'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'common=Iberian Lynx'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'mcp_global_status=VU'",
+     "passed": true
+    },
+    {
+     "check": "MCP research-grade count vs iNaturalist REST (926 vs 926, tol 3%)",
+     "passed": true
+    },
+    {
+     "check": "Wikidata IUCN item is Vulnerable (Q278113)",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "case": "gbif-lynx",
+   "observed_utc": "2026-11-22T22:39:20.286643+00:00",
+   "exit": 0,
+   "stdout_sha256": "ba800101cef43aee5b8d48beaf6a22300d462dc5b06522eb934c4ec4c24acee5",
+   "observed": {
+    "mcp_taxon_key": "2435261",
+    "mcp_family": "Felidae",
+    "mcp_count": "2271",
+    "rest_count": "2271",
+    "rest_absent": "389",
+    "rest_total": "2660",
+    "present_plus_absent": "2660"
+   },
+   "checks": [
+    {
+     "check": "taxon key equals GBIF REST (2435261 == 2435261)",
+     "passed": true
+    },
+    {
+     "check": "family equals GBIF REST (Felidae == Felidae)",
+     "passed": true
+    },
+    {
+     "check": "PRESENT count vs api.gbif.org (2271 vs 2271, tol 1%)",
+     "passed": true
+    },
+    {
+     "check": "arithmetic: REST PRESENT + ABSENT equals REST total (2660 == 2660)",
+     "passed": true
+    },
+    {
+     "check": "output contains 'mcp_match_type=EXACT'",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "case": "story-lynx-two-catalogs",
+   "observed_utc": "2026-11-22T22:39:59.018259+00:00",
+   "exit": 0,
+   "stdout_sha256": "41635509d074121a314d70d1a9b20b0c61849e06945779ce739045ca2a7ec789",
+   "observed": {
+    "inat_licensed_research": "398",
+    "gbif_inat_dataset": "394",
+    "gbif_rest_inat_dataset": "394",
+    "inat_rest_licensed_research": "398"
+   },
+   "checks": [
+    {
+     "check": "output contains 'dataset_title=iNaturalist'",
+     "passed": true
+    },
+    {
+     "check": "GBIF MCP (iNat dataset) vs GBIF REST (394 vs 394, tol 2%)",
+     "passed": true
+    },
+    {
+     "check": "iNaturalist MCP vs iNaturalist REST (398 vs 398, tol 3%)",
+     "passed": true
+    },
+    {
+     "check": "cross-catalog agreement, iNaturalist licensed research-grade vs GBIF copy (398 vs 394, tol 3%)",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "case": "met-caseyjhand-cypresses",
+   "observed_utc": "2026-11-22T22:40:18.318093+00:00",
+   "exit": 0,
+   "stdout_sha256": "f9fe2f1aa527cbe5a4c4dc7a6c0431b81e8a6ce6a1a754c8c3980d4c83688def",
+   "observed": {
+    "mcp_has_436535": "1",
+    "mcp_title_hit": "1",
+    "mcp_artist_hit": "1",
+    "rest_title": "Wheat Field with Cypresses",
+    "rest_artist": "Vincent van Gogh",
+    "rest_accession": "1993.132"
+   },
+   "checks": [
+    {
+     "check": "output contains 'mcp_has_436535=1'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'mcp_title_hit=1'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'mcp_artist_hit=1'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'rest_title=Wheat Field with Cypresses'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'rest_artist=Vincent van Gogh'",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "case": "artnap-seurat",
+   "observed_utc": "2026-11-22T22:40:28.617371+00:00",
+   "exit": 0,
+   "stdout_sha256": "e1d6cba9938925c34642678a28fd490978c53367adf7bb024f342947e4f80c54",
+   "observed": {
+    "mcp_id": "aic-27992",
+    "mcp_museum": "Art Institute of Chicago",
+    "mcp_license": "Public domain",
+    "mcp_year": "1884–86, border added 1888–89",
+    "wd_item": "Q1044742",
+    "wd_creator_is_seurat": "1",
+    "wd_collection_is_aic": "1"
+   },
+   "checks": [
+    {
+     "check": "output contains 'mcp_id=aic-27992'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'mcp_museum=Art Institute of Chicago'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'mcp_license=Public domain'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'wd_label=A Sunday Afternoon on the Island of La Grande Jatte'",
+     "passed": true
+    },
+    {
+     "check": "Wikidata creator is Georges Seurat (Q34013)",
+     "passed": true
+    },
+    {
+     "check": "Wikidata collection is the Art Institute of Chicago (Q239303)",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "case": "lviv-transit-rynok",
+   "observed_utc": "2026-11-22T22:40:39.639322+00:00",
+   "exit": 0,
+   "stdout_sha256": "2d7f7a7ac18ec860ca7641bf52977b1661b5c1ef46c9c067e032d601ce0ae67c",
+   "observed": {
+    "stop_id": "61",
+    "eng": "Rynok square",
+    "routes": "Т01,Т02",
+    "route_mentions_stop_name": "1",
+    "distance_km": "0.07",
+    "within_2km": "1"
+   },
+   "checks": [
+    {
+     "check": "output contains 'stop_id=61'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'eng=Rynok square'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'route_mentions_stop_name=1'",
+     "passed": true
+    },
+    {
+     "check": "stop within 2 km of Wikidata coordinates for Lviv",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "case": "sitesy-union-toronto",
+   "observed_utc": "2026-11-22T22:40:49.381076+00:00",
+   "exit": 0,
+   "stdout_sha256": "fe6da941299685d0cb21030a2d0a0ff323351f71cb6d79bb4775219cf665da8a",
+   "observed": {
+    "agency": "TTC",
+    "name": "Union",
+    "total_matches": "9",
+    "distance_m": "72",
+    "within_500m": "1"
+   },
+   "checks": [
+    {
+     "check": "output contains 'agency=TTC'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'name=Union'",
+     "passed": true
+    },
+    {
+     "check": "TTC Union stop within 500 m of Wikidata Union Station, Toronto",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "case": "epvotes-proxy-voting",
+   "observed_utc": "2026-11-22T22:41:01.075316+00:00",
+   "exit": 0,
+   "stdout_sha256": "8a3ed74b5519a7e2e75c24701253b6cfc7044096a5dda6df551162fec6010f82",
+   "observed": {
+    "mcp_for": "578",
+    "mcp_against": "25",
+    "mcp_abstention": "4",
+    "mcp_result": "ADOPTED",
+    "mcp_ref": "A10-0270/2026",
+    "hv_for": "578",
+    "hv_against": "25",
+    "hv_abstention": "4",
+    "hv_result": "ADOPTED",
+    "hv_ref": "A10-0270/2026",
+    "group_sum_for": "578",
+    "country_sum_for": "578",
+    "cast": "607"
+   },
+   "checks": [
+    {
+     "check": "for-votes equal HowTheyVote (578 == 578)",
+     "passed": true
+    },
+    {
+     "check": "against equal (25 == 25)",
+     "passed": true
+    },
+    {
+     "check": "abstentions equal (4 == 4)",
+     "passed": true
+    },
+    {
+     "check": "result equal (ADOPTED == ADOPTED)",
+     "passed": true
+    },
+    {
+     "check": "EP reference equal (A10-0270/2026 == A10-0270/2026)",
+     "passed": true
+    },
+    {
+     "check": "sum of political-group 'for' equals total (578 == 578)",
+     "passed": true
+    },
+    {
+     "check": "sum of country 'for' equals total (578 == 578)",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "case": "dengdeng-yinhang",
+   "observed_utc": "2026-11-22T22:41:11.678504+00:00",
+   "exit": 0,
+   "stdout_sha256": "56bf7dc6e5bc560577934c78aa03f5ee25d763043d19a8238ef26076e183f65c",
+   "observed": {
+    "found": "True",
+    "mcp_pinyin": "yínháng",
+    "hsk3": "2",
+    "wiktionary_has_yinhang": "1",
+    "tatoeba_sentences_with_word": "104",
+    "tatoeba_has_translated": "1"
+   },
+   "checks": [
+    {
+     "check": "output contains 'found=True'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'mcp_pinyin=yínháng'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'hsk3=2'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'wiktionary_has_yinhang=1'",
+     "passed": true
+    },
+    {
+     "check": "output contains 'tatoeba_has_translated=1'",
+     "passed": true
+    },
+    {
+     "check": "Tatoeba lists at least 50 Mandarin sentences containing 银行 (observed 104)",
+     "passed": true
+    }
+   ],
+   "passed": true
+  }
+ ]
+}

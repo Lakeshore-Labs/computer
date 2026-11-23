@@ -1,0 +1,48 @@
+// usage: node capture.cjs STAGE_DIR  (needs a playwright install; set PLAYWRIGHT_PATH to its location)
+const path = require("path"), fs = require("fs")
+const { chromium } = require(process.env.PLAYWRIGHT_PATH || "playwright")
+;(async () => {
+  const stage = path.resolve(process.argv[2]); fs.mkdirSync(stage + "/screenshots", { recursive: true })
+  const browser = await chromium.launch({ channel: "chrome", headless: true, args: ["--autoplay-policy=no-user-gesture-required"] })
+  const log = []
+  try {
+    for (const [name, w, h, pick] of [["desktop", 1280, 900, "crypt"], ["phone", 390, 844, "chunker"]]) {
+      const page = await browser.newPage({ viewport: { width: w, height: h }, isMobile: name === "phone", deviceScaleFactor: name === "phone" ? 2 : 1 })
+      const errs = []; page.on("pageerror", e => errs.push(e.message)); page.on("console", m => m.type() === "error" && errs.push(m.text()))
+      await page.goto("file://" + stage + "/index.html")
+      const ids = await page.locator("#tabs button").evaluateAll(bs => bs.map(b => b.dataset.id))
+      if (ids.length !== 9) throw Error("expected 9 backends, got " + ids.length)
+      for (const id of ids) {
+        await page.locator(`#t-${id}`).click()
+        await page.locator("#panel .card h3").first().waitFor()
+        const rows = await page.locator("#panel table").first().locator("tbody tr").count()
+        const matches = await page.locator("#panel table").first().locator("td", { hasText: "✓ match" }).count()
+        const notes = await page.locator("svg.score .n").count()
+        const browserOk = await page.locator("#panel table").first().locator("tbody tr td:last-child", { hasText: "✓ match" }).count()
+        if (rows !== 2 || browserOk !== 2 || notes !== 22) throw Error(`${id}: rows=${rows} browserOk=${browserOk} notes=${notes}`)
+        log.push(`${id}: ${rows} files, ${browserOk} browser-hash matches, ${notes} notes drawn, ${matches} ✓ cells`)
+      }
+      await page.locator(`#t-${pick}`).click(); await page.locator("#play").click()
+      const label = await page.locator("#play").textContent()
+      if (!label.includes("Stop")) throw Error("playback did not start")
+      await page.waitForTimeout(700)
+      const lit = await page.locator("svg.score .n.on").count()
+      log.push(`${name}: playback started on ${pick}, ${lit} note(s) highlighted at 0.7s`)
+      await page.locator("#play").click()
+      const ow = await page.evaluate(() => document.documentElement.scrollWidth)
+      if (ow > w) throw Error("horizontal overflow " + name + " " + ow)
+      await page.locator("#inv tbody tr").first().waitFor()
+      const nInv = await page.locator("#inv tbody tr").count(), nT = await page.locator("#inv tbody tr.tested").count()
+      if (nInv !== 69 || nT !== 9) throw Error("inventory " + nInv + "/" + nT)
+      await page.locator("#q").fill("crypt"); const vis = await page.locator("#inv tbody tr:visible").count(); await page.locator("#q").fill("")
+      log.push(`${name}: inventory 69 rows, 9 tested, filter 'crypt' shows ${vis}; viewport width ${w}, scrollWidth ${ow}`)
+      if (errs.length) throw Error("page errors: " + errs.join("; "))
+      await page.locator(`#t-${pick}`).click()
+      if (name === "phone") await page.locator("#play").scrollIntoViewIfNeeded()
+      await page.screenshot({ path: `${stage}/screenshots/${name}.png`, fullPage: name === "phone" ? false : false })
+      await page.screenshot({ path: `${stage}/screenshots/${name}-full.png`, fullPage: true })
+      await page.close()
+    }
+  } finally { await browser.close() }
+  fs.writeFileSync(stage + "/screenshots/capture-log.txt", log.join("\n") + "\n"); console.log(log.join("\n"))
+})().catch(e => { console.error(e.message); process.exit(1) })

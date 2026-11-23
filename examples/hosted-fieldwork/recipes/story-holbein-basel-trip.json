@@ -1,0 +1,40 @@
+{
+  "id": "story-holbein-basel-trip",
+  "servers": {
+    "art": "https://direct.wikioo.org/mcp/",
+    "ch": "https://transport.opendata.ch/mcp"
+  },
+  "allow": [
+    "https://www.wikidata.org/w/api.php",
+    "https://transport.opendata.ch/"
+  ],
+  "python": true,
+  "checks": [
+    {
+      "desc": "output contains 'The Body of the Dead Christ in the Tomb'",
+      "ok": true
+    },
+    {
+      "desc": "output contains 'STEP 4'",
+      "ok": true
+    },
+    {
+      "desc": "output contains '= Kunstmuseum Basel'",
+      "ok": true
+    },
+    {
+      "desc": "city is Basel in both sources",
+      "ok": true
+    },
+    {
+      "desc": "year check",
+      "ok": true
+    },
+    {
+      "desc": "duration arithmetic",
+      "ok": true
+    }
+  ],
+  "stdout_sha256": "9533c66aafe9763879998bb9fbd0b8226b195022e92ac2c7131811236b898ba6",
+  "observed_utc": "2026-11-22T21:30:55.694355+00:00"
+}

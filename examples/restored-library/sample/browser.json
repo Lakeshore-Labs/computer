@@ -1,0 +1,38 @@
+[
+  {
+    "screen": "desktop",
+    "viewport": {
+      "width": 1280,
+      "height": 830
+    },
+    "changed_days": [
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "downloads": {
+      "original": "40502e0e2cee15e56ac2f5b32822945148c9ef1914fdd69f84100936045ddac1",
+      "changed": "d69f82d64788b930f279eaea7e099fcd9705ff8e1659375e6a8a7c58dd65499a"
+    },
+    "outside": [],
+    "errors": []
+  },
+  {
+    "screen": "phone",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "changed_days": [
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "downloads": {
+      "original": "40502e0e2cee15e56ac2f5b32822945148c9ef1914fdd69f84100936045ddac1",
+      "changed": "d69f82d64788b930f279eaea7e099fcd9705ff8e1659375e6a8a7c58dd65499a"
+    },
+    "outside": [],
+    "errors": []
+  }
+]

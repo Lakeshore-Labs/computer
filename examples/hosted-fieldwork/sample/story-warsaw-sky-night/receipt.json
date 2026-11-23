@@ -1,0 +1,13 @@
+{
+  "case": "story-warsaw-sky-night",
+  "observed_utc": "2026-11-22T22:38:14.109750+00:00",
+  "exit": 0,
+  "stdout_sha256": "ff4a0be3a53369a6b62ca649fe9cfbae62ae9cd0680f4a98aced9349cf72183b",
+  "checks": {
+    "CHECK sunset agrees within 5 min: True$": true,
+    "CHECK dark window starts after civil twilight: True$": true,
+    "CHECK kosmos moon within 6 points of model: True$": true,
+    "CHECK Geminids peak is Dec 13/14: True$": true
+  },
+  "passed": true
+}

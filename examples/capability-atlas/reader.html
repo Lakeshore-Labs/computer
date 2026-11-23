@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Computer capability atlas</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#27302e;background:#f5f4ee;font:16px/1.48 system-ui,sans-serif}main{max-width:1340px;margin:auto;padding:clamp(14px,3.5vw,49px)}
+header{border-top:4px solid #234e43;padding-top:11px;display:flex;align-items:baseline;justify-content:space-between;gap:10px}header span{font:600 .88rem ui-monospace,monospace;color:#40564d}
+h1{font:500 clamp(40px,6vw,77px)/1.04 Georgia,serif;letter-spacing:-.045em;margin:1.2rem 0 .6rem}p{margin:.4rem 0 1rem}.intro{font-size:1.1rem;max-width:850px}
+.toolbar{display:flex;align-items:end;flex-wrap:wrap;gap:12px 18px;padding:1rem 0;border-block:1px solid #a5b0a7;margin:1.4rem 0}
+label span{display:block;font-weight:650;font-size:.85rem;margin-bottom:4px}input[type=search],select{background:white;border:1px solid #6e8378;padding:.52rem .65rem;color:inherit;font:inherit;max-width:100%}
+#query{width:min(390px,79vw)}input[type=checkbox]{width:1rem;height:1rem;vertical-align:middle}.count{margin-left:auto;align-self:center;font-variant-numeric:tabular-nums;color:#40564d}
+.work{display:grid;grid-template-columns:minmax(250px,.8fr) minmax(320px,1.2fr);gap:24px}.results{max-height:570px;overflow:auto;border-block:1px solid #b1bdb2;scrollbar-gutter:stable}
+.result{width:100%;text-align:left;display:block;border:0;border-bottom:1px solid #cad2c9;padding:12px 12px 13px;background:none;color:inherit;cursor:pointer}
+.result code{font:600 clamp(13px,1.3vw,16px) ui-monospace,monospace;overflow-wrap:anywhere}.result small{display:block;font:14px/1.45 system-ui;margin-top:.2rem}
+.result[aria-current=true],.result:hover{background:#dfe8df}.result[aria-current=true]{box-shadow:inset 4px 0 #28694a}
+.detail{background:white;border:1px solid #b1bdb2;padding:clamp(16px,2.5vw,30px);align-self:start}.kind{font-size:.85rem;font-weight:700;color:#446355}
+h2{font:600 clamp(19px,2.5vw,32px)/1.2 ui-monospace,monospace;overflow-wrap:anywhere;margin:.45rem 0 .65rem}h3,summary{font-weight:700;font-size:.98rem;margin:1.1rem 0 .3rem}
+#task{font-size:1.08rem}a{color:#245b49}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #9151af;outline-offset:-2px}
+summary{cursor:pointer}pre{background:#f0f3ee;padding:.75rem;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.5 ui-monospace,monospace;max-height:290px;overflow:auto}
+footer{font-size:.88rem;color:#505c53;margin-top:1.3rem}#empty{padding:1rem}.scope{border-left:3px solid #b69e79;padding-left:.75rem}
+@media(max-width:740px){main{padding:15px}.work{grid-template-columns:1fr;gap:12px}.results{max-height:185px}.toolbar{gap:9px}.count{margin-left:0}.detail{padding:16px}header{align-items:start;flex-direction:column}#query{width:min(335px,85vw)}}
+</style>
+<main><header><strong>Computer / Capability atlas</strong><span>Go library · CLI · MCP</span></header>
+<h1>What did Computer do?</h1><p class="intro">Find a function, flag or tool and inspect the observed result. The atlas covers 57 declared Go callables, 20 CLI flags and four outer MCP tools in the recorded macOS build.</p>
+<div class="toolbar"><label><span>Search by name or task</span><input type="search" id="query" placeholder="Try append, session or Python"></label>
+<label><span>Interface</span><select id="category" aria-label="Interface"><option>All interfaces</option><option>Go function</option><option>Go method</option><option>CLI flag</option><option>MCP tool</option></select></label>
+<label><input type="checkbox" id="limits"> Has a recorded limit</label><span class="count" id="count" aria-live="polite"></span></div>
+<div class="work"><section aria-label="Matching entries"><div class="results" id="list"></div></section><article class="detail" id="detail" aria-live="polite">
+<span class="kind" id="kind"></span><h2 id="name"></h2><p id="task"></p><h3>Observed result</h3><p id="check"></p>
+<div class="scope" id="bound"><h3>Scope of this run</h3><p id="gap"></p></div>
+<a id="source" href="#">Open the pinned Go source</a><details id="receipt"><summary>Inspect supporting evidence</summary><pre id="data"></pre></details></article></div>
+<footer>Recorded on Darwin/arm64 at the November 22 source revision shown on each entry. The inventory counts declared methods and top-level functions in six library packages. Types, fields, promoted methods and other operating systems have a different scope.</footer></main>
+<script type="application/json" id="atlas">__ATLAS__</script>
+<script>
+const model=JSON.parse(document.querySelector('#atlas').textContent),byId=id=>document.getElementById(id);
+let current='files.Root.Rename';
+function display(row){
+ current=row.name;
+ for(const b of byId('list').querySelectorAll('button'))b.setAttribute('aria-current',String(b.dataset.name===row.name));
+ byId('kind').textContent=row.category;byId('name').textContent=row.name;byId('task').textContent=row.task;byId('check').textContent=row.check;
+ byId('bound').hidden=!row.gap;byId('gap').textContent=row.gap||'';byId('source').href=row.source_url;
+ const refs=[row.evidence_source,...row.also];const proof=Object.fromEntries(refs.map(k=>[k,k.startsWith('receipt:')?model.receipts[k.slice(8)]:k.replace('repo:','Repository source · ')]));
+ byId('data').textContent=JSON.stringify(proof,null,2);byId('receipt').open=false;byId('detail').hidden=false;
+}
+function render(){
+ const query=byId('query').value.trim().toLowerCase(),cat=byId('category').value,limit=byId('limits').checked;
+ const rows=model.rows.filter(r=>(cat==='All interfaces'||cat===r.category)&&(!limit||r.gap)&&[r.name,r.task,r.check,r.gap||''].join(' ').toLowerCase().includes(query));
+ byId('count').textContent=rows.length+' of '+model.rows.length+' entries';const list=byId('list');list.replaceChildren();
+ for(const r of rows){const b=document.createElement('button');b.className='result';b.dataset.name=r.name;b.type='button';
+ const n=document.createElement('code'),t=document.createElement('small');n.textContent=r.name;t.textContent=r.task;b.append(n,t);b.onclick=()=>display(r);list.append(b);}
+ if(rows.length){display(rows.find(r=>r.name===current)||rows[0]);}
+ else{const empty=document.createElement('p');empty.id='empty';empty.textContent='No entries match this search.';list.append(empty);byId('detail').hidden=true;}
+}
+for(const id of ['query','category','limits'])byId(id).oninput=render;render();
+</script></html>

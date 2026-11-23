@@ -1,0 +1,40 @@
+[
+  {
+    "width": 1280,
+    "films": [
+      {
+        "film": "Inside Computer",
+        "duration": 78.689909,
+        "position": 63.586112,
+        "caption_tracks": 1
+      },
+      {
+        "film": "Where the files go",
+        "duration": 81.564898,
+        "position": 67.70927,
+        "caption_tracks": 1
+      }
+    ],
+    "integration_map_opened": true,
+    "external_requests": []
+  },
+  {
+    "width": 390,
+    "films": [
+      {
+        "film": "Inside Computer",
+        "duration": 78.689909,
+        "position": 63.598515,
+        "caption_tracks": 1
+      },
+      {
+        "film": "Where the files go",
+        "duration": 81.564898,
+        "position": 67.708333,
+        "caption_tracks": 1
+      }
+    ],
+    "integration_map_opened": true,
+    "external_requests": []
+  }
+]

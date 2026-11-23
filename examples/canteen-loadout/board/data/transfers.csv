@@ -1,0 +1,5 @@
+service,meal,from_hall,to_hall,units
+Lunch,Herb pasta,Quay,Orchard,3
+Lunch,Herb pasta,Hill,Orchard,2
+Lunch,Roast vegetables,Orchard,Quay,5
+Lunch,Roast vegetables,Hill,Quay,3

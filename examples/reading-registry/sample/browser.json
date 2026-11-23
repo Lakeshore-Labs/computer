@@ -1,0 +1,60 @@
+[
+  {
+    "label": "desktop",
+    "width": 1040,
+    "height": 820,
+    "verifications": [
+      {
+        "edition": "original",
+        "filename": "reading-room.ics",
+        "bytes": 290
+      },
+      {
+        "edition": "original",
+        "filename": "four-moons.epub",
+        "bytes": 121382
+      },
+      {
+        "edition": "amended",
+        "filename": "reading-room.ics",
+        "bytes": 290
+      },
+      {
+        "edition": "amended",
+        "filename": "four-moons.epub",
+        "bytes": 121382
+      }
+    ],
+    "external_requests": [],
+    "errors": []
+  },
+  {
+    "label": "phone",
+    "width": 390,
+    "height": 844,
+    "verifications": [
+      {
+        "edition": "original",
+        "filename": "reading-room.ics",
+        "bytes": 290
+      },
+      {
+        "edition": "original",
+        "filename": "four-moons.epub",
+        "bytes": 121382
+      },
+      {
+        "edition": "amended",
+        "filename": "reading-room.ics",
+        "bytes": 290
+      },
+      {
+        "edition": "amended",
+        "filename": "four-moons.epub",
+        "bytes": 121382
+      }
+    ],
+    "external_requests": [],
+    "errors": []
+  }
+]

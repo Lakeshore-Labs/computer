@@ -1,0 +1,42 @@
+[
+  {
+    "label": "desktop",
+    "width": 1120,
+    "height": 760,
+    "reader": "EPUB.js 0.3.93",
+    "book_sha256": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5",
+    "photo": [
+      1870,
+      635
+    ],
+    "rows": [
+      "Io1,821.49±0.50",
+      "Europa1,560.80±0.30",
+      "Ganymede2,631.20±1.70",
+      "Callisto2,410.30±1.50"
+    ],
+    "source_links": 6,
+    "page_errors": [],
+    "external_requests": []
+  },
+  {
+    "label": "phone",
+    "width": 390,
+    "height": 844,
+    "reader": "EPUB.js 0.3.93",
+    "book_sha256": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5",
+    "photo": [
+      1870,
+      635
+    ],
+    "rows": [
+      "Io1,821.49±0.50",
+      "Europa1,560.80±0.30",
+      "Ganymede2,631.20±1.70",
+      "Callisto2,410.30±1.50"
+    ],
+    "source_links": 6,
+    "page_errors": [],
+    "external_requests": []
+  }
+]

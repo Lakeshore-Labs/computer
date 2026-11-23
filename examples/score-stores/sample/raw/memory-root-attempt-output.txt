@@ -1,0 +1,33 @@
+@@ copy
+{}
+@@ list
+{
+  "list": [
+    {
+      "Path": "flute.mid",
+      "Name": "flute.mid",
+      "Size": -1,
+      "MimeType": "inode/directory",
+      "ModTime": "2000-01-01T00:00:00.000000000Z",
+      "IsDir": true,
+      "IsBucket": true
+    }
+  ]
+}
+@@ stat
+{
+  "item": {
+    "Path": "flute.mid",
+    "Name": "flute.mid",
+    "Size": 242,
+    "MimeType": "audio/midi",
+    "ModTime": "2026-11-22T15:33:39.149330490-08:00",
+    "IsDir": false
+  }
+}
+@@ size
+{
+  "bytes": 242,
+  "count": 1,
+  "sizeless": 0
+}

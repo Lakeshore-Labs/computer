@@ -1,0 +1,121 @@
+{
+ "libs": {
+  "zarr": "3.4.2",
+  "numcodecs": "0.17.1",
+  "numpy": "2.5.5"
+ },
+ "checks": [
+  {
+   "name": "observed zarr_format is 2",
+   "ok": true,
+   "detail": "zarr lib read format 2; name suffix says v3"
+  },
+  {
+   "name": "shape/chunks",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "latitude axis (full 721) descends 90..-90",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "longitude axis stored 0..359.75",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "window latitude axis equals Computer",
+   "ok": true,
+   "detail": "52.5..50.0"
+  },
+  {
+   "name": "window longitude axis equals Computer (wraps 0\u00b0)",
+   "ok": true,
+   "detail": "-5.5..2.0"
+  },
+  {
+   "name": "time[1074222] is morning",
+   "ok": true,
+   "detail": "2022-07-19T06"
+  },
+  {
+   "name": "morning window K bit-identical (341 cells)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "morning \u00b0C max abs error < 1e-9",
+   "ok": true,
+   "detail": "0.00e+00"
+  },
+  {
+   "name": "morning chunk MD5 equals server X-Goog-Hash and Computer receipt",
+   "ok": true,
+   "detail": "809302ac25ab6863c14a25d018c915e3"
+  },
+  {
+   "name": "morning chunk full decode matches numcodecs Blosc",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "morning chunk header generation recorded",
+   "ok": true,
+   "detail": "1695414772326240"
+  },
+  {
+   "name": "time[1074231] is afternoon",
+   "ok": true,
+   "detail": "2022-07-19T15"
+  },
+  {
+   "name": "afternoon window K bit-identical (341 cells)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "afternoon \u00b0C max abs error < 1e-9",
+   "ok": true,
+   "detail": "0.00e+00"
+  },
+  {
+   "name": "afternoon chunk MD5 equals server X-Goog-Hash and Computer receipt",
+   "ok": true,
+   "detail": "4f7857f6de8e1c2f0f0610a1eeeda5bb"
+  },
+  {
+   "name": "afternoon chunk full decode matches numcodecs Blosc",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "afternoon chunk header generation recorded",
+   "ok": true,
+   "detail": "1695414772277552"
+  },
+  {
+   "name": "difference grid recomputed",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "London nearest cell + values",
+   "ok": true,
+   "detail": "cell 51.5,-0.25"
+  },
+  {
+   "name": "Bristol nearest cell + values",
+   "ok": true,
+   "detail": "cell 51.5,-2.5"
+  },
+  {
+   "name": "Southampton nearest cell + values",
+   "ok": true,
+   "detail": "cell 51.0,-1.5"
+  }
+ ],
+ "passed": 22,
+ "total": 22
+}

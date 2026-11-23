@@ -1,0 +1,11 @@
+{
+  "case": "still-met-van-gogh",
+  "observed_utc": "2026-11-22T21:47:38.510445+00:00",
+  "exit": 0,
+  "stdout_sha256": "4514cc9f6869ffe266e51f32e43906345402ed9ec7f8512bc1383835dd7a220c",
+  "checks": {
+    "fields matching Met API: 6 of 6$": true,
+    "status: ok$": true
+  },
+  "passed": true
+}

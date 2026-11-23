@@ -1,0 +1,40 @@
+{
+  "busy": [
+    {
+      "calendar": "/ensemble/room/",
+      "end": "2026-11-29T09:30:00Z",
+      "start": "2026-11-29T09:00:00Z",
+      "type": "BUSY"
+    },
+    {
+      "calendar": "/ensemble/flute/",
+      "end": "2026-11-29T10:15:00Z",
+      "start": "2026-11-29T09:15:00Z",
+      "type": "BUSY"
+    },
+    {
+      "calendar": "/ensemble/clarinet/",
+      "end": "2026-11-29T10:45:00Z",
+      "start": "2026-11-29T10:00:00Z",
+      "type": "BUSY"
+    },
+    {
+      "calendar": "/ensemble/room/",
+      "end": "2026-11-29T11:00:00Z",
+      "start": "2026-11-29T10:45:00Z",
+      "type": "BUSY"
+    },
+    {
+      "calendar": "/ensemble/room/",
+      "end": "2026-11-29T13:00:00Z",
+      "start": "2026-11-29T12:15:00Z",
+      "type": "BUSY"
+    }
+  ],
+  "count": 5,
+  "method": "server",
+  "window": {
+    "from": "2026-11-29T09:00:00.000Z",
+    "to": "2026-11-29T13:00:00.000Z"
+  }
+}

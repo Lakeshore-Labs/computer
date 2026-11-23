@@ -1,0 +1,32 @@
+{
+  "client": "Rust MCP SDK",
+  "degrees": 9,
+  "scans": [
+    {
+      "bytes": 385,
+      "decoded": "urn:example:lost-property:LF-042",
+      "file": "claim.png"
+    },
+    {
+      "bytes": 19500,
+      "decoded": "urn:example:lost-property:LF-042",
+      "file": "rotated.png"
+    }
+  ],
+  "tools": [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ],
+  "rendered_pdf": {
+    "dpi": 144,
+    "decoded": "urn:example:lost-property:LF-042"
+  },
+  "sha256": {
+    "claim.pdf": "eafad359dbb192c1fb9dde6dda6fcc24a982c884dab7a8bd821030dd042ccd34",
+    "claim.png": "1a8e1d1881c5535f49540fd93caf14959b42ef6aecc97c4b1c76085885de0d32",
+    "rotated.png": "5af6eaee1ab1d8f3dcc6758b50d02ff0fc4d03156fa774b82fc87578d810757d",
+    "paper.png": "c00948ca5a36ea7536b53fe4402d3ddb050c3c866833568d1f4ae102000238d3"
+  }
+}

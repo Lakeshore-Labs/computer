@@ -1,0 +1,62 @@
+[
+  {
+    "source": "four-tools/sample/report.png",
+    "bounds": [
+      0,
+      0,
+      800,
+      500
+    ],
+    "sha256": "ebeaab8fdff3ff46f7c84172832aafbafbc8414aed709998374281d4c0a5598b"
+  },
+  {
+    "source": "lagoon-windows/sample/desktop.png",
+    "bounds": [
+      575,
+      125,
+      1090,
+      595
+    ],
+    "sha256": "6760f54f22be330ad2d64c44145ea2c9df427e92acef921fb4c650e1bf72480c"
+  },
+  {
+    "source": "rehearsal-room/sample/desktop.png",
+    "bounds": [
+      170,
+      565,
+      1300,
+      870
+    ],
+    "sha256": "964a15286daaac1e5e35ed2394621a792b796c92de4dff373fbaad6891227361"
+  },
+  {
+    "source": "island-mailbag/sample/desktop.png",
+    "bounds": [
+      50,
+      70,
+      1110,
+      470
+    ],
+    "sha256": "3bd1cb250ab800bb5e19b49aa61cf423aa317b92a5d073da7ebf9340d49cf35a"
+  },
+  {
+    "source": "radio-jetstream/evidence/run-2/desktop.png",
+    "bounds": [
+      10,
+      29,
+      814,
+      275
+    ],
+    "sha256": "3bcab5c1a649ab031b8af64c3a98abcd0a0841cc35cacedf9b107486f5de838d"
+  },
+  {
+    "source": "canteen-loadout/evidence/desktop-quay-after.png",
+    "bounds": [
+      163,
+      230,
+      1115,
+      480
+    ],
+    "sha256": "40ac9f36ebca25ec5d3ca3657ad0edae725c9dcb6cc55aced27bf6ae80fe96b3"
+  }
+]

@@ -1,0 +1,116 @@
+[
+  {
+    "title": "The ferry ledger",
+    "source": "four-tools",
+    "start": 0.0,
+    "shots": [
+      {
+        "file": "trace.png",
+        "sha256": "1aeff7d718353ab8e252081bd01b05517e750157e6b4cc3c3a59db8a6e46244e",
+        "start": 0.0,
+        "frames": 190
+      },
+      {
+        "file": "report.png",
+        "sha256": "ebeaab8fdff3ff46f7c84172832aafbafbc8414aed709998374281d4c0a5598b",
+        "start": 7.916666666666667,
+        "frames": 171
+      }
+    ]
+  },
+  {
+    "title": "Windows over Venice",
+    "source": "lagoon-windows",
+    "start": 15.041666666666666,
+    "shots": [
+      {
+        "file": "windows.webm",
+        "sha256": "a97d969ea515ee46f556d996fc3abdbb7d89c4106a53799d4b6a21765c0af239",
+        "start": 15.041666666666666,
+        "frames": 141
+      },
+      {
+        "file": "desktop.png",
+        "sha256": "6760f54f22be330ad2d64c44145ea2c9df427e92acef921fb4c650e1bf72480c",
+        "start": 20.916666666666668,
+        "frames": 122
+      }
+    ]
+  },
+  {
+    "title": "A designer\u2019s palette",
+    "source": "lagoon-palette",
+    "start": 26.0,
+    "shots": [
+      {
+        "file": "palette.webm",
+        "sha256": "a34a49a4525cdb7a7fbc723cb94ad964a7a64106a3b39a50223e7e35f5a90a3c",
+        "start": 26.0,
+        "frames": 157
+      },
+      {
+        "file": "desktop.png",
+        "sha256": "76b1a3f5be3a650da708c83e88668f21f1e4753729ca7fb3ab144d410f7d2de7",
+        "start": 32.541666666666664,
+        "frames": 164
+      }
+    ]
+  },
+  {
+    "title": "Oslofjord in relief",
+    "source": "terrain-workshop",
+    "start": 39.375,
+    "shots": [
+      {
+        "file": "rotate.webm",
+        "sha256": "422bc7f4194c7a43ab2d61e3ed95221927fa944317427dbe8a72557caa5b810a",
+        "start": 39.375,
+        "frames": 136
+      },
+      {
+        "file": "layers.png",
+        "sha256": "0185016fb27188af081cce0b98247516b32a037406bac562518d577e191b7862",
+        "start": 45.041666666666664,
+        "frames": 120
+      }
+    ]
+  },
+  {
+    "title": "Sunday\u2019s fitting",
+    "source": "browser-wardrobe",
+    "start": 50.041666666666664,
+    "shots": [
+      {
+        "file": "offline.png",
+        "sha256": "fe42bff68ca97053c1fb3f387419dac316756157555d20b62e72cc40aee93c98",
+        "start": 50.041666666666664,
+        "frames": 168
+      },
+      {
+        "file": "wardrobe.webm",
+        "sha256": "7468988005183d7d5f37408b38786102033423ad3424d56313da099788359e87",
+        "start": 57.041666666666664,
+        "frames": 157
+      }
+    ]
+  },
+  {
+    "title": "Last Boat Home",
+    "source": "rehearsal-room",
+    "start": 63.583333333333336,
+    "shots": [
+      {
+        "file": "rehearsal.mp4",
+        "sha256": "1f443e50257c5ba40824534df7f42c4bb7732d39ba8eeebe21c3e15515fcb2b4",
+        "start": 63.583333333333336,
+        "frames": 186
+      },
+      {
+        "file": "desktop.png",
+        "sha256": "964a15286daaac1e5e35ed2394621a792b796c92de4dff373fbaad6891227361",
+        "start": 71.33333333333333,
+        "frames": 176
+      }
+    ]
+  }
+]

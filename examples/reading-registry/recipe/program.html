@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Four moons · reading room</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#181c29;color:#f3ecd9;font:16px/1.5 system-ui,sans-serif}main{max-width:950px;padding:clamp(20px,5vw,58px);margin:auto}
+header{display:flex;justify-content:space-between;border-bottom:1px solid #858197;gap:18px;padding-bottom:12px}.place{font-weight:650}.edition{font-size:14px;color:#bfbacb}
+h1{font:clamp(48px,8vw,100px)/.94 Georgia,serif;letter-spacing:-.055em;margin:34px 0 20px}figure{margin:0}img{display:block;width:100%;max-height:255px;object-fit:contain;background:#050505}figcaption{font-size:12px;color:#bfbacb;margin:5px 0 20px}
+.event{display:flex;gap:25px;align-items:center;flex-wrap:wrap;border-top:1px solid #78798f;border-bottom:1px solid #78798f;padding:16px 0}.event strong{font:40px/1 Georgia,serif}.event span{display:block}select{background:#f7eed9;color:#242535;border:0;padding:7px 9px;font:inherit}
+label{font-size:14px;margin-left:auto}footer{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:18px}a{display:inline-block;border:1px solid #bda884;padding:8px 14px;color:#f7eed9;text-decoration:none;border-radius:2px}
+details{margin-top:20px;font-size:13px;color:#c8c8cb}code{overflow-wrap:anywhere}p{margin:6px 0}
+@media(max-width:510px){header{font-size:14px}.event{gap:10px}.event label{width:100%;margin:0}main{padding:17px}}
+</style><main><header><span class="place">West reading room</span><span class="edition">Public program · November 24, 2026</span></header>
+<h1>Four moons<br>reading room</h1><figure><img alt="Ganymede, Callisto, Io and Europa at the same image scale" src="{{PHOTO}}"><figcaption>Image courtesy NASA/JPL/DLR · PIA00601</figcaption></figure>
+<div class="event"><strong id="time"></strong><span>UTC<br>45-minute reading</span><label>Program edition <select id="edition"><option value="original">Original</option><option value="amended" selected>Amended</option></select></label></div>
+<footer><a id="calendar" download="reading-room.ics">Save event</a><a id="book" download="four-moons.epub" href="{{BOOK}}">Download the book</a></footer>
+<details><summary>Registry digests</summary><p>Edition manifest <code id="manifest"></code></p><p>Shared book layer <code>{{BOOK_DIGEST}}</code></p></details></main>
+<script>const items={{EDITS}};const choice=document.querySelector('#edition');function update(){const c=items.find(x=>x.edition===choice.value);document.querySelector('#time').textContent=c.time;document.querySelector('#calendar').href=c.calendar;document.querySelector('#manifest').textContent='sha256:'+c.sha}choice.addEventListener('change',update);update()</script></html>

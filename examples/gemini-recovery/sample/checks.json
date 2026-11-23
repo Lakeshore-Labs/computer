@@ -1,0 +1,45 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "direct_endpoint": "https://generativelanguage.googleapis.com/v1beta/openai",
+  "cli_sha256": "247d57b9f12965c06508147effcb75d11f44adf3da61823db18ad493db84907f",
+  "bundle_sha256": "3d58318fb2e6fab9c2aa52a942451b6190e2f9aa52a150299981001cd8a46f5a",
+  "engine_sha256": "2c218412cb8b17e46ee91bea7556ec38f5b9b6bd6312fddd3ceeed14aa71eaaa",
+  "events": [
+    {
+      "step": "opened",
+      "elapsed_s": 0.0,
+      "child_process": 1
+    },
+    {
+      "step": "packing",
+      "elapsed_s": 2.89,
+      "in_progress": "LF-042",
+      "packed": false,
+      "replay_markers": 1
+    },
+    {
+      "step": "interrupted",
+      "elapsed_s": 2.9,
+      "exit": -9,
+      "terminal_events": []
+    },
+    {
+      "step": "reopened",
+      "elapsed_s": 2.9,
+      "child_process": 2
+    },
+    {
+      "step": "finished",
+      "elapsed_s": 10.1,
+      "exit": 0,
+      "terminal_events": [
+        "answer"
+      ],
+      "conversations": 1,
+      "replay_markers": 6,
+      "packed": "LF-042",
+      "notice": "LF-042 IVORY"
+    }
+  ],
+  "passed": true
+}

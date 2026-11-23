@@ -1,0 +1,86 @@
+{
+  "edition": 2,
+  "root": "bafyreiefwkzm6lj6p5giwtpx6r7jmqwojjdm6xz7uriexhq7q2kcunewpe",
+  "blocks": [
+    {
+      "cid": "bafyreiefwkzm6lj6p5giwtpx6r7jmqwojjdm6xz7uriexhq7q2kcunewpe",
+      "codec": "dag-cbor",
+      "bytes": 316,
+      "role": "manifest"
+    },
+    {
+      "cid": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u",
+      "codec": "raw",
+      "bytes": 121382,
+      "role": "book"
+    },
+    {
+      "cid": "bafkreig7pry4kvsi73vfgleat3z7hqfhyseatvebziov5eavb2l3phd3ji",
+      "codec": "raw",
+      "bytes": 584,
+      "role": "card"
+    }
+  ],
+  "sent": [
+    {
+      "cid": "bafyreiefwkzm6lj6p5giwtpx6r7jmqwojjdm6xz7uriexhq7q2kcunewpe",
+      "codec": "dag-cbor",
+      "bytes": 316,
+      "role": "manifest"
+    },
+    {
+      "cid": "bafkreig7pry4kvsi73vfgleat3z7hqfhyseatvebziov5eavb2l3phd3ji",
+      "codec": "raw",
+      "bytes": 584,
+      "role": "card"
+    }
+  ],
+  "withheld": [
+    {
+      "cid": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u",
+      "codec": "raw",
+      "bytes": 121382,
+      "role": "book",
+      "reason": "the receiving store already holds this block"
+    }
+  ],
+  "car": {
+    "file": "edition-2.delta.car",
+    "bytes": 1035,
+    "sha256": "2ae01f20f9ae816c4694ed3eac83cd353ffa53e8df9998baf42e502147aa74e5",
+    "blocks": 2,
+    "roots": [
+      "bafyreiefwkzm6lj6p5giwtpx6r7jmqwojjdm6xz7uriexhq7q2kcunewpe"
+    ]
+  },
+  "standalone": {
+    "file": "edition-2.standalone.car",
+    "bytes": 122456,
+    "sha256": "ea3d610590f886bca7da6ac994237988fe3f8d1467f09118cedd1c28da0de2dc",
+    "blocks": 3
+  },
+  "storeA": {
+    "library": "blockstore-fs 4.0.1 (FsBlockstore)",
+    "blocksNow": 5,
+    "roundTripFromStoreA": true
+  },
+  "manifestValue": {
+    "schema": "island-mailbag/edition/v1",
+    "library": "Gull Island Library (made up for this exhibit)",
+    "edition": 2,
+    "files": [
+      {
+        "name": "four-moons.epub",
+        "mediaType": "application/epub+zip",
+        "size": 121382,
+        "link": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u"
+      },
+      {
+        "name": "reading-card.md",
+        "mediaType": "text/markdown",
+        "size": 584,
+        "link": "bafkreig7pry4kvsi73vfgleat3z7hqfhyseatvebziov5eavb2l3phd3ji"
+      }
+    ]
+  }
+}

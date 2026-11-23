@@ -1,0 +1,37 @@
+[
+  {
+    "name": "genanki",
+    "version": "0.13.1",
+    "filename": "genanki-0.13.1-py3-none-any.whl",
+    "url": "https://files.pythonhosted.org/packages/af/7e/6c74ea7aaf2a36fd7df281267fade72e1f06ed1e44315bd77af2c6f82800/genanki-0.13.1-py3-none-any.whl",
+    "sha256": "65b59434008588a1213b940474d1aca8cca83243af6fc0e26200b560efe4d9e3"
+  },
+  {
+    "name": "frozendict",
+    "version": "2.5.1",
+    "filename": "frozendict-2.5.1-py3-none-any.whl",
+    "url": "https://files.pythonhosted.org/packages/60/98/0902e074fb777b4064594a3a18773a50d661dbb8d73b7487fdf63ba088cc/frozendict-2.5.1-py3-none-any.whl",
+    "sha256": "b6e602e286b912beca1e12615f50eda6c74646b440c8cfde34221adee6c98c5e"
+  },
+  {
+    "name": "cached-property",
+    "version": "2.0.1",
+    "filename": "cached_property-2.0.1-py3-none-any.whl",
+    "url": "https://files.pythonhosted.org/packages/11/0e/7d8225aab3bc1a0f5811f8e1b557aa034ac04bdf641925b30d3caf586b28/cached_property-2.0.1-py3-none-any.whl",
+    "sha256": "f617d70ab1100b7bcf6e42228f9ddcb78c676ffa167278d9f730d1c2fba69ccb"
+  },
+  {
+    "name": "chevron",
+    "version": "0.14.0",
+    "filename": "chevron-0.14.0-py3-none-any.whl",
+    "url": "https://files.pythonhosted.org/packages/52/93/342cc62a70ab727e093ed98e02a725d85b746345f05d2b5e5034649f4ec8/chevron-0.14.0-py3-none-any.whl",
+    "sha256": "fbf996a709f8da2e745ef763f482ce2d311aa817d287593a5b990d6d6e4f0443"
+  },
+  {
+    "name": "PyYAML",
+    "version": "6.0.4",
+    "filename": "pyyaml-6.0.4.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/76/b8/c0b780928e2fb1c87e9e375818c6f121da2398b071012d1747be300b83f4/pyyaml-6.0.4.tar.gz",
+    "sha256": "e24bf71af8a432d7808fabff134d38dfe16d3cbb41f2873bb4b1e42422de0a1a"
+  }
+]

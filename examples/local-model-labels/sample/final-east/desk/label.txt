@@ -1,0 +1,2 @@
+Shelf: EAST-42
+Pickup ribbon: COPPER

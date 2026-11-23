@@ -1,0 +1,6 @@
+SELECT ?moon ?name ?parent WHERE {
+  VALUES ?moon { wd:Q3123 wd:Q3143 wd:Q3169 wd:Q3134 }
+  ?moon rdfs:label ?name; wdt:P397 ?parent.
+  FILTER(LANG(?name) = "en" && ?parent = wd:Q319)
+}
+ORDER BY ?name

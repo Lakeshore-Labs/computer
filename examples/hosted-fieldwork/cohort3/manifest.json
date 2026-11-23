@@ -1,0 +1,455 @@
+{
+ "note": "Cohort 3 field cases, scripts as run on 2026-11-22. Predicates are evaluated on key=value lines of stdout by replay_manifest.py. Receipts record only the listed keys.",
+ "cases": [
+  {
+   "id": "inat-lynx",
+   "servers": {
+    "inat": "https://inaturalist.caseyjhand.com/mcp"
+   },
+   "allow": [
+    "https://api.inaturalist.org/",
+    "https://www.wikidata.org/"
+   ],
+   "inputs": {
+    "name": "Lynx pardinus",
+    "taxon_id": 41975,
+    "wikidata": "Q129727 P141",
+    "filters": "quality_grade=research, captive=false (REST)"
+   },
+   "predicates": [
+    {
+     "type": "contains",
+     "text": "taxon_id=41975"
+    },
+    {
+     "type": "contains",
+     "text": "common=Iberian Lynx"
+    },
+    {
+     "type": "contains",
+     "text": "mcp_global_status=VU"
+    },
+    {
+     "type": "within",
+     "desc": "MCP research-grade count vs iNaturalist REST",
+     "a": "mcp_research_obs",
+     "b": "rest_research_obs",
+     "pct": 3
+    },
+    {
+     "type": "flag",
+     "desc": "Wikidata IUCN item is Vulnerable (Q278113)",
+     "key": "wikidata_is_vulnerable"
+    }
+   ],
+   "record": [
+    "taxon_id",
+    "mcp_global_status",
+    "mcp_research_obs",
+    "rest_research_obs",
+    "wikidata_iucn_item"
+   ]
+  },
+  {
+   "id": "gbif-lynx",
+   "servers": {
+    "gbif": "https://gbif-biodiversity.caseyjhand.com/mcp"
+   },
+   "allow": [
+    "https://api.gbif.org/"
+   ],
+   "inputs": {
+    "name": "Lynx pardinus",
+    "taxon_key": 2435261,
+    "note": "MCP excludes ABSENT records by default; compared with REST PRESENT"
+   },
+   "predicates": [
+    {
+     "type": "eq",
+     "desc": "taxon key equals GBIF REST",
+     "a": "mcp_taxon_key",
+     "b": "rest_taxon_key"
+    },
+    {
+     "type": "eq",
+     "desc": "family equals GBIF REST",
+     "a": "mcp_family",
+     "b": "rest_family"
+    },
+    {
+     "type": "within",
+     "desc": "PRESENT count vs api.gbif.org",
+     "a": "mcp_count",
+     "b": "rest_count",
+     "pct": 1
+    },
+    {
+     "type": "eq",
+     "desc": "arithmetic: REST PRESENT + ABSENT equals REST total",
+     "a": "present_plus_absent",
+     "b": "rest_total"
+    },
+    {
+     "type": "contains",
+     "text": "mcp_match_type=EXACT"
+    }
+   ],
+   "record": [
+    "mcp_taxon_key",
+    "mcp_family",
+    "mcp_count",
+    "rest_count",
+    "rest_absent",
+    "rest_total",
+    "present_plus_absent"
+   ]
+  },
+  {
+   "id": "story-lynx-two-catalogs",
+   "servers": {
+    "inat": "https://inaturalist.caseyjhand.com/mcp",
+    "gbif": "https://gbif-biodiversity.caseyjhand.com/mcp"
+   },
+   "allow": [
+    "https://api.gbif.org/",
+    "https://api.inaturalist.org/"
+   ],
+   "inputs": {
+    "taxon_id": 41975,
+    "taxon_key": 2435261,
+    "licences": "cc0, cc-by, cc-by-nc",
+    "dataset_key": "50c9509d-22c7-4a22-a47d-8c48425ef4a7"
+   },
+   "predicates": [
+    {
+     "type": "contains",
+     "text": "dataset_title=iNaturalist"
+    },
+    {
+     "type": "within",
+     "desc": "GBIF MCP (iNat dataset) vs GBIF REST",
+     "a": "gbif_inat_dataset",
+     "b": "gbif_rest_inat_dataset",
+     "pct": 2
+    },
+    {
+     "type": "within",
+     "desc": "iNaturalist MCP vs iNaturalist REST",
+     "a": "inat_licensed_research",
+     "b": "inat_rest_licensed_research",
+     "pct": 3
+    },
+    {
+     "type": "within",
+     "desc": "cross-catalog agreement, iNaturalist licensed research-grade vs GBIF copy",
+     "a": "inat_licensed_research",
+     "b": "gbif_inat_dataset",
+     "pct": 3
+    }
+   ],
+   "record": [
+    "inat_licensed_research",
+    "gbif_inat_dataset",
+    "gbif_rest_inat_dataset",
+    "inat_rest_licensed_research"
+   ]
+  },
+  {
+   "id": "met-caseyjhand-cypresses",
+   "servers": {
+    "met": "https://met-museum.caseyjhand.com/mcp"
+   },
+   "allow": [
+    "https://collectionapi.metmuseum.org/"
+   ],
+   "inputs": {
+    "object_id": 436535,
+    "title_query": "Wheat Field with Cypresses"
+   },
+   "predicates": [
+    {
+     "type": "contains",
+     "text": "mcp_has_436535=1"
+    },
+    {
+     "type": "contains",
+     "text": "mcp_title_hit=1"
+    },
+    {
+     "type": "contains",
+     "text": "mcp_artist_hit=1"
+    },
+    {
+     "type": "contains",
+     "text": "rest_title=Wheat Field with Cypresses"
+    },
+    {
+     "type": "contains",
+     "text": "rest_artist=Vincent van Gogh"
+    }
+   ],
+   "record": [
+    "mcp_has_436535",
+    "mcp_title_hit",
+    "mcp_artist_hit",
+    "rest_title",
+    "rest_artist",
+    "rest_accession"
+   ]
+  },
+  {
+   "id": "artnap-seurat",
+   "servers": {
+    "an": "https://artnap.com/mcp"
+   },
+   "allow": [
+    "https://www.wikidata.org/"
+   ],
+   "inputs": {
+    "query": "Sunday on La Grande Jatte",
+    "artist": "Georges Seurat",
+    "wikidata_creator": "Q34013",
+    "wikidata_collection": "Q239303"
+   },
+   "predicates": [
+    {
+     "type": "contains",
+     "text": "mcp_id=aic-27992"
+    },
+    {
+     "type": "contains",
+     "text": "mcp_museum=Art Institute of Chicago"
+    },
+    {
+     "type": "contains",
+     "text": "mcp_license=Public domain"
+    },
+    {
+     "type": "contains",
+     "text": "wd_label=A Sunday Afternoon on the Island of La Grande Jatte"
+    },
+    {
+     "type": "flag",
+     "desc": "Wikidata creator is Georges Seurat (Q34013)",
+     "key": "wd_creator_is_seurat"
+    },
+    {
+     "type": "flag",
+     "desc": "Wikidata collection is the Art Institute of Chicago (Q239303)",
+     "key": "wd_collection_is_aic"
+    }
+   ],
+   "record": [
+    "mcp_id",
+    "mcp_museum",
+    "mcp_license",
+    "mcp_year",
+    "wd_item",
+    "wd_creator_is_seurat",
+    "wd_collection_is_aic"
+   ]
+  },
+  {
+   "id": "lviv-transit-rynok",
+   "servers": {
+    "lv": "https://api.lad.lviv.ua/mcp"
+   },
+   "allow": [
+    "https://www.wikidata.org/"
+   ],
+   "inputs": {
+    "stop_query": "Площа Ринок",
+    "wikidata_city": "Q36036 P625",
+    "limit_km": 2
+   },
+   "predicates": [
+    {
+     "type": "contains",
+     "text": "stop_id=61"
+    },
+    {
+     "type": "contains",
+     "text": "eng=Rynok square"
+    },
+    {
+     "type": "contains",
+     "text": "route_mentions_stop_name=1"
+    },
+    {
+     "type": "flag",
+     "desc": "stop within 2 km of Wikidata coordinates for Lviv",
+     "key": "within_2km"
+    }
+   ],
+   "record": [
+    "stop_id",
+    "eng",
+    "routes",
+    "route_mentions_stop_name",
+    "distance_km",
+    "within_2km"
+   ]
+  },
+  {
+   "id": "sitesy-union-toronto",
+   "servers": {
+    "tr": "https://transit.sitesy.ca/mcp"
+   },
+   "allow": [
+    "https://www.wikidata.org/"
+   ],
+   "inputs": {
+    "query": "Union Station",
+    "agency": "ttc",
+    "reference_point": "43.645523,-79.379723",
+    "limit_m": 500
+   },
+   "predicates": [
+    {
+     "type": "contains",
+     "text": "agency=TTC"
+    },
+    {
+     "type": "contains",
+     "text": "name=Union"
+    },
+    {
+     "type": "flag",
+     "desc": "TTC Union stop within 500 m of Wikidata Union Station, Toronto",
+     "key": "within_500m"
+    }
+   ],
+   "record": [
+    "agency",
+    "name",
+    "total_matches",
+    "distance_m",
+    "within_500m"
+   ]
+  },
+  {
+   "id": "epvotes-proxy-voting",
+   "servers": {
+    "ep": "https://epvotes.com/mcp"
+   },
+   "allow": [
+    "https://howtheyvote.eu/"
+   ],
+   "inputs": {
+    "day": "2026-11-12",
+    "vote_id": "199979"
+   },
+   "predicates": [
+    {
+     "type": "eq",
+     "desc": "for-votes equal HowTheyVote",
+     "a": "mcp_for",
+     "b": "hv_for"
+    },
+    {
+     "type": "eq",
+     "desc": "against equal",
+     "a": "mcp_against",
+     "b": "hv_against"
+    },
+    {
+     "type": "eq",
+     "desc": "abstentions equal",
+     "a": "mcp_abstention",
+     "b": "hv_abstention"
+    },
+    {
+     "type": "eq",
+     "desc": "result equal",
+     "a": "mcp_result",
+     "b": "hv_result"
+    },
+    {
+     "type": "eq",
+     "desc": "EP reference equal",
+     "a": "mcp_ref",
+     "b": "hv_ref"
+    },
+    {
+     "type": "eq",
+     "desc": "sum of political-group 'for' equals total",
+     "a": "group_sum_for",
+     "b": "hv_for"
+    },
+    {
+     "type": "eq",
+     "desc": "sum of country 'for' equals total",
+     "a": "country_sum_for",
+     "b": "hv_for"
+    }
+   ],
+   "record": [
+    "mcp_for",
+    "mcp_against",
+    "mcp_abstention",
+    "mcp_result",
+    "mcp_ref",
+    "hv_for",
+    "hv_against",
+    "hv_abstention",
+    "hv_result",
+    "hv_ref",
+    "group_sum_for",
+    "country_sum_for",
+    "cast"
+   ]
+  },
+  {
+   "id": "dengdeng-yinhang",
+   "servers": {
+    "dd": "https://dengdeng.app/dictionary/mcp"
+   },
+   "allow": [
+    "https://en.wiktionary.org/",
+    "https://tatoeba.org/"
+   ],
+   "inputs": {
+    "word": "银行",
+    "wiktionary_page": "銀行",
+    "tatoeba_query": "银行 (cmn to eng)",
+    "note": "final predicate does not test where the dictionary's example sentence came from"
+   },
+   "predicates": [
+    {
+     "type": "contains",
+     "text": "found=True"
+    },
+    {
+     "type": "contains",
+     "text": "mcp_pinyin=yínháng"
+    },
+    {
+     "type": "contains",
+     "text": "hsk3=2"
+    },
+    {
+     "type": "contains",
+     "text": "wiktionary_has_yinhang=1"
+    },
+    {
+     "type": "contains",
+     "text": "tatoeba_has_translated=1"
+    },
+    {
+     "type": "min",
+     "desc": "Tatoeba lists at least 50 Mandarin sentences containing 银行",
+     "key": "tatoeba_sentences_with_word",
+     "value": 50
+    }
+   ],
+   "record": [
+    "found",
+    "mcp_pinyin",
+    "hsk3",
+    "wiktionary_has_yinhang",
+    "tatoeba_sentences_with_word",
+    "tatoeba_has_translated"
+   ]
+  }
+ ]
+}

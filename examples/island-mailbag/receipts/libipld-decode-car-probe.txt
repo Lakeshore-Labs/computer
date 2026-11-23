@@ -1,0 +1,2 @@
+libipld 4.0.0 decode_car(edition-1.car): ValueError: Failed to read CAR block. Unsupported codec. For now we support only DAG-CBOR (0x71)
+libipld 4.0.0 decode_car(edition-2.delta.car): ValueError: Failed to read CAR block. Unsupported codec. For now we support only DAG-CBOR (0x71)

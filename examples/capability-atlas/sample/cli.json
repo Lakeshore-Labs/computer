@@ -1,0 +1,114 @@
+{
+ "checks": [
+  {
+   "id": "python-lib-supplied",
+   "row": "cli-flag:-python-lib",
+   "expected": "with the real library: exit 0, colorsys loaded from a path under the guest /lib and the HSV of pure red printed as (0.0, 1.0, 1)",
+   "observed": {
+    "args": [
+     "-mount",
+     "\u003ctmp\u003e/work:/work",
+     "-python",
+     "\u003cpython.wasm\u003e",
+     "-python-lib",
+     "\u003cpython-lib\u003e",
+     "-c",
+     "python3 -c \"import colorsys; print(colorsys.__file__); print(colorsys.rgb_to_hsv(1, 0, 0))\""
+    ],
+    "exit": 0,
+    "stdout": "/lib/python3.15/colorsys.py\n(0.0, 1.0, 1)\n",
+    "stderr": "",
+    "seconds": 2.49
+   },
+   "pass": true
+  },
+  {
+   "id": "python-lib-wrong-path-control",
+   "row": "cli-flag:-python-lib",
+   "expected": "with an empty directory as -python-lib the same command does not succeed and prints no HSV",
+   "observed": {
+    "args": [
+     "-mount",
+     "\u003ctmp\u003e/work:/work",
+     "-python",
+     "\u003cpython.wasm\u003e",
+     "-python-lib",
+     "\u003ctmp\u003e/emptylib",
+     "-c",
+     "python3 -c \"import colorsys; print(colorsys.__file__); print(colorsys.rgb_to_hsv(1, 0, 0))\""
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "WARN: Could not find the standard library directory! The Python 'home' directory was set to '/', is this correct?\nPython path configuration:\n  PYTHONHOME = '/'\n  PYTHONPATH = '/usr/lib/python-tools'\n  program name = 'python3'\n  isolated = 0\n  environment = 1\n  user site = 1\n  safe_path = 0\n  import site = 1\n  is in build tree = 0\n  stdlib dir = '/lib/python3.15'\n  sys.path[0] = (not set)\n  sys._base_executable = ''\n  sys.base_prefix = '/'\n  sys.base_exec_prefix = '/'\n  sys.platlibdir = 'lib'\n  sys.executable = ''\n  sys.prefix = '/'\n  sys.exec_prefix = '/'\n  sys.path = [\n    '/usr/lib/python-tools',\n    '/lib/python315.zip',\n    '/lib/python3.15',\n    '/lib/python3.15/lib-dynload',\n  ]\nFatal Python error: Failed to import encodings module\nPython runtime state: core initialized\nModuleNotFoundError: No module named 'encodings'\n\nCurrent thread 0x0133c760 (most recent call first):\n",
+    "seconds": 0.11
+   },
+   "pass": true
+  },
+  {
+   "id": "python-lib-omitted-control",
+   "row": "cli-flag:-python-lib",
+   "expected": "with -python-lib omitted the same command does not succeed and prints no HSV",
+   "observed": {
+    "args": [
+     "-mount",
+     "\u003ctmp\u003e/work:/work",
+     "-python",
+     "\u003cpython.wasm\u003e",
+     "-c",
+     "python3 -c \"import colorsys; print(colorsys.__file__); print(colorsys.rgb_to_hsv(1, 0, 0))\""
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "computer: open : no such file or directory\n",
+    "seconds": 0.09
+   },
+   "pass": true
+  },
+  {
+   "id": "allow-url-default-refusal",
+   "row": "cli-flag:-allow-url",
+   "expected": "without the flag curl does not exist in the computer (exit 127) and the fixture sees 0 requests",
+   "observed": {
+    "fixture_requests": 0,
+    "run": {
+     "args": [
+      "-mount",
+      "\u003ctmp\u003e/work:/work",
+      "-c",
+      "curl -sS http://\u003cloopback\u003e:\u003cport\u003e/hello; echo \"curl-exit=$?\""
+     ],
+     "exit": 0,
+     "stdout": "curl-exit=127\n",
+     "stderr": "curl: command not found\n",
+     "seconds": 0.01
+    }
+   },
+   "pass": true
+  },
+  {
+   "id": "allow-url-flag-registers-curl-loopback-still-denied",
+   "row": "cli-flag:-allow-url",
+   "expected": "with the flag curl exists (it reaches the network layer, not 127) and the network layer refuses the loopback host by name; the fixture sees 0 requests",
+   "observed": {
+    "fixture_requests": 0,
+    "run": {
+     "args": [
+      "-mount",
+      "\u003ctmp\u003e/work:/work",
+      "-allow-url",
+      "http://\u003cloopback\u003e:\u003cport\u003e/",
+      "-c",
+      "curl -sS http://\u003cloopback\u003e:\u003cport\u003e/hello; echo \"curl-exit=$?\""
+     ],
+     "exit": 0,
+     "stdout": "curl-exit=7\n",
+     "stderr": "curl: (7) Network access denied: private or loopback host blocked: http://\u003cloopback\u003e:\u003cport\u003e/hello\n",
+     "seconds": 0.01
+    }
+   },
+   "pass": true
+  }
+ ],
+ "passed": 5,
+ "total": 5
+}

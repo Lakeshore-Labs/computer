@@ -1,0 +1,48 @@
+{
+  "guide_tools": [
+    "search",
+    "show"
+  ],
+  "resource_uris": [
+    "guide://collections/saint-remy",
+    "guide://dispatch/sheet",
+    "guide://dispatch/workbook",
+    "guide://festival/amended",
+    "guide://festival/original",
+    "guide://observations/great-lakes",
+    "guide://observations/pacific-listening-room"
+  ],
+  "exact_downloadable_assets": 239,
+  "downloadable_asset_bytes": 45436953,
+  "exhibit_template": "guide://exhibits/{id}",
+  "exact_exhibit_receipts": 249,
+  "documents": {
+    "guide://festival/original": {
+      "bytes": 679,
+      "sha256": "e06d6868078deabee0cba257e10146d99453885f34e92f492e8bb3bd7ffba3bc"
+    },
+    "guide://festival/amended": {
+      "bytes": 679,
+      "sha256": "2c3acb14ea5bfda35d72bcec69e7e249b22828dc738478c9821eaaf007b657ac"
+    },
+    "guide://collections/saint-remy": {
+      "bytes": 349258,
+      "sha256": "ebeef91aff90dbd13f00efe4ac5d98f6e10a316e8de1c37f1b2b94a845e5a319"
+    },
+    "guide://observations/pacific-listening-room": {
+      "bytes": 1169365,
+      "sha256": "a6e9590c0ffd7db3a3833b8ff5163c805c42227f604e4db10b94a305c1e81c4d"
+    }
+  },
+  "outer_tools": [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ],
+  "pdf_bytes": 1983,
+  "pdf_sha256": "44458168def9c1c2a146cb270b4d680673f373cc3ddf3d9d034945822903122c",
+  "guest_answer": "100\nbakery.png PNG 1080x650",
+  "image_bytes": 100352,
+  "image_sha256": "2f2c65cbde6cbea9dd1876845362eb593041f672c1a9aaacd14b136c4d189831"
+}

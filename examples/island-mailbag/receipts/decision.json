@@ -1,0 +1,177 @@
+{
+  "decision": {
+    "use_edition": 2,
+    "where": "Ferry Landing Reading Room",
+    "when": "Saturday 28 November 2026, 14:30",
+    "was_when": "Saturday 28 November 2026, 10:00",
+    "was_where": "Ferry Landing Reading Room",
+    "changed_fields": [
+      "When"
+    ],
+    "changed_note": "time only. It was Saturday 28 November 2026, 10:00."
+  },
+  "book": {
+    "title": "Four moons of Jupiter",
+    "chapters": 3,
+    "moons": [
+      {
+        "name": "Io",
+        "radius_km": "1,821.49"
+      },
+      {
+        "name": "Europa",
+        "radius_km": "1,560.80"
+      },
+      {
+        "name": "Ganymede",
+        "radius_km": "2,631.20"
+      },
+      {
+        "name": "Callisto",
+        "radius_km": "2,410.30"
+      }
+    ],
+    "bytes": 121382,
+    "sha256": "db45721e5c875bc1be2b4b0870132c70d04d2e0aa6e29b48729ee771268b8ee5",
+    "cid": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u"
+  },
+  "editions": {
+    "1": {
+      "root": "bafyreiapfhcpiwovzncwwbior2xd2dkppzem64nnc2ygvofdkxvmthc2v4",
+      "card": {
+        "Edition": "1",
+        "Book": "Four moons of Jupiter",
+        "Inside": "3 chapters, 4 moons (Io, Europa, Ganymede, Callisto)",
+        "Where": "Ferry Landing Reading Room",
+        "When": "Saturday 28 November 2026, 10:00"
+      },
+      "card_cid": "bafkreih7gkzykdplnejv7jzen4nntjbtdeoanbi4gw4ny4d7667ll2nddi",
+      "card_bytes": 523,
+      "card_sha256": "ff32b3850deb69135fa7246f1ad9a433191c06851c35b8dc707ff7beb5e9a31a",
+      "card_text": "# Take-home reading card\nGull Island Library (a made-up library for this exhibit)\n\nEdition: 1\nBook: Four moons of Jupiter\nInside: 3 chapters, 4 moons (Io, Europa, Ganymede, Callisto)\nPage 2 table: largest is Ganymede at 2,631.20 km, smallest is Europa at 1,560.80 km.\n\nBefore we meet:\n1. Open the cover page and find the credited spacecraft picture.\n2. On page 2, put the four moons in order by radius.\n3. Bring one question for the reading circle.\n\nWhere: Ferry Landing Reading Room\nWhen: Saturday 28 November 2026, 10:00\n"
+    },
+    "2": {
+      "root": "bafyreiefwkzm6lj6p5giwtpx6r7jmqwojjdm6xz7uriexhq7q2kcunewpe",
+      "card": {
+        "Edition": "2",
+        "Book": "Four moons of Jupiter",
+        "Inside": "3 chapters, 4 moons (Io, Europa, Ganymede, Callisto)",
+        "Where": "Ferry Landing Reading Room",
+        "When": "Saturday 28 November 2026, 14:30",
+        "Changed": "time only. It was Saturday 28 November 2026, 10:00."
+      },
+      "card_cid": "bafkreig7pry4kvsi73vfgleat3z7hqfhyseatvebziov5eavb2l3phd3ji",
+      "card_bytes": 584,
+      "card_sha256": "df7c71c55648feea532c809ef3f3c0a7c48809d481ca1d5e90150e97b79c7b4a",
+      "card_text": "# Take-home reading card\nGull Island Library (a made-up library for this exhibit)\n\nEdition: 2\nBook: Four moons of Jupiter\nInside: 3 chapters, 4 moons (Io, Europa, Ganymede, Callisto)\nPage 2 table: largest is Ganymede at 2,631.20 km, smallest is Europa at 1,560.80 km.\n\nBefore we meet:\n1. Open the cover page and find the credited spacecraft picture.\n2. On page 2, put the four moons in order by radius.\n3. Bring one question for the reading circle.\n\nWhere: Ferry Landing Reading Room\nWhen: Saturday 28 November 2026, 14:30\nChanged: time only. It was Saturday 28 November 2026, 10:00.\n"
+    }
+  },
+  "checks": [
+    {
+      "title": "edition 1: four-moons.epub sha256 equals the digest inside its CID",
+      "pass": true,
+      "detail": "db45721e5c875bc1"
+    },
+    {
+      "title": "edition 1: four-moons.epub raw CID derived here equals the manifest's",
+      "pass": true,
+      "detail": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u"
+    },
+    {
+      "title": "edition 1: four-moons.epub size equals the manifest's",
+      "pass": true,
+      "detail": "121382"
+    },
+    {
+      "title": "edition 1: reading-card.md sha256 equals the digest inside its CID",
+      "pass": true,
+      "detail": "ff32b3850deb6913"
+    },
+    {
+      "title": "edition 1: reading-card.md raw CID derived here equals the manifest's",
+      "pass": true,
+      "detail": "bafkreih7gkzykdplnejv7jzen4nntjbtdeoanbi4gw4ny4d7667ll2nddi"
+    },
+    {
+      "title": "edition 1: reading-card.md size equals the manifest's",
+      "pass": true,
+      "detail": "523"
+    },
+    {
+      "title": "edition 1: the card says edition 1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "edition 2: four-moons.epub sha256 equals the digest inside its CID",
+      "pass": true,
+      "detail": "db45721e5c875bc1"
+    },
+    {
+      "title": "edition 2: four-moons.epub raw CID derived here equals the manifest's",
+      "pass": true,
+      "detail": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u"
+    },
+    {
+      "title": "edition 2: four-moons.epub size equals the manifest's",
+      "pass": true,
+      "detail": "121382"
+    },
+    {
+      "title": "edition 2: reading-card.md sha256 equals the digest inside its CID",
+      "pass": true,
+      "detail": "df7c71c55648feea"
+    },
+    {
+      "title": "edition 2: reading-card.md raw CID derived here equals the manifest's",
+      "pass": true,
+      "detail": "bafkreig7pry4kvsi73vfgleat3z7hqfhyseatvebziov5eavb2l3phd3ji"
+    },
+    {
+      "title": "edition 2: reading-card.md size equals the manifest's",
+      "pass": true,
+      "detail": "584"
+    },
+    {
+      "title": "edition 2: the card says edition 2",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the book is the same bytes in both editions",
+      "pass": true,
+      "detail": "db45721e5c875bc1"
+    },
+    {
+      "title": "the book has one CID in both editions",
+      "pass": true,
+      "detail": "bafkreig3ivzb4xehlpa34k2lbbybgldq2bgs4cvg4knuq4u645ysnc4o4u"
+    },
+    {
+      "title": "the two roots differ",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the two cards differ",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the EPUB opens as a ZIP with the EPUB mimetype",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "title": "the book has 3 chapters and 4 moons",
+      "pass": true,
+      "detail": "3 chapters"
+    },
+    {
+      "title": "exactly one meeting field changed, and it is the time",
+      "pass": true,
+      "detail": "When"
+    }
+  ],
+  "all_pass": true
+}

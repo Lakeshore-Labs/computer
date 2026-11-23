@@ -1,0 +1,8 @@
+{
+  "tile": "https://s3.amazonaws.com/elevation-tiles-prod/skadi/N59/N59E010.hgt.gz",
+  "gzip_sha256": "1857ec665132c85de52d789ba1123f9957e3c7562d5e6dd0d0c6c5b153a42a78",
+  "raw_sha256": "9ef36408ada5a1e3195954320fa844474023584e08f46d190c5295b6b7f69911",
+  "grid_size": 3601,
+  "dataset": "https://registry.opendata.aws/terrain-tiles/",
+  "attribution": "Mapzen Terrain Tiles, Norway terrain © Kartverket. Europe terrain uses Copernicus data funded by the European Union, EU-DEM layers."
+}

@@ -1,0 +1,106 @@
+[
+  {
+    "id": "musokit-eb-dorian",
+    "provider": "MusoKit",
+    "endpoint": "https://musokit.com/mcp",
+    "docs": "https://musokit.com",
+    "command": "mk scale-info --root Eb --scale dorian",
+    "title": "Name the seven notes of E-flat Dorian"
+  },
+  {
+    "id": "musokit-transpose",
+    "provider": "MusoKit",
+    "endpoint": "https://musokit.com/mcp",
+    "docs": "https://musokit.com",
+    "command": "mk transpose-chords --chords 'C G Am F' --semitones 2",
+    "title": "Transpose a four-chord progression"
+  },
+  {
+    "id": "apished-datediff",
+    "provider": "apished.com",
+    "endpoint": "https://apished.com/mcp/v1/datemath",
+    "docs": "https://apished.com",
+    "command": "dm datemath-diff --from 2026-11-22 --to 2028-03-01",
+    "title": "Count days across a leap February"
+  },
+  {
+    "id": "apished-dayofweek",
+    "provider": "apished.com",
+    "endpoint": "https://apished.com/mcp/v1/datemath",
+    "docs": "https://apished.com",
+    "command": "dm datemath-dayofweek --date 2028-03-01",
+    "title": "Find the weekday of 1 March 2028"
+  },
+  {
+    "id": "gumball-fallback-hour",
+    "provider": "gumballtools timezone-truth",
+    "endpoint": "https://timezone-truth.gumballtools.com/api/mcp",
+    "docs": "https://timezone-truth.gumballtools.com",
+    "command": "tz convert-time --from America/New_York --to Asia/Tokyo --time '2026-11-01 01:30'",
+    "title": "Resolve the two New York 01:30 instants"
+  },
+  {
+    "id": "gumball-spring-gap",
+    "provider": "gumballtools timezone-truth",
+    "endpoint": "https://timezone-truth.gumballtools.com/api/mcp",
+    "docs": "https://timezone-truth.gumballtools.com",
+    "command": "tz convert-time --from America/New_York --to Asia/Kolkata --time '2026-03-08 02:30'",
+    "title": "Detect the missing spring-forward hour"
+  },
+  {
+    "id": "opencurrent-kr-holidays",
+    "provider": "OpenCurrent kr-calendar",
+    "endpoint": "https://opencurrent.ai/mcp/kr-calendar",
+    "docs": "https://opencurrent.ai",
+    "command": "kr kr-holidays --from 2026-09-20 --to 2026-10-15",
+    "title": "Read two dates from the Korean holiday calendar"
+  },
+  {
+    "id": "eancheck-isbn",
+    "provider": "eancheck.com",
+    "endpoint": "https://eancheck.com/api/mcp",
+    "docs": "https://eancheck.com",
+    "command": "ean convert-isbn --isbn 0-306-40615-2",
+    "title": "Convert a ten-digit ISBN to ISBN-13"
+  },
+  {
+    "id": "ghana-census-total",
+    "provider": "kwekuanansi.ai ghana-numbers",
+    "endpoint": "https://kwekuanansi.ai/mcp/ghana-numbers",
+    "docs": "https://kwekuanansi.ai",
+    "command": "gh ghana-count-people",
+    "title": "Audit the coverage of a national census subset"
+  },
+  {
+    "id": "ghana-census-accra",
+    "provider": "kwekuanansi.ai ghana-numbers",
+    "endpoint": "https://kwekuanansi.ai/mcp/ghana-numbers",
+    "docs": "https://kwekuanansi.ai",
+    "command": "gh ghana-count-people --region 'Greater Accra'",
+    "title": "Compare Greater Accra with the published census"
+  },
+  {
+    "id": "humanities-check-claim",
+    "provider": "humanitieshelpinghands.com",
+    "endpoint": "https://humanitieshelpinghands.com/mcp",
+    "docs": "https://humanitieshelpinghands.com",
+    "command": "hm check-claim --text '17*23=391 and 91 is prime'",
+    "title": "Check two arithmetic claims"
+  },
+  {
+    "id": "developerpoetry-read",
+    "provider": "developerpoetry.com",
+    "endpoint": "https://developerpoetry.com/mcp",
+    "docs": "https://developerpoetry.com",
+    "command": "pt read-poems --limit 3",
+    "title": "List up to three poems without publishing"
+  },
+  {
+    "id": "lemmapark-programs",
+    "provider": "lemmapark.com",
+    "endpoint": "https://lemmapark.com/mcp",
+    "docs": "https://lemmapark.com",
+    "command": "lp list-programs",
+    "title": "List the available mathematics programs"
+  }
+]

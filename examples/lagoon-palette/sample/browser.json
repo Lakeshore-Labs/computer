@@ -1,0 +1,142 @@
+[
+  {
+    "name": "desktop",
+    "viewport": {
+      "width": 1280,
+      "height": 850
+    },
+    "colors": [
+      {
+        "name": "Roof terracotta",
+        "pixel": [
+          198,
+          125,
+          92
+        ],
+        "hex": "#C67D5C"
+      },
+      {
+        "name": "Canal teal",
+        "pixel": [
+          40,
+          80,
+          73
+        ],
+        "hex": "#285049"
+      },
+      {
+        "name": "Marsh olive",
+        "pixel": [
+          95,
+          105,
+          80
+        ],
+        "hex": "#5F6950"
+      },
+      {
+        "name": "Pale reed",
+        "pixel": [
+          169,
+          174,
+          130
+        ],
+        "hex": "#A9AE82"
+      },
+      {
+        "name": "Lido sand",
+        "pixel": [
+          247,
+          215,
+          166
+        ],
+        "hex": "#F7D7A6"
+      },
+      {
+        "name": "Adriatic green",
+        "pixel": [
+          56,
+          99,
+          92
+        ],
+        "hex": "#38635C"
+      }
+    ],
+    "downloads": {
+      "ase": "9a113a6dfc74eb609063ac35c879273e67e482d7ed010e715d3d6d426f841eb3",
+      "gpl": "8658610f7fd4079094d7a77e7e2e8ecc8e6f17ea9831ec28844f5155531b5955",
+      "css": "8fca0c38e111e3fbe858dfcb5232be273c17a38d3ece9abee4763c26ae75f384"
+    },
+    "errors": [],
+    "outside": []
+  },
+  {
+    "name": "phone",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "colors": [
+      {
+        "name": "Roof terracotta",
+        "pixel": [
+          198,
+          125,
+          92
+        ],
+        "hex": "#C67D5C"
+      },
+      {
+        "name": "Canal teal",
+        "pixel": [
+          40,
+          80,
+          73
+        ],
+        "hex": "#285049"
+      },
+      {
+        "name": "Marsh olive",
+        "pixel": [
+          95,
+          105,
+          80
+        ],
+        "hex": "#5F6950"
+      },
+      {
+        "name": "Pale reed",
+        "pixel": [
+          169,
+          174,
+          130
+        ],
+        "hex": "#A9AE82"
+      },
+      {
+        "name": "Lido sand",
+        "pixel": [
+          247,
+          215,
+          166
+        ],
+        "hex": "#F7D7A6"
+      },
+      {
+        "name": "Adriatic green",
+        "pixel": [
+          56,
+          99,
+          92
+        ],
+        "hex": "#38635C"
+      }
+    ],
+    "downloads": {
+      "ase": "9a113a6dfc74eb609063ac35c879273e67e482d7ed010e715d3d6d426f841eb3",
+      "gpl": "8658610f7fd4079094d7a77e7e2e8ecc8e6f17ea9831ec28844f5155531b5955",
+      "css": "8fca0c38e111e3fbe858dfcb5232be273c17a38d3ece9abee4763c26ae75f384"
+    },
+    "errors": [],
+    "outside": []
+  }
+]

@@ -1,0 +1,287 @@
+[
+  {
+    "name": "agent.Command",
+    "source": "agent/agent.go",
+    "line": 83
+  },
+  {
+    "name": "computer.Computer.About",
+    "source": "computer.go",
+    "line": 370
+  },
+  {
+    "name": "computer.Computer.Close",
+    "source": "computer.go",
+    "line": 154
+  },
+  {
+    "name": "computer.Computer.Describe",
+    "source": "environment.go",
+    "line": 34
+  },
+  {
+    "name": "computer.Computer.Environment",
+    "source": "environment.go",
+    "line": 31
+  },
+  {
+    "name": "computer.Computer.Exec",
+    "source": "computer.go",
+    "line": 172
+  },
+  {
+    "name": "computer.Computer.MCPServer",
+    "source": "mcp.go",
+    "line": 31
+  },
+  {
+    "name": "computer.Computer.Mounts",
+    "source": "computer.go",
+    "line": 151
+  },
+  {
+    "name": "computer.Computer.Options",
+    "source": "computer.go",
+    "line": 276
+  },
+  {
+    "name": "computer.Computer.Session",
+    "source": "computer.go",
+    "line": 203
+  },
+  {
+    "name": "computer.Computer.ToolCommands",
+    "source": "computer.go",
+    "line": 261
+  },
+  {
+    "name": "computer.Computer.ToolModules",
+    "source": "computer.go",
+    "line": 268
+  },
+  {
+    "name": "computer.Environment.List",
+    "source": "environment.go",
+    "line": 195
+  },
+  {
+    "name": "computer.Environment.Mkdir",
+    "source": "environment.go",
+    "line": 219
+  },
+  {
+    "name": "computer.Environment.Read",
+    "source": "environment.go",
+    "line": 124
+  },
+  {
+    "name": "computer.Environment.Remove",
+    "source": "environment.go",
+    "line": 239
+  },
+  {
+    "name": "computer.Environment.Rename",
+    "source": "environment.go",
+    "line": 251
+  },
+  {
+    "name": "computer.Environment.Run",
+    "source": "environment.go",
+    "line": 47
+  },
+  {
+    "name": "computer.Environment.Stat",
+    "source": "environment.go",
+    "line": 110
+  },
+  {
+    "name": "computer.Environment.Truncate",
+    "source": "environment.go",
+    "line": 175
+  },
+  {
+    "name": "computer.Environment.Write",
+    "source": "environment.go",
+    "line": 157
+  },
+  {
+    "name": "computer.LoadPython",
+    "source": "computer.go",
+    "line": 69
+  },
+  {
+    "name": "computer.New",
+    "source": "computer.go",
+    "line": 105
+  },
+  {
+    "name": "extra.Commands",
+    "source": "extra/extra.go",
+    "line": 16
+  },
+  {
+    "name": "files.Dir",
+    "source": "files/dir.go",
+    "line": 25
+  },
+  {
+    "name": "files.File.IsAppend",
+    "source": "files/append_unix.go",
+    "line": 11
+  },
+  {
+    "name": "files.File.SetAppend",
+    "source": "files/append_unix.go",
+    "line": 17
+  },
+  {
+    "name": "files.Root.Chmod",
+    "source": "files/dir.go",
+    "line": 122
+  },
+  {
+    "name": "files.Root.Chown",
+    "source": "files/dir.go",
+    "line": 126
+  },
+  {
+    "name": "files.Root.Chtimes",
+    "source": "files/dir.go",
+    "line": 130
+  },
+  {
+    "name": "files.Root.Close",
+    "source": "files/dir.go",
+    "line": 33
+  },
+  {
+    "name": "files.Root.Create",
+    "source": "files/dir.go",
+    "line": 74
+  },
+  {
+    "name": "files.Root.Link",
+    "source": "files/dir.go",
+    "line": 164
+  },
+  {
+    "name": "files.Root.LstatIfPossible",
+    "source": "files/dir.go",
+    "line": 144
+  },
+  {
+    "name": "files.Root.Mkdir",
+    "source": "files/dir.go",
+    "line": 102
+  },
+  {
+    "name": "files.Root.MkdirAll",
+    "source": "files/dir.go",
+    "line": 106
+  },
+  {
+    "name": "files.Root.Name",
+    "source": "files/dir.go",
+    "line": 34
+  },
+  {
+    "name": "files.Root.Open",
+    "source": "files/dir.go",
+    "line": 78
+  },
+  {
+    "name": "files.Root.OpenFile",
+    "source": "files/dir.go",
+    "line": 80
+  },
+  {
+    "name": "files.Root.ReadlinkIfPossible",
+    "source": "files/dir.go",
+    "line": 154
+  },
+  {
+    "name": "files.Root.Remove",
+    "source": "files/dir.go",
+    "line": 110
+  },
+  {
+    "name": "files.Root.RemoveAll",
+    "source": "files/dir.go",
+    "line": 114
+  },
+  {
+    "name": "files.Root.Rename",
+    "source": "files/dir.go",
+    "line": 118
+  },
+  {
+    "name": "files.Root.Stat",
+    "source": "files/dir.go",
+    "line": 134
+  },
+  {
+    "name": "tools.Call",
+    "source": "tools/tools.go",
+    "line": 66
+  },
+  {
+    "name": "tools.Command",
+    "source": "tools/tools.go",
+    "line": 340
+  },
+  {
+    "name": "tools.Groups",
+    "source": "tools/tools.go",
+    "line": 271
+  },
+  {
+    "name": "tools.Host",
+    "source": "tools/tools.go",
+    "line": 181
+  },
+  {
+    "name": "tools.Kebab",
+    "source": "tools/tools.go",
+    "line": 306
+  },
+  {
+    "name": "tools.List",
+    "source": "tools/tools.go",
+    "line": 42
+  },
+  {
+    "name": "tools.Modules",
+    "source": "tools/python.go",
+    "line": 60
+  },
+  {
+    "name": "tools.With",
+    "source": "tools/tools.go",
+    "line": 174
+  },
+  {
+    "name": "tools.WritePython",
+    "source": "tools/python.go",
+    "line": 74
+  },
+  {
+    "name": "wasm.Compile",
+    "source": "wasm/wasm.go",
+    "line": 64
+  },
+  {
+    "name": "wasm.Module.Close",
+    "source": "wasm/wasm.go",
+    "line": 123
+  },
+  {
+    "name": "wasm.Module.Run",
+    "source": "wasm/wasm.go",
+    "line": 144
+  },
+  {
+    "name": "wasm.Module.Sum",
+    "source": "wasm/wasm.go",
+    "line": 61
+  }
+]

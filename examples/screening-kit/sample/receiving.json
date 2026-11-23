@@ -1,0 +1,9 @@
+{
+  "source": "https://raw.githubusercontent.com/Lakeshore-Labs/computer/70a93921b2b2f46e14e4604ae262684de11e373b/examples/screening-kit/sample/computer-screening-kit.zip",
+  "zip_bytes": 6077052,
+  "zip_sha256": "1608dfe1231b2c4c5987f7cf0dbbeddb0ce8ab6895bfe1350971f67869b3dd92",
+  "cue_sheet_bytes": 572,
+  "cue_sheet_sha256": "59f8f45ce88d92b8c5421fb704a8326c680a7e9821425498b83322e3d73c0f6d",
+  "checked_chapters": 12,
+  "largest_difference_seconds": 0.0
+}

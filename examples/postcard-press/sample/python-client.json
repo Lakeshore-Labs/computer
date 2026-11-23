@@ -1,0 +1,29 @@
+{
+  "tool_names": [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ],
+  "order": {
+    "museum": "cleveland",
+    "inscription": "Greetings from Saint-Rémy"
+  },
+  "guest": {
+    "museum": "cleveland",
+    "title": "The Large Plane Trees (Road Menders at Saint-Rémy)",
+    "inscription": "Greetings from Saint-Rémy",
+    "credit": "The Cleveland Museum of Art",
+    "accession": "1947.209",
+    "source_jpeg_sha256": "3a9337e095805241fb86be7c6eb9235d69a062d541719f5a74143995e0214042",
+    "thumbnail_sha256": "b105f920c9ef2ff2224f2804c1b3209ce1b9af820d0ff266e1f90ebf700174cb",
+    "svg_bytes": 31326,
+    "svg_sha256": "743a4618637045b5822b54cd481b441c597460b64cc6129dc94902f12c97e08a"
+  },
+  "independent_svg_sha256": "743a4618637045b5822b54cd481b441c597460b64cc6129dc94902f12c97e08a",
+  "original_museum_jpeg_matches": true,
+  "embedded_jpeg_matches": true,
+  "native_renderer": "librsvg",
+  "raster_sha256": "89e61b31e6897baf4f210969dc5f0085ae377d17521a110b1865a1b8e80c51b4",
+  "browser_download_matched": true
+}
