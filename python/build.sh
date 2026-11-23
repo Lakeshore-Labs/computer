@@ -68,11 +68,13 @@ if [ ! -f "$DEPS/lib/libz.a" ]; then
 fi
 
 # 3. SQLite 3.46.1 amalgamation, static. The options were read from the compile-options table of the reference build.
+# WASI has no fchmod, so SQLite's slot for it is a null pointer, and creating a temporary file traps. Temporary
+# tables, indices and sorts are kept in memory instead, whatever PRAGMA temp_store says.
 if [ ! -f "$DEPS/lib/libsqlite3.a" ]; then
 	mkdir -p "$WORK/build/sqlite" "$DEPS/lib" "$DEPS/include"
 	(cd "$WORK/build/sqlite" &&
 		$WASICC -O2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_OMIT_SHARED_CACHE -DSQLITE_OMIT_WAL \
-			-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_MATH_FUNCTIONS \
+			-DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_MATH_FUNCTIONS -DSQLITE_TEMP_STORE=3 \
 			-c "$WORK/src/sqlite-amalgamation-3460100/sqlite3.c" -o sqlite3.o &&
 		"$S/bin/llvm-ar" rcs "$DEPS/lib/libsqlite3.a" sqlite3.o)
 	cp "$WORK/src/sqlite-amalgamation-3460100/sqlite3.h" "$WORK/src/sqlite-amalgamation-3460100/sqlite3ext.h" "$DEPS/include/"

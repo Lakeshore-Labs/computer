@@ -7,7 +7,7 @@ built-in module, `_host`, through which a script calls MCP tools.
 
 Each build is made by the `python` workflow in this repository from `build.sh` and attached to a release:
 
-    gh release download python-3.15.2-2 --repo Lakeshore-Labs/computer --pattern '*.tar.gz*'
+    gh release download python-3.15.2-3 --repo Lakeshore-Labs/computer --pattern '*.tar.gz*'
     shasum -a 256 -c python-3.15.2-wasi.tar.gz.sha256
     mkdir python-wasi && tar -xzf python-3.15.2-wasi.tar.gz -C python-wasi
 

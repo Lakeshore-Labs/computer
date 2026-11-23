@@ -247,6 +247,23 @@ func TestPythonSleeps(t *testing.T) {
 	}
 }
 
+// A sort larger than SQLite's sorter memory, at least 250 pages, spills to a temporary file, which this build cannot create (#28).
+func TestPythonSQLiteSortsMoreThanFitsInMemory(t *testing.T) {
+	c := newComputer(t, Config{Python: python(t)})
+	got := run(t, c, `python3 -c "
+import sqlite3
+c = sqlite3.connect(':memory:')
+c.execute('pragma temp_store=FILE')
+c.execute('create table t(x)')
+c.executemany('insert into t values (?)', ((str(i % 997) * 50,) for i in range(20000)))
+c.execute('create index i on t(x)')
+print(c.execute('pragma integrity_check').fetchone()[0])
+"`)
+	if got != "ok" {
+		t.Errorf("got %q", got)
+	}
+}
+
 func TestTheShellWritesOnlyWhereProgramsSeeTheResult(t *testing.T) {
 	c := newComputer(t, Config{Python: python(t)})
 	if got := run(t, c, `f=$(mktemp); echo shared > $f; python3 -c "import sys; print(open(sys.argv[1]).read().strip())" $f; echo quiet > /dev/null`); got != "shared" {
