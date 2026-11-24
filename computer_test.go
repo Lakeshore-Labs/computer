@@ -280,6 +280,15 @@ python3 recap.py`)
 	}
 }
 
+func TestAPythonScriptImportsTheModulesBesideItAndInTheWorkingDirectory(t *testing.T) {
+	c := newComputer(t, Config{Python: python(t)})
+	got := run(t, c, `mkdir d && echo 'X = 1' > d/helper.py && echo 'import helper, os; print(helper.X, os.path.isabs(__file__))' > d/main.py
+python3 d/main.py; cd d && python3 main.py && python3 -m helper && python3 -c 'import helper; print(helper.X)' && python3 -W ignore -O -c 'print("flags")'`)
+	if got != "1 True\n1 True\n1\nflags" {
+		t.Errorf("got %q", got)
+	}
+}
+
 func TestTheShellWritesOnlyWhereProgramsSeeTheResult(t *testing.T) {
 	c := newComputer(t, Config{Python: python(t)})
 	if got := run(t, c, `f=$(mktemp); echo shared > $f; python3 -c "import sys; print(open(sys.argv[1]).read().strip())" $f; echo quiet > /dev/null`); got != "shared" {

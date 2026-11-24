@@ -34,3 +34,6 @@ isolated mode, and then runs the program's own arguments.
     rm -r python/LICENSES && cp -R release/LICENSES python/
 
 Then run `go test ./...`. The unpacked directory is named for `SHA256SUMS`, so a new release unpacks afresh.
+
+`-python DIR` and `computer.LoadPython` take a release unpacked as `EmbeddedPython` lays it out, not the release
+archive's own layout.

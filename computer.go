@@ -66,11 +66,13 @@ const (
 	pythonMpl  = pythonLib + "/python315.zip/matplotlib/mpl-data"
 	pythonSite = "/usr/lib/python-tools" // where the generated package is mounted
 	// pythonStartCode runs before every program. wasi-python runs in isolated mode, without site and without a
-	// working directory, so it moves to the shell's working directory, puts the tools package on the path, and then
-	// runs the program's own arguments through the interpreter's argument handling, as wasi-python's runner does.
-	// wasi-python's time.sleep waits for an absolute time, which wazero does not support; a select with a timeout
-	// waits for a relative one.
-	pythonStartCode = `import os, sys, time, select, linecache, _reactor
+	// working directory, so it moves to the shell's working directory and puts on the path what CPython would: the
+	// script's directory, or the working directory for -c, -m and standard input, and then the tools package. It
+	// gives the script's path absolute, as CPython does, takes -W as a warnings filter and drops -O, -q and -S,
+	// which wasi-python's own parser refuses, and runs the rest of the arguments through the interpreter's argument
+	// handling, as wasi-python's runner does. wasi-python's time.sleep waits for an absolute time, which wazero does
+	// not support; a select with a timeout waits for a relative one.
+	pythonStartCode = `import os, sys, time, select, warnings, linecache, _reactor
 linecache._interactive_cache.clear()
 def sleep(secs, select=select.select):
     if secs < 0:
@@ -81,8 +83,26 @@ try:
     os.chdir(os.environ.get("PYCWD", "/"))
 except OSError:
     pass
+args, rest = [], sys.argv[1:]
+while rest and rest[0].startswith("-") and rest[0] not in ("-", "-c", "-m"):
+    a = rest.pop(0)
+    if a in ("-W", "-X") and rest:
+        v = rest.pop(0)
+        if a == "-W":
+            warnings._setoption(v)
+        else:
+            args += [a, v]
+    elif a.startswith("-W"):
+        warnings._setoption(a[2:])
+    elif a not in ("-O", "-OO", "-q", "-S"):
+        args.append(a)
+if rest and rest[0] not in ("-", "-c", "-m"):
+    rest[0] = os.path.abspath(rest[0])
+    sys.path.insert(0, os.path.dirname(rest[0]))
+else:
+    sys.path.insert(0, os.getcwd())
 sys.path.append("` + pythonSite + `")
-sys.exit(_reactor.run(["` + pythonExe + `", *sys.argv[1:]], dict(os.environ)))
+sys.exit(_reactor.run(["` + pythonExe + `", *args, *rest], dict(os.environ)))
 `
 )
 
@@ -91,6 +111,11 @@ sys.exit(_reactor.run(["` + pythonExe + `", *sys.argv[1:]], dict(os.environ)))
 // first python3 waits for the compile, and fails with its error. p's Binary is read from the file, its host call
 // is answered by the computer's tools, and a zero MemoryPages is 8192 (512 MiB); its other fields are the caller's.
 func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error) {
+	for _, name := range []string{"lib/python315.zip", "mpl-data/matplotlibrc"} {
+		if _, err := os.Stat(filepath.Join(dir, name)); err != nil {
+			return nil, err
+		}
+	}
 	var err error
 	if p.Binary, err = os.ReadFile(filepath.Join(dir, "python.wasm")); err != nil {
 		return nil, err
@@ -110,10 +135,11 @@ func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error
 }
 
 // pythonStart is pythonStartCode as a program for -c. It runs in a namespace of its own, so the program's
-// __main__ is untouched. A JSON string is a Python string literal.
+// __main__ is untouched, and under a file name of its own, so a traceback through it does not show the program's
+// -c source. A JSON string is a Python string literal.
 var pythonStart = func() string {
 	b, _ := json.Marshal(pythonStartCode)
-	return "exec(" + string(b) + ", {})"
+	return "exec(compile(" + string(b) + `, "<computer start>", "exec"), {})`
 }()
 
 // A Computer is one agent's computer. Its methods are safe for concurrent use.

@@ -88,7 +88,7 @@ func Compile(ctx context.Context, p Program) (*Module, error) {
 			}
 			reply := p.Host(ctx, slices.Clone(request)) // the program's memory may move while the host answers
 			at, err := alloc.Call(ctx, uint64(len(reply)))
-			if err != nil || len(at) == 0 {
+			if err != nil || len(at) == 0 || at[0] == 0 && len(reply) > 0 { // 0 is malloc's answer when the heap is full
 				return -2
 			}
 			if !mod.Memory().Write(uint32(at[0]), reply) || !mod.Memory().WriteUint32Le(replyPtrPtr, uint32(at[0])) ||
