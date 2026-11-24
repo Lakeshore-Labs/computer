@@ -8,6 +8,7 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/spf13/afero"
 
@@ -20,11 +21,13 @@ import (
 //go:embed python/python-wasi.tar.gz
 var pythonBuild []byte
 
-// EmbeddedPython compiles the CPython build this module carries. Its standard library is held in memory, about
-// 90 MB. p is as for LoadPython, except that its host module is the one the build imports, and a zero MemoryPages
-// is 8192 (512 MiB), which the build needs.
+// EmbeddedPython compiles the CPython build this module carries. Its standard library is unpacked into memory on
+// the first call, about 90 MB held for the life of the process, and shared by every later call; each call compiles
+// the program again, so a host calls it once and shares the Python, as with LoadPython. p is as for LoadPython,
+// except that its host module is the one the build imports, and a zero MemoryPages is 8192 (512 MiB), which the
+// build needs.
 func EmbeddedPython(ctx context.Context, p wasm.Program) (*Python, error) {
-	build, err := unpackPython()
+	build, err := pythonFS()
 	if err != nil {
 		return nil, fmt.Errorf("the embedded Python: %w", err)
 	}
@@ -41,6 +44,9 @@ func EmbeddedPython(ctx context.Context, p wasm.Program) (*Python, error) {
 	}
 	return &Python{module: module, lib: Mount{Guest: pythonLib, FS: afero.NewBasePathFs(build, "/lib"), ReadOnly: true}}, nil
 }
+
+// pythonFS is the embedded archive as an in-memory filesystem, unpacked once.
+var pythonFS = sync.OnceValues(unpackPython)
 
 // unpackPython is the embedded archive as an in-memory filesystem. MemMapFs tells "/a" from "a", and BasePathFs
 // asks for "/a".
