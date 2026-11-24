@@ -10,12 +10,10 @@ require (
 	github.com/Lakeshore-Labs/gbash/contrib/jq v0.0.42
 	github.com/Lakeshore-Labs/gbash/contrib/sqlite3 v0.0.42
 	github.com/Lakeshore-Labs/gbash/contrib/yq v0.0.42
-	github.com/go-analyze/charts v0.6.4
 	github.com/klippa-app/go-pdfium v1.21.5
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/spf13/afero v1.15.0
 	github.com/tetratelabs/wazero v1.12.1-0.20261019203559-ef2dd2f85376
-	golang.org/x/image v0.46.0
 	golang.org/x/sys v0.50.0
 	golang.org/x/term v0.48.0
 )
@@ -28,14 +26,11 @@ require (
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
-	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elliotchance/orderedmap v1.8.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
-	github.com/go-analyze/bulk v0.1.6 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
-	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
