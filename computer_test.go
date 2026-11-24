@@ -312,7 +312,7 @@ func TestTheShellHandlesAFileAndALoopLargerThanGbashsDefaults(t *testing.T) {
 }
 
 func TestTheAgentIsToldEachToolModuleByItsPythonName(t *testing.T) {
-	c := newComputer(t, Config{Python: &Python{lib: Mount{Guest: pythonLib, Host: t.TempDir()}}, Tools: []tools.Source{{Name: "my-server", Session: testSession(t, listNotes)}}})
+	c := newComputer(t, Config{Python: &Python{lib: t.TempDir()}, Tools: []tools.Source{{Name: "my-server", Session: testSession(t, listNotes)}}})
 	if _, err := c.Session(context.Background()); err != nil {
 		t.Fatal(err)
 	}
@@ -322,7 +322,7 @@ func TestTheAgentIsToldEachToolModuleByItsPythonName(t *testing.T) {
 }
 
 func TestThePythonPackageIsNotRewrittenWhenTheToolsAreUnchanged(t *testing.T) {
-	c := newComputer(t, Config{Python: &Python{lib: Mount{Guest: pythonLib, Host: t.TempDir()}}, Tools: testTools(t, listNotes)})
+	c := newComputer(t, Config{Python: &Python{lib: t.TempDir()}, Tools: testTools(t, listNotes)})
 	if _, err := c.Session(context.Background()); err != nil {
 		t.Fatal(err)
 	}

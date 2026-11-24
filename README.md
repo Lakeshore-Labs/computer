@@ -155,8 +155,8 @@ pdftoppm -png -r 100 report.pdf page       # writes page-1.png, page-2.png, ... 
 
 ## Python
 
-`python3` is a CPython built for WASI and embedded in the module, about 30 MB; its standard library is held in
-memory, about 90 MB. The program uses it; from Go:
+`python3` is a CPython built for WASI and embedded in the module, about 30 MB. On first use it is unpacked, about
+90 MB, into `computer/python-<checksum>` in the user's cache directory. The program uses it; from Go:
 
 ```go
 python, err := computer.EmbeddedPython(ctx, wasm.Program{MaxRuns: 8})
