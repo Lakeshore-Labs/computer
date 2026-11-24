@@ -87,6 +87,23 @@ defer c.Close()
 res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: "wiki read-wiki-structure --repo-name wazero/wazero | wc -l"})
 ```
 
+A host that serves many sessions gives each its own computer with the `computers` package. A `computers.Computers`
+is one `Environment` for all of them: each call goes to the computer of the session its context names, made when
+that session first uses it and closed after it has been idle. You say which session a context belongs to and what
+its computer is.
+
+```go
+cs := computers.New(
+    func(ctx context.Context) (string, bool) { id, ok := ctx.Value(sessionKey{}).(string); return id, ok },
+    func(ctx context.Context, session string) (computer.Config, error) {
+        return computer.Config{Mounts: []computer.Mount{{Guest: "/home/user", Host: dirOf(session)}}}, nil
+    },
+    10*time.Minute, // idle time; zero keeps every computer until Close
+)
+defer cs.Close()
+cs.End(session) // when a session is deleted
+```
+
 ## Mounts
 
 A mount is a directory of the computer. The shell and every program are given the same one, so a file one writes
