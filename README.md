@@ -132,8 +132,6 @@ does not, so an embedder passes `extra.Commands()` in `Config.Commands`. Each co
 inside the mounts, and `NAME --help` lists its options.
 
 ```
-magick photo.jpg -resize 800 small.png     # a subset of ImageMagick: also convert, identify, -crop, -rotate, -flip, -flop
-chart bar --x month --y north,south sales.csv --out sales.png    # or line, pie, scatter; SVG or PNG
 pdftotext -f 1 -l 3 report.pdf -           # a subset of poppler's: text of pages 1 to 3 on standard output
 pdftoppm -png -r 100 report.pdf page       # writes page-1.png, page-2.png, ... (also -jpeg, -f, -l)
 ```
@@ -148,7 +146,7 @@ pdftoppm -png -r 100 report.pdf page       # writes page-1.png, page-2.png, ... 
 | [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) | Talks to the MCP servers |
 | `wasm/` | Runs a WASI program like a command: memory cap, deadline, and directories that are afero filesystems |
 | `files/` | A host directory as an afero filesystem that cannot be left |
-| `extra/` | Commands the shell lacks: `magick`, `convert`, `identify` (a subset of ImageMagick), `chart`, `pdftotext` and `pdftoppm` (a subset of poppler's, PDFium as WebAssembly) |
+| `extra/` | `pdftotext` and `pdftoppm`, a subset of poppler's, PDFium as WebAssembly; images and charts are Python's (Pillow, matplotlib) |
 | `tools/` | Turns MCP tools into commands and a Python package |
 | `computer.go` | Assembles the above |
 | `cmd/computer` | The command-line program and the MCP server mode |

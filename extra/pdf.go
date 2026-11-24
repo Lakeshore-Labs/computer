@@ -298,3 +298,33 @@ func runPdftoppm(ctx context.Context, inv *commands.Invocation) error {
 		return nil
 	})
 }
+
+// maxPixels bounds the size of an image to make. A page can declare a size that would exhaust memory at the DPI
+// asked.
+const maxPixels = 100_000_000
+
+func checkSize(w, h int) error {
+	if w <= 0 || h <= 0 {
+		return fmt.Errorf("the size %dx%d is empty", w, h)
+	}
+	if mp := float64(w) * float64(h) / 1e6; mp > maxPixels/1e6 {
+		return fmt.Errorf("%dx%d is %.0f megapixels, more than the limit of %d", w, h, mp, maxPixels/1_000_000)
+	}
+	return nil
+}
+
+// define registers a command whose run reports mistakes as "name: message" and prints usage for -help.
+func define(name, usage string, run func(context.Context, *commands.Invocation) error) commands.Command {
+	return commands.DefineCommand(name, func(ctx context.Context, inv *commands.Invocation) error {
+		for _, a := range inv.Args {
+			if a == "-help" || a == "--help" {
+				fmt.Fprintln(inv.Stdout, usage)
+				return nil
+			}
+		}
+		if err := run(ctx, inv); err != nil {
+			return exit(inv, name, err)
+		}
+		return nil
+	})
+}

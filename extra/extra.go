@@ -1,4 +1,4 @@
-// Package extra holds commands for everyday data and document work that the shell lacks. They are not part of the
+// Package extra holds the PDF commands the shell lacks, pdftotext and pdftoppm. They are not part of the
 // library's default computer: an embedder passes Commands in Config.Commands. A command reaches files only through
 // its invocation's filesystem and talks only on its invocation's streams.
 package extra
@@ -14,7 +14,7 @@ import (
 
 // Commands is every command in the package.
 func Commands() []commands.Command {
-	return []commands.Command{magickCommand, convertCommand, identifyCommand, chartCommand, pdftotextCommand, pdftoppmCommand}
+	return []commands.Command{pdftotextCommand, pdftoppmCommand}
 }
 
 // usageError is a mistake in the command line, as opposed to a failure of the work: it exits 2, not 1.
