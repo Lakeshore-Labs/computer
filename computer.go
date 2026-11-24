@@ -77,10 +77,12 @@ try:
     os.chdir(os.environ.get("PYCWD", "/"))
 except OSError:
     pass
-args = sys.argv[1:]
-if args and not args[0].startswith("-"):
-    args[0] = os.path.abspath(args[0])
-    sys.path.insert(0, os.path.dirname(args[0]))
+args, i = sys.argv[1:], 0
+while i < len(args) and args[i].startswith("-") and args[i] not in ("-", "-c", "-m"):
+    i += 2 if args[i] == "-X" else 1
+if i < len(args) and not args[i].startswith("-"):
+    args[i] = os.path.abspath(args[i])
+    sys.path.insert(0, os.path.dirname(args[i]))
 else:
     sys.path.insert(0, os.getcwd())
 sys.path.append("` + pythonSite + `")
