@@ -208,16 +208,19 @@ func run(ctx context.Context) error {
 		cfg.Tools = append(cfg.Tools, tools.Source{Name: name, Session: cs})
 	}
 	cache, err := cacheDir(cfg.Mounts)
-	if err != nil {
-		// A mount such as the home directory holds the cache; Python is then compiled on every start instead.
-		fmt.Fprintf(os.Stderr, "computer: compiling Python without a cache: %v\n", err)
-		cache = ""
-	}
 	program := wasm.Program{MaxRuns: *pythonRuns, CacheDir: cache, Unstoppable: *pythonFast}
-	if *python != "" {
+	switch {
+	case *python != "" && err != nil:
+		return err
+	case *python != "":
 		program.MemoryPages, program.HostModule = 8192, *pythonHost
 		cfg.Python, err = computer.LoadPython(ctx, *python, *pythonLib, program)
-	} else {
+	case err != nil:
+		// A mount such as the home directory holds the cache, where the built-in Python is unpacked and compiled;
+		// what runs in the computer could change it for every later run, so the computer starts without it.
+		fmt.Fprintf(os.Stderr, "computer: no python3: %v\n", err)
+		err = nil
+	default:
 		cfg.Python, err = computer.EmbeddedPython(ctx, program)
 	}
 	if err != nil {
