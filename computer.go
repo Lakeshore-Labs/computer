@@ -52,7 +52,7 @@ type Config struct {
 // Python is a compiled CPython, shared by every computer of the process.
 type Python struct {
 	module *wasm.Module
-	lib    string
+	lib    Mount // the standard library, at pythonLib
 }
 
 const (
@@ -74,7 +74,7 @@ func LoadPython(ctx context.Context, binary, lib string, p wasm.Program) (*Pytho
 	if err != nil {
 		return nil, err
 	}
-	return &Python{module: module, lib: lib}, nil
+	return &Python{module: module, lib: Mount{Guest: pythonLib, Host: lib, ReadOnly: true}}, nil
 }
 
 // A Computer is one agent's computer. Its methods are safe for concurrent use.
@@ -118,7 +118,7 @@ func New(cfg Config) (_ *Computer, err error) {
 		c.cfg.Mounts = append(c.cfg.Mounts, Mount{Guest: "/tmp", Host: c.tmp})
 	}
 	if cfg.Python != nil {
-		c.cfg.Mounts = append(c.cfg.Mounts, Mount{Guest: pythonLib, Host: cfg.Python.lib, ReadOnly: true}, Mount{Guest: pythonSite, Host: c.site, ReadOnly: true})
+		c.cfg.Mounts = append(c.cfg.Mounts, cfg.Python.lib, Mount{Guest: pythonSite, Host: c.site, ReadOnly: true})
 	}
 	// Each host directory is opened once, so that the shell and every program are given the one filesystem.
 	for i, m := range c.cfg.Mounts {

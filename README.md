@@ -155,19 +155,16 @@ pdftoppm -png -r 100 report.pdf page       # writes page-1.png, page-2.png, ... 
 
 ## Python
 
-`python3` is a CPython built for WASI and embedded in the module, about 30 MB. `computer.EmbeddedPython` unpacks
-its standard library once into a directory the caller names and compiles it:
+`python3` is a CPython built for WASI and embedded in the module, about 30 MB; its standard library is held in
+memory, about 90 MB. The program uses it; from Go:
 
 ```go
-python, err := computer.EmbeddedPython(ctx, cacheDir, wasm.Program{MaxRuns: 8})
+python, err := computer.EmbeddedPython(ctx, wasm.Program{MaxRuns: 8})
 ```
 
-The program does the same, in the user's cache directory. A build of your own is given with `computer.LoadPython`,
-or to the program with `-python` and `-python-lib`.
-
-The build is made by a workflow in this repository from [`python/build.sh`](python/build.sh); a release of it
-opens a pull request that embeds it. See [`python/README.md`](python/README.md) for what is in it and how to build
-it yourself.
+A build of your own is given with `computer.LoadPython`, or to the program with `-python` and `-python-lib`. The
+build is made by a workflow in this repository from [`python/build.sh`](python/build.sh). See
+[`python/README.md`](python/README.md) for what is in it, how to build it yourself and how to embed a new one.
 
 ## The boundary
 

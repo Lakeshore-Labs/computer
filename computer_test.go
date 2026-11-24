@@ -121,9 +121,7 @@ func python(t *testing.T) *Python {
 	cpython.once.Do(func() {
 		p := wasm.Program{MaxRuns: 2, CacheDir: os.Getenv("PYTHON_CACHE"), Features: api.CoreFeaturesV2}
 		if binary == "" || lib == "" {
-			// One directory for every run, which reuses the unpacked build.
-			dir := filepath.Join(os.TempDir(), "computer-test-python")
-			cpython.python, cpython.err = EmbeddedPython(context.Background(), dir, p)
+			cpython.python, cpython.err = EmbeddedPython(context.Background(), p)
 			return
 		}
 		p.MemoryPages, p.HostModule = 8192, os.Getenv("PYTHON_HOST_MODULE")
@@ -314,7 +312,7 @@ func TestTheShellHandlesAFileAndALoopLargerThanGbashsDefaults(t *testing.T) {
 }
 
 func TestTheAgentIsToldEachToolModuleByItsPythonName(t *testing.T) {
-	c := newComputer(t, Config{Python: &Python{lib: t.TempDir()}, Tools: []tools.Source{{Name: "my-server", Session: testSession(t, listNotes)}}})
+	c := newComputer(t, Config{Python: &Python{lib: Mount{Guest: pythonLib, Host: t.TempDir()}}, Tools: []tools.Source{{Name: "my-server", Session: testSession(t, listNotes)}}})
 	if _, err := c.Session(context.Background()); err != nil {
 		t.Fatal(err)
 	}
@@ -324,7 +322,7 @@ func TestTheAgentIsToldEachToolModuleByItsPythonName(t *testing.T) {
 }
 
 func TestThePythonPackageIsNotRewrittenWhenTheToolsAreUnchanged(t *testing.T) {
-	c := newComputer(t, Config{Python: &Python{lib: t.TempDir()}, Tools: testTools(t, listNotes)})
+	c := newComputer(t, Config{Python: &Python{lib: Mount{Guest: pythonLib, Host: t.TempDir()}}, Tools: testTools(t, listNotes)})
 	if _, err := c.Session(context.Background()); err != nil {
 		t.Fatal(err)
 	}

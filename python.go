@@ -5,106 +5,72 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"crypto/sha256"
 	_ "embed"
-	"encoding/hex"
-	"errors"
 	"fmt"
 	"io"
-	"io/fs"
-	"os"
-	"path/filepath"
 
+	"github.com/spf13/afero"
+
+	"github.com/Lakeshore-Labs/computer/tools"
 	"github.com/Lakeshore-Labs/computer/wasm"
 )
 
-// pythonBuild is the release archive the python workflow makes from python/build.sh: python.wasm and lib/.
+// pythonBuild is the archive of a release of the python workflow, made from python/build.sh: python.wasm and lib/.
 //
 //go:embed python/python-wasi.tar.gz
 var pythonBuild []byte
 
-// EmbeddedPython compiles the CPython build this module carries. Its standard library is unpacked once into a
-// directory under dir named for the build, so a process given the same dir later reuses it; dir must be outside
-// every mount, as LoadPython's lib must. p is as for LoadPython, except that its host module is the one the build
-// imports, and a zero MemoryPages is 8192 (512 MiB), which the build needs.
-func EmbeddedPython(ctx context.Context, dir string, p wasm.Program) (*Python, error) {
-	sum := sha256.Sum256(pythonBuild)
-	build := filepath.Join(dir, "python-"+hex.EncodeToString(sum[:8]))
-	if _, err := os.Stat(build); errors.Is(err, fs.ErrNotExist) {
-		if err := unpackPython(dir, build); err != nil {
-			return nil, fmt.Errorf("unpacking the embedded Python: %w", err)
-		}
-	} else if err != nil {
+// EmbeddedPython compiles the CPython build this module carries. Its standard library is held in memory, about
+// 90 MB. p is as for LoadPython, except that its host module is the one the build imports, and a zero MemoryPages
+// is 8192 (512 MiB), which the build needs.
+func EmbeddedPython(ctx context.Context, p wasm.Program) (*Python, error) {
+	build, err := unpackPython()
+	if err != nil {
+		return nil, fmt.Errorf("the embedded Python: %w", err)
+	}
+	if p.Binary, err = afero.ReadFile(build, "/python.wasm"); err != nil {
 		return nil, err
 	}
-	p.HostModule = "computer"
+	p.Host, p.HostModule = tools.Host, "computer"
 	if p.MemoryPages == 0 {
 		p.MemoryPages = 8192
 	}
-	return LoadPython(ctx, filepath.Join(build, "python.wasm"), filepath.Join(build, "lib"), p)
+	module, err := wasm.Compile(ctx, p)
+	if err != nil {
+		return nil, err
+	}
+	return &Python{module: module, lib: Mount{Guest: pythonLib, FS: afero.NewBasePathFs(build, "/lib"), ReadOnly: true}}, nil
 }
 
-// unpackPython unpacks the embedded build into a new directory in dir and renames it to build, so that build is
-// either whole or absent, also when two processes unpack at once.
-func unpackPython(dir, build string) (err error) {
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return err
-	}
-	tmp, err := os.MkdirTemp(dir, "unpacking")
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err != nil {
-			os.RemoveAll(tmp)
-		}
-	}()
+// unpackPython is the embedded archive as an in-memory filesystem. MemMapFs tells "/a" from "a", and BasePathFs
+// asks for "/a".
+func unpackPython() (afero.Fs, error) {
 	gz, err := gzip.NewReader(bytes.NewReader(pythonBuild))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	r := tar.NewReader(gz)
+	fs, r := afero.NewMemMapFs(), tar.NewReader(gz)
 	for {
 		h, err := r.Next()
 		if err == io.EOF {
-			break
+			return fs, nil
 		}
 		if err != nil {
-			return err
+			return nil, err
 		}
-		if !filepath.IsLocal(h.Name) {
-			return fmt.Errorf("%q leaves the directory", h.Name)
-		}
-		name := filepath.Join(tmp, h.Name)
 		switch h.Typeflag {
 		case tar.TypeDir:
-			err = os.MkdirAll(name, 0o755)
+			err = fs.MkdirAll("/"+h.Name, 0o755)
 		case tar.TypeReg:
-			err = writeFile(name, r)
+			var data []byte
+			if data, err = io.ReadAll(r); err == nil {
+				err = afero.WriteFile(fs, "/"+h.Name, data, 0o644)
+			}
 		default:
 			err = fmt.Errorf("%q is neither a file nor a directory", h.Name)
 		}
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
-	if err := os.Rename(tmp, build); err != nil {
-		if _, statErr := os.Stat(build); statErr == nil { // another process unpacked it first
-			return os.RemoveAll(tmp)
-		}
-		return err
-	}
-	return nil
-}
-
-func writeFile(name string, r io.Reader) error {
-	if err := os.MkdirAll(filepath.Dir(name), 0o755); err != nil {
-		return err
-	}
-	f, err := os.Create(name)
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(f, r)
-	return errors.Join(err, f.Close())
 }
