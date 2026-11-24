@@ -1,0 +1,522 @@
+==== statsmodels LICENSE.txt ====
+Copyright (C) 2006, Jonathan E. Taylor
+All rights reserved.
+
+Copyright (c) 2006-2008 Scipy Developers.
+All rights reserved.
+
+Copyright (c) 2009-2018 statsmodels Developers.
+All rights reserved.
+
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  a. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+  b. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+  c. Neither the name of statsmodels nor the names of its contributors
+     may be used to endorse or promote products derived from this software
+     without specific prior written permission.
+
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL STATSMODELS OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+==== statsmodels COPYRIGHTS.txt ====
+
+The license of statsmodels can be found in LICENSE.txt
+
+statsmodels contains code or derivative code from several other
+packages. Some modules also note the author of individual contributions, or
+author of code that formed the basis for the derived or translated code.
+The copyright statements for the datasets are attached to the individual
+datasets, most datasets are in public domain, and we do not claim any copyright
+on any of them.
+
+In the following, we collect copyright statements of code from other packages,
+all of which are either a version of BSD or MIT licensed:
+
+numpy
+scipy
+pandas
+matplotlib
+scikit-learn
+qsturng-py http://code.google.com/p/qsturng-py/
+
+
+numpy (statsmodels.compatnp contains copy of entire model)
+----------------------------------------------------------
+Copyright (c) 2005-2009, NumPy Developers.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+       copyright notice, this list of conditions and the following
+       disclaimer in the documentation and/or other materials provided
+       with the distribution.
+
+    * Neither the name of the NumPy Developers nor the names of any
+       contributors may be used to endorse or promote products derived
+       from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------
+
+scipy
+-----
+Copyright (c) 2001, 2002 Enthought, Inc.
+All rights reserved.
+
+Copyright (c) 2003-2009 SciPy Developers.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  a. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+  b. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+  c. Neither the name of the Enthought nor the names of its contributors
+     may be used to endorse or promote products derived from this software
+     without specific prior written permission.
+
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+---------------------------------------------------------------------------
+
+
+pandas
+------
+
+Copyright (c) 2008-2009 AQR Capital Management, LLC
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+       copyright notice, this list of conditions and the following
+       disclaimer in the documentation and/or other materials provided
+       with the distribution.
+
+    * Neither the name of the copyright holder nor the names of any
+       contributors may be used to endorse or promote products derived
+       from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+----------------------------------------------------------------------
+
+
+matplotlib (copied from license.py)
+-----------------------------------
+
+
+LICENSE AGREEMENT FOR MATPLOTLIB %(version)s
+--------------------------------------
+
+1. This LICENSE AGREEMENT is between John D. Hunter ("JDH"), and the
+Individual or Organization ("Licensee") accessing and otherwise using
+matplotlib software in source or binary form and its associated
+documentation.
+
+2. Subject to the terms and conditions of this License Agreement, JDH
+hereby grants Licensee a nonexclusive, royalty-free, world-wide license
+to reproduce, analyze, test, perform and/or display publicly, prepare
+derivative works, distribute, and otherwise use matplotlib %(version)s
+alone or in any derivative version, provided, however, that JDH's
+License Agreement and JDH's notice of copyright, i.e., "Copyright (c)
+2002-%(year)d John D. Hunter; All Rights Reserved" are retained in
+matplotlib %(version)s alone or in any derivative version prepared by
+Licensee.
+
+3. In the event Licensee prepares a derivative work that is based on or
+incorporates matplotlib %(version)s or any part thereof, and wants to
+make the derivative work available to others as provided herein, then
+Licensee hereby agrees to include in any such work a brief summary of
+the changes made to matplotlib %(version)s.
+
+4. JDH is making matplotlib %(version)s available to Licensee on an "AS
+IS" basis. JDH MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+IMPLIED. BY WAY OF EXAMPLE, BUT NOT LIMITATION, JDH MAKES NO AND
+DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS
+FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF MATPLOTLIB %(version)s
+WILL NOT INFRINGE ANY THIRD PARTY RIGHTS.
+
+5. JDH SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF MATPLOTLIB
+%(version)s FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR
+LOSS AS A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING
+MATPLOTLIB %(version)s, OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF
+THE POSSIBILITY THEREOF.
+
+6. This License Agreement will automatically terminate upon a material
+breach of its terms and conditions.
+
+7. Nothing in this License Agreement shall be deemed to create any
+relationship of agency, partnership, or joint venture between JDH and
+Licensee. This License Agreement does not grant permission to use JDH
+trademarks or trade name in a trademark sense to endorse or promote
+products or services of Licensee, or any third party.
+
+8. By copying, installing or otherwise using matplotlib %(version)s,
+Licensee agrees to be bound by the terms and conditions of this License
+Agreement.
+--------------------------------------------------------------------------
+
+scikits-learn
+-------------
+
+New BSD License
+
+Copyright (c) 2007 - 2010 Scikit-Learn Developers.
+All rights reserved.
+
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  a. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+  b. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+  c. Neither the name of the Scikit-learn Developers  nor the names of
+     its contributors may be used to endorse or promote products
+     derived from this software without specific prior written
+     permission.
+
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+---------------------------------------------------------------------------
+
+qsturng-py (code included in statsmodels.stats.libqsturng)
+--------------------------------------------------------------
+Copyright (c) 2011, Roger Lew [see LICENSE.txt]
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+  * Neither the name of the organizations affiliated with the
+    contributors or the names of its contributors themselves may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+----------------------------------------------------------
+
+==== statsmodels statsmodels/multivariate/factor_rotation/LICENSE.txt ====
+Copyright (c) 2015, Martin van der Schans
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the <organization> nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+==== statsmodels statsmodels/multivariate/factor_rotation/COPYRIGHTS.txt ====
+The license of this package can be found in LICENSE.txt
+This file contains a Python version of the gradient projection rotation
+algorithms (GPA) developed by Bernaards, C.A. and Jennrich, R.I.
+The code is based on code developed Bernaards, C.A. and Jennrich, R.I.
+and is ported and made available with permission of the authors.
+
+==== statsmodels statsmodels/stats/libqsturng/LICENSE.txt ====
+Copyright (c) 2011, Roger Lew [see LICENSE.txt]
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+  * Neither the name of the organizations affiliated with the
+    contributors or the names of its contributors themselves may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+==== statsmodels statsmodels/tools/parallel.py, lines 1-12 ====
+"""
+Parallel utility function using joblib
+
+copied from https://github.com/mne-tools/mne-python
+
+Author: Alexandre Gramfort <gramfort@nmr.mgh.harvard.edu>
+License: Simplified BSD
+
+changes for statsmodels (Josef Perktold)
+- try import from joblib directly, (does not import all of sklearn)
+
+"""
+
+==== statsmodels statsmodels/tools/docstring.py, lines 1-1 ====
+"""Substantially copied from NumpyDoc 1.0pre"""
+
+==== statsmodels statsmodels/stats/libqsturng/qsturng_.py, lines 1926-1961 ====
+def _phi(p):
+    # this function is faster than using scipy.stats.norm.isf(p)
+    # but the permissity of the license is not explicitly listed.
+    # using scipy.stats.norm.isf(p) is an acceptable alternative
+    """
+    Modified from the author's original perl code (original comments follow below)
+    by dfield@yahoo-inc.com.  May 3, 2004.
+
+    Lower tail quantile for standard normal distribution function.
+
+    This function returns an approximation of the inverse cumulative
+    standard normal distribution function.  I.e., given P, it returns
+    an approximation to the X satisfying P = Pr{Z <= X} where Z is a
+    random variable from the standard normal distribution.
+
+    The algorithm uses a minimax approximation by rational functions
+    and the result has a relative error whose absolute value is less
+    than 1.15e-9.
+
+    Parameters
+    ----------
+    p : float
+        Probability, in the open interval (0, 1).
+
+    Returns
+    -------
+    float
+        The approximate standard normal quantile corresponding to `p`.
+
+    Notes
+    -----
+    Author:      Peter John Acklam
+    Time-stamp:  2000-07-19 18:26:14
+    E-mail:      pjacklam@online.no
+    WWW URL:     http://home.online.no/~pjacklam
+    """
+
+==== statsmodels statsmodels/tsa/stl/_stl.pyx, lines 3-13 ====
+"""
+(c) 2019 Kevin Sheppard
+License: NCSA/BSD-3 Clause
+Based on NETLIB STL code
+
+Notes: See file _stl_py.py in Git history for a pure python port for
+the STL FORTRAN code
+
+R.B. Cleveland, W.S.Cleveland, J.E. McRae, and I. Terpenning,
+STL: A Seasonal-Trend Decomposition Procedure Based on Loess, Statistics
+Research Report, AT&T Bell Laboratories.
+
+==== statsmodels statsmodels/graphics/boxplots.py, lines 3-4 ====
+# Author: Ralf Gommers
+# Based on code by Flavio Coelho and Teemu Ikonen.
+
+==== statsmodels statsmodels/regression/quantile_regression.py, lines 1-16 ====
+"""
+Quantile regression model
+
+Model parameters are estimated using iterated reweighted least squares. The
+asymptotic covariance matrix estimated using kernel density estimation.
+
+Author: Vincent Arel-Bundock
+License: BSD-3
+Created: 2013-03-19
+
+The original IRLS function was written for Matlab by Shapour Mohammadi,
+University of Tehran, 2008 (shmohammadi@gmail.com), with some lines based on
+code written by James P. Lesage in Applied Econometrics Using MATLAB(1999).PP.
+73-4.  Translated to python with permission from original author by Christian
+Prinoth (christian at prinoth dot name).
+"""
+
+==== mne-python, for statsmodels/tools/parallel.py (mne-python-2c4a3b03-LICENSE.txt) ====
+Copyright 2011-2025 MNE-Python authors
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+==== numpydoc, for statsmodels/tools/docstring.py (numpydoc-894c8c47-LICENSE.txt) ====
+Copyright (C) 2008-2023 Stefan van der Walt <stefan@mentat.za.net>, Pauli Virtanen <pav@iki.fi>
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+==== statsmodels' bundled datasets: their terms ====
+statsmodels 0.15.0 bundles example datasets (statsmodels/datasets/), each module stating
+its own terms in COPYRIGHT; statsmodels' COPYRIGHTS.txt says they are not under its
+licence. This release packs the data files of these sixteen, unchanged, each stating
+public domain:
+
+- anes96: This is public domain.
+- co2: This is public domain.
+- danish_data: This is public domain.
+- elec_equip: This is public domain.
+- elnino: This data is in the public domain.
+- engel: This is public domain.
+- grunfeld: This is public domain.
+- longley: This is public domain.
+- macrodata: This is public domain.
+- modechoice: This is public domain.
+- nile: This is public domain.
+- randhie: This is in the public domain.
+- stackloss: This is public domain.
+- statecrime: Public domain.
+- strikes: This is public domain.
+- sunspots: This data is public domain.
+
+The data files of these thirteen are not in this release, since their stated terms are
+not approved (their modules stay, and their loaders raise FileNotFoundError), and
+neither is any datasets/*/src/ folder, nor sandbox/rlsdata.txt (a table with no stated
+terms):
+
+- cancer (its module says: ???)
+- ccard (its module says: Used with express permission of the original author, who retains all rights.)
+- china_smoking (its module says: Intern. J. Epidemiol. (1992))
+- committee (its module says: Used with express permission from the original author, who retains all rights.)
+- copper (its module says: Used with express permission from the original author, who retains all rights.)
+- cpunish (its module says: Used with express permission from the original author, who retains all rights.)
+- fair (its module says: Included with permission of the author.)
+- fertility (its module says: This data is distributed according to the World Bank terms of use. See SOURCE.)
+- heart (its module says: ???)
+- interest_inflation (its module says: ...)
+- scotland (its module says: Used with express permission from the original author, who retains all rights.)
+- spector (its module says: Used with express permission of the original author, who retains all rights.)
+- star98 (its module says: Used with express permission from the original author, who retains all rights.)
+

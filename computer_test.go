@@ -17,7 +17,6 @@ import (
 	"github.com/Lakeshore-Labs/gbash/policy"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/spf13/afero"
-	"github.com/tetratelabs/wazero/api"
 
 	"github.com/Lakeshore-Labs/computer/tools"
 	"github.com/Lakeshore-Labs/computer/wasm"
@@ -113,19 +112,17 @@ var cpython struct {
 	err    error
 }
 
-// python is the CPython build named by PYTHON_WASM and PYTHON_LIB, or the embedded one when they are not set,
-// compiled once for all the tests.
+// python is the wasi-python release unpacked in PYTHON_DIR, or the embedded one when it is not set, compiled once
+// for all the tests.
 func python(t *testing.T) *Python {
 	t.Helper()
-	binary, lib := os.Getenv("PYTHON_WASM"), os.Getenv("PYTHON_LIB")
 	cpython.once.Do(func() {
-		p := wasm.Program{MaxRuns: 2, CacheDir: os.Getenv("PYTHON_CACHE"), Features: api.CoreFeaturesV2}
-		if binary == "" || lib == "" {
-			cpython.python, cpython.err = EmbeddedPython(context.Background(), p)
+		p := wasm.Program{MaxRuns: 2, CacheDir: os.Getenv("PYTHON_CACHE")}
+		if dir := os.Getenv("PYTHON_DIR"); dir != "" {
+			cpython.python, cpython.err = LoadPython(context.Background(), dir, p)
 			return
 		}
-		p.MemoryPages, p.HostModule = 8192, os.Getenv("PYTHON_HOST_MODULE")
-		cpython.python, cpython.err = LoadPython(context.Background(), binary, lib, p)
+		cpython.python, cpython.err = EmbeddedPython(context.Background(), p)
 	})
 	if cpython.err != nil {
 		t.Fatal(cpython.err)
@@ -266,6 +263,32 @@ print(c.execute('pragma integrity_check').fetchone()[0])
 	}
 }
 
+func TestPythonAnalysesWithPandasAndPutsAChartInWordAndExcel(t *testing.T) {
+	c := newComputer(t, Config{Python: python(t)})
+	got := run(t, c, `cat > recap.py <<'END'
+import pandas as pd, docx, openpyxl
+df = pd.DataFrame({"store": ["A", "B", "A", "B"], "month": [1, 1, 2, 2], "sales": [100, 80, 120, 60]})
+pivot = df.pivot_table(index="store", columns="month", values="sales")
+pivot.T.plot.line(title="Sales").figure.savefig("sales.png")
+d = docx.Document(); d.add_heading("Recap", 0); d.add_picture("sales.png"); d.save("recap.docx")
+pivot.to_excel("recap.xlsx")
+print(pivot.loc["A", 2], len(docx.Document("recap.docx").inline_shapes), openpyxl.load_workbook("recap.xlsx").active["C2"].value)
+END
+python3 recap.py`)
+	if got != "120.0 1 120" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestAPythonScriptImportsTheModulesBesideItAndInTheWorkingDirectory(t *testing.T) {
+	c := newComputer(t, Config{Python: python(t)})
+	got := run(t, c, `mkdir d && echo 'X = 1' > d/helper.py && echo 'import helper, os; print(helper.X, os.path.isabs(__file__))' > d/main.py
+python3 -u d/main.py; cd d && python3 main.py && python3 -m helper && python3 -c 'import helper; print(helper.X)'`)
+	if got != "1 True\n1 True\n1" {
+		t.Errorf("got %q", got)
+	}
+}
+
 func TestTheShellWritesOnlyWhereProgramsSeeTheResult(t *testing.T) {
 	c := newComputer(t, Config{Python: python(t)})
 	if got := run(t, c, `f=$(mktemp); echo shared > $f; python3 -c "import sys; print(open(sys.argv[1]).read().strip())" $f; echo quiet > /dev/null`); got != "shared" {
@@ -312,7 +335,7 @@ func TestTheShellHandlesAFileAndALoopLargerThanGbashsDefaults(t *testing.T) {
 }
 
 func TestTheAgentIsToldEachToolModuleByItsPythonName(t *testing.T) {
-	c := newComputer(t, Config{Python: &Python{lib: t.TempDir()}, Tools: []tools.Source{{Name: "my-server", Session: testSession(t, listNotes)}}})
+	c := newComputer(t, Config{Python: python(t), Tools: []tools.Source{{Name: "my-server", Session: testSession(t, listNotes)}}})
 	if _, err := c.Session(context.Background()); err != nil {
 		t.Fatal(err)
 	}
@@ -322,7 +345,7 @@ func TestTheAgentIsToldEachToolModuleByItsPythonName(t *testing.T) {
 }
 
 func TestThePythonPackageIsNotRewrittenWhenTheToolsAreUnchanged(t *testing.T) {
-	c := newComputer(t, Config{Python: &Python{lib: t.TempDir()}, Tools: testTools(t, listNotes)})
+	c := newComputer(t, Config{Python: python(t), Tools: testTools(t, listNotes)})
 	if _, err := c.Session(context.Background()); err != nil {
 		t.Fatal(err)
 	}

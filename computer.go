@@ -31,6 +31,7 @@ import (
 	gbfs "github.com/Lakeshore-Labs/gbash/fs"
 	"github.com/Lakeshore-Labs/gbash/policy"
 	"github.com/Lakeshore-Labs/gbash/shell/syntax"
+	"github.com/tetratelabs/wazero/experimental"
 )
 
 // A Mount is a directory the shell and every program see at the path Guest: the filesystem FS, which can be
@@ -49,33 +50,76 @@ type Config struct {
 	Options []gbash.Option
 }
 
-// Python is a compiled CPython, shared by every computer of the process.
+// Python is a wasi-python, compiled once and shared by every computer of the process.
 type Python struct {
+	dir string // the unpacked release: python.wasm, lib/python315.zip and mpl-data/
+	// ready is closed when module and err are set. Compiling the 110 MB binary takes about 30 seconds without a
+	// cache, so it runs while the computer is already in use, and only a python3 waits for it.
+	ready  chan struct{}
 	module *wasm.Module
-	lib    string
+	err    error
 }
 
 const (
-	pythonLib  = "/lib"                  // CPython looks for its standard library under PYTHONHOME/lib
-	pythonSite = "/usr/lib/python-tools" // where the generated package and the start-up module are mounted
-	// sitecustomize is imported by Python at start. WASI has no working directory, so the command passes its own.
-	sitecustomize = "import os\ntry:\n    os.chdir(os.environ.get('PYCWD', '/'))\nexcept OSError:\n    pass\n"
+	pythonExe  = "/usr/local/bin/python.wasm" // the program's name, as wasi-python's runner gives it
+	pythonLib  = "/usr/local/lib"             // where wasi-python looks for python315.zip
+	pythonMpl  = pythonLib + "/python315.zip/matplotlib/mpl-data"
+	pythonSite = "/usr/lib/python-tools" // where the generated package is mounted
+	// pythonStartCode runs before every program. wasi-python runs in isolated mode, without site and without a
+	// working directory, so it moves to the shell's working directory, puts the script's directory (or the working
+	// directory) and the tools package on the path, and runs the program's arguments as wasi-python's runner does.
+	// wasi-python's time.sleep waits for an absolute time, which wazero does not support; select waits for a
+	// relative one.
+	pythonStartCode = `import os, sys, time, select, linecache, _reactor
+linecache._interactive_cache.clear()
+time.sleep = lambda secs: select.select([], [], [], secs)
+try:
+    os.chdir(os.environ.get("PYCWD", "/"))
+except OSError:
+    pass
+args, i = sys.argv[1:], 0
+while i < len(args) and args[i].startswith("-") and args[i] not in ("-", "-c", "-m"):
+    i += 2 if args[i] == "-X" else 1
+if i < len(args) and not args[i].startswith("-"):
+    args[i] = os.path.abspath(args[i])
+    sys.path.insert(0, os.path.dirname(args[i]))
+else:
+    sys.path.insert(0, os.getcwd())
+sys.path.append("` + pythonSite + `")
+sys.exit(_reactor.run(["` + pythonExe + `", *args], dict(os.environ)))
+`
 )
 
-// LoadPython compiles the CPython binary at binary, whose standard library is the directory lib. p's Binary is
-// read from the file; its other fields are the caller's, and its host call is answered by the computer's tools.
-func LoadPython(ctx context.Context, binary, lib string, p wasm.Program) (*Python, error) {
+// LoadPython reads the wasi-python release unpacked in dir, laid out as EmbeddedPython unpacks it:
+// python.wasm, lib/python315.zip (alone in lib) and mpl-data/, matplotlib's data, and starts compiling it; the
+// first python3 waits for the compile, and fails with its error. p's Binary is read from the file, its host call
+// is answered by the computer's tools, and a zero MemoryPages is 8192 (512 MiB); its other fields are the caller's.
+func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error) {
 	var err error
-	if p.Binary, err = os.ReadFile(binary); err != nil {
+	if p.Binary, err = os.ReadFile(filepath.Join(dir, "python.wasm")); err != nil {
 		return nil, err
 	}
 	p.Host = tools.Host
-	module, err := wasm.Compile(ctx, p)
-	if err != nil {
-		return nil, err
+	// wasi-python's C++ (pybind11, matplotlib, scipy) throws WebAssembly exceptions.
+	p.Features |= experimental.CoreFeaturesExceptionHandling
+	if p.MemoryPages == 0 {
+		p.MemoryPages = 8192
 	}
-	return &Python{module: module, lib: lib}, nil
+	py := &Python{dir: dir, ready: make(chan struct{})}
+	go func() {
+		defer close(py.ready)
+		py.module, py.err = wasm.Compile(context.WithoutCancel(ctx), p)
+	}()
+	return py, nil
 }
+
+// pythonStart is pythonStartCode as a program for -c. It runs in a namespace of its own, so the program's
+// __main__ is untouched, and under a file name of its own, so a traceback through it does not show the program's
+// -c source. A JSON string is a Python string literal.
+var pythonStart = func() string {
+	b, _ := json.Marshal(pythonStartCode)
+	return "exec(compile(" + string(b) + `, "<computer start>", "exec"), {})`
+}()
 
 // A Computer is one agent's computer. Its methods are safe for concurrent use.
 type Computer struct {
@@ -107,9 +151,6 @@ func New(cfg Config) (_ *Computer, err error) {
 	if c.site, err = os.MkdirTemp("", "computer-python"); err != nil {
 		return nil, err
 	}
-	if err := os.WriteFile(filepath.Join(c.site, "sitecustomize.py"), []byte(sitecustomize), 0o600); err != nil {
-		return nil, err
-	}
 	c.cfg.Mounts = slices.Clone(cfg.Mounts)
 	if !slices.ContainsFunc(cfg.Mounts, func(m Mount) bool { return m.Guest == "/tmp" }) {
 		if c.tmp, err = os.MkdirTemp("", "computer-tmp"); err != nil {
@@ -118,7 +159,8 @@ func New(cfg Config) (_ *Computer, err error) {
 		c.cfg.Mounts = append(c.cfg.Mounts, Mount{Guest: "/tmp", Host: c.tmp})
 	}
 	if cfg.Python != nil {
-		c.cfg.Mounts = append(c.cfg.Mounts, Mount{Guest: pythonLib, Host: cfg.Python.lib, ReadOnly: true}, Mount{Guest: pythonSite, Host: c.site, ReadOnly: true})
+		c.cfg.Mounts = append(c.cfg.Mounts, Mount{Guest: pythonLib, Host: filepath.Join(cfg.Python.dir, "lib"), ReadOnly: true},
+			Mount{Guest: pythonSite, Host: c.site, ReadOnly: true})
 	}
 	// Each host directory is opened once, so that the shell and every program are given the one filesystem.
 	for i, m := range c.cfg.Mounts {
@@ -361,7 +403,7 @@ func (c *Computer) About(toolCommands, toolModules []string) string {
 	}
 	b.WriteString(".")
 	if c.cfg.Python != nil {
-		b.WriteString(" python3 has the standard library and pure-Python packages; it has no modules written in C, such as PIL, numpy or pandas.")
+		b.WriteString(" python3 has numpy, pandas, scipy, scikit-learn, statsmodels, matplotlib, seaborn, Pillow, lxml, openpyxl, xlsxwriter, python-docx, python-pptx, pypdf, pdfplumber and reportlab; it has no network, threads or subprocesses.")
 	}
 	if len(toolCommands) > 0 {
 		fmt.Fprintf(&b, "\nThese commands call tools: %s. Run one with --help to see its tools, and `<command> <tool> --help` for a tool's arguments. A tool prints its result as text or JSON.", strings.Join(toolCommands, ", "))
@@ -380,29 +422,27 @@ func (c *Computer) python(name string, mounts []Mount) commands.Command {
 		for k, v := range inv.Env {
 			env[k] = v
 		}
-		env["PYTHONHOME"], env["PYTHONPATH"], env["PYCWD"], env["PYTHONDONTWRITEBYTECODE"] = "/", pythonSite, inv.Cwd, "1"
+		// matplotlib keeps its font list in a writable directory; /tmp outlives the run.
+		env["PYCWD"], env["MPLCONFIGDIR"] = inv.Cwd, "/tmp/.matplotlib"
 		stdin := inv.Stdin
 		if stdin == nil {
 			stdin = strings.NewReader("")
 		}
-		args := append([]string{name}, inv.Args...)
-		// CPython makes its script's path absolute before sitecustomize has moved to the working directory, so
-		// a relative script is made absolute here. Options that end the options or take a value are stepped over.
-	script:
-		for i := 1; i < len(args); i++ {
-			switch a := args[i]; {
-			case a == "-c" || a == "-m" || a == "-":
-				break script
-			case a == "-W" || a == "-X":
-				i++
-			case !strings.HasPrefix(a, "-"):
-				args[i] = gbfs.Resolve(inv.Cwd, a)
-				break script
-			}
+		py := c.cfg.Python
+		select {
+		case <-py.ready:
+		case <-ctx.Done():
+			return commands.Exitf(inv, 124, "%s: %v", name, ctx.Err())
 		}
-		code, err := c.cfg.Python.module.Run(tools.With(ctx, c.cfg.Tools, inv.FS), wasm.Run{
-			Args: args, Env: env,
-			Stdin: stdin, Stdout: inv.Stdout, Stderr: inv.Stderr, Dirs: mounts,
+		if py.err != nil {
+			return commands.Exitf(inv, 70, "%s: %v", name, py.err)
+		}
+		code, err := py.module.Run(tools.With(ctx, c.cfg.Tools, inv.FS), wasm.Run{
+			Args: append([]string{pythonExe, "-c", pythonStart}, inv.Args...), Env: env,
+			Stdin: stdin, Stdout: inv.Stdout, Stderr: inv.Stderr,
+			// matplotlib's data is mounted inside the zip at pythonLib, which wazero allows and the shell's own
+			// mounts do not, so only Python sees it.
+			Dirs: append(mounts[:len(mounts):len(mounts)], Mount{Guest: pythonMpl, Host: filepath.Join(c.cfg.Python.dir, "mpl-data"), ReadOnly: true}),
 		})
 		if err != nil {
 			return commands.Exitf(inv, code, "%s: %v", name, err)

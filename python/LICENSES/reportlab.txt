@@ -1,0 +1,160 @@
+==== reportlab-5.0.1-py3-none-any.whl: reportlab-5.0.1.dist-info/licenses/LICENSE ====
+#####################################################################################
+#
+#	Copyright (c) 2000-2024, ReportLab Inc.
+#	All rights reserved.
+#
+#	Redistribution and use in source and binary forms, with or without modification,
+#	are permitted provided that the following conditions are met:
+#
+#		*	Redistributions of source code must retain the above copyright notice,
+#			this list of conditions and the following disclaimer. 
+#		*	Redistributions in binary form must reproduce the above copyright notice,
+#			this list of conditions and the following disclaimer in the documentation
+#			and/or other materials provided with the distribution. 
+#		*	Neither the name of the company nor the names of its contributors may be
+#			used to endorse or promote products derived from this software without
+#			specific prior written permission. 
+#
+#	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+#	IN NO EVENT SHALL THE OFFICERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+#	INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+#	TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#	OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+#	IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+#	IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+#	SUCH DAMAGE.
+#
+#####################################################################################
+
+==== reportlab-5.0.1-py3-none-any.whl: reportlab/graphics/barcode/__init__.py, its leading comment (Tyler C. Sarna's BSD-4-Clause notice, which heads __init__.py, code128.py, code39.py, code93.py, common.py, fourstate.py and usps.py in reportlab/graphics/barcode/) ====
+#
+# Copyright (c) 1996-2000 Tyler C. Sarna <tsarna@sarna.org>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. All advertising materials mentioning features or use of this software
+#    must display the following acknowledgement:
+#      This product includes software developed by Tyler C. Sarna.
+# 4. Neither the name of the author nor the names of contributors
+#    may be used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+==== reportlab-5.0.1-py3-none-any.whl: reportlab/pdfbase/_glyphlist.py, its leading comment (Adobe's BSD-3-Clause notice for the Adobe Glyph List) ====
+#see https://github.com/adobe-type-tools/agl-aglfn
+# -----------------------------------------------------------
+# Copyright 2002-2019 Adobe (http://www.adobe.com/).
+#
+# Redistribution and use in source and binary forms, with or
+# without modification, are permitted provided that the
+# following conditions are met:
+#
+# Redistributions of source code must retain the above
+# copyright notice, this list of conditions and the following
+# disclaimer.
+#
+# Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following
+# disclaimer in the documentation and/or other materials
+# provided with the distribution.
+#
+# Neither the name of Adobe nor the names of its contributors
+# may be used to endorse or promote products derived from this
+# software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# -----------------------------------------------------------
+# Name:          Adobe Glyph List
+# Table version: 2.0
+# Date:          September 20, 2002
+# URL:           https://github.com/adobe-type-tools/agl-aglfn
+#
+# Format: two semicolon-delimited fields:
+#   (1) glyph name--upper/lowercase letters and digits
+#   (2) Unicode scalar value--four uppercase hexadecimal digits
+#
+# END
+
+==== reportlab-5.0.1-py3-none-any.whl: reportlab/graphics/barcode/qrencoder.py, its leading comment (Open End AB's and Kazuhiko Arase's notice; the MIT licence it names follows) ====
+# QRCode for Python
+#
+# Support for Kanji, Hanzi, ECI, FNC1 and Structurded append,
+# and optimizations by Anders Hammarquist <iko@openend.se>
+#
+# Copyright (c) 2014 Open End AB http://www.openend.se/
+#
+# Ported from the Javascript library by Sam Curren
+#
+# QRCode for Javascript
+# http://d-project.googlecode.com/svn/trunk/misc/qrcode/js/qrcode.js
+#
+# Copyright (c) 2009 Kazuhiko Arase
+#
+# URL: http://www.d-project.com/
+#
+# Licensed under the MIT license:
+#   http://www.opensource.org/licenses/mit-license.php
+#
+# The word "QR Code" is registered trademark of
+# DENSO WAVE INCORPORATED
+#   http://www.denso-wave.com/qrcode/faqpatent-e.html
+
+==== The MIT licence reportlab/graphics/barcode/qrencoder.py names (wasi-libc-2e6fb9d8-LICENSE-MIT) ====
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+

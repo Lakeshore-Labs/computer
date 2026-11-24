@@ -1,7 +1,7 @@
 package computer
 
 import (
-	"archive/tar"
+	"archive/zip"
 	"bytes"
 	"compress/gzip"
 	"context"
@@ -19,45 +19,47 @@ import (
 	"github.com/Lakeshore-Labs/computer/wasm"
 )
 
-// pythonBuild is the archive of a release of the python workflow, made from python/build.sh: python.wasm and lib/.
-//
-//go:embed python/python-wasi.tar.gz
-var pythonBuild []byte
+// The embedded wasi-python release (see python/README.md): its interpreter, gzipped, its standard library and
+// packages as one zip, and the checksums that name them.
+var (
+	//go:embed python/python.wasm.gz
+	pythonWasm []byte
+	//go:embed python/python-stdlib.zip
+	pythonStdlib []byte
+	//go:embed python/SHA256SUMS
+	pythonSums []byte
+)
 
-// The directory the embedded archive is unpacked into, once by EmbeddedPython. A package-level
-// sync.OnceValues(unpackPython) would keep the archive in every binary, including those that never call it.
+// The directory the embedded release is unpacked into, once by EmbeddedPython. A package-level
+// sync.OnceValues(unpackPython) would keep the release in every binary, including those that never call it.
 var (
 	pythonOnce sync.Once
 	pythonDir  string
 	pythonErr  error
 )
 
-// EmbeddedPython compiles the CPython build this module carries. On first use it unpacks the build, about 90 MB,
-// into computer/python-<checksum> in the user's cache directory (os.UserCacheDir), and later processes reuse it;
-// a host must not mount that directory. Each call compiles the program again, so a host calls it once and shares
-// the Python, as with LoadPython. p is as for LoadPython, except that its host module is the one the build
-// imports, and a zero MemoryPages is 8192 (512 MiB), which the build needs.
+// EmbeddedPython compiles the wasi-python release this module carries: CPython with numpy, pandas, scipy,
+// scikit-learn, statsmodels, matplotlib, Pillow, lxml, python-docx, python-pptx and more. On first use it unpacks
+// the release, about 270 MB, into computer/python-<checksum> in the user's cache directory (os.UserCacheDir), and
+// later processes reuse it; a host must not mount that directory. Each call compiles the program again, so a host
+// calls it once and shares the Python, as with LoadPython.
 func EmbeddedPython(ctx context.Context, p wasm.Program) (*Python, error) {
 	pythonOnce.Do(func() { pythonDir, pythonErr = unpackPython() })
 	if pythonErr != nil {
 		return nil, fmt.Errorf("unpacking the embedded Python: %w", pythonErr)
 	}
-	p.HostModule = "computer"
-	if p.MemoryPages == 0 {
-		p.MemoryPages = 8192
-	}
-	return LoadPython(ctx, filepath.Join(pythonDir, "python.wasm"), filepath.Join(pythonDir, "lib"), p)
+	return LoadPython(ctx, pythonDir, p)
 }
 
-// unpackPython is the directory of the unpacked build, unpacking it unless it is there. It unpacks into a new
-// directory and renames that into place, so the build is either whole or absent, also when two processes unpack
+// unpackPython is the directory of the unpacked release, unpacking it unless it is there. It unpacks into a new
+// directory and renames that into place, so the release is either whole or absent, also when two processes unpack
 // at once.
 func unpackPython() (_ string, err error) {
 	cache, err := os.UserCacheDir()
 	if err != nil {
 		return "", err
 	}
-	sum := sha256.Sum256(pythonBuild)
+	sum := sha256.Sum256(pythonSums)
 	dir := filepath.Join(cache, "computer")
 	build := filepath.Join(dir, "python-"+hex.EncodeToString(sum[:8]))
 	if _, err := os.Stat(build); err == nil {
@@ -77,34 +79,31 @@ func unpackPython() (_ string, err error) {
 			os.RemoveAll(tmp)
 		}
 	}()
-	gz, err := gzip.NewReader(bytes.NewReader(pythonBuild))
+	gz, err := gzip.NewReader(bytes.NewReader(pythonWasm))
 	if err != nil {
 		return "", err
 	}
-	r := tar.NewReader(gz)
-	for {
-		h, err := r.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return "", err
-		}
-		if !filepath.IsLocal(h.Name) {
-			return "", fmt.Errorf("%q leaves the directory", h.Name)
-		}
-		name := filepath.Join(tmp, h.Name)
-		switch h.Typeflag {
-		case tar.TypeDir:
-			err = os.MkdirAll(name, 0o755)
-		case tar.TypeReg:
-			err = writeFile(name, r)
-		default:
-			err = fmt.Errorf("%q is neither a file nor a directory", h.Name)
-		}
-		if err != nil {
-			return "", err
-		}
+	if err := writeFile(filepath.Join(tmp, "python.wasm"), gz); err != nil {
+		return "", err
+	}
+	if err := writeFile(filepath.Join(tmp, "lib", "python315.zip"), bytes.NewReader(pythonStdlib)); err != nil {
+		return "", err
+	}
+	// matplotlib reads its data from a directory, which the release keeps as a zip inside the zip.
+	stdlib, err := zip.NewReader(bytes.NewReader(pythonStdlib), int64(len(pythonStdlib)))
+	if err != nil {
+		return "", err
+	}
+	inner, err := fs.ReadFile(stdlib, "matplotlib/mpl-data.zip")
+	if err != nil {
+		return "", err
+	}
+	mpl, err := zip.NewReader(bytes.NewReader(inner), int64(len(inner)))
+	if err != nil {
+		return "", err
+	}
+	if err := os.CopyFS(filepath.Join(tmp, "mpl-data"), mpl); err != nil {
+		return "", err
 	}
 	if err := os.Rename(tmp, build); err != nil {
 		if _, statErr := os.Stat(build); statErr == nil { // another process unpacked it first

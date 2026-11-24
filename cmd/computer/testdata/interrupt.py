@@ -31,9 +31,8 @@ def controlling_terminal():
         os.fchmod(0, 0)  # the CLI can use the descriptor it was given, but cannot open the device again
 
 command = [binary, '-mount', directory + ':/work']
-python = os.environ.get('PYTHON_WASM'), os.environ.get('PYTHON_LIB')
-if all(python):
-    command += ['-python', python[0], '-python-lib', python[1]]
+if os.environ.get('PYTHON_DIR'):
+    command += ['-python', os.environ['PYTHON_DIR']]
 # sh survives Ctrl-C and SIGTERM, which are the CLI's to handle, and waits after the CLI ends so the terminal stays.
 # In mode sighup-ignored the CLI starts with SIGHUP ignored, as under nohup, and must leave it ignored.
 shell = ('trap "" HUP; ' if mode == 'sighup-ignored' else '') + 'trap : INT TERM; "$@"; echo "cli-exit=$?"; sleep 30'
@@ -90,7 +89,7 @@ try:
         expect(output)
         os.write(terminal, b'\x03')
         expect(b'$ ')
-    if all(python):
+    if os.environ.get('PYTHON_DIR'):  # the built-in Python may take longer to compile than expect waits
         # A program that waits for input and gives up leaves its read of the terminal under way. Ending the command
         # must end that read too, or it takes the next line typed at the prompt.
         os.write(terminal, b'python3 -c "import select, sys; select.select([sys.stdin], [], [], 0.2)"; echo gave-up\r')
