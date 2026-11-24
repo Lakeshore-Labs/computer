@@ -5,8 +5,6 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-env:
-  PYTHON_RELEASE: python-3.15.2-3
 jobs:
   test:
     runs-on: ubuntu-24.04
@@ -15,21 +13,7 @@ jobs:
       - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: go.mod
-      - name: Fetch the Python build
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if ! gh release download "$PYTHON_RELEASE" --pattern '*.tar.gz*' --dir "$RUNNER_TEMP"; then
-            echo "::warning::release $PYTHON_RELEASE not found; the tests that need Python are skipped"
-            exit 0
-          fi
-          cd "$RUNNER_TEMP" && sha256sum -c python-3.15.2-wasi.tar.gz.sha256
-          mkdir python-wasi && tar -xzf python-3.15.2-wasi.tar.gz -C python-wasi
-          echo "PYTHON_WASM=$RUNNER_TEMP/python-wasi/python.wasm" >> "$GITHUB_ENV"
-          echo "PYTHON_LIB=$RUNNER_TEMP/python-wasi/lib" >> "$GITHUB_ENV"
       # stdmethods objects to the Seek method wazero's file interface requires.
       - run: go vet -stdmethods=false ./...
       - name: Test
-        env:
-          PYTHON_HOST_MODULE: computer
         run: go test -count=1 -timeout 900s -v . ./cmd/computer | grep -vE '^=== (RUN|PAUSE|CONT|NAME)' ; exit "${PIPESTATUS[0]}"

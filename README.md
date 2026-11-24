@@ -81,7 +81,7 @@ From Go:
 c, err := computer.New(computer.Config{
     Mounts: []computer.Mount{{Guest: "/home/user", Host: dir}},
     Tools:  []tools.Source{{Name: "wiki", Session: session}}, // an MCP client session
-    Python: python,                                           // from computer.LoadPython, shared by every computer
+    Python: python,                                           // from computer.EmbeddedPython, shared by every computer
 })
 defer c.Close()
 res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: "wiki read-wiki-structure --repo-name wazero/wazero | wc -l"})
@@ -155,17 +155,16 @@ pdftoppm -png -r 100 report.pdf page       # writes page-1.png, page-2.png, ... 
 
 ## Python
 
-`python3` needs a CPython built for WASI, passed with `-python` and `-python-lib`. Without it the shell, SQLite and
-the tool commands still work.
+`python3` is a CPython built for WASI and embedded in the module, about 30 MB. On first use it is unpacked, about
+90 MB, into `computer/python-<checksum>` in the user's cache directory. The program uses it; from Go:
 
-```
-gh release download python-3.15.2-3 --repo Lakeshore-Labs/computer --pattern '*.tar.gz'
-mkdir python-wasi && tar -xzf python-3.15.2-wasi.tar.gz -C python-wasi
-./computer -mount ./work:/home/user -python python-wasi/python.wasm -python-lib python-wasi/lib
+```go
+python, err := computer.EmbeddedPython(ctx, wasm.Program{MaxRuns: 8})
 ```
 
-The build is made by a workflow in this repository from [`python/build.sh`](python/build.sh). See
-[`python/README.md`](python/README.md) for what is in it and how to build it yourself.
+A build of your own is given with `computer.LoadPython`, or to the program with `-python` and `-python-lib`. The
+build is made by a workflow in this repository from [`python/build.sh`](python/build.sh). See
+[`python/README.md`](python/README.md) for what is in it, how to build it yourself and how to embed a new one.
 
 ## The boundary
 
@@ -195,7 +194,8 @@ The build is made by a workflow in this repository from [`python/build.sh`](pyth
 go test .
 ```
 
-The tests that need Python are skipped unless `PYTHON_WASM`, `PYTHON_LIB` and `PYTHON_HOST_MODULE` are set.
+The tests use the embedded Python, unless `PYTHON_WASM` and `PYTHON_LIB` name another build, whose host module is
+`PYTHON_HOST_MODULE`.
 
 ## License
 

@@ -148,3 +148,25 @@ func TestInterruptReturnsToThePrompt(t *testing.T) {
 		})
 	}
 }
+
+// A mount that holds the cache, such as the home directory, starts without python3: what runs in the computer could
+// change the Python unpacked there, and every later run would import it.
+func TestAMountHoldingTheCacheStartsWithoutPython(t *testing.T) {
+	binary := filepath.Join(t.TempDir(), "computer")
+	if out, err := exec.Command("go", "build", "-o", binary, ".").CombinedOutput(); err != nil {
+		t.Fatalf("build CLI: %v: %s", err, out)
+	}
+	home := t.TempDir()
+	cmd := exec.Command(binary, "-mount", home+":/home/user", "-c", "echo ok; python3 -c 'print(1)' || echo none")
+	cmd.Env = append(os.Environ(), "HOME="+home, "XDG_CACHE_HOME="+filepath.Join(home, ".cache"))
+	out, err := cmd.CombinedOutput()
+	if err != nil || !strings.Contains(string(out), "ok") || !strings.Contains(string(out), "none") {
+		t.Fatalf("%v: %s", err, out)
+	}
+	if found, _ := filepath.Glob(filepath.Join(home, "*", "*", "computer", "python-*")); len(found) > 0 {
+		t.Errorf("Python was unpacked into the mount: %v", found)
+	}
+	if found, _ := filepath.Glob(filepath.Join(home, ".cache", "computer", "python-*")); len(found) > 0 {
+		t.Errorf("Python was unpacked into the mount: %v", found)
+	}
+}
