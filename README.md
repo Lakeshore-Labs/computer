@@ -194,7 +194,8 @@ build is made by a workflow in this repository from [`python/build.sh`](python/b
 go test .
 ```
 
-The tests use the embedded Python, unless `PYTHON_WASM`, `PYTHON_LIB` and `PYTHON_HOST_MODULE` name another build.
+The tests use the embedded Python, unless `PYTHON_WASM` and `PYTHON_LIB` name another build, whose host module is
+`PYTHON_HOST_MODULE`.
 
 ## License
 

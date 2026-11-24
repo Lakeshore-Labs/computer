@@ -27,7 +27,8 @@ var pythonBuild []byte
 // except that its host module is the one the build imports, and a zero MemoryPages is 8192 (512 MiB), which the
 // build needs.
 func EmbeddedPython(ctx context.Context, p wasm.Program) (*Python, error) {
-	build, err := pythonFS()
+	pythonOnce.Do(func() { pythonFS, pythonErr = unpackPython() })
+	build, err := pythonFS, pythonErr
 	if err != nil {
 		return nil, fmt.Errorf("the embedded Python: %w", err)
 	}
@@ -45,8 +46,13 @@ func EmbeddedPython(ctx context.Context, p wasm.Program) (*Python, error) {
 	return &Python{module: module, lib: Mount{Guest: pythonLib, FS: afero.NewBasePathFs(build, "/lib"), ReadOnly: true}}, nil
 }
 
-// pythonFS is the embedded archive as an in-memory filesystem, unpacked once.
-var pythonFS = sync.OnceValues(unpackPython)
+// The embedded archive as an in-memory filesystem, unpacked once by EmbeddedPython. A package-level
+// sync.OnceValues(unpackPython) would keep the archive in every binary, including those that never call it.
+var (
+	pythonOnce sync.Once
+	pythonFS   afero.Fs
+	pythonErr  error
+)
 
 // unpackPython is the embedded archive as an in-memory filesystem. MemMapFs tells "/a" from "a", and BasePathFs
 // asks for "/a".
