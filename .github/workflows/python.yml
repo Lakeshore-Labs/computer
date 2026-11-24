@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write # to start test.yml, which a pull request made with this workflow's token does not start
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -54,3 +55,4 @@ jobs:
           git push origin "embed-$GITHUB_REF_NAME"
           gh pr create --base main --head "embed-$GITHUB_REF_NAME" --title "The embedded Python is $GITHUB_REF_NAME" \
             --body "Embeds the build of release $GITHUB_REF_NAME, made by the python workflow at $GITHUB_SHA."
+          gh workflow run test.yml --ref "embed-$GITHUB_REF_NAME"

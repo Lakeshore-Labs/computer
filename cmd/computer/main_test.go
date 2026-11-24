@@ -148,3 +148,18 @@ func TestInterruptReturnsToThePrompt(t *testing.T) {
 		})
 	}
 }
+
+// A mount that holds the cache, such as the home directory, costs only the built-in Python, which would unpack there.
+func TestAMountHoldingTheCacheStartsWithoutPython(t *testing.T) {
+	binary := filepath.Join(t.TempDir(), "computer")
+	if out, err := exec.Command("go", "build", "-o", binary, ".").CombinedOutput(); err != nil {
+		t.Fatalf("build CLI: %v: %s", err, out)
+	}
+	home := t.TempDir()
+	cmd := exec.Command(binary, "-mount", home+":/home/user", "-c", "echo ok")
+	cmd.Env = append(os.Environ(), "HOME="+home, "XDG_CACHE_HOME="+filepath.Join(home, ".cache"))
+	out, err := cmd.CombinedOutput()
+	if err != nil || !strings.Contains(string(out), "ok") {
+		t.Fatalf("%v: %s", err, out)
+	}
+}

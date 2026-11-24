@@ -208,14 +208,19 @@ func run(ctx context.Context) error {
 		cfg.Tools = append(cfg.Tools, tools.Source{Name: name, Session: cs})
 	}
 	cache, err := cacheDir(cfg.Mounts)
-	if err != nil {
-		return err
-	}
 	program := wasm.Program{MaxRuns: *pythonRuns, CacheDir: cache, Unstoppable: *pythonFast}
-	if *python != "" {
+	switch {
+	case *python != "" && err != nil:
+		return err
+	case *python != "":
 		program.MemoryPages, program.HostModule = 8192, *pythonHost
 		cfg.Python, err = computer.LoadPython(ctx, *python, *pythonLib, program)
-	} else {
+	case err != nil:
+		// A mount such as the home directory holds the cache, where the built-in Python would be unpacked; the
+		// computer starts without it rather than not at all.
+		fmt.Fprintf(os.Stderr, "computer: no python3: %v\n", err)
+		err = nil
+	default:
 		cfg.Python, err = computer.EmbeddedPython(ctx, cache, program)
 	}
 	if err != nil {
