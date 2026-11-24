@@ -283,7 +283,8 @@ print(len(pptx.Presentation('deck.pptx').slides[0].shapes))
 from lxml import etree
 open('t.xml', 'w').write('<a><b>x</b></a>')
 print(etree.parse('t.xml').xpath('//b')[0].text)
-open('bad.jpg', 'wb').write(open('bar.jpg', 'rb').read()[:200])
+b = bytearray(open('bar.jpg', 'rb').read()); b[-150:-20] = bytes(x ^ 0x5a for x in b[-150:-20])  # the image data, not the header
+open('bad.jpg', 'wb').write(b)
 try:
     Image.open('bad.jpg').load()
 except OSError:
