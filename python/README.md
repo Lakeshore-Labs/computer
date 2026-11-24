@@ -46,7 +46,9 @@ version and checked against a SHA-256 written in the script or in that file.
   against this CPython and registered as static modules under the top-level names `_imaging` and `etree`; the
   files `PIL/_imaging.py` and `lxml/etree.py` are stubs that put those modules in their packages' places. Pillow
   has JPEG (libjpeg 9f) and PNG (zlib) but no FreeType, WebP, TIFF or AVIF, so `ImageFont` draws only its built-in
-  bitmap font. lxml has XPath, XSLT and EXSLT, and no `lxml.objectify`. libxml2 is built without threads, iconv
+  bitmap font, and no `ImageMath`, `ImageMorph` or `ImageCms`. lxml has XPath, XSLT and EXSLT, and no
+  `lxml.objectify`. A script's own module named `_imaging` or `etree` cannot be imported, since a built-in module
+  of that name comes first. libxml2 is built without threads, iconv
   (UTF-8, UTF-16 and Latin-1 only), zlib, HTTP and catalogs.
 - **Exception handling is on.** Pillow's JPEG codec uses `setjmp`, which WASI builds as WebAssembly exceptions, so
   python.wasm needs a runtime with the exception-handling proposal in its exnref form; `computer.LoadPython` turns

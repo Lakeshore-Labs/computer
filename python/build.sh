@@ -105,7 +105,9 @@ CROSS="--host=wasm32-unknown-wasi --disable-shared --enable-static --prefix=$DEP
 if [ ! -f "$DEPS/lib/libjpeg.a" ]; then
 	autotools jpeg.tar.gz jpeg
 	CC="$WASICC" AR="$S/bin/llvm-ar" RANLIB="$S/bin/llvm-ranlib" CFLAGS=-O2 ./configure -q $CROSS
-	make -j "$JOBS" libjpeg.la && make install-libLTLIBRARIES install-includeHEADERS && cp jconfig.h "$DEPS/include/"
+	make -j "$JOBS" libjpeg.la
+	make install-libLTLIBRARIES install-includeHEADERS
+	cp jconfig.h "$DEPS/include/"
 fi
 
 # 3c. libxml2 2.15.2 and libxslt 1.1.45, static, for lxml. WASI has no dup(), which libxml2 calls when it reads a
@@ -116,7 +118,8 @@ if [ ! -f "$DEPS/lib/libxml2.a" ]; then
 	CC="$WASICC" AR="$S/bin/llvm-ar" RANLIB="$S/bin/llvm-ranlib" CFLAGS=-O2 ./configure -q $CROSS --without-python \
 		--without-threads --without-iconv --without-modules --without-zlib --without-debug --without-catalog \
 		--without-readline --without-icu --without-http
-	make -j "$JOBS" libxml2.la && make install-libLTLIBRARIES install-data
+	make -j "$JOBS" libxml2.la
+	make install-libLTLIBRARIES install-data
 fi
 if [ ! -f "$DEPS/lib/libxslt.a" ]; then
 	autotools libxslt.tar.xz libxslt
@@ -213,7 +216,8 @@ rm -rf "$SP"/*.data
 cp -R "$PIL/PIL" "$SP/"
 (cd "$LX/.." && tar cf - --exclude tests --exclude '*.c' --exclude '*.h' --exclude '*.pyx' --exclude '*.pxd' \
 	--exclude '*.pxi' lxml) | (cd "$SP" && tar xf -)
-printf 'import sys\nimport _imaging\nsys.modules[__name__] = _imaging\n' > "$SP/PIL/_imaging.py"
+# PIL.features reads the module's __file__, which a built-in module lacks.
+printf 'import sys\nimport _imaging\n_imaging.__file__ = __file__\nsys.modules[__name__] = _imaging\n' > "$SP/PIL/_imaging.py"
 printf 'import sys\nimport etree\nsys.modules[__name__] = etree\n' > "$SP/lxml/etree.py"
 mkdir -p "$SP/pillow.dist-info" "$SP/lxml.dist-info"
 cp "$WORK/src/pillow-13.0.0/LICENSE" "$SP/pillow.dist-info/"

@@ -280,8 +280,16 @@ d = docx.Document(); d.add_paragraph('Weekly recap'); d.add_picture('bar.jpg'); 
 p = pptx.Presentation(); s = p.slides.add_slide(p.slide_layouts[6]); s.shapes.add_picture('bar.jpg', Inches(1), Inches(1)); p.save('deck.pptx')
 print(docx.Document('recap.docx').paragraphs[0].text, len(docx.Document('recap.docx').inline_shapes), Image.open('bar.jpg').size)
 print(len(pptx.Presentation('deck.pptx').slides[0].shapes))
+from lxml import etree
+open('t.xml', 'w').write('<a><b>x</b></a>')
+print(etree.parse('t.xml').xpath('//b')[0].text)
+open('bad.jpg', 'wb').write(open('bar.jpg', 'rb').read()[:200])
+try:
+    Image.open('bad.jpg').load()
+except OSError:
+    print('corrupt')
 "`)
-	if got != "Weekly recap 1 (40, 20)\n1" {
+	if got != "Weekly recap 1 (40, 20)\n1\nx\ncorrupt" {
 		t.Errorf("got %q", got)
 	}
 }
