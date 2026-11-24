@@ -83,22 +83,32 @@ try:
     os.chdir(os.environ.get("PYCWD", "/"))
 except OSError:
     pass
+def warn(option):
+    try:
+        warnings._setoption(option)
+    except warnings._OptionError as e:
+        print("Invalid -W option ignored:", e, file=sys.stderr)
 args, rest = [], sys.argv[1:]
 while rest and rest[0].startswith("-") and rest[0] not in ("-", "-c", "-m"):
     a = rest.pop(0)
-    if a in ("-W", "-X") and rest:
+    if a in ("-W", "-X"):
+        if not rest:
+            print("Argument expected for the " + a + " option", file=sys.stderr)
+            sys.exit(2)
         v = rest.pop(0)
         if a == "-W":
-            warnings._setoption(v)
+            warn(v)
         else:
             args += [a, v]
     elif a.startswith("-W"):
-        warnings._setoption(a[2:])
+        warn(a[2:])
     elif a not in ("-O", "-OO", "-q", "-S"):
         args.append(a)
 if rest and rest[0] not in ("-", "-c", "-m"):
     rest[0] = os.path.abspath(rest[0])
-    sys.path.insert(0, os.path.dirname(rest[0]))
+    # The interpreter puts a directory or zip that is run on the path itself.
+    if not os.path.isdir(rest[0]) and not rest[0].endswith(".zip"):
+        sys.path.insert(0, os.path.dirname(rest[0]))
 else:
     sys.path.insert(0, os.getcwd())
 sys.path.append("` + pythonSite + `")
