@@ -29,10 +29,11 @@ From an empty working directory, on Linux or macOS:
 
     mkdir work && cd work && sh /path/to/python/build.sh
 
-It writes `downloads/`, `src/`, `build/` and `dist/` there, and takes a few minutes. It needs `curl`, `tar`,
-`unzip`, `make` and a C compiler; on Debian or Ubuntu, `apt-get install build-essential ca-certificates curl unzip`.
-It downloads wasi-sdk 33, CPython 3.15.2, zlib 1.3.1, SQLite 3.54.1 and the packages in `requirements.txt`, each
-pinned to a version and checked against a SHA-256 written in the script or in that file.
+It writes `downloads/`, `src/`, `build/` and `dist/` there, and takes a few minutes. It needs `curl`, `tar`, `xz`,
+`unzip`, `patch`, `make` and a C compiler; on Debian or Ubuntu, `apt-get install build-essential ca-certificates
+curl unzip xz-utils patch`. It downloads wasi-sdk 33, CPython 3.15.2, zlib 1.3.1, SQLite 3.54.1, libjpeg 9f,
+libxml2 2.15.2, libxslt 1.1.45, Pillow 13.0.0, lxml 6.1.3 and the packages in `requirements.txt`, each pinned to a
+version and checked against a SHA-256 written in the script or in that file.
 
 ## What differs from a stock CPython build
 
@@ -41,6 +42,18 @@ pinned to a version and checked against a SHA-256 written in the script or in th
   module named `computer`, so the host must provide that module; the `wasm` package of this repository does.
 - **zlib and SQLite are linked in statically**, since a WASI build cannot load extension modules. SQLite is built
   without write-ahead logging, shared cache and extension loading, and with FTS5 and the math functions.
+- **Pillow and lxml are built in.** Their C extension modules, `PIL._imaging` and `lxml.etree`, are compiled
+  against this CPython and registered as static modules under the top-level names `_imaging` and `etree`; the
+  files `PIL/_imaging.py` and `lxml/etree.py` are stubs that put those modules in their packages' places. Pillow
+  has JPEG (libjpeg 9f) and PNG (zlib) but no FreeType, WebP, TIFF or AVIF, so `ImageFont` draws only its built-in
+  bitmap font. lxml has XPath, XSLT and EXSLT, and no `lxml.objectify`. libxml2 is built without threads, iconv
+  (UTF-8, UTF-16 and Latin-1 only), zlib, HTTP and catalogs.
+- **Exception handling is on.** Pillow's JPEG codec uses `setjmp`, which WASI builds as WebAssembly exceptions, so
+  python.wasm needs a runtime with the exception-handling proposal in its exnref form; `computer.LoadPython` turns
+  it on in wazero.
+- **libxml2 keeps a descriptor it opened instead of duplicating it.** WASI has no `dup`; `libxml2-wasi.patch`
+  changes the one place libxml2 calls it when reading a file by name, and makes writing to `-` (standard output)
+  an error.
 - **`clock_nanosleep` is disabled.** CPython would otherwise sleep until an absolute time, which wazero does not
   support, and `time.sleep` would fail. Two configure values are needed, because configure repeats the check with
   `-lrt`.
@@ -58,7 +71,11 @@ licence files stay in each package's `*.dist-info`.
 | openpyxl (et_xmlfile) | 3.1.5 (2.0.0) | read and write `.xlsx` |
 | XlsxWriter | 3.3.3 | write `.xlsx` with formats and charts |
 | pypdf | 7.1.1 | read text from, merge and split PDFs |
-| fpdf2 (fonttools, defusedxml) | 2.8.7 (4.68.0, 0.7.1) | create PDFs; no images, because Pillow is absent |
+| fpdf2 (fonttools, defusedxml) | 2.8.7 (4.68.0, 0.7.1) | create PDFs, with images |
+| python-docx | 1.2.0 | read and write `.docx` |
+| python-pptx | 1.0.2 | read and write `.pptx`, with native charts |
+| Pillow (built in) | 13.0.0 | images: JPEG and PNG |
+| lxml (built in) | 6.1.3 | XML, XPath and XSLT |
 | mammoth (cobble) | 1.13.0 (0.1.4) | read `.docx` as HTML or text |
 | PyYAML | 6.0.4 | YAML, without libyaml |
 | Jinja2 (MarkupSafe) | 3.1.6 (3.0.4) | templates |
@@ -69,11 +86,11 @@ licence files stay in each package's `*.dist-info`.
 | Markdown | 3.11.3 | Markdown to HTML |
 | tomli_w | 1.2.0 | write TOML; `tomllib` reads it |
 
-The rule is pure Python only. The sandbox cannot load C extension modules, has no network and no `ssl`, so a
-package with a compiled part (lxml, Pillow, numpy, pandas) cannot work, and neither can one that needs the network.
-Check a new package by importing it and running a round trip in the computer before adding it. These were tried and
-left out: python-docx and docx2python (import lxml), reportlab (imports Pillow at import time), fpdf2 2.8.8 and
-later (import `urllib.request.HTTPSHandler`, which needs `ssl`), and xlrd (imports `mmap`, which is absent).
+The rule is pure Python, apart from Pillow and lxml, which `build.sh` builds into python.wasm. The sandbox cannot
+load C extension modules, has no network and no `ssl`, so any other package with a compiled part (numpy, pandas)
+cannot work, and neither can one that needs the network. Check a new package by importing it and running a round
+trip in the computer before adding it. These were tried and left out: fpdf2 2.8.8 and later (import
+`urllib.request.HTTPSHandler`, which needs `ssl`), and xlrd (imports `mmap`, which is absent).
 PyYAML and MarkupSafe publish no pure wheel, so the source archive is used and only its Python package is copied.
 The library is compiled to bytecode ahead of time (`build.sh` step 7), so an import does not compile its source
 again, but importing a large package is still slow, and the first import of `fpdf` takes about ten seconds.

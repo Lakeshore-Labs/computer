@@ -1,0 +1,47 @@
+--- a/xmlIO.c
++++ b/xmlIO.c
+@@ -1227,13 +1227,21 @@
+     }
+ #endif /* LIBXML_ZLIB_ENABLED */
+ 
++#ifdef __wasi__
++    /* WASI has no dup: the buffer takes over fd, which its caller then closes only on an error. The public
++     * functions that read a caller's descriptor (xmlCtxtReadFd, xmlReaderForFd) take it over too. */
++    copy = fd;
++#else
+     copy = dup(fd);
+     if (copy == -1)
+         return(xmlIOErr(errno));
++#endif
+ 
+     fdctxt = xmlMalloc(sizeof(*fdctxt));
+     if (fdctxt == NULL) {
++#ifndef __wasi__
+         close(copy);
++#endif
+         return(XML_ERR_NO_MEMORY);
+     }
+     fdctxt->fd = copy;
+@@ -1261,7 +1269,12 @@
+     (void) compression;
+ 
+     if (!strcmp(filename, "-")) {
++#ifdef __wasi__
++        errno = ENOTSUP;
++        fd = -1;
++#else
+         fd = dup(STDOUT_FILENO);
++#endif
+ 
+         if (fd < 0)
+             return(xmlIOErr(errno));
+@@ -1527,6 +1540,9 @@
+ 
+             if (ret == XML_ERR_OK) {
+                 ret = xmlInputFromFd(buf, fd, flags);
++#ifdef __wasi__
++                if (ret != XML_ERR_OK)
++#endif
+                 close(fd);
+                 break;
+             } else if (ret != XML_IO_ENOENT) {

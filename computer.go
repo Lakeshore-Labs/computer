@@ -31,6 +31,7 @@ import (
 	gbfs "github.com/Lakeshore-Labs/gbash/fs"
 	"github.com/Lakeshore-Labs/gbash/policy"
 	"github.com/Lakeshore-Labs/gbash/shell/syntax"
+	"github.com/tetratelabs/wazero/experimental"
 )
 
 // A Mount is a directory the shell and every program see at the path Guest: the filesystem FS, which can be
@@ -70,6 +71,8 @@ func LoadPython(ctx context.Context, binary, lib string, p wasm.Program) (*Pytho
 		return nil, err
 	}
 	p.Host = tools.Host
+	// Pillow's JPEG codec uses setjmp, which WASI builds as WebAssembly exceptions.
+	p.Features |= experimental.CoreFeaturesExceptionHandling
 	module, err := wasm.Compile(ctx, p)
 	if err != nil {
 		return nil, err

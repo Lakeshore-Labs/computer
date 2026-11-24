@@ -266,6 +266,26 @@ print(c.execute('pragma integrity_check').fetchone()[0])
 	}
 }
 
+func TestPythonMakesAWordDocumentAndADeckWithAPicture(t *testing.T) {
+	if os.Getenv("PYTHON_WASM") == "" {
+		t.Skip("the embedded build has no Pillow or lxml until it is the python-3.15.2-4 release")
+	}
+	c := newComputer(t, Config{Python: python(t)})
+	got := run(t, c, `python3 -c "
+from PIL import Image
+import docx, pptx
+from pptx.util import Inches
+Image.new('RGB', (40, 20), 'navy').save('bar.jpg')
+d = docx.Document(); d.add_paragraph('Weekly recap'); d.add_picture('bar.jpg'); d.save('recap.docx')
+p = pptx.Presentation(); s = p.slides.add_slide(p.slide_layouts[6]); s.shapes.add_picture('bar.jpg', Inches(1), Inches(1)); p.save('deck.pptx')
+print(docx.Document('recap.docx').paragraphs[0].text, len(docx.Document('recap.docx').inline_shapes), Image.open('bar.jpg').size)
+print(len(pptx.Presentation('deck.pptx').slides[0].shapes))
+"`)
+	if got != "Weekly recap 1 (40, 20)\n1" {
+		t.Errorf("got %q", got)
+	}
+}
+
 func TestTheShellWritesOnlyWhereProgramsSeeTheResult(t *testing.T) {
 	c := newComputer(t, Config{Python: python(t)})
 	if got := run(t, c, `f=$(mktemp); echo shared > $f; python3 -c "import sys; print(open(sys.argv[1]).read().strip())" $f; echo quiet > /dev/null`); got != "shared" {
