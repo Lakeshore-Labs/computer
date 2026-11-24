@@ -8,7 +8,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"io"
-	"sync"
+	"slices"
 	"time"
 
 	"github.com/spf13/afero"
@@ -38,18 +38,18 @@ type Program struct {
 	// run may take MemoryPages of memory, so this is what bounds the memory of all of them. Zero is no limit.
 	MaxRuns int
 
-	// Host answers the program's host call, and HostModule is the module name the binary imports it from. The
-	// module exports call(ptr, len) -> replyLen, which hands Host a message from the program's memory, and
-	// read(ptr), which copies the reply into it. Nil gives the program no host call.
-	HostModule string
-	Host       func(ctx context.Context, request []byte) []byte
+	// Host answers the program's host call: host::call(ptr, len, replyPtrPtr, replyLenPtr) -> status, as
+	// wasi-python's door is. It hands Host the request in the program's memory, puts the reply in memory the
+	// program's exported host_alloc gives, and stores the reply's address and length. Nil gives the program no
+	// host call: the call answers -1.
+	Host func(ctx context.Context, request []byte) []byte
 }
 
 // A Module is a compiled Program. It is safe for concurrent runs, each with its own memory.
 type Module struct {
 	runtime wazero.Runtime
 	code    wazero.CompiledModule
-	replies sync.Map      // a running instance to the reply it has not read yet
+	reactor bool          // the binary exports run, called after _initialize, in place of a main
 	turns   chan struct{} // one place for each run allowed at once; nil when there is no limit
 }
 
@@ -76,32 +76,34 @@ func Compile(ctx context.Context, p Program) (*Module, error) {
 	if _, err := wasi_snapshot_preview1.Instantiate(ctx, m.runtime); err != nil {
 		return nil, errors.Join(err, m.Close(ctx))
 	}
-	if p.Host != nil {
-		_, err := m.runtime.NewHostModuleBuilder(p.HostModule).
-			NewFunctionBuilder().WithFunc(func(ctx context.Context, mod api.Module, ptr, n uint32) uint32 {
+	_, err := m.runtime.NewHostModuleBuilder("host").NewFunctionBuilder().
+		WithFunc(func(ctx context.Context, mod api.Module, ptr, n, replyPtrPtr, replyLenPtr uint32) int32 {
+			if p.Host == nil {
+				return -1
+			}
 			request, ok := mod.Memory().Read(ptr, n)
-			if !ok {
-				panic("host call: the message is outside the program's memory")
+			alloc := mod.ExportedFunction("host_alloc")
+			if !ok || alloc == nil {
+				return -2
 			}
-			reply := p.Host(ctx, request)
-			m.replies.Store(mod, reply)
-			return uint32(len(reply))
-		}).Export("call").
-			NewFunctionBuilder().WithFunc(func(_ context.Context, mod api.Module, ptr uint32) {
-			reply, _ := m.replies.LoadAndDelete(mod)
-			if b, _ := reply.([]byte); !mod.Memory().Write(ptr, b) {
-				panic("host call: the reply does not fit the program's memory")
+			reply := p.Host(ctx, slices.Clone(request)) // the program's memory may move while the host answers
+			at, err := alloc.Call(ctx, uint64(len(reply)))
+			if err != nil || len(at) == 0 {
+				return -2
 			}
-		}).Export("read").
-			Instantiate(ctx)
-		if err != nil {
-			return nil, errors.Join(err, m.Close(ctx))
-		}
+			if !mod.Memory().Write(uint32(at[0]), reply) || !mod.Memory().WriteUint32Le(replyPtrPtr, uint32(at[0])) ||
+				!mod.Memory().WriteUint32Le(replyLenPtr, uint32(len(reply))) {
+				return -2
+			}
+			return 0
+		}).Export("call").Instantiate(ctx)
+	if err != nil {
+		return nil, errors.Join(err, m.Close(ctx))
 	}
-	var err error
 	if m.code, err = m.runtime.CompileModule(ctx, p.Binary); err != nil {
 		return nil, errors.Join(err, m.Close(ctx))
 	}
+	_, m.reactor = m.code.ExportedFunctions()["run"]
 	return m, nil
 }
 
@@ -167,9 +169,18 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 	for k, v := range r.Env {
 		cfg = cfg.WithEnv(k, v)
 	}
+	code := 0
+	if m.reactor { // a reactor is started by _initialize, and its run returns the exit code
+		cfg = cfg.WithStartFunctions("_initialize")
+	}
 	mod, err := m.runtime.InstantiateModule(ctx, m.code, cfg)
+	if err == nil && m.reactor {
+		var res []uint64
+		if res, err = mod.ExportedFunction("run").Call(ctx); err == nil && len(res) == 1 {
+			code = int(int32(res[0]))
+		}
+	}
 	if mod != nil {
-		m.replies.Delete(mod)
 		_ = mod.Close(ctx)
 	}
 	var exit *sys.ExitError
@@ -181,7 +192,7 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 	case err != nil:
 		return 70, err
 	}
-	return 0, nil
+	return code, nil
 }
 
 // stdin is a program's standard input, read for it by a goroutine, so that a program waiting on its input is still

@@ -14,7 +14,7 @@ require (
 	github.com/klippa-app/go-pdfium v1.21.5
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/spf13/afero v1.15.0
-	github.com/tetratelabs/wazero v1.12.0
+	github.com/tetratelabs/wazero v1.12.1-0.20261019203559-ef2dd2f85376
 	golang.org/x/image v0.46.0
 	golang.org/x/sys v0.50.0
 	golang.org/x/term v0.48.0

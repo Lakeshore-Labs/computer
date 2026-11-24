@@ -155,16 +155,20 @@ pdftoppm -png -r 100 report.pdf page       # writes page-1.png, page-2.png, ... 
 
 ## Python
 
-`python3` is a CPython built for WASI and embedded in the module, about 30 MB. On first use it is unpacked, about
-90 MB, into `computer/python-<checksum>` in the user's cache directory. The program uses it; from Go:
+`python3` is [wasi-python](https://github.com/ClayGendron/wasi_python) 0.1.6, CPython 3.15 built for WASI with
+numpy, pandas, scipy, scikit-learn, statsmodels, matplotlib, seaborn, Pillow, lxml, openpyxl, XlsxWriter,
+python-docx, python-pptx, pypdf, pdfplumber, reportlab and about forty more packages compiled in. The module embeds
+it, about 97 MB; on first use it is unpacked, about 270 MB, into `computer/python-<checksum>` in the user's cache
+directory. The program uses it; from Go:
 
 ```go
-python, err := computer.EmbeddedPython(ctx, wasm.Program{MaxRuns: 8})
+python, err := computer.EmbeddedPython(ctx, wasm.Program{MaxRuns: 8, CacheDir: cacheDir})
 ```
 
-A build of your own is given with `computer.LoadPython`, or to the program with `-python` and `-python-lib`. The
-build is made by a workflow in this repository from [`python/build.sh`](python/build.sh). See
-[`python/README.md`](python/README.md) for what is in it, how to build it yourself and how to embed a new one.
+Compiling it takes about 30 seconds the first time and under a second from `CacheDir`; it runs in the background,
+and only the first `python3` waits for it. A release of your own, laid out as `computer.LoadPython` describes, is
+given with `computer.LoadPython`, or to the program with `-python DIR`. See [`python/README.md`](python/README.md)
+for what is in it and how to embed a new release.
 
 ## The boundary
 
@@ -182,7 +186,12 @@ build is made by a workflow in this repository from [`python/build.sh`](python/b
 
 - Stopping a WebAssembly run at its deadline makes Python three to four times slower. `wasm.Program.Unstoppable`
   trades that away for trusted scripts.
-- In our Python build `asyncio` and thread timeouts do not work, and there is no numpy or pandas.
+- Python has no threads, processes, sockets, `ctypes` or `mmap`, and numpy's default integer is 32-bit
+  (wasi-python's limits). Its `time.sleep` is replaced with a `select` timeout, since wazero does not support
+  sleeping until an absolute time. matplotlib's first import takes several seconds.
+- wasi-python's C++ throws WebAssembly exceptions, which wazero runs only with its experimental exception handling
+  turned on. The module therefore uses an unreleased wazero commit that fixes exceptions corrupting locals
+  (wazero#2503), and wazero#2522, a use-after-free in that support, is still open.
 - A shell command reads a file of at most 256 MiB, and a script runs at most 1,000,000 commands and as many loop
   iterations; a command's captured output is cut at gbash's default of 1 MiB. A larger file has to be handled in
   Python. An embedder changes these with `gbash.WithLimitOverrides` in `Config.Options`.
@@ -194,8 +203,7 @@ build is made by a workflow in this repository from [`python/build.sh`](python/b
 go test .
 ```
 
-The tests use the embedded Python, unless `PYTHON_WASM` and `PYTHON_LIB` name another build, whose host module is
-`PYTHON_HOST_MODULE`.
+The tests use the embedded Python, unless `PYTHON_DIR` names an unpacked release.
 
 ## License
 
