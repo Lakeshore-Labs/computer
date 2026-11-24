@@ -1,7 +1,11 @@
 package wasm
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/Lakeshore-Labs/computer/files"
 
 	"github.com/spf13/afero"
 	"github.com/tetratelabs/wazero/experimental/sys"
@@ -109,5 +113,59 @@ func TestADirectoryInMemoryIsListedAgainAfterARewind(t *testing.T) {
 		if _, errno := f.Seek(0, 0); errno != 0 {
 			t.Fatal(errno)
 		}
+	}
+}
+
+func TestAHostDirectoryIsRewoundByItselfNotByItsName(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "a.txt"), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(filepath.Join(root, "d"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "d", "a.txt"), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	host, err := files.Dir(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer host.Close()
+	f, errno := (&dirFS{fs: host}).OpenFile("d", sys.O_RDONLY|sys.O_DIRECTORY, 0)
+	if errno != 0 {
+		t.Fatal(errno)
+	}
+	defer f.Close()
+	if _, errno := f.Readdir(-1); errno != 0 {
+		t.Fatal(errno)
+	}
+	if err := os.Rename(filepath.Join(root, "d"), filepath.Join(root, "e")); err != nil {
+		t.Fatal(err)
+	}
+	if _, errno := f.Seek(0, 0); errno != 0 {
+		t.Fatalf("rewind: %v", errno)
+	}
+	// Not the entries: on macOS a renamed directory's rewound listing is empty for os.File itself.
+	if _, errno := f.Readdir(-1); errno != 0 {
+		t.Errorf("listing after the rename: %v", errno)
+	}
+}
+
+func TestAPathInTwoMemoryMountsIsTwoFiles(t *testing.T) {
+	var stats [][2]uint64 // device, inode
+	for range 2 {
+		mem := afero.NewMemMapFs()
+		if err := afero.WriteFile(mem, "/a.txt", nil, 0o644); err != nil {
+			t.Fatal(err)
+		}
+		st, errno := newDirFS(mem, false).Stat("a.txt")
+		if errno != 0 {
+			t.Fatal(errno)
+		}
+		stats = append(stats, [2]uint64{st.Dev, st.Ino})
+	}
+	if stats[0] == stats[1] {
+		t.Errorf("both are device and inode %v", stats[0])
 	}
 }

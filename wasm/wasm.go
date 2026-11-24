@@ -147,7 +147,7 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 			defer host.Close()
 			dir = host
 		}
-		fs = fs.(sysfs.FSConfig).WithSysFSMount(&dirFS{fs: dir, readOnly: d.ReadOnly}, d.Guest)
+		fs = fs.(sysfs.FSConfig).WithSysFSMount(newDirFS(dir, d.ReadOnly), d.Guest)
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()

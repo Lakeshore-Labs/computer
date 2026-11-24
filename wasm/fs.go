@@ -7,9 +7,11 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"sync/atomic"
 	"time"
 
 	"github.com/spf13/afero"
+	"github.com/spf13/afero/mem"
 	"github.com/tetratelabs/wazero/experimental/sys"
 	wsys "github.com/tetratelabs/wazero/sys"
 )
@@ -23,6 +25,14 @@ type dirFS struct {
 	sys.UnimplementedFS
 	fs       afero.Fs
 	readOnly bool
+	dev      uint64 // the device of its files that have no inode of their own
+}
+
+// devices numbers each dirFS, so that the files of two memory filesystems are not the same file.
+var devices atomic.Uint64
+
+func newDirFS(fs afero.Fs, readOnly bool) *dirFS {
+	return &dirFS{fs: fs, readOnly: readOnly, dev: devices.Add(1)}
 }
 
 // errno is err as WASI reports it.
@@ -95,20 +105,29 @@ func (d *dirFS) OpenFile(p string, flag sys.Oflag, perm fs.FileMode) (sys.File, 
 		_ = f.Close()
 		return nil, sys.ENOTDIR
 	}
-	return &file{f: f, fs: d.fs, name: name, appends: flag&sys.O_APPEND != 0}, 0
+	return &file{f: f, fs: d.fs, name: name, dev: d.dev, appends: flag&sys.O_APPEND != 0}, 0
 }
 
-// stat is info, of the file at name, as WASI reports it. A filesystem without inodes, such as afero's memory one,
-// would give every file inode 0, which makes any two files the same file; such a file's inode is then a hash of
-// its name.
-func stat(info os.FileInfo, name string) wsys.Stat_t {
+// stat is info, of the file at name on device dev, as WASI reports it. A filesystem without inodes, such as
+// afero's memory one, would give every file inode 0, which makes any two files the same file; such a file's inode
+// is then a hash of its name, and its device dev.
+func stat(info os.FileInfo, name string, dev uint64) wsys.Stat_t {
 	st := wsys.NewStat_t(info)
 	if st.Ino == 0 {
 		h := fnv.New64a()
 		h.Write([]byte(path.Clean(name)))
-		st.Ino = h.Sum64()
+		st.Ino, st.Dev = h.Sum64(), dev
 	}
 	return st
+}
+
+// inMemory reports whether f is a file of afero's memory filesystem, alone or under a BasePathFs.
+func inMemory(f afero.File) bool {
+	if b, ok := f.(*afero.BasePathFile); ok {
+		f = b.File
+	}
+	_, ok := f.(*mem.File)
+	return ok
 }
 
 func (d *dirFS) Stat(p string) (wsys.Stat_t, sys.Errno) {
@@ -116,7 +135,7 @@ func (d *dirFS) Stat(p string) (wsys.Stat_t, sys.Errno) {
 	if err != nil {
 		return wsys.Stat_t{}, errno(err)
 	}
-	return stat(info, "/"+p), 0
+	return stat(info, "/"+p, d.dev), 0
 }
 
 func (d *dirFS) Lstat(p string) (wsys.Stat_t, sys.Errno) {
@@ -124,7 +143,7 @@ func (d *dirFS) Lstat(p string) (wsys.Stat_t, sys.Errno) {
 	if err != nil {
 		return wsys.Stat_t{}, errno(err)
 	}
-	return stat(info, "/"+p), 0
+	return stat(info, "/"+p, d.dev), 0
 }
 
 func (d *dirFS) Readlink(p string) (string, sys.Errno) {
@@ -205,6 +224,7 @@ type file struct {
 	f    afero.File
 	fs   afero.Fs // the filesystem f was opened from, and its name there
 	name string
+	dev  uint64
 	// appends is used for a file that cannot set its own append mode: each write is then placed at the end by a
 	// seek before it, which is sound only while nothing else appends to the file.
 	appends bool
@@ -221,7 +241,7 @@ func (f *file) stat() (wsys.Stat_t, sys.Errno) {
 	if err != nil {
 		return wsys.Stat_t{}, errno(err)
 	}
-	return stat(info, f.name), 0
+	return stat(info, f.name, f.dev), 0
 }
 
 func (f *file) Stat() (wsys.Stat_t, sys.Errno) { return f.stat() }
@@ -245,16 +265,16 @@ func (f *file) SetAppend(on bool) sys.Errno {
 }
 
 // read is a read's result as WASI reports it: the end of the file is no bytes and no error. afero's memory files
-// report a read that starts past the end as io.ErrUnexpectedEOF.
-func read(n int, err error) (int, sys.Errno) {
-	if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+// report a read that starts past the end as io.ErrUnexpectedEOF, which from another file is a real error.
+func (f *file) read(n int, err error) (int, sys.Errno) {
+	if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) && inMemory(f.f) {
 		return n, 0
 	}
 	return n, errno(err)
 }
 
-func (f *file) Read(b []byte) (int, sys.Errno)             { return read(f.f.Read(b)) }
-func (f *file) Pread(b []byte, off int64) (int, sys.Errno) { return read(f.f.ReadAt(b, off)) }
+func (f *file) Read(b []byte) (int, sys.Errno)             { return f.read(f.f.Read(b)) }
+func (f *file) Pread(b []byte, off int64) (int, sys.Errno) { return f.read(f.f.ReadAt(b, off)) }
 
 func (f *file) Write(b []byte) (int, sys.Errno) {
 	if _, own := f.f.(appender); !own && f.appends {
@@ -272,9 +292,10 @@ func (f *file) Pwrite(b []byte, off int64) (int, sys.Errno) {
 }
 
 // Seek of a directory to its start is how wazero rewinds it to list it again. afero's memory directories keep
-// their place in the listing across a seek, so the directory is opened again instead.
+// their place in the listing across a seek, so such a directory is opened again by its name instead; any other
+// file seeks itself, which stays right when the directory is renamed.
 func (f *file) Seek(offset int64, whence int) (int64, sys.Errno) {
-	if offset == 0 && whence == io.SeekStart {
+	if offset == 0 && whence == io.SeekStart && inMemory(f.f) {
 		if info, err := f.f.Stat(); err == nil && info.IsDir() {
 			again, err := f.fs.Open(f.name)
 			if err != nil {
@@ -296,7 +317,7 @@ func (f *file) Readdir(n int) ([]sys.Dirent, sys.Errno) {
 	}
 	dirents := make([]sys.Dirent, 0, len(entries))
 	for _, info := range entries {
-		dirents = append(dirents, sys.Dirent{Name: info.Name(), Type: info.Mode().Type(), Ino: stat(info, path.Join(f.name, info.Name())).Ino})
+		dirents = append(dirents, sys.Dirent{Name: info.Name(), Type: info.Mode().Type(), Ino: stat(info, path.Join(f.name, info.Name()), f.dev).Ino})
 	}
 	return dirents, 0
 }
