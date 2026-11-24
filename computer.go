@@ -66,53 +66,25 @@ const (
 	pythonMpl  = pythonLib + "/python315.zip/matplotlib/mpl-data"
 	pythonSite = "/usr/lib/python-tools" // where the generated package is mounted
 	// pythonStartCode runs before every program. wasi-python runs in isolated mode, without site and without a
-	// working directory, so it moves to the shell's working directory and puts on the path what CPython would: the
-	// script's directory, or the working directory for -c, -m and standard input, and then the tools package. It
-	// gives the script's path absolute, as CPython does, takes -W as a warnings filter and drops -O, -q and -S,
-	// which wasi-python's own parser refuses, and runs the rest of the arguments through the interpreter's argument
-	// handling, as wasi-python's runner does. wasi-python's time.sleep waits for an absolute time, which wazero does
-	// not support; a select with a timeout waits for a relative one.
-	pythonStartCode = `import os, sys, time, select, warnings, linecache, _reactor
+	// working directory, so it moves to the shell's working directory, puts the script's directory (or the working
+	// directory) and the tools package on the path, and runs the program's arguments as wasi-python's runner does.
+	// wasi-python's time.sleep waits for an absolute time, which wazero does not support; select waits for a
+	// relative one.
+	pythonStartCode = `import os, sys, time, select, linecache, _reactor
 linecache._interactive_cache.clear()
-def sleep(secs, select=select.select):
-    if secs < 0:
-        raise ValueError("sleep length must be non-negative")
-    select([], [], [], secs)
-time.sleep = sleep
+time.sleep = lambda secs: select.select([], [], [], secs)
 try:
     os.chdir(os.environ.get("PYCWD", "/"))
 except OSError:
     pass
-def warn(option):
-    try:
-        warnings._setoption(option)
-    except warnings._OptionError as e:
-        print("Invalid -W option ignored:", e, file=sys.stderr)
-args, rest = [], sys.argv[1:]
-while rest and rest[0].startswith("-") and rest[0] not in ("-", "-c", "-m"):
-    a = rest.pop(0)
-    if a in ("-W", "-X"):
-        if not rest:
-            print("Argument expected for the " + a + " option", file=sys.stderr)
-            sys.exit(2)
-        v = rest.pop(0)
-        if a == "-W":
-            warn(v)
-        else:
-            args += [a, v]
-    elif a.startswith("-W"):
-        warn(a[2:])
-    elif a not in ("-O", "-OO", "-q", "-S"):
-        args.append(a)
-if rest and rest[0] not in ("-", "-c", "-m"):
-    rest[0] = os.path.abspath(rest[0])
-    # The interpreter puts a directory or zip that is run on the path itself.
-    if not os.path.isdir(rest[0]) and not rest[0].endswith(".zip"):
-        sys.path.insert(0, os.path.dirname(rest[0]))
+args = sys.argv[1:]
+if args and not args[0].startswith("-"):
+    args[0] = os.path.abspath(args[0])
+    sys.path.insert(0, os.path.dirname(args[0]))
 else:
     sys.path.insert(0, os.getcwd())
 sys.path.append("` + pythonSite + `")
-sys.exit(_reactor.run(["` + pythonExe + `", *args, *rest], dict(os.environ)))
+sys.exit(_reactor.run(["` + pythonExe + `", *args], dict(os.environ)))
 `
 )
 
@@ -121,11 +93,6 @@ sys.exit(_reactor.run(["` + pythonExe + `", *args, *rest], dict(os.environ)))
 // first python3 waits for the compile, and fails with its error. p's Binary is read from the file, its host call
 // is answered by the computer's tools, and a zero MemoryPages is 8192 (512 MiB); its other fields are the caller's.
 func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error) {
-	for _, name := range []string{"lib/python315.zip", "mpl-data/matplotlibrc"} {
-		if _, err := os.Stat(filepath.Join(dir, name)); err != nil {
-			return nil, err
-		}
-	}
 	var err error
 	if p.Binary, err = os.ReadFile(filepath.Join(dir, "python.wasm")); err != nil {
 		return nil, err
