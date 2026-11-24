@@ -121,9 +121,9 @@ func run(ctx context.Context) error {
 	flag.Var(&allow, "allow-url", "a URL prefix curl may fetch; repeatable; none gives the computer no network")
 	workDir := flag.String("workdir", "", "where commands start; the first mount when empty")
 	flag.Var(&servers, "mcp", "an MCP server whose tools become commands: name=URL, or name='command arguments' for a server started as a program and spoken to on its standard streams, each one command of that name; or a bare URL, to group its tools by the prefix of their names; repeatable; a bearer token for a URL is read from COMPUTER_MCP_TOKEN_<NAME>, with a hyphen as an underscore, or COMPUTER_MCP_TOKEN for a bare URL")
-	python := flag.String("python", "", "a CPython built for WASI, for python3")
+	python := flag.String("python", "", "a CPython built for WASI, for python3, in place of the one built in")
 	pythonLib := flag.String("python-lib", "", "the directory holding that build's lib/python3.x")
-	pythonHost := flag.String("python-host", "computer", "the module name the Python build imports its host call from")
+	pythonHost := flag.String("python-host", "computer", "the module name the -python build imports its host call from")
 	pythonRuns := flag.Int("python-runs", 8, "how many python3 may run at once, each with up to 512 MiB; a further one waits; 0 is no limit")
 	pythonFast := flag.Bool("python-unstoppable", false, "run Python three to four times faster, and give up stopping a script that does not end")
 	timeout := flag.Duration("timeout", 2*time.Minute, "in the mcp mode, how long a bash call may run when the agent sets no limit")
@@ -207,16 +207,19 @@ func run(ctx context.Context) error {
 		defer cs.Close()
 		cfg.Tools = append(cfg.Tools, tools.Source{Name: name, Session: cs})
 	}
+	cache, err := cacheDir(cfg.Mounts)
+	if err != nil {
+		return err
+	}
+	program := wasm.Program{MaxRuns: *pythonRuns, CacheDir: cache, Unstoppable: *pythonFast}
 	if *python != "" {
-		cache, err := cacheDir(cfg.Mounts)
-		if err != nil {
-			return err
-		}
-		p, err := computer.LoadPython(ctx, *python, *pythonLib, wasm.Program{MemoryPages: 8192, MaxRuns: *pythonRuns, CacheDir: cache, HostModule: *pythonHost, Unstoppable: *pythonFast})
-		if err != nil {
-			return fmt.Errorf("-python: %w", err)
-		}
-		cfg.Python = p
+		program.MemoryPages, program.HostModule = 8192, *pythonHost
+		cfg.Python, err = computer.LoadPython(ctx, *python, *pythonLib, program)
+	} else {
+		cfg.Python, err = computer.EmbeddedPython(ctx, cache, program)
+	}
+	if err != nil {
+		return fmt.Errorf("python: %w", err)
 	}
 	c, err := computer.New(cfg)
 	if err != nil {

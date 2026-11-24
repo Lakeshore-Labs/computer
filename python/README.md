@@ -5,7 +5,9 @@ built-in module, `_host`, through which a script calls MCP tools.
 
 ## Download it
 
-Each build is made by the `python` workflow in this repository from `build.sh` and attached to a release:
+The module embeds the build as `python-wasi.tar.gz`, so a Go program needs no download (see
+`computer.EmbeddedPython`). Each build is made by the `python` workflow in this repository from `build.sh`,
+attached to a release, and embedded by the pull request the release opens. To download it:
 
     gh release download python-3.15.2-3 --repo Lakeshore-Labs/computer --pattern '*.tar.gz*'
     shasum -a 256 -c python-3.15.2-wasi.tar.gz.sha256

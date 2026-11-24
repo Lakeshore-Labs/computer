@@ -113,18 +113,21 @@ var cpython struct {
 	err    error
 }
 
-// python is the CPython build named by PYTHON_WASM and PYTHON_LIB, compiled once for all the tests; those that
-// need it are skipped without it.
+// python is the CPython build named by PYTHON_WASM and PYTHON_LIB, or the embedded one when they are not set,
+// compiled once for all the tests.
 func python(t *testing.T) *Python {
 	t.Helper()
 	binary, lib := os.Getenv("PYTHON_WASM"), os.Getenv("PYTHON_LIB")
-	if binary == "" || lib == "" {
-		t.Skip("PYTHON_WASM and PYTHON_LIB are not set")
-	}
 	cpython.once.Do(func() {
-		cpython.python, cpython.err = LoadPython(context.Background(), binary, lib, wasm.Program{
-			MemoryPages: 8192, MaxRuns: 2, CacheDir: os.Getenv("PYTHON_CACHE"), HostModule: os.Getenv("PYTHON_HOST_MODULE"), Features: api.CoreFeaturesV2,
-		})
+		p := wasm.Program{MaxRuns: 2, CacheDir: os.Getenv("PYTHON_CACHE"), Features: api.CoreFeaturesV2}
+		if binary == "" || lib == "" {
+			// One directory for every run, which reuses the unpacked build.
+			dir := filepath.Join(os.TempDir(), "computer-test-python")
+			cpython.python, cpython.err = EmbeddedPython(context.Background(), dir, p)
+			return
+		}
+		p.MemoryPages, p.HostModule = 8192, os.Getenv("PYTHON_HOST_MODULE")
+		cpython.python, cpython.err = LoadPython(context.Background(), binary, lib, p)
 	})
 	if cpython.err != nil {
 		t.Fatal(cpython.err)
