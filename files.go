@@ -222,6 +222,12 @@ func (r *ruled) Rename(ctx context.Context, from, to string) error {
 // same reports whether a and b describe one file. ponytail: kinds of mount other than the host's directories and
 // memory report false, so a refused write leaves their new file; add a case for one that matters.
 func same(a, b fs.FileInfo) bool {
+	if o, ok := a.(owned); ok { // the shell's filesystem gives the information as the shell user's own
+		a = o.FileInfo
+	}
+	if o, ok := b.(owned); ok {
+		b = o.FileInfo
+	}
 	ma, okA := a.(*mem.FileInfo)
 	mb, okB := b.(*mem.FileInfo)
 	if okA && okB {
