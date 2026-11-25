@@ -12,6 +12,7 @@ import (
 	"io"
 	"maps"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -352,18 +353,21 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	c.calling, c.modules = names, tools.Modules(sorted)
 	var table []gbfs.MountConfig
 	writable := []string{"/dev/null"} // gbash's own device, which a redirect to nowhere writes
+	var readOnly []string
 	for _, m := range mounts {
 		factory := gbfs.FactoryFunc(func(context.Context) (gbfs.FileSystem, error) {
 			return &shellFS{fs: m.FS, readOnly: m.ReadOnly, cwd: "/"}, nil
 		})
-		if !m.ReadOnly {
+		if m.ReadOnly {
+			readOnly = append(readOnly, path.Clean("/"+strings.TrimSpace(m.Guest))) // as gbash cleans a mount point
+		} else {
 			writable = append(writable, m.Guest)
 		}
 		table = append(table, gbfs.MountConfig{MountPoint: m.Guest, Factory: factory})
 	}
 	// Outside the mounts gbash keeps files in memory, where a program run as WebAssembly cannot see them. The
 	// shell may write only where every program sees the result.
-	writes := policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny, Limits: limits})
+	writes := readOnlyMounts{policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny, Limits: limits}), readOnly}
 	opts := []gbash.Option{gbash.WithPolicy(writes), gbash.WithRegistry(registry), gbash.WithBaseEnv(map[string]string{"HOME": c.cfg.WorkDir}), gbash.WithFileSystem(gbash.MountableFileSystem(gbash.MountableFileSystemOptions{Mounts: table, WorkingDir: c.cfg.WorkDir}))}
 	opts = append(opts, c.cfg.Options...)
 	var built gbash.Config // what the embedder's options leave as the policy
@@ -372,6 +376,28 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	}
 	c.policy = built.Policy
 	return opts, nil
+}
+
+// readOnlyMounts is the shell's policy, which refuses a change to a read-only mount as it refuses one outside every
+// mount, but says why: the path is in a read-only mount. Only the reason differs; what is refused is the same.
+type readOnlyMounts struct {
+	policy.Policy
+	guests []string
+}
+
+func (p readOnlyMounts) AllowPath(ctx context.Context, action policy.FileAction, target string) error {
+	err := p.Policy.AllowPath(ctx, action, target)
+	var denied *policy.DeniedError
+	if !errors.As(err, &denied) {
+		return err
+	}
+	target = path.Clean("/" + target)
+	for _, guest := range p.guests {
+		if target == guest || strings.HasPrefix(target, guest+"/") {
+			return &policy.DeniedError{Subject: denied.Subject, Reason: "read-only file system"}
+		}
+	}
+	return err
 }
 
 // limits are the shell's, chosen for data work: gbash's defaults stop a command at a file of 8 MiB and a script at
