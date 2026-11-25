@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/Lakeshore-Labs/gbash"
 )
 
 // The shell's cd asks the mode bits for the shell's user, who is not the host's: a home that others on the host
@@ -28,4 +30,32 @@ func TestTheShellEntersADirectoryOthersOnTheHostMayNot(t *testing.T) {
 	if got := run(t, c, "cd ~; echo a > a; ln a b 2>/dev/null; cp a c; test a -ef a && echo same; test a -ef c || echo different; ls -ld sub | cut -c1-10"); got != "same\ndifferent\ndrwx------" {
 		t.Errorf("got %q", got)
 	}
+}
+
+// Copying with -p and moving between mounts give the copy its source's owner, which is the shell's user: the host
+// is asked for nothing it would refuse.
+func TestACopyKeepsTheShellUsersOwnerAcrossMounts(t *testing.T) {
+	c := newComputer(t, Config{})
+	if got := run(t, c, "echo a > a; cp -p a b; cp -a a /tmp/a; echo z > z; mv z /tmp/z; mkdir d; echo q > d/q; mv d /tmp/d; mv /tmp/z ./back; ls /tmp | tr '\\n' ' '; cat back /tmp/d/q"); got != "a d z\nq" {
+		t.Errorf("got %q", got)
+	}
+}
+
+// A directory of another user of the host, which the host's process cannot open, is not the shell's.
+func TestAnotherHostUsersDirectoryIsNotTheShells(t *testing.T) {
+	if os.Getuid() == 0 {
+		t.Skip("root opens every directory")
+	}
+	for _, theirs := range []string{"/root", "/var/root"} { // linux, darwin
+		if _, err := os.ReadDir(theirs); !os.IsPermission(err) {
+			continue
+		}
+		c := newComputer(t, Config{Mounts: []Mount{{Guest: "/host", Host: filepath.Dir(theirs), ReadOnly: true}}})
+		res, err := c.Exec(t.Context(), &gbash.ExecutionRequest{Script: "cd /host/root"})
+		if err != nil || res.ExitCode == 0 {
+			t.Errorf("cd into %s: %v, %v; want it refused", theirs, res, err)
+		}
+		return
+	}
+	t.Skip("no directory of another user here")
 }

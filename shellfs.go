@@ -49,13 +49,27 @@ func (s *shellFS) OpenFile(_ context.Context, name string, flag int, perm fs.Fil
 	return f, nil
 }
 
-// owned is a mounted file's information with the shell's user as its owner. gbash's cd asks the mode bits for the
-// shell's user, and a host directory's owner is the host's, so the shell would be anyone else and need a directory
-// open to everyone on the host. What the host's process may open, the shell may: the file is the shell user's own.
-// gbash's own host filesystems wrap their information the same way, and tell two files apart by Sys, kept here.
+// owned is a mounted file's information with its owner as the shell sees it. gbash's cd asks the mode bits for the
+// shell's user, who is not the host's, so in a host directory the shell would be anyone else and need a directory
+// open to everyone on the host. As a user namespace maps one id to another, the host process's user and group are
+// the shell's own here and in Chown, and any other owner of the host is itself: what the host's process may open
+// the shell may, and no more. A file with no owner of the host's, as in memory, is the shell user's own. gbash's
+// own host filesystems wrap their information the same way, and tell two files apart by Sys, which is kept.
 type owned struct{ fs.FileInfo }
 
-func (owned) Ownership() (gbfs.FileOwnership, bool) { return gbfs.DefaultOwnership(), true }
+func (o owned) Ownership() (gbfs.FileOwnership, bool) {
+	own, ok := gbfs.OwnershipFromSys(o.Sys())
+	if !ok {
+		return gbfs.DefaultOwnership(), true
+	}
+	if own.UID == uint32(os.Getuid()) {
+		own.UID = gbfs.DefaultOwnerUID
+	}
+	if own.GID == uint32(os.Getgid()) {
+		own.GID = gbfs.DefaultOwnerGID
+	}
+	return own, true
+}
 
 func own(info fs.FileInfo, err error) (fs.FileInfo, error) {
 	if err != nil {
@@ -113,8 +127,18 @@ func (s *shellFS) change(op, name string, do func() error) error {
 	return do()
 }
 
+// Chown takes the shell's user and group to be the host process's, as owned gives them: cp -p and a move between
+// mounts give a copy its source's owner, which the host would refuse as the shell names it.
 func (s *shellFS) Chown(_ context.Context, name string, uid, gid uint32, _ bool) error {
-	return s.change("chown", name, func() error { return s.fs.Chown(name, int(uid), int(gid)) })
+	host := func(id, shells uint32, hosts int) int {
+		if id == shells {
+			return hosts
+		}
+		return int(id)
+	}
+	return s.change("chown", name, func() error {
+		return s.fs.Chown(name, host(uid, gbfs.DefaultOwnerUID, os.Getuid()), host(gid, gbfs.DefaultOwnerGID, os.Getgid()))
+	})
 }
 
 func (s *shellFS) Chmod(_ context.Context, name string, mode fs.FileMode) error {
