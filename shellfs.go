@@ -38,7 +38,11 @@ func (s *shellFS) OpenFile(_ context.Context, name string, flag int, perm fs.Fil
 	if s.readOnly && flag&(os.O_WRONLY|os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_TRUNC) != 0 {
 		return nil, s.refused("open", name)
 	}
-	f, err := s.fs.OpenFile(name, flag, perm)
+	open := func() (afero.File, error) { return s.fs.OpenFile(name, flag, perm) }
+	if flag == os.O_RDONLY { // by Open, where afero's layered filesystem joins a directory's layers: see wasm's open
+		open = func() (afero.File, error) { return s.fs.Open(name) }
+	}
+	f, err := open()
 	if err != nil {
 		return nil, err
 	}

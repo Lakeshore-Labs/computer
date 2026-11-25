@@ -516,3 +516,20 @@ func TestARedirectReportsAFileThatFailsToClose(t *testing.T) {
 		t.Errorf("exit %d, stdout %q, stderr %q", res.ExitCode, res.Stdout, res.Stderr)
 	}
 }
+
+// afero's layered filesystem joins a directory's two layers only in Open, not in OpenFile.
+func TestAProgramListsBothLayersOfALayeredMount(t *testing.T) {
+	base, layer := afero.NewMemMapFs(), afero.NewMemMapFs()
+	if err := errors.Join(afero.WriteFile(base, "/shared/given.txt", []byte("given"), 0o644), afero.WriteFile(layer, "/own.txt", []byte("own"), 0o644)); err != nil {
+		t.Fatal(err)
+	}
+	c := newComputer(t, Config{Python: python(t), Mounts: []Mount{{Guest: "/layered", FS: afero.NewCopyOnWriteFs(base, layer)}}})
+	const list = `python3 -c "import os; print(sorted(os.listdir('/layered')), sorted(os.listdir('/layered/shared')))"`
+	if got := run(t, c, list); got != "['own.txt', 'shared'] ['given.txt']" {
+		t.Errorf("before a write: %q", got)
+	}
+	// A write under the base's directory makes it in the layer too, which must not hide the base's files.
+	if got := run(t, c, "echo new > /layered/shared/new.txt; ls /layered/shared | tr '\\n' ' '; "+list); got != "given.txt new.txt ['own.txt', 'shared'] ['given.txt', 'new.txt']" {
+		t.Errorf("after a write: %q", got)
+	}
+}

@@ -89,7 +89,7 @@ func (d *dirFS) OpenFile(p string, flag sys.Oflag, perm fs.FileMode) (sys.File, 
 	if mode != os.O_RDONLY && flag&(sys.O_SYNC|sys.O_DSYNC|sys.O_RSYNC) != 0 {
 		mode |= os.O_SYNC
 	}
-	f, err := d.fs.OpenFile(name, mode, perm)
+	f, err := open(d.fs, name, mode, perm)
 	if err != nil {
 		return nil, errno(err)
 	}
@@ -106,6 +106,15 @@ func (d *dirFS) OpenFile(p string, flag sys.Oflag, perm fs.FileMode) (sys.File, 
 		return nil, sys.ENOTDIR
 	}
 	return &file{f: f, fs: d.fs, name: name, dev: d.dev, appends: flag&sys.O_APPEND != 0}, 0
+}
+
+// open is OpenFile, a read by the filesystem's Open: afero's layered filesystem (CopyOnWriteFs) joins a
+// directory's layers there alone, and a directory opened by OpenFile lists one layer.
+func open(fsys afero.Fs, name string, flag int, perm os.FileMode) (afero.File, error) {
+	if flag == os.O_RDONLY {
+		return fsys.Open(name)
+	}
+	return fsys.OpenFile(name, flag, perm)
 }
 
 // stat is info, of the file at name on device dev, as WASI reports it. A filesystem without inodes, such as
