@@ -160,3 +160,16 @@ for change in tries:
 		})
 	}
 }
+
+// A read-only mount whose guest path is spelt otherwise than clean, as gbash accepts it, is told as read-only too.
+func TestAReadOnlyMountSpeltUncleanlyRefusesAsReadOnly(t *testing.T) {
+	for _, guest := range []string{"/ro/", "/ro//", " /ro"} {
+		c := newComputer(t, Config{Mounts: []Mount{{Guest: guest, FS: afero.NewMemMapFs(), ReadOnly: true}}})
+		for _, script := range []string{"echo x > /ro/n", "mkdir /ro/m", "mv /home/user/w /ro/w"} {
+			run(t, c, "echo w > /home/user/w")
+			if res := exec(t, c, script, 0); res.ExitCode == 0 || !refusedAsReadOnly(res.Stderr) {
+				t.Errorf("guest %q: %s: exit %d, told %q", guest, script, res.ExitCode, res.Stderr)
+			}
+		}
+	}
+}

@@ -359,7 +359,7 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 			return &shellFS{fs: m.FS, readOnly: m.ReadOnly, cwd: "/"}, nil
 		})
 		if m.ReadOnly {
-			readOnly = append(readOnly, m.Guest)
+			readOnly = append(readOnly, path.Clean("/"+strings.TrimSpace(m.Guest))) // as gbash cleans a mount point
 		} else {
 			writable = append(writable, m.Guest)
 		}
@@ -393,7 +393,7 @@ func (p readOnlyMounts) AllowPath(ctx context.Context, action policy.FileAction,
 	}
 	target = path.Clean("/" + target)
 	for _, guest := range p.guests {
-		if guest == "/" || target == guest || strings.HasPrefix(target, guest+"/") {
+		if target == guest || strings.HasPrefix(target, guest+"/") {
 			return &policy.DeniedError{Subject: denied.Subject, Reason: "read-only file system"}
 		}
 	}
