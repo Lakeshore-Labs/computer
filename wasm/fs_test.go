@@ -1,6 +1,7 @@
 package wasm
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -109,6 +110,33 @@ func TestADirectoryInMemoryIsListedAgainAfterARewind(t *testing.T) {
 	for i := range 2 {
 		if entries, errno := f.Readdir(-1); len(entries) != 1 || errno != 0 {
 			t.Fatalf("listing %d: %v, %v", i+1, entries, errno)
+		}
+		if _, errno := f.Seek(0, 0); errno != 0 {
+			t.Fatal(errno)
+		}
+	}
+}
+
+func TestAJoinedDirectoryOfTwoLayersIsListedAgainAfterARewind(t *testing.T) {
+	base, layer := afero.NewMemMapFs(), afero.NewMemMapFs()
+	if err := errors.Join(afero.WriteFile(base, "/d/given.txt", nil, 0o644), afero.WriteFile(layer, "/d/own.txt", nil, 0o644)); err != nil {
+		t.Fatal(err)
+	}
+	f, errno := (&dirFS{fs: afero.NewCopyOnWriteFs(base, layer)}).OpenFile("d", sys.O_RDONLY|sys.O_DIRECTORY, 0)
+	if errno != 0 {
+		t.Fatal(errno)
+	}
+	defer f.Close()
+	for i := range 2 {
+		var entries []sys.Dirent
+		for part, errno := f.Readdir(1); len(part) > 0 || errno != 0; part, errno = f.Readdir(1) { // as wazero reads, in parts
+			if errno != 0 {
+				t.Fatal(errno)
+			}
+			entries = append(entries, part...)
+		}
+		if len(entries) != 2 {
+			t.Fatalf("listing %d: %v, want both layers' files", i+1, entries)
 		}
 		if _, errno := f.Seek(0, 0); errno != 0 {
 			t.Fatal(errno)

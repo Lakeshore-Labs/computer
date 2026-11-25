@@ -528,6 +528,9 @@ func TestAProgramListsBothLayersOfALayeredMount(t *testing.T) {
 	if got := run(t, c, list); got != "['own.txt', 'shared'] ['given.txt']" {
 		t.Errorf("before a write: %q", got)
 	}
+	if got := run(t, c, "find /layered -type f | sort | tr '\\n' ' '; du -a /layered | wc -l; cd /layered && echo */*"); got != "/layered/own.txt /layered/shared/given.txt 4\nshared/given.txt" {
+		t.Errorf("the shell's commands that walk: %q", got)
+	}
 	// A write under the base's directory makes it in the layer too, which must not hide the base's files.
 	if got := run(t, c, "echo new > /layered/shared/new.txt; ls /layered/shared | tr '\\n' ' '; "+list); got != "given.txt new.txt ['own.txt', 'shared'] ['given.txt', 'new.txt']" {
 		t.Errorf("after a write: %q", got)

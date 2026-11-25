@@ -139,6 +139,13 @@ func inMemory(f afero.File) bool {
 	return ok
 }
 
+// keepsItsPlace reports whether f, a directory, lists from where it was after a seek to its start: afero's
+// memory directories, and the joined directory of its layered filesystem.
+func keepsItsPlace(f afero.File) bool {
+	_, joined := f.(*afero.UnionFile)
+	return joined || inMemory(f)
+}
+
 func (d *dirFS) Stat(p string) (wsys.Stat_t, sys.Errno) {
 	info, err := d.fs.Stat("/" + p)
 	if err != nil {
@@ -300,11 +307,12 @@ func (f *file) Pwrite(b []byte, off int64) (int, sys.Errno) {
 	return n, errno(err)
 }
 
-// Seek of a directory to its start is how wazero rewinds it to list it again. afero's memory directories keep
-// their place in the listing across a seek, so such a directory is opened again by its name instead; any other
+// Seek of a directory to its start is how wazero rewinds it to list it again. afero's memory directories, and a
+// layered filesystem's joined one, keep their place in the listing across a seek, so such a directory is opened
+// again by its name instead; any other
 // file seeks itself, which stays right when the directory is renamed.
 func (f *file) Seek(offset int64, whence int) (int64, sys.Errno) {
-	if offset == 0 && whence == io.SeekStart && inMemory(f.f) {
+	if offset == 0 && whence == io.SeekStart && keepsItsPlace(f.f) {
 		if info, err := f.f.Stat(); err == nil && info.IsDir() {
 			again, err := f.fs.Open(f.name)
 			if err != nil {
