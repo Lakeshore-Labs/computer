@@ -153,6 +153,9 @@ func New(cfg Config) (_ *Computer, err error) {
 		return nil, err
 	}
 	c.cfg.Mounts = slices.Clone(cfg.Mounts)
+	for i, m := range c.cfg.Mounts {
+		c.cfg.Mounts[i].Guest = path.Clean("/" + strings.TrimSpace(m.Guest)) // as gbash cleans a mount point
+	}
 	if !slices.ContainsFunc(cfg.Mounts, func(m Mount) bool { return m.Guest == "/tmp" }) {
 		if c.tmp, err = os.MkdirTemp("", "computer-tmp"); err != nil {
 			return nil, err
@@ -174,7 +177,48 @@ func New(cfg Config) (_ *Computer, err error) {
 		}
 		c.cfg.Mounts[i].FS, c.opened = dir, append(c.opened, dir)
 	}
+	// A mount inside another is on a folder of it, which must be there, as an operating system's mount point is:
+	// a program lists the outer directory itself, and would not see a mount the shell shows.
+	for _, m := range c.cfg.Mounts {
+		outer, ok := outerOf(m, c.cfg.Mounts)
+		if !ok {
+			continue
+		}
+		if info, err := outer.FS.Stat(strings.TrimPrefix(m.Guest, outer.Guest)); err != nil || !info.IsDir() {
+			return nil, fmt.Errorf("computer: the mount %s is inside %s, which has no such folder", m.Guest, outer.Guest)
+		}
+	}
 	return c, nil
+}
+
+// outerOf is the mount m is inside, the nearest one.
+func outerOf(m Mount, mounts []Mount) (outer Mount, ok bool) {
+	for _, o := range mounts {
+		if strings.HasPrefix(m.Guest, o.Guest+"/") && len(o.Guest) > len(outer.Guest) {
+			outer, ok = o, true
+		}
+	}
+	return outer, ok
+}
+
+// shellMounts is the mounts directly inside the mount at, or inside none when at is empty, as gbash takes them.
+// gbash mounts on a folder of a base filesystem and not on one of another mount, so a mount that has mounts inside
+// it is their base: gbash's own mount table, once for each mount that holds others.
+func shellMounts(mounts []Mount, at string) []gbfs.MountConfig {
+	var table []gbfs.MountConfig
+	for _, m := range mounts {
+		if outer, _ := outerOf(m, mounts); outer.Guest != at {
+			continue
+		}
+		var factory gbfs.Factory = gbfs.FactoryFunc(func(context.Context) (gbfs.FileSystem, error) {
+			return &shellFS{fs: m.FS, readOnly: m.ReadOnly, cwd: "/"}, nil
+		})
+		if inside := shellMounts(mounts, m.Guest); len(inside) > 0 {
+			factory = gbfs.Mountable(gbfs.MountableOptions{Base: factory, Mounts: inside})
+		}
+		table = append(table, gbfs.MountConfig{MountPoint: strings.TrimPrefix(m.Guest, at), Factory: factory})
+	}
+	return table
 }
 
 // Mounts is every directory the computer mounts, the caller's and its own.
@@ -351,24 +395,19 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 		names = append(names, name)
 	}
 	c.calling, c.modules = names, tools.Modules(sorted)
-	var table []gbfs.MountConfig
 	writable := []string{"/dev/null"} // gbash's own device, which a redirect to nowhere writes
 	var readOnly []string
 	for _, m := range mounts {
-		factory := gbfs.FactoryFunc(func(context.Context) (gbfs.FileSystem, error) {
-			return &shellFS{fs: m.FS, readOnly: m.ReadOnly, cwd: "/"}, nil
-		})
 		if m.ReadOnly {
-			readOnly = append(readOnly, path.Clean("/"+strings.TrimSpace(m.Guest))) // as gbash cleans a mount point
+			readOnly = append(readOnly, m.Guest)
 		} else {
 			writable = append(writable, m.Guest)
 		}
-		table = append(table, gbfs.MountConfig{MountPoint: m.Guest, Factory: factory})
 	}
 	// Outside the mounts gbash keeps files in memory, where a program run as WebAssembly cannot see them. The
 	// shell may write only where every program sees the result.
-	writes := readOnlyMounts{policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny, Limits: limits}), readOnly}
-	opts := []gbash.Option{gbash.WithPolicy(writes), gbash.WithRegistry(registry), gbash.WithBaseEnv(map[string]string{"HOME": c.cfg.WorkDir}), gbash.WithFileSystem(gbash.MountableFileSystem(gbash.MountableFileSystemOptions{Mounts: table, WorkingDir: c.cfg.WorkDir}))}
+	writes := readOnlyMounts{policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny, Limits: limits}), readOnly, writable}
+	opts := []gbash.Option{gbash.WithPolicy(writes), gbash.WithRegistry(registry), gbash.WithBaseEnv(map[string]string{"HOME": c.cfg.WorkDir}), gbash.WithFileSystem(gbash.MountableFileSystem(gbash.MountableFileSystemOptions{Mounts: shellMounts(mounts, ""), WorkingDir: c.cfg.WorkDir}))}
 	opts = append(opts, c.cfg.Options...)
 	var built gbash.Config // what the embedder's options leave as the policy
 	for _, option := range opts {
@@ -379,23 +418,33 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 }
 
 // readOnlyMounts is the shell's policy, which refuses a change to a read-only mount as it refuses one outside every
-// mount, but says why: the path is in a read-only mount. Only the reason differs; what is refused is the same.
+// mount, but says why: the path is in a read-only mount. A path is in the nearest mount around it, so a read-only
+// mount inside a writable one is refused here, where the policy beneath, which knows the writable one, would allow.
 type readOnlyMounts struct {
 	policy.Policy
-	guests []string
+	guests, writable []string
+}
+
+// nearest is the length of the longest of the mounts that target is in, or -1.
+func nearest(guests []string, target string) int {
+	n := -1
+	for _, guest := range guests {
+		if (target == guest || strings.HasPrefix(target, guest+"/")) && len(guest) > n {
+			n = len(guest)
+		}
+	}
+	return n
 }
 
 func (p readOnlyMounts) AllowPath(ctx context.Context, action policy.FileAction, target string) error {
+	in := nearest(p.guests, path.Clean("/"+target)) > nearest(p.writable, path.Clean("/"+target))
 	err := p.Policy.AllowPath(ctx, action, target)
 	var denied *policy.DeniedError
-	if !errors.As(err, &denied) {
-		return err
-	}
-	target = path.Clean("/" + target)
-	for _, guest := range p.guests {
-		if target == guest || strings.HasPrefix(target, guest+"/") {
-			return &policy.DeniedError{Subject: denied.Subject, Reason: "read-only file system"}
-		}
+	switch {
+	case in && errors.As(err, &denied):
+		return &policy.DeniedError{Subject: denied.Subject, Reason: "read-only file system"}
+	case in && err == nil && (action == policy.FileActionWrite || action == policy.FileActionMkdir || action == policy.FileActionRemove || action == policy.FileActionRename):
+		return &policy.DeniedError{Subject: fmt.Sprintf("%s %q", action, target), Reason: "read-only file system"}
 	}
 	return err
 }

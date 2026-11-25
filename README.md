@@ -99,6 +99,10 @@ computer.Mount{Guest: "/scratch", FS: afero.NewMemMapFs()}         // kept in me
 computer.Mount{Guest: "/reference", Host: docs, ReadOnly: true}
 ```
 
+A mount may be inside another: `/home/user/files` in `/home/user`. Its folder must already be there in the outer
+mount, as a mount point is. A path belongs to the nearest mount around it, so a read-only mount inside a writable
+one stays read-only.
+
 A host directory is opened with `files.Dir`, which goes through Go's `os.Root` and cannot be left by `..` or by a
 symbolic link. A filesystem of your own decides for itself what a name may reach.
 
