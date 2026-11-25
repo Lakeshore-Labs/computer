@@ -3,7 +3,7 @@ module github.com/Lakeshore-Labs/computer
 go 1.26.0
 
 require (
-	github.com/Lakeshore-Labs/gbash v0.0.42
+	github.com/Lakeshore-Labs/gbash v0.0.43-0.20261125114809-f4d0cf5e9fc3
 	github.com/Lakeshore-Labs/gbash/contrib/awk v0.0.42
 	github.com/Lakeshore-Labs/gbash/contrib/codingtools v0.0.42
 	github.com/Lakeshore-Labs/gbash/contrib/htmltomarkdown v0.0.42

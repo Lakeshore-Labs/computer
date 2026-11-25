@@ -49,21 +49,38 @@ func (s *shellFS) OpenFile(_ context.Context, name string, flag int, perm fs.Fil
 	return f, nil
 }
 
-func (s *shellFS) Stat(_ context.Context, name string) (fs.FileInfo, error) { return s.fs.Stat(name) }
+// owned is a mounted file's information with the shell's user as its owner. gbash's cd asks the mode bits for the
+// shell's user, and a host directory's owner is the host's, so the shell would be anyone else and need a directory
+// open to everyone on the host. What the host's process may open, the shell may: the file is the shell user's own.
+// gbash's own host filesystems wrap their information the same way, and tell two files apart by Sys, kept here.
+type owned struct{ fs.FileInfo }
+
+func (owned) Ownership() (gbfs.FileOwnership, bool) { return gbfs.DefaultOwnership(), true }
+
+func own(info fs.FileInfo, err error) (fs.FileInfo, error) {
+	if err != nil {
+		return nil, err
+	}
+	return owned{info}, nil
+}
+
+func (s *shellFS) Stat(_ context.Context, name string) (fs.FileInfo, error) {
+	return own(s.fs.Stat(name))
+}
 
 func (s *shellFS) Lstat(_ context.Context, name string) (fs.FileInfo, error) {
 	if l, ok := s.fs.(afero.Lstater); ok {
 		info, _, err := l.LstatIfPossible(name)
-		return info, err
+		return own(info, err)
 	}
-	return s.fs.Stat(name)
+	return own(s.fs.Stat(name))
 }
 
 func (s *shellFS) ReadDir(_ context.Context, name string) ([]fs.DirEntry, error) {
 	infos, err := afero.ReadDir(s.fs, name)
 	entries := make([]fs.DirEntry, len(infos))
 	for i, info := range infos {
-		entries[i] = fs.FileInfoToDirEntry(info)
+		entries[i] = fs.FileInfoToDirEntry(owned{info})
 	}
 	return entries, err
 }
