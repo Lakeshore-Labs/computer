@@ -140,8 +140,11 @@ func inMemory(f afero.File) bool {
 }
 
 // keepsItsPlace reports whether f, a directory, lists from where it was after a seek to its start: afero's
-// memory directories, and the joined directory of its layered filesystem.
+// memory directories, and the joined directory of its layered filesystem, alone or under a BasePathFs.
 func keepsItsPlace(f afero.File) bool {
+	for b, ok := f.(*afero.BasePathFile); ok; b, ok = f.(*afero.BasePathFile) {
+		f = b.File
+	}
 	_, joined := f.(*afero.UnionFile)
 	return joined || inMemory(f)
 }

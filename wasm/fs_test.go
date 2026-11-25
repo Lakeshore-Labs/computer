@@ -122,7 +122,15 @@ func TestAJoinedDirectoryOfTwoLayersIsListedAgainAfterARewind(t *testing.T) {
 	if err := errors.Join(afero.WriteFile(base, "/d/given.txt", nil, 0o644), afero.WriteFile(layer, "/d/own.txt", nil, 0o644)); err != nil {
 		t.Fatal(err)
 	}
-	f, errno := (&dirFS{fs: afero.NewCopyOnWriteFs(base, layer)}).OpenFile("d", sys.O_RDONLY|sys.O_DIRECTORY, 0)
+	layered := afero.NewCopyOnWriteFs(base, layer)
+	for _, mount := range []afero.Fs{layered, afero.NewBasePathFs(layered, "/")} {
+		listedTwice(t, mount)
+	}
+}
+
+func listedTwice(t *testing.T, mount afero.Fs) {
+	t.Helper()
+	f, errno := (&dirFS{fs: mount}).OpenFile("d", sys.O_RDONLY|sys.O_DIRECTORY, 0)
 	if errno != 0 {
 		t.Fatal(errno)
 	}
