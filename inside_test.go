@@ -107,3 +107,12 @@ func TestACommandRunsAfterCdIntoAReadOnlyMount(t *testing.T) {
 		t.Errorf("got %q", got)
 	}
 }
+
+func TestACallersTmpSpeltWithASlashIsTheirs(t *testing.T) {
+	tmp := t.TempDir()
+	c := newComputer(t, Config{Mounts: []Mount{{Guest: "/tmp/", Host: tmp}}})
+	run(t, c, "echo x > /tmp/mine")
+	if _, err := os.Stat(filepath.Join(tmp, "mine")); err != nil {
+		t.Errorf("the caller's /tmp was not written: %v", err)
+	}
+}

@@ -156,7 +156,7 @@ func New(cfg Config) (_ *Computer, err error) {
 	for i, m := range c.cfg.Mounts {
 		c.cfg.Mounts[i].Guest = path.Clean("/" + strings.TrimSpace(m.Guest)) // as gbash cleans a mount point
 	}
-	if !slices.ContainsFunc(cfg.Mounts, func(m Mount) bool { return m.Guest == "/tmp" }) {
+	if !slices.ContainsFunc(c.cfg.Mounts, func(m Mount) bool { return m.Guest == "/tmp" }) {
 		if c.tmp, err = os.MkdirTemp("", "computer-tmp"); err != nil {
 			return nil, err
 		}
@@ -191,15 +191,18 @@ func New(cfg Config) (_ *Computer, err error) {
 	return c, nil
 }
 
-// outerOf is the mount m is inside, the nearest one.
-func outerOf(m Mount, mounts []Mount) (outer Mount, ok bool) {
-	for _, o := range mounts {
-		if strings.HasPrefix(m.Guest, o.Guest+"/") && len(o.Guest) > len(outer.Guest) {
-			outer, ok = o, true
+// mountOf is the mount name is in: the nearest one around it.
+func mountOf(name string, mounts []Mount) (in Mount, ok bool) {
+	for _, m := range mounts {
+		if (name == m.Guest || strings.HasPrefix(name, m.Guest+"/")) && len(m.Guest) > len(in.Guest) {
+			in, ok = m, true
 		}
 	}
-	return outer, ok
+	return in, ok
 }
+
+// outerOf is the mount that the mount m is inside.
+func outerOf(m Mount, mounts []Mount) (Mount, bool) { return mountOf(path.Dir(m.Guest), mounts) }
 
 // shellMounts is the mounts directly inside the mount at, or inside none when at is empty, as gbash takes them.
 // gbash mounts on a folder of a base filesystem and not on one of another mount, so a mount that has mounts inside
@@ -396,17 +399,14 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	}
 	c.calling, c.modules = names, tools.Modules(sorted)
 	writable := []string{"/dev/null"} // gbash's own device, which a redirect to nowhere writes
-	var readOnly []string
 	for _, m := range mounts {
-		if m.ReadOnly {
-			readOnly = append(readOnly, m.Guest)
-		} else {
+		if !m.ReadOnly {
 			writable = append(writable, m.Guest)
 		}
 	}
 	// Outside the mounts gbash keeps files in memory, where a program run as WebAssembly cannot see them. The
 	// shell may write only where every program sees the result.
-	writes := readOnlyMounts{policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny, Limits: limits}), readOnly, writable}
+	writes := readOnlyMounts{policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny, Limits: limits}), mounts}
 	opts := []gbash.Option{gbash.WithPolicy(writes), gbash.WithRegistry(registry), gbash.WithBaseEnv(map[string]string{"HOME": c.cfg.WorkDir}), gbash.WithFileSystem(gbash.MountableFileSystem(gbash.MountableFileSystemOptions{Mounts: shellMounts(mounts, ""), WorkingDir: c.cfg.WorkDir}))}
 	opts = append(opts, c.cfg.Options...)
 	var built gbash.Config // what the embedder's options leave as the policy
@@ -417,36 +417,22 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	return opts, nil
 }
 
-// readOnlyMounts is the shell's policy, which refuses a change to a read-only mount as it refuses one outside every
-// mount, but says why: the path is in a read-only mount. A path is in the nearest mount around it, so a read-only
-// mount inside a writable one is refused here, where the policy beneath, which knows the writable one, would allow.
+// readOnlyMounts is the shell's policy, which refuses a change in a read-only mount and says why. A path is in the
+// nearest mount around it, so a read-only mount inside a writable one is refused here, where the policy beneath,
+// which knows the writable one's root, would allow it.
 type readOnlyMounts struct {
 	policy.Policy
-	guests, writable []string
-}
-
-// nearest is the length of the longest of the mounts that target is in, or -1.
-func nearest(guests []string, target string) int {
-	n := -1
-	for _, guest := range guests {
-		if (target == guest || strings.HasPrefix(target, guest+"/")) && len(guest) > n {
-			n = len(guest)
-		}
-	}
-	return n
+	mounts []Mount
 }
 
 func (p readOnlyMounts) AllowPath(ctx context.Context, action policy.FileAction, target string) error {
-	in := nearest(p.guests, path.Clean("/"+target)) > nearest(p.writable, path.Clean("/"+target))
-	err := p.Policy.AllowPath(ctx, action, target)
-	var denied *policy.DeniedError
-	switch {
-	case in && errors.As(err, &denied):
-		return &policy.DeniedError{Subject: denied.Subject, Reason: "read-only file system"}
-	case in && err == nil && (action == policy.FileActionWrite || action == policy.FileActionMkdir || action == policy.FileActionRemove || action == policy.FileActionRename):
-		return &policy.DeniedError{Subject: fmt.Sprintf("%s %q", action, target), Reason: "read-only file system"}
+	switch action {
+	case policy.FileActionWrite, policy.FileActionMkdir, policy.FileActionRemove, policy.FileActionRename:
+		if m, _ := mountOf(path.Clean("/"+target), p.mounts); m.ReadOnly {
+			return &policy.DeniedError{Subject: fmt.Sprintf("%s %q", action, path.Clean("/"+target)), Reason: "read-only file system"}
+		}
 	}
-	return err
+	return p.Policy.AllowPath(ctx, action, target)
 }
 
 // limits are the shell's, chosen for data work: gbash's defaults stop a command at a file of 8 MiB and a script at
