@@ -108,7 +108,12 @@ func (s *shellFS) Chtimes(_ context.Context, name string, atime, mtime time.Time
 	return s.change("chtimes", name, func() error { return s.fs.Chtimes(name, atime, mtime) })
 }
 
+// MkdirAll of a directory that is there changes nothing, read-only or not: gbash makes the working directory
+// before each command.
 func (s *shellFS) MkdirAll(_ context.Context, name string, perm fs.FileMode) error {
+	if info, err := s.fs.Stat(name); err == nil && info.IsDir() {
+		return nil
+	}
 	return s.change("mkdir", name, func() error { return s.fs.MkdirAll(name, perm) })
 }
 
