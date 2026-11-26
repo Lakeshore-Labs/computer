@@ -168,6 +168,54 @@ python, err := computer.EmbeddedPython(ctx, wasm.Program{MaxRuns: 8, CacheDir: c
 The first compile takes about 30 seconds, then under a second from `CacheDir`; it runs in the background, and only
 the first `python3` waits. See [`python/README.md`](python/README.md).
 
+### Run a WSGI app
+
+In a Go application, configure embedded Python and the app mount when creating
+your `Computer`, then register the handler on your existing HTTP mux:
+
+```go
+handler, err := c.WSGIHandler("app:app", 30*time.Second)
+if err != nil {
+    return err
+}
+mux.Handle("/", handler)
+```
+
+The [embedded Flask example](examples/wsgi) shows a Go mux serving a Jinja page backed by SQLite, pandas, and an MCP tool.
+
+The CLI uses the same handler and provides a listener for local development.
+
+Put your app in a mounted directory and pass its WSGI callable as `module:callable`.
+For example, save this as `./work/app.py`:
+
+```python
+import sys
+
+from flask import Flask, request
+
+app = Flask(__name__)
+
+
+@app.post("/echo")
+def echo():
+    return {"echo": request.get_json()["message"], "platform": sys.platform}
+```
+
+Install the app's dependencies into `vendor/` within the mount before starting the server.
+The embedded interpreter can use pure Python packages and extensions built into its WASI distribution.
+
+```sh
+python3 -m pip install --target ./work/vendor 'Flask>=3.1,<3.2'
+./computer -mount ./work:/app:ro serve app:app
+curl -i -H 'Content-Type: application/json' -d '{"message":"hello"}' http://127.0.0.1:8080/echo
+```
+
+The listener defaults to `127.0.0.1:8080`. Use `serve -listen HOST:PORT app:app` to change it.
+Go accepts HTTP connections and runs the application in embedded Python for each request.
+The WSGI callable and its routes run inside WASM. Each request has a fresh Python instance, so
+module globals are recreated and edits to the mounted app take effect on the next request.
+The server buffers requests up to 1 MiB and responses up to gbash's capture limit.
+
 ## The boundary
 
 - **Files.** The shell and programs see only the mounted folders. Programs reach them through Go's `os.Root`.
