@@ -9,7 +9,8 @@ connection. It registers the Flask app as a regular `http.Handler` and answers
 2. Flask imports `tools.wiki` and calls `read_wiki_structure` over MCP.
 3. Flask saves the outline to SQLite on the writable `/data` mount.
 4. The next Flask request reads SQLite, aggregates the history with pandas, and
-   renders the lookup counts, average outline lengths, and recent results in Jinja.
+   renders the lookup counts, a Seaborn chart of average outline lengths, and
+   recent results in Jinja.
 
 From the repository root, prepare a disposable working directory and start the host:
 

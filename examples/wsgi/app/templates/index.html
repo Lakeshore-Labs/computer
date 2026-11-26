@@ -9,6 +9,7 @@
     input, button { font: inherit; padding: .4rem .6rem; }
     label { display: block; margin-bottom: .25rem; }
     th, td { text-align: left; padding: .25rem .75rem .25rem 0; }
+    .chart { display: block; max-width: 100%; height: auto; margin-top: 1rem; }
     pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f2f4f6; padding: 1rem; }
   </style>
 </head>
@@ -31,6 +32,8 @@
       {% endfor %}
     </tbody>
   </table>
+  <img class="chart" src="data:image/png;base64,{{ chart }}"
+       alt="Bar chart comparing average outline lengths by repository">
   {% endif %}
   {% for lookup in lookups %}
   <article>
