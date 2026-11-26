@@ -124,7 +124,7 @@ func run(ctx context.Context) error {
 	python := flag.String("python", "", "a directory holding a wasi-python release, laid out as computer.LoadPython reads it, in place of the one built in")
 	pythonRuns := flag.Int("python-runs", 8, "how many python3 may run at once, each with up to 512 MiB; a further one waits; 0 is no limit")
 	pythonFast := flag.Bool("python-unstoppable", false, "run Python three to four times faster, and give up stopping a script that does not end")
-	timeout := flag.Duration("timeout", 2*time.Minute, "maximum duration for a WSGI request or an MCP bash call without its own limit")
+	timeout := flag.Duration("timeout", 2*time.Minute, "maximum WSGI dispatch and execution time, or duration of an MCP bash call without its own limit")
 	script := flag.String("c", "", "run this command and exit")
 	config := flag.String("config", "", `a JSON file of mounts and MCP servers, added to those the flags give: {"mounts": ["host:guest"], "mcpServers": {"name": {"url": "..."} or {"command": "...", "args": [...]}}}; mcpServers is as in Claude Code's .mcp.json, and ${NAME} in a header or an env value is read from the environment`)
 	flag.Parse()

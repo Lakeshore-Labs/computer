@@ -14,36 +14,16 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/Lakeshore-Labs/gbash"
 )
-
-const wsgiLauncher = `
-import importlib
-import os
-import sys
-from wsgiref.handlers import CGIHandler
-
-class BufferedCGIHandler(CGIHandler):
-    def handle_error(self):
-        if self.headers_sent:
-            # The host can discard a buffered response if the app fails midway.
-            raise
-        super().handle_error()
-
-module, name = sys.argv[1].split(":", 1)
-sys.path.append(os.path.join(os.getcwd(), "vendor"))
-gateway = BufferedCGIHandler()
-sys.stdout = sys.stderr
-gateway.run(getattr(importlib.import_module(module), name))
-`
 
 // WSGIHandler adapts an application in the computer's working directory to
 // net/http. app is a module:callable reference, and vendor/ in that directory
-// is available for dependencies. Each request runs in a fresh Python instance
-// with the computer's configured mounts and tools. The timeout bounds Python
-// execution when positive. The caller owns the HTTP server and must finish
-// serving requests before closing the computer.
+// is available for dependencies. A handler runs one Python worker at a time,
+// retaining application state and a Python run slot between requests. A
+// canceled request stops its worker, and the next request starts a new one.
+// The timeout bounds the
+// wait and execution when positive. Close stops the workers and releases
+// their mounts after the caller shuts down its HTTP server.
 func (c *Computer) WSGIHandler(app string, timeout time.Duration) (http.Handler, error) {
 	module, callable, ok := strings.Cut(app, ":")
 	if !ok || module == "" || callable == "" || strings.Contains(callable, ":") {
@@ -51,6 +31,39 @@ func (c *Computer) WSGIHandler(app string, timeout time.Duration) (http.Handler,
 	}
 	if c.cfg.Python == nil {
 		return nil, errors.New("WSGI requires Python")
+	}
+	if c.cfg.Python.unstoppable {
+		return nil, errors.New("WSGI requires interruptible Python")
+	}
+	turn := make(chan struct{}, 1)
+	var worker *wsgiWorker
+	dispatch := func(ctx context.Context, env map[string]string, body []byte) ([]byte, string, error) {
+		select {
+		case turn <- struct{}{}:
+			defer func() { <-turn }()
+		case <-ctx.Done():
+			return nil, "", ctx.Err()
+		}
+		if err := ctx.Err(); err != nil {
+			return nil, "", err
+		}
+		if worker != nil && worker.ctx.Err() != nil {
+			select {
+			case <-worker.done:
+				worker = nil
+			case <-ctx.Done():
+				return nil, "", ctx.Err()
+			}
+		}
+		if worker == nil {
+			var err error
+			worker, err = c.startWSGIWorker(app)
+			if err != nil {
+				return nil, "", err
+			}
+		}
+		output, err := worker.request(ctx, env, body)
+		return output, worker.logs.take(), err
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		const maxBody = 1 << 20
@@ -110,33 +123,30 @@ func (c *Computer) WSGIHandler(app string, timeout time.Duration) (http.Handler,
 			ctx, cancel = context.WithTimeout(ctx, timeout)
 			defer cancel()
 		}
-		result, err := c.Exec(ctx, &gbash.ExecutionRequest{
-			Script: "python3 -c '" + wsgiLauncher + "' \"$1\"", Args: []string{app},
-			Env: env, WorkDir: c.cfg.WorkDir, Timeout: timeout, Stdin: bytes.NewReader(body),
-		})
-		if result != nil && result.Stderr != "" {
-			log.Print(result.Stderr)
+		output, diagnostics, err := dispatch(ctx, env, body)
+		if diagnostics != "" && ctx.Err() == nil {
+			log.Print(diagnostics)
 		}
-		if errors.Is(ctx.Err(), context.DeadlineExceeded) || (result != nil && result.TimedOut) {
+		if errors.Is(err, context.DeadlineExceeded) {
 			http.Error(w, "WSGI request timed out", http.StatusGatewayTimeout)
 			return
 		}
-		if err != nil || result == nil || result.ExitCode != 0 || result.StdoutTruncated {
-			if err != nil {
+		if err != nil {
+			if !errors.Is(err, context.Canceled) {
 				log.Printf("WSGI execution: %v", err)
 			}
 			http.Error(w, "WSGI application failed", http.StatusBadGateway)
 			return
 		}
-		if err := writeCGIResponse(w, result.Stdout); err != nil {
+		if err := writeCGIResponse(w, output); err != nil {
 			log.Printf("WSGI response: %v", err)
 			http.Error(w, "invalid WSGI response", http.StatusBadGateway)
 		}
 	}), nil
 }
 
-func writeCGIResponse(w http.ResponseWriter, output string) error {
-	reader := bufio.NewReader(strings.NewReader(output))
+func writeCGIResponse(w http.ResponseWriter, output []byte) error {
+	reader := bufio.NewReader(bytes.NewReader(output))
 	headers, err := textproto.NewReader(reader).ReadMIMEHeader()
 	if err != nil {
 		return err

@@ -211,10 +211,11 @@ curl -i -H 'Content-Type: application/json' -d '{"message":"hello"}' http://127.
 ```
 
 The listener defaults to `127.0.0.1:8080`. Use `serve -listen HOST:PORT app:app` to change it.
-Go accepts HTTP connections and runs the application in embedded Python for each request.
-The WSGI callable and its routes run inside WASM. Each request has a fresh Python instance, so
-module globals are recreated and edits to the mounted app take effect on the next request.
-The server buffers requests up to 1 MiB and responses up to gbash's capture limit.
+Go accepts HTTP connections and dispatches requests to one long-lived Python worker inside WASM.
+The worker loads the WSGI callable once and serves requests serially. Restart the host to reload
+app code. A request canceled while running stops the worker, and the next request starts a new one.
+Each worker occupies one Python run slot while it is alive, including when idle.
+The server buffers requests and responses up to 1 MiB each.
 
 ## The boundary
 
