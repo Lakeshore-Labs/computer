@@ -163,9 +163,22 @@ func (wp *workerPrepare) preparation() *Preparation {
 type workerRun struct {
 	Args  []string
 	Env   map[string]string
-	Dirs  []Dir // host directories only: FS is nil
+	Dirs  []workerDir
 	Stdin bool
 }
+
+// workerDir is a host directory as it crosses to a worker, which opens it by its path. When the parent holds the
+// directory open, Dev and Ino are what it holds, and the worker refuses a directory at the path that is another:
+// one renamed or replaced since, which the shell does not see and Python must not.
+type workerDir struct {
+	Guest, Host string
+	ReadOnly    bool
+	Held        bool
+	Dev, Ino    uint64
+}
+
+// errFull is start's when the program has all the workers it may.
+var errFull = errors.New("wasm: every worker is in use")
 
 type workerExit struct {
 	Code int
@@ -197,8 +210,8 @@ func frameError(b []byte) error {
 }
 
 // hostDirs are the directories as a worker opens them, by host path, and whether every one is a host directory.
-func hostDirs(dirs []Dir) ([]Dir, bool) {
-	out := make([]Dir, len(dirs))
+func hostDirs(dirs []Dir) ([]workerDir, bool) {
+	out := make([]workerDir, len(dirs))
 	for i, d := range dirs {
 		switch fs := d.FS.(type) {
 		case nil:
@@ -206,9 +219,17 @@ func hostDirs(dirs []Dir) ([]Dir, bool) {
 			if err != nil {
 				return nil, false
 			}
-			out[i] = Dir{Guest: d.Guest, Host: host, ReadOnly: d.ReadOnly}
+			out[i] = workerDir{Guest: d.Guest, Host: host, ReadOnly: d.ReadOnly}
 		case *files.Root:
-			out[i] = Dir{Guest: d.Guest, Host: fs.Path(), ReadOnly: d.ReadOnly}
+			info, err := fs.Stat("/")
+			if err != nil {
+				return nil, false
+			}
+			dev, ino, ok := identity(info)
+			if !ok {
+				return nil, false
+			}
+			out[i] = workerDir{Guest: d.Guest, Host: fs.Path(), ReadOnly: d.ReadOnly, Held: true, Dev: dev, Ino: ino}
 		default: // in this process's memory, or anything else only this process can reach
 			return nil, false
 		}
@@ -220,10 +241,11 @@ func hostDirs(dirs []Dir) ([]Dir, bool) {
 type pool struct {
 	program Program
 
-	mu     sync.Mutex
-	idle   []*worker
-	all    map[*worker]bool
-	closed bool
+	mu      sync.Mutex
+	changed chan struct{} // closed, and made again, when a worker is idle or has ended
+	idle    []*worker
+	all     map[*worker]bool
+	closed  bool
 }
 
 type worker struct {
@@ -259,8 +281,8 @@ func (t *tail) String() string {
 }
 
 func newPool(ctx context.Context, p Program) (*pool, error) {
-	pl := &pool{program: p, all: map[*worker]bool{}}
-	w, err := pl.start()
+	pl := &pool{program: p, all: map[*worker]bool{}, changed: make(chan struct{})}
+	w, err := pl.start(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -268,8 +290,15 @@ func newPool(ctx context.Context, p Program) (*pool, error) {
 	return pl, nil
 }
 
-// start starts a worker and waits for it to be ready.
-func (pl *pool) start() (*worker, error) {
+// signal wakes whoever waits for a worker. The caller holds mu.
+func (pl *pool) signal() {
+	close(pl.changed)
+	pl.changed = make(chan struct{})
+}
+
+// start starts a worker and waits for it to be ready, or for ctx to end, which ends the worker. There are at most
+// MaxRuns workers, the starting ones among them: beyond that it is errFull.
+func (pl *pool) start(ctx context.Context) (*worker, error) {
 	cmd := exec.Command(workerExe)
 	cmd.Env = append(os.Environ(), workerEnv+"=1")
 	cmd.SysProcAttr = procAttr()
@@ -289,6 +318,10 @@ func (pl *pool) start() (*worker, error) {
 		pl.mu.Unlock()
 		return nil, errors.New("wasm: the module is closed")
 	}
+	if limit := pl.program.MaxRuns; limit > 0 && len(pl.all) >= limit {
+		pl.mu.Unlock()
+		return nil, errFull
+	}
 	if err := cmd.Start(); err != nil {
 		pl.mu.Unlock()
 		return nil, err
@@ -307,6 +340,7 @@ func (pl *pool) start() (*worker, error) {
 		w.err = cmd.Wait()
 		pl.mu.Lock()
 		delete(pl.all, w)
+		pl.signal()
 		pl.mu.Unlock()
 		close(w.ended)
 		close(w.frames)
@@ -316,16 +350,23 @@ func (pl *pool) start() (*worker, error) {
 	if err := errors.Join(writeFrame(in, frameProgram, header), writeFrame(in, frameBinary, p.Binary)); err != nil {
 		return nil, w.fail(err)
 	}
-	for f := range w.frames {
-		switch f.kind {
-		case frameReady:
-			return w, nil
-		case frameFailed:
+	for {
+		select {
+		case f, ok := <-w.frames:
+			switch {
+			case !ok:
+				return nil, w.fail(errors.New("the worker ended before it was ready"))
+			case f.kind == frameReady:
+				return w, nil
+			case f.kind == frameFailed:
+				w.kill()
+				return nil, errors.New(string(f.data))
+			}
+		case <-ctx.Done():
 			w.kill()
-			return nil, errors.New(string(f.data))
+			return nil, ctx.Err()
 		}
 	}
-	return nil, w.fail(errors.New("the worker ended before it was ready"))
 }
 
 // fail kills the worker and is err, with what the worker said as it ended.
@@ -349,38 +390,49 @@ func (w *worker) kill() {
 	<-w.ended
 }
 
-// get is a worker ready for a run: an idle one, or a new one.
+// get is a worker ready for a run: an idle one, or a new one, or, when there are as many as there may be, the next
+// to be idle.
 func (pl *pool) get(ctx context.Context) (*worker, error) {
-	pl.mu.Lock()
-	if n := len(pl.idle); n > 0 {
-		w := pl.idle[n-1]
-		pl.idle = pl.idle[:n-1]
-		if w.reap != nil {
-			w.reap.Stop()
-		}
-		pl.mu.Unlock()
-		return w, nil
-	}
-	pl.mu.Unlock()
 	type started struct {
 		w   *worker
 		err error
 	}
-	ch := make(chan started, 1)
-	go func() {
-		w, err := pl.start()
-		ch <- started{w, err}
-	}()
-	select {
-	case s := <-ch:
-		return s.w, s.err
-	case <-ctx.Done():
-		go func() { // the worker is kept for the next run
-			if s := <-ch; s.err == nil {
-				pl.put(s.w)
+	for {
+		pl.mu.Lock()
+		if n := len(pl.idle); n > 0 {
+			w := pl.idle[n-1]
+			pl.idle = pl.idle[:n-1]
+			if w.reap != nil {
+				w.reap.Stop()
 			}
+			pl.mu.Unlock()
+			return w, nil
+		}
+		changed := pl.changed
+		pl.mu.Unlock()
+		ch := make(chan started, 1)
+		go func() {
+			w, err := pl.start(context.Background())
+			ch <- started{w, err}
 		}()
-		return nil, ctx.Err()
+		select {
+		case s := <-ch:
+			if s.err != errFull {
+				return s.w, s.err
+			}
+		case <-ctx.Done():
+			go func() { // the worker is kept for the next run
+				if s := <-ch; s.err == nil {
+					pl.put(s.w)
+				}
+			}()
+			return nil, ctx.Err()
+		}
+		select { // one that is starting or ending is among them, and will be idle or gone
+		case <-changed:
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
 	}
 }
 
@@ -394,6 +446,7 @@ func (pl *pool) put(w *worker) {
 		return
 	}
 	pl.idle = append(pl.idle, w)
+	pl.signal()
 	if len(pl.idle) > 1 {
 		w.reap = time.AfterFunc(idleFor, func() {
 			pl.mu.Lock()
@@ -418,7 +471,7 @@ func (pl *pool) replace() {
 		return
 	}
 	go func() {
-		if w, err := pl.start(); err == nil {
+		if w, err := pl.start(context.Background()); err == nil {
 			pl.put(w)
 		}
 	}()
@@ -440,7 +493,7 @@ func (pl *pool) close() error {
 }
 
 // run runs r in a worker; dirs are r's directories as hostDirs gives them.
-func (pl *pool) run(ctx context.Context, r Run, dirs []Dir) (int, error) {
+func (pl *pool) run(ctx context.Context, r Run, dirs []workerDir) (int, error) {
 	w, err := pl.get(ctx)
 	switch {
 	case err == nil && ctx.Err() != nil:
@@ -612,12 +665,18 @@ func serve(stdin io.Reader, stdout io.Writer) int {
 	s.send(frameReady, nil)
 	for run := range runs {
 		ctx, cancel := context.WithCancel(context.Background())
-		r := Run{Args: run.spec.Args, Env: run.spec.Env, Dirs: run.spec.Dirs,
+		r := Run{Args: run.spec.Args, Env: run.spec.Env,
 			Stdout: output{s, run, frameStdout}, Stderr: output{s, run, frameStderr}}
 		if run.spec.Stdin {
 			r.Stdin = remoteInput{ctx, s, run}
 		}
-		code, err := l.run(ctx, r)
+		dirs, closeDirs, err := openDirs(run.spec.Dirs)
+		code := 70
+		if err == nil {
+			r.Dirs = dirs
+			code, err = l.run(ctx, r)
+		}
+		closeDirs()
 		cancel()
 		exit := workerExit{Code: code}
 		if err != nil {
@@ -631,6 +690,37 @@ func serve(stdin io.Reader, stdout io.Writer) int {
 		debug.FreeOSMemory()
 	}
 	return 0
+}
+
+// openDirs opens a run's directories in the worker. One the parent holds open is opened here and checked to be the
+// same directory before the program is given it, so that the check is of what the program then uses.
+func openDirs(specs []workerDir) (dirs []Dir, closeDirs func(), _ error) {
+	var opened []io.Closer
+	closeDirs = func() {
+		for _, c := range opened {
+			_ = c.Close()
+		}
+	}
+	for _, d := range specs {
+		dir := Dir{Guest: d.Guest, Host: d.Host, ReadOnly: d.ReadOnly}
+		if d.Held {
+			root, err := files.Dir(d.Host)
+			if err != nil {
+				return nil, closeDirs, err
+			}
+			opened = append(opened, root)
+			info, err := root.Stat("/")
+			if err != nil {
+				return nil, closeDirs, err
+			}
+			if dev, ino, ok := identity(info); !ok || dev != d.Dev || ino != d.Ino {
+				return nil, closeDirs, fmt.Errorf("the directory mounted at %s is no longer at %s on the host", d.Guest, d.Host)
+			}
+			dir.FS = root
+		}
+		dirs = append(dirs, dir)
+	}
+	return dirs, closeDirs, nil
 }
 
 // server is a worker's side of its frames.

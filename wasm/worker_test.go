@@ -17,6 +17,8 @@ import (
 	"time"
 
 	"github.com/spf13/afero"
+
+	"github.com/Lakeshore-Labs/computer/files"
 )
 
 func TestMain(m *testing.M) {
@@ -131,4 +133,50 @@ func TestAWorkerEndsWithItsParent(t *testing.T) {
 	}
 	_ = syscall.Kill(pid, syscall.SIGKILL)
 	t.Error("the worker running a program that does not end outlived its parent")
+}
+
+// A worker opens a mounted directory by its path, and refuses one that is no longer the directory this process
+// holds open: the path may have been renamed away and made again since.
+func TestAWorkerRefusesADirectoryThatWasReplacedAtItsPath(t *testing.T) {
+	m := compileIn(t, Program{Binary: door, CacheDir: t.TempDir(), Host: func(context.Context, []byte) []byte { return nil }})
+	base := t.TempDir()
+	held, err := files.Dir(base + "/mounted")
+	if err == nil {
+		t.Fatal("opened a directory that is not there")
+	}
+	if err := os.Mkdir(base+"/mounted", 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if held, err = files.Dir(base + "/mounted"); err != nil {
+		t.Fatal(err)
+	}
+	defer held.Close()
+	run := func() (int, error) {
+		return m.Run(context.Background(), Run{Args: []string{"door"}, Dirs: []Dir{{Guest: "/d", FS: held}}})
+	}
+	if code, err := run(); code != 0 || err != nil {
+		t.Fatalf("with the directory in place: exit %d, %v", code, err)
+	}
+	if err := errors.Join(os.Rename(base+"/mounted", base+"/moved"), os.Mkdir(base+"/mounted", 0o700)); err != nil {
+		t.Fatal(err)
+	}
+	if code, err := run(); err == nil || !strings.Contains(err.Error(), "no longer") {
+		t.Errorf("with another directory at the path: exit %d, %v", code, err)
+	}
+}
+
+// Runs that end at their deadline while a worker starts leave no more workers than MaxRuns allows.
+func TestThereAreNoMoreWorkersThanRuns(t *testing.T) {
+	m := compileIn(t, Program{Binary: spin, CacheDir: t.TempDir(), MaxRuns: 1})
+	for range 5 {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+		_, _ = m.Run(ctx, Run{Args: []string{"spin"}})
+		cancel()
+		m.workers.mu.Lock()
+		n := len(m.workers.all)
+		m.workers.mu.Unlock()
+		if n > 1 {
+			t.Fatalf("%d workers for a program of one run at a time", n)
+		}
+	}
 }

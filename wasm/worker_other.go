@@ -3,6 +3,7 @@
 package wasm
 
 import (
+	"os"
 	"syscall"
 
 	"github.com/tetratelabs/wazero/experimental"
@@ -13,6 +14,8 @@ import (
 const canWork = false
 
 func procAttr() *syscall.SysProcAttr { return nil }
+
+func identity(os.FileInfo) (dev, ino uint64, ok bool) { return 0, 0, false }
 
 type mappedMemory struct{}
 

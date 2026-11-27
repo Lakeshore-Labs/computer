@@ -83,6 +83,7 @@ type Module struct {
 	// local runs the program in this process: always without workers, and with them only for a run given a
 	// directory that is not the host's, which a worker cannot open. With workers it is compiled on first use.
 	localOnce sync.Once
+	localDone chan struct{} // made by localOnce, closed when local and localErr are set
 	local     *local
 	localErr  error
 }
@@ -99,7 +100,7 @@ func Compile(ctx context.Context, p Program) (*Module, error) {
 		m.workers, err = newPool(ctx, p)
 		return m, err
 	}
-	m.localOnce.Do(func() { m.local, m.localErr = compileLocal(ctx, p, nil) })
+	<-m.startLocal(ctx)
 	return m, m.localErr
 }
 
@@ -110,6 +111,9 @@ func (m *Module) Close(ctx context.Context) error {
 		errs = append(errs, m.workers.close())
 	}
 	m.localOnce.Do(func() {}) // a local compiled from now on would not be closed
+	if m.localDone != nil {
+		<-m.localDone
+	}
 	if m.local != nil {
 		errs = append(errs, m.local.runtime.Close(ctx))
 	}
@@ -148,12 +152,37 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 		if dirs, ok := hostDirs(r.Dirs); ok {
 			return m.workers.run(ctx, r, dirs)
 		}
-		m.localOnce.Do(func() { m.local, m.localErr = compileLocal(context.WithoutCancel(ctx), m.program, nil) })
+		// The compile is every such run's, so it does not end with this one's context; this run stops waiting.
+		select {
+		case <-m.startLocal(context.WithoutCancel(ctx)):
+		case <-ctx.Done():
+			return 124, ctx.Err()
+		}
 		if m.localErr != nil {
 			return 70, m.localErr
 		}
 	}
+	if m.local == nil { // closed before a first run in this process
+		return 70, errors.New("wasm: the module is closed")
+	}
 	return m.local.run(ctx, r)
+}
+
+// startLocal compiles the program in this process, once, and is closed when local and localErr are set.
+func (m *Module) startLocal(ctx context.Context) <-chan struct{} {
+	m.localOnce.Do(func() {
+		m.localDone = make(chan struct{})
+		go func() {
+			defer close(m.localDone)
+			m.local, m.localErr = compileLocal(ctx, m.program, nil)
+		}()
+	})
+	if m.localDone == nil { // closed first
+		done := make(chan struct{})
+		close(done)
+		return done
+	}
+	return m.localDone
 }
 
 // local is a program compiled in this process.
