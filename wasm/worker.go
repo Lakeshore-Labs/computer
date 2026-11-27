@@ -165,6 +165,7 @@ type workerRun struct {
 	Env   map[string]string
 	Dirs  []workerDir
 	Stdin bool
+	Seq   uint32 // which of the worker's runs this is, by which a late request for input is told from the next run's
 }
 
 // workerDir is a host directory as it crosses to a worker, which opens it by its path. When the parent holds the
@@ -241,11 +242,12 @@ func hostDirs(dirs []Dir) ([]workerDir, bool) {
 type pool struct {
 	program Program
 
-	mu      sync.Mutex
-	changed chan struct{} // closed, and made again, when a worker is idle or has ended
-	idle    []*worker
-	all     map[*worker]bool
-	closed  bool
+	mu       sync.Mutex
+	changed  chan struct{} // closed, and made again, when a worker is idle or has ended, or a start has failed
+	starting int           // workers being started, not yet among all
+	idle     []*worker
+	all      map[*worker]bool
+	closed   bool
 }
 
 type worker struct {
@@ -255,6 +257,7 @@ type worker struct {
 	ended  chan struct{} // closed when the process has been waited for
 	err    error         // why it ended, set before ended is closed
 	stderr tail
+	seq    uint32      // the run it was last given
 	reap   *time.Timer // ends the worker when it has been idle too long
 }
 
@@ -304,28 +307,32 @@ func (pl *pool) start(ctx context.Context) (*worker, error) {
 	cmd.SysProcAttr = procAttr()
 	w := &worker{cmd: cmd, frames: make(chan frame, 16), ended: make(chan struct{})}
 	cmd.Stderr = &w.stderr
-	in, err := cmd.StdinPipe()
-	if err != nil {
-		return nil, err
-	}
-	out, err := cmd.StdoutPipe()
-	if err != nil {
-		return nil, err
-	}
-	w.in = in
+	// Its place is taken before its pipes are made, so that a start refused for want of a place opens nothing.
 	pl.mu.Lock()
-	if pl.closed {
+	switch limit := pl.program.MaxRuns; {
+	case pl.closed:
 		pl.mu.Unlock()
 		return nil, errors.New("wasm: the module is closed")
-	}
-	if limit := pl.program.MaxRuns; limit > 0 && len(pl.all) >= limit {
+	case limit > 0 && len(pl.all)+pl.starting >= limit:
 		pl.mu.Unlock()
 		return nil, errFull
 	}
-	if err := cmd.Start(); err != nil {
+	pl.starting++
+	pl.mu.Unlock()
+	in, out, err := startWorker(cmd)
+	pl.mu.Lock()
+	pl.starting--
+	if err == nil && pl.closed {
+		err = errors.New("wasm: the module is closed")
+		_ = cmd.Process.Kill()
+		go cmd.Wait()
+	}
+	if err != nil {
+		pl.signal()
 		pl.mu.Unlock()
 		return nil, err
 	}
+	w.in = in
 	pl.all[w] = true
 	pl.mu.Unlock()
 	go func() {
@@ -367,6 +374,21 @@ func (pl *pool) start(ctx context.Context) (*worker, error) {
 			return nil, ctx.Err()
 		}
 	}
+}
+
+// startWorker starts cmd with pipes to its standard input and from its standard output. Start closes them when it
+// fails.
+func startWorker(cmd *exec.Cmd) (io.WriteCloser, io.ReadCloser, error) {
+	in, err := cmd.StdinPipe()
+	if err != nil {
+		return nil, nil, err
+	}
+	out, err := cmd.StdoutPipe()
+	if err != nil {
+		_ = in.Close()
+		return nil, nil, err
+	}
+	return in, out, cmd.Start()
 }
 
 // fail kills the worker and is err, with what the worker said as it ended.
@@ -504,7 +526,8 @@ func (pl *pool) run(ctx context.Context, r Run, dirs []workerDir) (int, error) {
 	case err != nil:
 		return 70, err
 	}
-	spec, _ := json.Marshal(workerRun{Args: r.Args, Env: r.Env, Dirs: dirs, Stdin: r.Stdin != nil})
+	w.seq++
+	spec, _ := json.Marshal(workerRun{Args: r.Args, Env: r.Env, Dirs: dirs, Stdin: r.Stdin != nil, Seq: w.seq})
 	if err := writeFrame(w.in, frameRun, spec); err != nil {
 		return 70, w.fail(err)
 	}
@@ -538,6 +561,10 @@ func (pl *pool) run(ctx context.Context, r Run, dirs []workerDir) (int, error) {
 				_, werr := out.Write(f.data)
 				err = writeFrame(w.in, frameWritten, errorFrame(werr))
 			case frameWant:
+				// A program's read of its input is a goroutine's, which may ask after its run has ended.
+				if r.Stdin == nil || len(f.data) != 8 || binary.BigEndian.Uint32(f.data) != w.seq {
+					continue
+				}
 				go func(n int) {
 					b := make([]byte, n)
 					n, err := r.Stdin.Read(b)
@@ -545,7 +572,7 @@ func (pl *pool) run(ctx context.Context, r Run, dirs []workerDir) (int, error) {
 						n, err = r.Stdin.Read(b)
 					}
 					input <- inputFrame(b[:n], err)
-				}(int(binary.BigEndian.Uint32(f.data)))
+				}(int(binary.BigEndian.Uint32(f.data[4:])))
 			case frameCall:
 				go func(request []byte) { replies <- pl.program.Host(ctx, request) }(f.data)
 			case frameExit:
@@ -588,7 +615,6 @@ func (pl *pool) run(ctx context.Context, r Run, dirs []workerDir) (int, error) {
 // has grown by GOGC. So the worker has no timer and collects only when the heap has grown by workerHeap, which a
 // loop that calls nothing does not grow; and a run's memory is mapped from the system, outside Go's heap.
 func serve(stdin io.Reader, stdout io.Writer) int {
-	debug.SetGCPercent(-1)
 	runtime.GOMAXPROCS(max(2, runtime.GOMAXPROCS(0))) // one for the program, at least one for the rest
 	in := bufio.NewReaderSize(stdin, 64<<10)
 	s := &server{out: stdout}
@@ -617,6 +643,9 @@ func serve(stdin io.Reader, stdout io.Writer) int {
 		return fail(err)
 	}
 	p, bin = Program{}, frame{}
+	// Only now: compiling a program that is not in the cache allocates many times what it keeps (CPython 4.8 GB
+	// uncollected, 1.5 GB collected), and it calls no program that could hold a collection up.
+	debug.SetGCPercent(-1)
 	debug.FreeOSMemory()
 	var heap runtime.MemStats
 	runtime.ReadMemStats(&heap)
@@ -773,8 +802,12 @@ type remoteInput struct {
 }
 
 func (r remoteInput) Read(p []byte) (int, error) {
-	var n [4]byte
-	binary.BigEndian.PutUint32(n[:], uint32(len(p)))
+	if r.ctx.Err() != nil { // the run has ended
+		return 0, r.ctx.Err()
+	}
+	var n [8]byte
+	binary.BigEndian.PutUint32(n[:], r.run.spec.Seq)
+	binary.BigEndian.PutUint32(n[4:], uint32(len(p)))
 	r.s.send(frameWant, n[:])
 	select {
 	case b := <-r.run.input:

@@ -556,3 +556,16 @@ func TestARedirectReportsAFileThatFailsToClose(t *testing.T) {
 		t.Errorf("exit %d, stdout %q, stderr %q", res.ExitCode, res.Stdout, res.Stderr)
 	}
 }
+
+// matplotlib is imported before a run begins, and still reads the run's own settings.
+func TestMatplotlibReadsARunsOwnBackendAndRcFile(t *testing.T) {
+	c := newComputer(t, Config{Python: python(t)})
+	got := run(t, c, `MPLBACKEND=svg python3 -c 'import matplotlib; print(matplotlib.get_backend())'
+echo 'lines.linewidth: 7' > matplotlibrc
+python3 -c 'import matplotlib; print(matplotlib.rcParams["lines.linewidth"])'
+rm matplotlibrc
+python3 -c 'import matplotlib; print(matplotlib.rcParams["lines.linewidth"])'`)
+	if got != "svg\n7.0\n1.5" {
+		t.Errorf("got %q", got)
+	}
+}

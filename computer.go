@@ -72,7 +72,8 @@ const (
 	// working directory, so it moves to the shell's working directory, puts the script's directory (or the working
 	// directory) and the tools package on the path, and runs the program's arguments as wasi-python's runner does.
 	// wasi-python's time.sleep waits for an absolute time, which wazero does not support; select waits for a
-	// relative one.
+	// relative one. matplotlib is imported already, in the image every run starts from, so what it reads on import
+	// from the run's own environment and directory is read here: a matplotlibrc, and MPLBACKEND.
 	pythonStartCode = `import os, sys, time, select, linecache, _reactor
 linecache._interactive_cache.clear()
 time.sleep = lambda secs: select.select([], [], [], secs)
@@ -80,6 +81,16 @@ try:
     os.chdir(os.environ.get("PYCWD", "/"))
 except OSError:
     pass
+mpl = sys.modules.get("matplotlib")
+if mpl is not None:
+    try:
+        rc = mpl.matplotlib_fname()
+        if os.path.dirname(rc) != mpl.get_data_path():
+            mpl.rc_file(rc)
+        if os.environ.get("MPLBACKEND"):
+            mpl.use(os.environ["MPLBACKEND"])
+    except Exception as e:
+        print("matplotlib:", e, file=sys.stderr)
 args, i = sys.argv[1:], 0
 while i < len(args) and args[i].startswith("-") and args[i] not in ("-", "-c", "-m"):
     i += 2 if args[i] == "-X" else 1
