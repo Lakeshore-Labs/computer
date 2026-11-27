@@ -43,7 +43,7 @@ type Mount = wasm.Dir
 type Config struct {
 	Mounts   []Mount
 	WorkDir  string             // where a command starts; a mount, or a directory in one
-	User     string             // whose computer it is: $USER and $LOGNAME, and what whoami, id and logname name; gbash's own default when empty
+	User     string             // whose computer it is: $USER, $LOGNAME, $HOME as /home/<user>, and what whoami, id and logname name; gbash's own default, and $HOME WorkDir, when empty
 	Commands []commands.Command // commands beyond the shell's own
 	Tools    []tools.Source     // the MCP servers whose tools become commands and the Python package `tools`
 	Python   *Python            // python3; nil for none
@@ -516,11 +516,12 @@ func (c *Computer) python(name string, mounts []Mount) commands.Command {
 	})
 }
 
-// baseEnv is every shell's starting environment: its home, and its user when the computer has one.
+// baseEnv is every shell's starting environment: its home, and its user when the computer has one. A
+// user's home is /home/<user>, as on Unix; with no user it is WorkDir.
 func (c *Computer) baseEnv() map[string]string {
 	env := map[string]string{"HOME": c.cfg.WorkDir}
 	if c.cfg.User != "" {
-		env["USER"], env["LOGNAME"] = c.cfg.User, c.cfg.User
+		env["USER"], env["LOGNAME"], env["HOME"] = c.cfg.User, c.cfg.User, "/home/"+c.cfg.User
 	}
 	return env
 }
