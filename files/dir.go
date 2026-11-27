@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -23,7 +24,11 @@ type Root struct{ root *os.Root }
 
 // Dir opens the host directory at path. Close it when the computer it was given to is done.
 func Dir(path string) (*Root, error) {
-	root, err := os.OpenRoot(path)
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+	root, err := os.OpenRoot(abs)
 	if err != nil {
 		return nil, err
 	}
@@ -32,6 +37,9 @@ func Dir(path string) (*Root, error) {
 
 func (r *Root) Close() error { return r.root.Close() }
 func (r *Root) Name() string { return "Root" }
+
+// Path is the host directory's absolute path, by which another process opens it.
+func (r *Root) Path() string { return r.root.Name() }
 
 // in is name as os.Root takes it: relative to the directory, which is itself ".". A name that ends in a slash
 // names a directory, and the host follows a symbolic link there even where os.Root asks it not to (on macOS, with
