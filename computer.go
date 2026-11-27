@@ -43,6 +43,7 @@ type Mount = wasm.Dir
 type Config struct {
 	Mounts   []Mount
 	WorkDir  string             // where a command starts; a mount, or a directory in one
+	User     string             // whose computer it is: $USER and $LOGNAME, and what whoami, id and logname name; gbash's own default when empty
 	Commands []commands.Command // commands beyond the shell's own
 	Tools    []tools.Source     // the MCP servers whose tools become commands and the Python package `tools`
 	Python   *Python            // python3; nil for none
@@ -407,7 +408,7 @@ func (c *Computer) options(listed []tools.Tool) ([]gbash.Option, error) {
 	// Outside the mounts gbash keeps files in memory, where a program run as WebAssembly cannot see them. The
 	// shell may write only where every program sees the result.
 	writes := readOnlyMounts{policy.NewStatic(&policy.Config{ReadRoots: []string{"/"}, WriteRoots: writable, SymlinkMode: policy.SymlinkDeny, Limits: limits}), mounts}
-	opts := []gbash.Option{gbash.WithPolicy(writes), gbash.WithRegistry(registry), gbash.WithBaseEnv(map[string]string{"HOME": c.cfg.WorkDir}), gbash.WithFileSystem(gbash.MountableFileSystem(gbash.MountableFileSystemOptions{Mounts: shellMounts(mounts, ""), WorkingDir: c.cfg.WorkDir}))}
+	opts := []gbash.Option{gbash.WithPolicy(writes), gbash.WithRegistry(registry), gbash.WithBaseEnv(c.baseEnv()), gbash.WithFileSystem(gbash.MountableFileSystem(gbash.MountableFileSystemOptions{Mounts: shellMounts(mounts, ""), WorkingDir: c.cfg.WorkDir}))}
 	opts = append(opts, c.cfg.Options...)
 	var built gbash.Config // what the embedder's options leave as the policy
 	for _, option := range opts {
@@ -513,4 +514,13 @@ func (c *Computer) python(name string, mounts []Mount) commands.Command {
 		}
 		return nil
 	})
+}
+
+// baseEnv is every shell's starting environment: its home, and its user when the computer has one.
+func (c *Computer) baseEnv() map[string]string {
+	env := map[string]string{"HOME": c.cfg.WorkDir}
+	if c.cfg.User != "" {
+		env["USER"], env["LOGNAME"] = c.cfg.User, c.cfg.User
+	}
+	return env
 }

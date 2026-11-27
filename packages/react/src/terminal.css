@@ -1,0 +1,2 @@
+/* xterm.js's own styles, which the Terminal needs: a host imports this once, from its CSS or its code. */
+@import "@xterm/xterm/css/xterm.css";

@@ -10,6 +10,7 @@ require (
 	github.com/Lakeshore-Labs/gbash/contrib/jq v0.0.42
 	github.com/Lakeshore-Labs/gbash/contrib/sqlite3 v0.0.42
 	github.com/Lakeshore-Labs/gbash/contrib/yq v0.0.42
+	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/klippa-app/go-pdfium v1.21.5
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/spf13/afero v1.15.0

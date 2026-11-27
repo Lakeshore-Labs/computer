@@ -62,6 +62,11 @@ def expect(marker):
 
 try:
     expect(b'$ ')
+    # Keys come to the prompt one at a time, and output is processed as a cooked terminal's, so what is written straight
+    # to the CLI's standard error while a command runs starts each line at its left edge.
+    output_flags, local_flags = termios.tcgetattr(tty)[1], termios.tcgetattr(tty)[3]
+    assert output_flags & termios.OPOST and output_flags & termios.ONLCR, 'the prompt turned off output processing'
+    assert not local_flags & termios.ICANON, 'the prompt is not reading a key at a time'
     os.write(terminal, b'read -t 0.1 x; echo timed-out $?\r')
     expect(b'\r\ntimed-out 142\r\n')
     expect(b'$ ')
