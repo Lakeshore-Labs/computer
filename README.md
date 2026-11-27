@@ -91,10 +91,14 @@ res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: "wiki read-wiki-structur
 
 `c.Prompt(ctx, term, workDir, interrupt, size)` is the shell `./computer` gives a person at a terminal: a line
 editor with history and Tab completion over any stream, with the working directory and exported variables carried
-from line to line, and Ctrl-C ending only the running command. `computer.TerminalHandler(get)` serves it over a
-WebSocket; `get` is yours, and returns the requester's computer and working directory, or an error (403 for
-`fs.ErrPermission`, else 500). You keep authentication and which computer is whose; a page of another origin is
-refused. The React component is `@lakeshore-labs/computer-react` (`packages/react`):
+from line to line, and Ctrl-C ending only the running command. Each prompt is a shell of its own: two on one
+computer keep their own directories and variables. `computer.TerminalHandler(get)` serves it over a WebSocket;
+`get` is yours, and returns the requester's computer and working directory, or an error (403 for
+`fs.ErrPermission`, else a 500 that logs your error and does not show it). You keep authentication and which
+computer is whose. A request that is not a WebSocket, or whose page is of another origin, is refused before `get`
+is called; `computer.CheckOrigin(func(*http.Request) bool)` is another rule, for pages on a development server or
+behind a proxy that changes the Host. A client that answers no ping for a minute, or stops reading, ends its
+prompt and command. The React component is `@lakeshore-labs/computer-react` (`packages/react`):
 
 ```go
 http.Handle("/computer/terminal", computer.TerminalHandler(func(r *http.Request) (*computer.Computer, string, error) {
@@ -107,16 +111,20 @@ http.Handle("/computer/terminal", computer.TerminalHandler(func(r *http.Request)
 ```
 
 ```tsx
-// package.json: "@lakeshore-labs/computer-react": "github:Lakeshore-Labs/computer#<commit>&path:/packages/react"
+// package.json, installed with pnpm, which installs a folder of a git repository (npm does not):
+// "@lakeshore-labs/computer-react": "github:Lakeshore-Labs/computer#<commit>&path:/packages/react"
 import { Terminal } from "@lakeshore-labs/computer-react"
-import "@lakeshore-labs/computer-react/terminal.css" // xterm.js's styles
+import "@lakeshore-labs/computer-react/terminal.css" // xterm.js's styles; or @import it in your CSS
 
 <Terminal url="/computer/terminal" onCommandEnd={(code) => refreshFiles()} />
 ```
 
-The package is TypeScript source; React 19 is the host's. The terminal fills its parent, follows a `dark` class on
-`<html>`, and offers to reconnect when the connection closes. A command's end reaches `onCommandEnd` as OSC 133's
-`D` mark, which the prompt writes after each command.
+The package is TypeScript source, which your bundler compiles and your `tsc` checks: React 19 and its types are
+yours. Importing the CSS from code needs your bundler's types for it, such as Vite's `vite/client` in
+`compilerOptions.types` (TypeScript 6 otherwise reports TS2882); an `@import` in your CSS needs none. The terminal
+fills its parent, follows a `dark` class on `<html>`, and offers to reconnect when the connection closes. A
+command's end reaches `onCommandEnd` as OSC 133's `D` mark, which the prompt writes after each command. Its tests
+run on Node 22.18 or later, which runs TypeScript.
 
 ## Mounts
 

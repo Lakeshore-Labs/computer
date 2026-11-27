@@ -19,8 +19,9 @@ import (
 
 // Prompt is the computer's shell for a person at a terminal: a line editor with history and Tab completion, which
 // gbash's own interactive mode does not have. Each line is run in the computer; the working directory and exported
-// variables carry from one to the next, as Exec carries them. It returns at the end of term's input, at Ctrl-D on
-// an empty line, at exit, or when ctx ends, and ends the command that is running.
+// variables carry from one to the next, and are this prompt's own, as a shell's are: two prompts on one computer
+// do not see each other's, and Exec does not see theirs. It returns at the end of term's input, at Ctrl-D on an
+// empty line, at exit, or when ctx ends, and ends the command that is running.
 //
 // term is a terminal in raw mode, or what stands for one, such as a WebSocket to a terminal in a browser: Prompt
 // reads keystrokes from it and writes output for a terminal to it, a newline as "\r\n". While a command runs, what
@@ -55,7 +56,7 @@ func (c *Computer) Prompt(ctx context.Context, term io.ReadWriter, workDir strin
 		}
 	}()
 	in := &keyReader{keys: keys, done: ctx.Done()}
-	p := &prompt{c: c, ctx: ctx, cwd: workDir, in: in, out: out, width: 80, height: 24}
+	p := &prompt{c: c, ctx: ctx, cwd: workDir, env: map[string]string{}, in: in, out: out, width: 80, height: 24}
 	p.newEditor(nil)
 
 	var mu sync.Mutex
@@ -110,7 +111,8 @@ func (c *Computer) Prompt(ctx context.Context, term io.ReadWriter, workDir strin
 		go func() {
 			defer close(done)
 			lines := &newlines{w: out}
-			res, err = c.Exec(running, &gbash.ExecutionRequest{Script: line, WorkDir: p.cwd, Stdin: stdin, Stdout: lines, Stderr: lines})
+			// An Env makes Exec carry nothing of its own: the prompt carries its variables itself.
+			res, err = c.Exec(running, &gbash.ExecutionRequest{Script: line, WorkDir: p.cwd, Env: p.env, Stdin: stdin, Stdout: lines, Stderr: lines})
 		}()
 		typed, ended := in.pending, false
 		in.pending = nil
@@ -149,6 +151,9 @@ func (c *Computer) Prompt(ctx context.Context, term io.ReadWriter, workDir strin
 			code = res.ExitCode
 		}
 		fmt.Fprintf(out, "\x1b]133;D;%d\x07", code)
+		if res != nil && res.FinalEnv != nil {
+			p.env = res.FinalEnv
+		}
 		switch {
 		case err != nil:
 			if !interrupted {
@@ -167,6 +172,7 @@ type prompt struct {
 	c   *Computer
 	ctx context.Context
 	cwd string
+	env map[string]string // the exported variables, as the last line left them
 	in  *keyReader
 	out io.Writer
 

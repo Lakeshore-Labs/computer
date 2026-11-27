@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"os"
@@ -15,7 +16,7 @@ import (
 )
 
 // prompt is the computer's Prompt at this process's terminal, which it puts in raw mode for as long as the prompt
-// runs. A program that serves a terminal to a browser, such as gotty or ttyd, makes this the computer's web
+// runs, with the output processing of a cooked terminal. A program that serves a terminal to a browser, such as gotty or ttyd, makes this the computer's web
 // terminal, as does computer.TerminalHandler.
 func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 	fd := syscall.Stdin // os.Stdin.Fd would put a non-blocking terminal into blocking mode
@@ -33,7 +34,13 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 	var mu sync.Mutex
 	mu.Lock()
 	cooked, err := term.MakeRaw(fd)
+	if err == nil {
+		err = cookedOutput(fd)
+	}
 	if err != nil {
+		if cooked != nil {
+			_ = term.Restore(fd, cooked)
+		}
 		signal.Stop(ended)
 		return err
 	}
@@ -111,7 +118,30 @@ func prompt(ctx context.Context, c *computer.Computer, workDir string) error {
 	return c.Prompt(ctx, struct {
 		io.Reader
 		io.Writer
-	}{input, os.Stdout}, workDir, interrupt, size)
+	}{input, crlf{os.Stdout}}, workDir, interrupt, size)
+}
+
+// cookedOutput gives the raw terminal fd back its output processing, as a cooked terminal has it: a newline starts a
+// line. So what is written straight to this process's standard error while a command runs, such as a library's
+// log, is laid out as it was before the prompt, while what is typed still comes to the prompt a key at a time.
+func cookedOutput(fd int) error {
+	t, err := unix.IoctlGetTermios(fd, getTermios)
+	if err != nil {
+		return err
+	}
+	t.Oflag |= unix.OPOST | unix.ONLCR
+	return unix.IoctlSetTermios(fd, setTermios, t)
+}
+
+// crlf is the terminal as the prompt writes to it: the prompt ends a line with "\r\n", as a raw terminal needs, and
+// the terminal, which processes output, makes "\r\n" of a newline itself.
+type crlf struct{ w io.Writer }
+
+func (c crlf) Write(p []byte) (int, error) {
+	if _, err := c.w.Write(bytes.ReplaceAll(p, []byte("\r\n"), []byte("\n"))); err != nil {
+		return 0, err
+	}
+	return len(p), nil
 }
 
 // openTerminal is a new descriptor for the terminal fd, as a file Go's poller manages, since fd is in non-blocking mode.

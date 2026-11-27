@@ -29,17 +29,26 @@
     "test": "node --test 'src/*.test.ts'",
     "typecheck": "tsc --noEmit"
   },
+  "engines": {
+    "node": ">=22.18"
+  },
   "peerDependencies": {
+    "@types/react": "^19",
     "react": "^19",
     "react-dom": "^19"
   },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  },
   "dependencies": {
-    "@types/react": "^19",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^24",
+    "@types/react": "^19",
     "react": "^19",
     "react-dom": "^19",
     "typescript": "~6.0.2",

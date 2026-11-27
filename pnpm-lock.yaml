@@ -10,9 +10,6 @@ importers:
 
   packages/react:
     dependencies:
-      '@types/react':
-        specifier: ^19
-        version: 19.3.3
       '@xterm/addon-fit':
         specifier: ^0.11.0
         version: 0.11.0
@@ -23,6 +20,9 @@ importers:
       '@types/node':
         specifier: ^24
         version: 24.19.4
+      '@types/react':
+        specifier: ^19
+        version: 19.3.3
       react:
         specifier: ^19
         version: 19.3.1
