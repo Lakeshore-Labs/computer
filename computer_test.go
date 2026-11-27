@@ -22,6 +22,11 @@ import (
 	"github.com/Lakeshore-Labs/computer/wasm"
 )
 
+func TestMain(m *testing.M) {
+	wasm.Worker()
+	os.Exit(m.Run())
+}
+
 type note struct {
 	ID    int    `json:"id"`
 	Title string `json:"title"`
@@ -117,7 +122,11 @@ var cpython struct {
 func python(t *testing.T) *Python {
 	t.Helper()
 	cpython.once.Do(func() {
-		p := wasm.Program{MaxRuns: 2, CacheDir: os.Getenv("PYTHON_CACHE")}
+		cache := os.Getenv("PYTHON_CACHE")
+		if dir, err := os.UserCacheDir(); cache == "" && err == nil {
+			cache = filepath.Join(dir, "computer") // as the command does, so that Python runs in workers
+		}
+		p := wasm.Program{MaxRuns: 2, CacheDir: cache}
 		if dir := os.Getenv("PYTHON_DIR"); dir != "" {
 			cpython.python, cpython.err = LoadPython(context.Background(), dir, p)
 			return
