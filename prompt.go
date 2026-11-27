@@ -217,7 +217,9 @@ func (p *prompt) complete(t *term.Terminal) func(string, int, rune) (string, int
 		found := p.c.Complete(p.ctx, p.cwd, before)
 		switch shared := sharedPrefix(found); {
 		case len(found) == 1:
-			shared += " "
+			if !strings.HasSuffix(shared, "/") { // a folder: Tab goes on into it
+				shared += " "
+			}
 			fallthrough
 		case len(shared) > len(word):
 			return before[:len(before)-len(word)] + shared + line[pos:], pos - len(word) + len(shared), true
@@ -445,12 +447,22 @@ func (c *Computer) Complete(ctx context.Context, cwd, before string) []string {
 			}
 		}
 	}
+	// A path from ~ is completed from the home, and given back from ~, as bash does.
+	path, home := word, ""
+	if word == "~" || strings.HasPrefix(word, "~/") {
+		home = c.cfg.WorkDir
+		path = home + word[1:]
+	}
 	if all == nil {
-		all = run("compgen -f -- " + quote(word))
+		// A folder has its slash, so that Tab goes on into it.
+		all = run("compgen -f -- " + quote(path) + ` | while IFS= read -r f; do if [ -d "$f" ]; then printf '%s/\n' "$f"; else printf '%s\n' "$f"; fi; done`)
 	}
 	var found []string
 	for _, candidate := range all {
-		if candidate != "" && strings.HasPrefix(candidate, word) {
+		if candidate != "" && strings.HasPrefix(candidate, path) {
+			if home != "" {
+				candidate = "~" + strings.TrimPrefix(candidate, home)
+			}
 			found = append(found, candidate)
 		}
 	}
