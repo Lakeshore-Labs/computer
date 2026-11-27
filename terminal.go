@@ -32,7 +32,7 @@ type terminalOptions struct{ checkOrigin func(*http.Request) bool }
 // CheckOrigin is the rule for which pages may open the terminal, for a host whose pages are on another origin than
 // its own, such as a development server's, or behind a proxy that changes the Host header. The rule is the host's:
 // the terminal is the person a cookie names, which a page of any site may send. Without this option a page of the
-// request's own origin alone may.
+// request's own origin alone may, as with CheckOrigin(nil).
 func CheckOrigin(check func(*http.Request) bool) TerminalOption {
 	return func(o *terminalOptions) { o.checkOrigin = check }
 }
@@ -53,6 +53,9 @@ func TerminalHandler(get func(*http.Request) (*Computer, string, error), opts ..
 	pongWait, pingPeriod, writeWait := pongWait, pingPeriod, writeWait // as they are when the handler is made
 	for _, opt := range opts {
 		opt(&o)
+	}
+	if o.checkOrigin == nil { // CheckOrigin(nil), as gorilla/websocket's nil CheckOrigin is
+		o.checkOrigin = sameOrigin
 	}
 	upgrader := websocket.Upgrader{ReadBufferSize: 4096, WriteBufferSize: 4096, CheckOrigin: o.checkOrigin}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -226,3 +226,48 @@ func newComputerAt(t *testing.T, dir string) *Computer {
 	t.Cleanup(func() { _ = c.Close() })
 	return c
 }
+
+// A client that answers the pings stays connected however long it is idle: the handler pings it.
+func TestAnIdleClientThatAnswersPingsStaysConnected(t *testing.T) {
+	quickKeepAlive(t)
+	url, ended := servedUntil(t, newComputerAt(t, t.TempDir()))
+	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	s := &screen{}
+	go func() { // reading, which answers each ping with a pong
+		for {
+			_, msg, err := conn.ReadMessage()
+			if err != nil {
+				return
+			}
+			s.Write(msg)
+		}
+	}()
+	s.expect(t, "$ ")
+	select {
+	case <-ended:
+		t.Fatal("an idle client that answers pings was dropped")
+	case <-time.After(3 * pongWait):
+	}
+	send(t, conn, "echo still-here\r")
+	s.expect(t, "\r\nstill-here\r\n")
+}
+
+// CheckOrigin(nil) is no rule of the host's: the default, same origin, as gorilla/websocket's nil CheckOrigin is.
+func TestCheckOriginNilIsSameOrigin(t *testing.T) {
+	c := newComputerAt(t, t.TempDir())
+	srv := httptest.NewServer(TerminalHandler(func(*http.Request) (*Computer, string, error) { return c, "/home/user", nil }, CheckOrigin(nil)))
+	defer srv.Close()
+	url := "ws" + strings.TrimPrefix(srv.URL, "http")
+	conn, _, err := websocket.DefaultDialer.Dial(url, http.Header{"Origin": {srv.URL}})
+	if err != nil {
+		t.Fatalf("the page's own origin: %v", err)
+	}
+	conn.Close()
+	if _, res, err := websocket.DefaultDialer.Dial(url, http.Header{"Origin": {"https://elsewhere.example"}}); err == nil || res == nil || res.StatusCode != http.StatusForbidden {
+		t.Errorf("another origin: %v %+v", err, res)
+	}
+}
