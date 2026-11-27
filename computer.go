@@ -32,6 +32,7 @@ import (
 	gbfs "github.com/Lakeshore-Labs/gbash/fs"
 	"github.com/Lakeshore-Labs/gbash/policy"
 	"github.com/Lakeshore-Labs/gbash/shell/syntax"
+	"github.com/spf13/afero"
 	"github.com/tetratelabs/wazero/experimental"
 )
 
@@ -90,6 +91,13 @@ else:
 sys.path.append("` + pythonSite + `")
 sys.exit(_reactor.run(["` + pythonExe + `", *args], dict(os.environ)))
 `
+	// pythonPrepareCode is run once, and every python3 starts from the memory it leaves: these modules are imported
+	// already, at no cost to a program, and one that does not use them pays nothing for them either. matplotlib
+	// builds its list of fonts on import, which then needs a writable MPLCONFIGDIR, the one every run is given.
+	// A module is here only when what it reads on import is the same for every run: not the tools package, which
+	// is each computer's own.
+	pythonPrepareCode = "import numpy, pandas, matplotlib, matplotlib.pyplot\n"
+	pythonConfigDir   = "/tmp/.matplotlib"
 )
 
 // LoadPython reads the wasi-python release unpacked in dir, laid out as EmbeddedPython unpacks it:
@@ -106,6 +114,25 @@ func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error
 	p.Features |= experimental.CoreFeaturesExceptionHandling
 	if p.MemoryPages == 0 {
 		p.MemoryPages = 8192
+	}
+	// The image depends on the binary and on the standard library the code imports from, which a file's size and
+	// time name well enough for a release that is unpacked once and not changed.
+	zip, err := os.Stat(filepath.Join(dir, "lib", "python315.zip"))
+	if err != nil {
+		return nil, err
+	}
+	p.Prepare = &wasm.Preparation{
+		Code: pythonPrepareCode,
+		Key:  fmt.Sprintf("python315.zip %d %d", zip.Size(), zip.ModTime().UnixNano()),
+		Run: wasm.Run{
+			Args: []string{pythonExe},
+			Env:  map[string]string{"MPLCONFIGDIR": pythonConfigDir},
+			Dirs: []wasm.Dir{
+				{Guest: pythonLib, Host: filepath.Join(dir, "lib"), ReadOnly: true},
+				{Guest: pythonMpl, Host: filepath.Join(dir, "mpl-data"), ReadOnly: true},
+				{Guest: "/tmp", FS: afero.NewMemMapFs()},
+			},
+		},
 	}
 	py := &Python{dir: dir, ready: make(chan struct{})}
 	go func() {
@@ -485,7 +512,7 @@ func (c *Computer) python(name string, mounts []Mount) commands.Command {
 			env[k] = v
 		}
 		// matplotlib keeps its font list in a writable directory; /tmp outlives the run.
-		env["PYCWD"], env["MPLCONFIGDIR"] = inv.Cwd, "/tmp/.matplotlib"
+		env["PYCWD"], env["MPLCONFIGDIR"] = inv.Cwd, pythonConfigDir
 		stdin := inv.Stdin
 		if stdin == nil {
 			stdin = strings.NewReader("")

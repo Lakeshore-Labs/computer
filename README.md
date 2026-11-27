@@ -205,7 +205,10 @@ python, err := computer.EmbeddedPython(ctx, wasm.Program{MaxRuns: 8, CacheDir: c
 ```
 
 The first compile takes about 30 seconds, then under a second from `CacheDir`; it runs in the background, and only
-the first `python3` waits. See [`python/README.md`](python/README.md).
+the first `python3` waits. Every `python3` starts from one image of the interpreter with numpy, pandas and
+matplotlib already imported, made once (about 4 to 8 seconds) and kept in `CacheDir`; each run is still its own
+interpreter, with its own memory, arguments, environment and files, and `random` and `numpy.random` seeded afresh.
+Its string hashes are not randomized: every run has the image's hash seed. See [`python/README.md`](python/README.md).
 
 ## The boundary
 
