@@ -17,4 +17,4 @@ jobs:
       # stdmethods objects to the Seek method wazero's file interface requires.
       - run: go vet -stdmethods=false ./...
       - name: Test
-        run: go test -count=1 -timeout 900s -v . ./cmd/computer | grep -vE '^=== (RUN|PAUSE|CONT|NAME)' ; exit "${PIPESTATUS[0]}"
+        run: go test -count=1 -timeout 900s -v . ./cmd/computer ./wasm | grep -vE '^=== (RUN|PAUSE|CONT|NAME)' ; exit "${PIPESTATUS[0]}"
