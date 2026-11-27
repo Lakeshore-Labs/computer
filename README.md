@@ -87,6 +87,37 @@ defer c.Close()
 res, err := c.Exec(ctx, &gbash.ExecutionRequest{Script: "wiki read-wiki-structure --repo-name wazero/wazero | wc -l"})
 ```
 
+## A terminal in the browser
+
+`c.Prompt(ctx, term, workDir, interrupt, size)` is the shell `./computer` gives a person at a terminal: a line
+editor with history and Tab completion over any stream, with the working directory and exported variables carried
+from line to line, and Ctrl-C ending only the running command. `computer.TerminalHandler(get)` serves it over a
+WebSocket; `get` is yours, and returns the requester's computer and working directory, or an error (403 for
+`fs.ErrPermission`, else 500). You keep authentication and which computer is whose; a page of another origin is
+refused. The React component is `@lakeshore-labs/computer-react` (`packages/react`):
+
+```go
+http.Handle("/computer/terminal", computer.TerminalHandler(func(r *http.Request) (*computer.Computer, string, error) {
+    user, ok := signedIn(r) // yours
+    if !ok {
+        return nil, "", fs.ErrPermission
+    }
+    return computers.For(user), "/home/" + user, nil // yours, which you close
+}))
+```
+
+```tsx
+// package.json: "@lakeshore-labs/computer-react": "github:Lakeshore-Labs/computer#<commit>&path:/packages/react"
+import { Terminal } from "@lakeshore-labs/computer-react"
+import "@lakeshore-labs/computer-react/terminal.css" // xterm.js's styles
+
+<Terminal url="/computer/terminal" onCommandEnd={(code) => refreshFiles()} />
+```
+
+The package is TypeScript source; React 19 is the host's. The terminal fills its parent, follows a `dark` class on
+`<html>`, and offers to reconnect when the connection closes. A command's end reaches `onCommandEnd` as OSC 133's
+`D` mark, which the prompt writes after each command.
+
 ## Mounts
 
 A mount is a directory of the computer. The shell and every program are given the same one, so a file one writes
