@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/spf13/afero"
@@ -24,6 +25,7 @@ import (
 
 	"github.com/Lakeshore-Labs/computer/files"
 	"github.com/tetratelabs/wazero/api"
+	"github.com/tetratelabs/wazero/experimental"
 	experimentalsys "github.com/tetratelabs/wazero/experimental/sys"
 	"github.com/tetratelabs/wazero/experimental/sysfs"
 	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
@@ -39,7 +41,8 @@ type Program struct {
 
 	// Unstoppable runs the program at full speed and gives up stopping it: a run then ends only when the program
 	// does, whatever its context. Stopping costs a call into Go on every loop iteration, which slows an interpreter
-	// such as CPython three to four times. Set it only for a program trusted to end.
+	// such as CPython three to four times. Set it only for a program trusted to end. A program run in worker
+	// processes (see Worker) is at full speed and stopped, so this matters only for a run in this process.
 	Unstoppable bool
 
 	// MaxRuns is how many runs there may be at once; a further one waits for its turn until its context ends. Each
@@ -73,79 +76,45 @@ type Preparation struct {
 
 // A Module is a compiled Program. It is safe for concurrent runs, each with its own memory.
 type Module struct {
-	runtime wazero.Runtime
-	code    wazero.CompiledModule
-	reactor bool          // the binary exports run, called after _initialize, in place of a main
+	program Program
 	turns   chan struct{} // one place for each run allowed at once; nil when there is no limit
-	image   []byte        // the memory every run starts from, a whole number of pages; nil without Prepare
+	workers *pool         // the worker processes, when Worker was called and the program has a CacheDir
+
+	// local runs the program in this process: always without workers, and with them only for a run given a
+	// directory that is not the host's, which a worker cannot open. With workers it is compiled on first use.
+	localOnce sync.Once
+	local     *local
+	localErr  error
 }
 
-// Compile compiles p once, for every run of it.
+// Compile compiles p once, for every run of it. When the process called Worker and p has a CacheDir, the program
+// runs in worker processes, compiled there from the cache, and Compile waits for the first worker to be ready.
 func Compile(ctx context.Context, p Program) (*Module, error) {
-	// ponytail: a goroutine cannot be killed, so wazero stops a run by having it check at every loop. The upgrade
-	// that keeps both speed and the stop is to run programs in a worker process, which the system can kill.
-	cfg := wazero.NewRuntimeConfig().WithCoreFeatures(api.CoreFeaturesV2 | p.Features).WithCloseOnContextDone(!p.Unstoppable).
-		WithDebugInfoEnabled(false) // or a stopped run spends seconds reading the binary's debug data for a stack trace
-	if p.MemoryPages > 0 {
-		cfg = cfg.WithMemoryLimitPages(p.MemoryPages)
-	}
-	if p.CacheDir != "" {
-		cache, err := wazero.NewCompilationCacheWithDir(p.CacheDir)
-		if err != nil {
-			return nil, err
-		}
-		cfg = cfg.WithCompilationCache(cache)
-	}
-	m := &Module{runtime: wazero.NewRuntimeWithConfig(ctx, cfg)}
+	m := &Module{program: p}
 	if p.MaxRuns > 0 {
 		m.turns = make(chan struct{}, p.MaxRuns)
 	}
-	if _, err := wasi_snapshot_preview1.Instantiate(ctx, m.runtime); err != nil {
-		return nil, errors.Join(err, m.Close(ctx))
+	if workerExe != "" && p.CacheDir != "" {
+		var err error
+		m.workers, err = newPool(ctx, p)
+		return m, err
 	}
-	_, err := m.runtime.NewHostModuleBuilder("host").NewFunctionBuilder().
-		WithFunc(func(ctx context.Context, mod api.Module, ptr, n, replyPtrPtr, replyLenPtr uint32) int32 {
-			if p.Host == nil {
-				return -1
-			}
-			request, ok := mod.Memory().Read(ptr, n)
-			alloc := mod.ExportedFunction("host_alloc")
-			if !ok || alloc == nil {
-				return -2
-			}
-			reply := p.Host(ctx, slices.Clone(request)) // the program's memory may move while the host answers
-			at, err := alloc.Call(ctx, uint64(len(reply)))
-			if err != nil || len(at) == 0 || at[0] == 0 && len(reply) > 0 { // 0 is malloc's answer when the heap is full
-				return -2
-			}
-			if !mod.Memory().Write(uint32(at[0]), reply) || !mod.Memory().WriteUint32Le(replyPtrPtr, uint32(at[0])) ||
-				!mod.Memory().WriteUint32Le(replyLenPtr, uint32(len(reply))) {
-				return -2
-			}
-			return 0
-		}).Export("call").Instantiate(ctx)
-	if err != nil {
-		return nil, errors.Join(err, m.Close(ctx))
-	}
-	// A kept image is looked for while the program compiles: naming it hashes the binary, and both take a while.
-	kept := make(chan cachedImage, 1)
-	if p.Prepare != nil {
-		go func() { kept <- findImage(p) }()
-	}
-	if m.code, err = m.runtime.CompileModule(ctx, p.Binary); err != nil {
-		return nil, errors.Join(err, m.Close(ctx))
-	}
-	_, m.reactor = m.code.ExportedFunctions()["run"]
-	if p.Prepare != nil {
-		if m.image, err = m.prepare(ctx, p.Prepare, <-kept); err != nil {
-			return nil, errors.Join(err, m.Close(ctx))
-		}
-	}
-	return m, nil
+	m.localOnce.Do(func() { m.local, m.localErr = compileLocal(ctx, p, nil) })
+	return m, m.localErr
 }
 
-// Close frees the compiled code.
-func (m *Module) Close(ctx context.Context) error { return m.runtime.Close(ctx) }
+// Close frees the compiled code, and ends the workers, with any run in them.
+func (m *Module) Close(ctx context.Context) error {
+	var errs []error
+	if m.workers != nil {
+		errs = append(errs, m.workers.close())
+	}
+	m.localOnce.Do(func() {}) // a local compiled from now on would not be closed
+	if m.local != nil {
+		errs = append(errs, m.local.runtime.Close(ctx))
+	}
+	return errors.Join(errs...)
+}
 
 // A Dir is a directory the program sees at the path Guest: the filesystem FS, or, when FS is nil, the host
 // directory Host.
@@ -175,15 +144,98 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 			return 124, ctx.Err()
 		}
 	}
+	if m.workers != nil {
+		if dirs, ok := hostDirs(r.Dirs); ok {
+			return m.workers.run(ctx, r, dirs)
+		}
+		m.localOnce.Do(func() { m.local, m.localErr = compileLocal(context.WithoutCancel(ctx), m.program, nil) })
+		if m.localErr != nil {
+			return 70, m.localErr
+		}
+	}
+	return m.local.run(ctx, r)
+}
+
+// local is a program compiled in this process.
+type local struct {
+	runtime wazero.Runtime
+	code    wazero.CompiledModule
+	reactor bool                         // the binary exports run, called after _initialize, in place of a main
+	memory  experimental.MemoryAllocator // where a run's memory is kept; nil is wazero's own, on the Go heap
+	image   []byte                       // the memory every run starts from, a whole number of pages; nil without Prepare
+}
+
+func compileLocal(ctx context.Context, p Program, memory experimental.MemoryAllocator) (*local, error) {
+	// A goroutine cannot be killed, so wazero stops a run by having it check at every loop, unless it is
+	// unstoppable. A worker process runs its program unstoppable and is killed instead.
+	cfg := wazero.NewRuntimeConfig().WithCoreFeatures(api.CoreFeaturesV2 | p.Features).WithCloseOnContextDone(!p.Unstoppable).
+		WithDebugInfoEnabled(false) // or a stopped run spends seconds reading the binary's debug data for a stack trace
+	if p.MemoryPages > 0 {
+		cfg = cfg.WithMemoryLimitPages(p.MemoryPages)
+	}
+	if p.CacheDir != "" {
+		cache, err := wazero.NewCompilationCacheWithDir(p.CacheDir)
+		if err != nil {
+			return nil, err
+		}
+		cfg = cfg.WithCompilationCache(cache)
+	}
+	l := &local{runtime: wazero.NewRuntimeWithConfig(ctx, cfg), memory: memory}
+	if _, err := wasi_snapshot_preview1.Instantiate(ctx, l.runtime); err != nil {
+		return nil, errors.Join(err, l.runtime.Close(ctx))
+	}
+	host := p.Host // and not p, whose Binary the function would keep
+	_, err := l.runtime.NewHostModuleBuilder("host").NewFunctionBuilder().
+		WithFunc(func(ctx context.Context, mod api.Module, ptr, n, replyPtrPtr, replyLenPtr uint32) int32 {
+			if host == nil {
+				return -1
+			}
+			request, ok := mod.Memory().Read(ptr, n)
+			alloc := mod.ExportedFunction("host_alloc")
+			if !ok || alloc == nil {
+				return -2
+			}
+			reply := host(ctx, slices.Clone(request)) // the program's memory may move while the host answers
+			at, err := alloc.Call(ctx, uint64(len(reply)))
+			if err != nil || len(at) == 0 || at[0] == 0 && len(reply) > 0 { // 0 is malloc's answer when the heap is full
+				return -2
+			}
+			if !mod.Memory().Write(uint32(at[0]), reply) || !mod.Memory().WriteUint32Le(replyPtrPtr, uint32(at[0])) ||
+				!mod.Memory().WriteUint32Le(replyLenPtr, uint32(len(reply))) {
+				return -2
+			}
+			return 0
+		}).Export("call").Instantiate(ctx)
+	if err != nil {
+		return nil, errors.Join(err, l.runtime.Close(ctx))
+	}
+	// A kept image is looked for while the program compiles: naming it hashes the binary, and both take a while.
+	kept := make(chan cachedImage, 1)
+	if p.Prepare != nil {
+		go func() { kept <- findImage(p) }()
+	}
+	if l.code, err = l.runtime.CompileModule(ctx, p.Binary); err != nil {
+		return nil, errors.Join(err, l.runtime.Close(ctx))
+	}
+	_, l.reactor = l.code.ExportedFunctions()["run"]
+	if p.Prepare != nil {
+		if l.image, err = l.prepare(ctx, p.Prepare, <-kept); err != nil {
+			return nil, errors.Join(err, l.runtime.Close(ctx))
+		}
+	}
+	return l, nil
+}
+
+func (l *local) run(ctx context.Context, r Run) (int, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	code := 0
-	mod, closeDirs, err := m.instantiate(ctx, r, m.image == nil)
+	mod, closeDirs, err := l.instantiate(ctx, r, l.image == nil)
 	defer closeDirs()
-	if err == nil && m.image != nil {
-		err = restore(mod.Memory(), m.image)
+	if err == nil && l.image != nil {
+		err = restore(mod.Memory(), l.image)
 	}
-	if err == nil && m.reactor {
+	if err == nil && l.reactor {
 		var res []uint64
 		if res, err = mod.ExportedFunction("run").Call(ctx); err == nil && len(res) == 1 {
 			code = int(int32(res[0]))
@@ -206,7 +258,7 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 
 // instantiate makes an instance of the program for r, started by its _initialize when start is set and the program
 // is a reactor. closeDirs closes the host directories it opened, and is to be called when the instance is closed.
-func (m *Module) instantiate(ctx context.Context, r Run, start bool) (_ api.Module, closeDirs func(), _ error) {
+func (l *local) instantiate(ctx context.Context, r Run, start bool) (_ api.Module, closeDirs func(), _ error) {
 	var opened []io.Closer
 	closeDirs = func() {
 		for _, c := range opened {
@@ -245,10 +297,10 @@ func (m *Module) instantiate(ctx context.Context, r Run, start bool) (_ api.Modu
 	switch {
 	case !start:
 		cfg = cfg.WithStartFunctions() // the image is the started program
-	case m.reactor: // a reactor is started by _initialize, and its run returns the exit code
+	case l.reactor: // a reactor is started by _initialize, and its run returns the exit code
 		cfg = cfg.WithStartFunctions("_initialize")
 	}
-	mod, err := m.runtime.InstantiateModule(ctx, m.code, cfg)
+	mod, err := l.runtime.InstantiateModule(experimental.WithMemoryAllocator(ctx, l.memory), l.code, cfg)
 	return mod, closeDirs, err
 }
 
@@ -302,11 +354,11 @@ func findImage(p Program) cachedImage {
 }
 
 // prepare is the starting image: the one kept, or one made by running prep's code and then kept.
-func (m *Module) prepare(ctx context.Context, prep *Preparation, kept cachedImage) ([]byte, error) {
+func (l *local) prepare(ctx context.Context, prep *Preparation, kept cachedImage) ([]byte, error) {
 	if kept.image != nil {
 		return kept.image, nil
 	}
-	image, err := m.makeImage(ctx, prep)
+	image, err := l.makeImage(ctx, prep)
 	if err != nil || kept.name == "" {
 		return image, err
 	}
@@ -337,7 +389,7 @@ func (m *Module) prepare(ctx context.Context, prep *Preparation, kept cachedImag
 
 // makeImage runs prep's code in a new instance, as wasi-python's prepare runs it: after wizer.initialize, which
 // starts the interpreter as a snapshot's is started, unless the binary is a snapshot already.
-func (m *Module) makeImage(ctx context.Context, prep *Preparation) ([]byte, error) {
+func (l *local) makeImage(ctx context.Context, prep *Preparation) ([]byte, error) {
 	var out bytes.Buffer
 	r := prep.Run
 	if r.Stdout == nil {
@@ -346,7 +398,7 @@ func (m *Module) makeImage(ctx context.Context, prep *Preparation) ([]byte, erro
 	if r.Stderr == nil {
 		r.Stderr = &out
 	}
-	mod, closeDirs, err := m.instantiate(ctx, r, true)
+	mod, closeDirs, err := l.instantiate(ctx, r, true)
 	defer closeDirs()
 	if err != nil {
 		return nil, err

@@ -210,13 +210,32 @@ matplotlib already imported, made once (about 4 to 8 seconds) and kept in `Cache
 interpreter, with its own memory, arguments, environment and files, and `random` and `numpy.random` seeded afresh.
 Its string hashes are not randomized: every run has the image's hash seed. See [`python/README.md`](python/README.md).
 
+Python runs three to four times faster in worker processes, and is still stopped at a deadline, by killing its
+worker. A worker is your executable started again, so call `wasm.Worker()` first thing in `main`:
+
+```go
+func main() {
+	wasm.Worker() // in a worker process, serves the parent and exits; otherwise returns at once
+	...
+}
+```
+
+Without it, or without a `CacheDir`, Python runs in your process, where stopping it costs that speed
+(`wasm.Program.Unstoppable` trades the stop away instead). A worker is kept for the next run and holds the compiled
+code, about 0.6 GB, and up to about 1.1 GB during a pandas and matplotlib script; there are at most `MaxRuns` of
+them, and one beyond the first ends after a minute unused. A run given a mount that is not a host directory (an
+`afero.Fs` in your memory) cannot be reached from a worker, and runs in your process, stoppable, after Python is
+compiled there too on first use.
+
 ## The boundary
 
 - **Files.** The shell and programs see only the mounted folders. Programs reach them through Go's `os.Root`.
   Neither can create a symbolic link. The shell may write only inside writable mounts.
 - **Network.** None, unless the embedder passes gbash's network options, which allow `curl` to listed URL prefixes.
 - **Python and SQLite** run as WebAssembly with their own memory. Python has a memory cap for each run, and
-  a limit on how many run at once (`-python-runs`, 8 by default), and stops at the request's deadline. The shell's `sqlite3` also runs as
+  a limit on how many run at once (`-python-runs`, 8 by default), and stops at the request's deadline. With
+  `wasm.Worker`, a run has a worker process to itself while it runs; a worker runs one program after another, has a
+  process group of its own, and ends when your process does. The shell's `sqlite3` also runs as
   WebAssembly, and we set no memory cap on it.
 - **The shell and its Go commands run in the host process.** gbash limits them, but it does not claim to be a
   hardened sandbox. Put the process in a container with CPU and memory limits if runaway scripts matter.
@@ -224,8 +243,8 @@ Its string hashes are not randomized: every run has the image's hash seed. See [
 
 ## Known limits
 
-- Stopping a WebAssembly run at its deadline makes Python three to four times slower. `wasm.Program.Unstoppable`
-  trades that away for trusted scripts.
+- In your process, stopping a WebAssembly run at its deadline makes Python three to four times slower; worker
+  processes (`wasm.Worker`) do not, and need Unix.
 - Python has no threads, processes, sockets, `ctypes` or `mmap`, and numpy's default integer is 32-bit.
 - wasi-python needs wazero's experimental exception handling: wazero is pinned to a main commit with the fix for
   wazero#2503, and wazero#2522, a use-after-free in that support, is open.
