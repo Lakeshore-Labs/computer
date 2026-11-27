@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Repository outlines</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 50rem; margin: 3rem auto; padding: 0 1rem; }
+    input, button { font: inherit; padding: .4rem .6rem; }
+    label { display: block; margin-bottom: .25rem; }
+    th, td { text-align: left; padding: .25rem .75rem .25rem 0; }
+    .chart { display: block; max-width: 100%; height: auto; margin-top: 1rem; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f2f4f6; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Repository outlines</h1>
+  {% if platform %}<p>Python runtime <code>{{ platform }}</code></p>{% endif %}
+  <form action="{{ url_for('lookup') }}" method="post">
+    <label for="repository">GitHub repository</label>
+    <input id="repository" name="repository" value="pallets/flask" required>
+    <button>Fetch outline</button>
+  </form>
+  {% if error %}<p role="alert">{{ error }}</p>{% endif %}
+  {% if summary %}
+  <h2>Lookup history</h2>
+  <table>
+    <thead><tr><th scope="col">Repository</th><th scope="col">Lookups</th><th scope="col">Average outline length</th></tr></thead>
+    <tbody>
+      {% for row in summary %}
+      <tr><td>{{ row.repository }}</td><td>{{ row.lookups }}</td><td>{{ "%.0f"|format(row.mean_characters) }} characters</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <img class="chart" src="data:image/png;base64,{{ chart }}"
+       alt="Bar chart comparing average outline lengths by repository">
+  {% endif %}
+  {% for lookup in lookups %}
+  <article>
+    <h2>{{ lookup.repository }}</h2>
+    <pre>{{ lookup.outline }}</pre>
+  </article>
+  {% endfor %}
+</body>
+</html>

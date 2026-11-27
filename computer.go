@@ -57,9 +57,10 @@ type Python struct {
 	dir string // the unpacked release: python.wasm, lib/python315.zip and mpl-data/
 	// ready is closed when module and err are set. Compiling the 110 MB binary takes about 30 seconds without a
 	// cache, so it runs while the computer is already in use, and only a python3 waits for it.
-	ready  chan struct{}
-	module *wasm.Module
-	err    error
+	ready       chan struct{}
+	module      *wasm.Module
+	err         error
+	unstoppable bool
 }
 
 const (
@@ -107,7 +108,7 @@ func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error
 	if p.MemoryPages == 0 {
 		p.MemoryPages = 8192
 	}
-	py := &Python{dir: dir, ready: make(chan struct{})}
+	py := &Python{dir: dir, ready: make(chan struct{}), unstoppable: p.Unstoppable}
 	go func() {
 		defer close(py.ready)
 		py.module, py.err = wasm.Compile(context.WithoutCancel(ctx), p)
@@ -130,6 +131,10 @@ type Computer struct {
 	tmp  string // a host directory mounted at /tmp when the caller mounts none, removed by Close
 	// opened are the host directories among the mounts, opened by New and closed by Close.
 	opened []io.Closer
+
+	wsgiMu      sync.Mutex
+	wsgiClosed  bool
+	wsgiWorkers map[*wsgiWorker]struct{}
 
 	mu      sync.Mutex
 	listed  [sha256.Size]byte // the tools the session was built from
@@ -230,6 +235,7 @@ func (c *Computer) Mounts() []Mount { return c.cfg.Mounts }
 
 // Close removes what the computer keeps on the host. The caller's mounts are the caller's and stay.
 func (c *Computer) Close() error {
+	c.closeWSGIWorkers()
 	var err error
 	for _, dir := range c.opened {
 		err = errors.Join(err, dir.Close())
@@ -276,13 +282,13 @@ const listTimeout = 5 * time.Second
 // every call: when they have changed, the commands and the Python package are made again and the session is a new
 // one over the same files.
 func (c *Computer) Session(ctx context.Context) (*gbash.Session, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
 	// ponytail: the tools are listed before every command, so a slow server costs each command up to listTimeout;
 	// list once and refresh on the MCP client's tools-changed notification if that cost shows.
 	listing, cancel := context.WithTimeout(ctx, listTimeout)
 	defer cancel()
 	listed, err := tools.List(listing, c.cfg.Tools)
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if err != nil {
 		if c.session != nil { // a server that stops answering takes its own commands down, not the shell
 			return c.session, nil
@@ -349,12 +355,12 @@ func (c *Computer) ToolModules() []string {
 // Options is the computer as gbash options, with the tools as they are now, for gbash's own front ends: its
 // command-line program, its server and its tool for a model.
 func (c *Computer) Options(ctx context.Context) ([]gbash.Option, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
 	listed, err := tools.List(ctx, c.cfg.Tools)
 	if err != nil {
 		return nil, err
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.options(listed)
 }
 

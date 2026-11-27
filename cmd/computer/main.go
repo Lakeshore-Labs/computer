@@ -124,10 +124,30 @@ func run(ctx context.Context) error {
 	python := flag.String("python", "", "a directory holding a wasi-python release, laid out as computer.LoadPython reads it, in place of the one built in")
 	pythonRuns := flag.Int("python-runs", 8, "how many python3 may run at once, each with up to 512 MiB; a further one waits; 0 is no limit")
 	pythonFast := flag.Bool("python-unstoppable", false, "run Python three to four times faster, and give up stopping a script that does not end")
-	timeout := flag.Duration("timeout", 2*time.Minute, "in the mcp mode, how long a bash call may run when the agent sets no limit")
+	timeout := flag.Duration("timeout", 2*time.Minute, "maximum WSGI dispatch and execution time, or duration of an MCP bash call without its own limit")
 	script := flag.String("c", "", "run this command and exit")
 	config := flag.String("config", "", `a JSON file of mounts and MCP servers, added to those the flags give: {"mounts": ["host:guest"], "mcpServers": {"name": {"url": "..."} or {"command": "...", "args": [...]}}}; mcpServers is as in Claude Code's .mcp.json, and ${NAME} in a header or an env value is read from the environment`)
 	flag.Parse()
+
+	var wsgiApp string
+	var wsgiAddr string
+	if *script == "" && flag.Arg(0) == "serve" {
+		serveFlags := flag.NewFlagSet("computer serve", flag.ContinueOnError)
+		serveFlags.StringVar(&wsgiAddr, "listen", "127.0.0.1:8080", "HTTP address for the WSGI app")
+		if err := serveFlags.Parse(flag.Args()[1:]); err != nil {
+			if err == flag.ErrHelp {
+				return nil
+			}
+			return err
+		}
+		wsgiApp = serveFlags.Arg(0)
+		if serveFlags.NArg() != 1 || wsgiApp == "" {
+			return fmt.Errorf("usage: computer [flags] serve [-listen address] module:callable")
+		}
+		if *pythonFast {
+			return fmt.Errorf("serve requires interruptible Python")
+		}
+	}
 
 	var listed []server // in the order given: the file's by name, then the flags'
 	if *config != "" {
@@ -235,6 +255,13 @@ func run(ctx context.Context) error {
 	// An interrupt ends what is running as a deadline would, and the computer removes its temporary directories.
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	if wsgiApp != "" {
+		handler, err := c.WSGIHandler(wsgiApp, *timeout)
+		if err != nil {
+			return err
+		}
+		return serveWSGI(ctx, wsgiAddr, handler)
+	}
 	if flag.Arg(0) == "mcp" {
 		server, err := c.MCPServer(ctx, *timeout)
 		if err != nil {
