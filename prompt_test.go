@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -207,4 +208,36 @@ func TestTwoPromptsOnOneComputerKeepTheirOwnVariables(t *testing.T) {
 	if got := run(t, c, "echo [$ONLY_HERE]"); got != "[]" {
 		t.Errorf("the computer's own Exec has the prompt's variable: %q", got)
 	}
+}
+
+// A folder completes with its slash and no space after, so Tab goes on into it, as in bash; and a path from ~ completes.
+func TestTabCompletesIntoAFolderAndFromHome(t *testing.T) {
+	c := newComputer(t, Config{})
+	run(t, c, "mkdir -p Desktop/inner; echo x > Desktop/Read.md")
+	for before, want := range map[string][]string{
+		"cd Desk":           {"Desktop/"},
+		"cat Desktop/":      {"Desktop/Read.md", "Desktop/inner/"},
+		"cat Desktop/Re":    {"Desktop/Read.md"},
+		"cat ~/Desk":        {"~/Desktop/"},
+		"cat ~/Desktop/inn": {"~/Desktop/inner/"},
+	} {
+		if got := c.Complete(context.Background(), "/home/user", before); !slices.Equal(got, want) {
+			t.Errorf("Complete(%q) = %q, want %q", before, got, want)
+		}
+	}
+
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, "Desktop"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "Desktop", "Read.md"), []byte("read\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	keys, s, _, _ := promptOverAPipe(t, dir)
+	io.WriteString(keys, "cat Desk\t")
+	s.expect(t, "top/")
+	io.WriteString(keys, "Re\t")
+	s.expect(t, "ad.md ")
+	io.WriteString(keys, "\r")
+	s.expect(t, "\r\nread\r\n")
 }
