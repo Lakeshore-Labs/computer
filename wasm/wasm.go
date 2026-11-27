@@ -4,11 +4,19 @@
 package wasm
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
+	"maps"
+	"os"
+	"path/filepath"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/spf13/afero"
@@ -43,6 +51,24 @@ type Program struct {
 	// program's exported host_alloc gives, and stores the reply's address and length. Nil gives the program no
 	// host call: the call answers -1.
 	Host func(ctx context.Context, request []byte) []byte
+
+	// Prepare, when set, is code run once in a program that has wasi-python's prepare, whose memory every run then
+	// starts from: what the code imported is imported already. See Preparation.
+	Prepare *Preparation
+}
+
+// A Preparation is a starting image for every run of a program: Code is run once, in an instance given Run's
+// arguments, environment and directories, and the instance's memory, read whole, is copied into each later instance
+// before its run. The program must be one that wasi-python's prepare can make an image of (its plain reactor,
+// started with wizer.initialize, or its snapshot), so that the image holds the whole of its state.
+//
+// The image is kept in CacheDir, named by the binary, Code, Run and Key, so a later process takes it from there,
+// and trusts it as it trusts the compiled code kept there. Key names what else Code reads, such as the files of
+// Run's directories.
+type Preparation struct {
+	Code string
+	Run  Run
+	Key  string
 }
 
 // A Module is a compiled Program. It is safe for concurrent runs, each with its own memory.
@@ -51,6 +77,7 @@ type Module struct {
 	code    wazero.CompiledModule
 	reactor bool          // the binary exports run, called after _initialize, in place of a main
 	turns   chan struct{} // one place for each run allowed at once; nil when there is no limit
+	image   []byte        // the memory every run starts from, a whole number of pages; nil without Prepare
 }
 
 // Compile compiles p once, for every run of it.
@@ -100,10 +127,20 @@ func Compile(ctx context.Context, p Program) (*Module, error) {
 	if err != nil {
 		return nil, errors.Join(err, m.Close(ctx))
 	}
+	// A kept image is looked for while the program compiles: naming it hashes the binary, and both take a while.
+	kept := make(chan cachedImage, 1)
+	if p.Prepare != nil {
+		go func() { kept <- findImage(p) }()
+	}
 	if m.code, err = m.runtime.CompileModule(ctx, p.Binary); err != nil {
 		return nil, errors.Join(err, m.Close(ctx))
 	}
 	_, m.reactor = m.code.ExportedFunctions()["run"]
+	if p.Prepare != nil {
+		if m.image, err = m.prepare(ctx, p.Prepare, <-kept); err != nil {
+			return nil, errors.Join(err, m.Close(ctx))
+		}
+	}
 	return m, nil
 }
 
@@ -138,42 +175,14 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 			return 124, ctx.Err()
 		}
 	}
-	fs := wazero.NewFSConfig()
-	for _, d := range r.Dirs {
-		dir := d.FS
-		if dir == nil {
-			host, err := files.Dir(d.Host)
-			if err != nil {
-				return 70, err
-			}
-			defer host.Close()
-			dir = host
-		}
-		fs = fs.(sysfs.FSConfig).WithSysFSMount(newDirFS(dir, d.ReadOnly), d.Guest)
-	}
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	if r.Stdin != nil {
-		r.Stdin = newStdin(ctx, r.Stdin)
-	}
-	// The empty name lets any number of instances of the one module run at once.
-	cfg := wazero.NewModuleConfig().WithName("").WithArgs(r.Args...).WithFSConfig(fs).
-		WithStdin(r.Stdin).WithStdout(r.Stdout).WithStderr(r.Stderr).
-		WithSysWalltime().WithSysNanotime().WithRandSource(rand.Reader).
-		WithNanosleep(func(ns int64) { // a sleep the run's deadline can end, which time.Sleep is not
-			select {
-			case <-time.After(time.Duration(ns)):
-			case <-ctx.Done():
-			}
-		})
-	for k, v := range r.Env {
-		cfg = cfg.WithEnv(k, v)
-	}
 	code := 0
-	if m.reactor { // a reactor is started by _initialize, and its run returns the exit code
-		cfg = cfg.WithStartFunctions("_initialize")
+	mod, closeDirs, err := m.instantiate(ctx, r, m.image == nil)
+	defer closeDirs()
+	if err == nil && m.image != nil {
+		err = restore(mod.Memory(), m.image)
 	}
-	mod, err := m.runtime.InstantiateModule(ctx, m.code, cfg)
 	if err == nil && m.reactor {
 		var res []uint64
 		if res, err = mod.ExportedFunction("run").Call(ctx); err == nil && len(res) == 1 {
@@ -193,6 +202,178 @@ func (m *Module) Run(ctx context.Context, r Run) (int, error) {
 		return 70, err
 	}
 	return code, nil
+}
+
+// instantiate makes an instance of the program for r, started by its _initialize when start is set and the program
+// is a reactor. closeDirs closes the host directories it opened, and is to be called when the instance is closed.
+func (m *Module) instantiate(ctx context.Context, r Run, start bool) (_ api.Module, closeDirs func(), _ error) {
+	var opened []io.Closer
+	closeDirs = func() {
+		for _, c := range opened {
+			_ = c.Close()
+		}
+	}
+	fs := wazero.NewFSConfig()
+	for _, d := range r.Dirs {
+		dir := d.FS
+		if dir == nil {
+			host, err := files.Dir(d.Host)
+			if err != nil {
+				return nil, closeDirs, err
+			}
+			opened = append(opened, host)
+			dir = host
+		}
+		fs = fs.(sysfs.FSConfig).WithSysFSMount(newDirFS(dir, d.ReadOnly), d.Guest)
+	}
+	if r.Stdin != nil {
+		r.Stdin = newStdin(ctx, r.Stdin)
+	}
+	// The empty name lets any number of instances of the one module run at once.
+	cfg := wazero.NewModuleConfig().WithName("").WithArgs(r.Args...).WithFSConfig(fs).
+		WithStdin(r.Stdin).WithStdout(r.Stdout).WithStderr(r.Stderr).
+		WithSysWalltime().WithSysNanotime().WithRandSource(rand.Reader).
+		WithNanosleep(func(ns int64) { // a sleep the run's deadline can end, which time.Sleep is not
+			select {
+			case <-time.After(time.Duration(ns)):
+			case <-ctx.Done():
+			}
+		})
+	for k, v := range r.Env {
+		cfg = cfg.WithEnv(k, v)
+	}
+	switch {
+	case !start:
+		cfg = cfg.WithStartFunctions() // the image is the started program
+	case m.reactor: // a reactor is started by _initialize, and its run returns the exit code
+		cfg = cfg.WithStartFunctions("_initialize")
+	}
+	mod, err := m.runtime.InstantiateModule(ctx, m.code, cfg)
+	return mod, closeDirs, err
+}
+
+// restore puts image in mem, which must be no larger. The instance's one mutable global, its stack pointer, is
+// where the image's was, since the image was read between calls.
+func restore(mem api.Memory, image []byte) error {
+	if grow := len(image)/pageSize - int(mem.Size()/pageSize); grow > 0 {
+		if _, ok := mem.Grow(uint32(grow)); !ok {
+			return errors.New("wasm: the starting image is larger than a run's memory")
+		}
+	}
+	if !mem.Write(0, image) {
+		return errors.New("wasm: the starting image does not fit the run's memory")
+	}
+	return nil
+}
+
+const pageSize = 64 << 10
+
+// A cachedImage is a starting image as CacheDir keeps it: the file it is kept in, and the image, nil when there is
+// none yet.
+type cachedImage struct {
+	name  string // empty when there is no CacheDir
+	image []byte
+}
+
+// findImage is p's starting image in CacheDir, named by everything it is made from.
+func findImage(p Program) cachedImage {
+	if p.CacheDir == "" {
+		return cachedImage{}
+	}
+	h := sha256.New()
+	field := func(s string) { fmt.Fprintf(h, "%d:%s", len(s), s) }
+	h.Write(p.Binary)
+	for _, s := range append([]string{p.Prepare.Code, p.Prepare.Key}, p.Prepare.Run.Args...) {
+		field(s)
+	}
+	for _, k := range slices.Sorted(maps.Keys(p.Prepare.Run.Env)) {
+		field(k)
+		field(p.Prepare.Run.Env[k])
+	}
+	for _, d := range p.Prepare.Run.Dirs { // a directory given as an FS is named by its place alone
+		field(d.Guest)
+		field(d.Host)
+	}
+	c := cachedImage{name: filepath.Join(p.CacheDir, "images", hex.EncodeToString(h.Sum(nil)))}
+	if image, err := os.ReadFile(c.name); err == nil && len(image)%pageSize == 0 && len(image) > 0 {
+		c.image = image
+	}
+	return c
+}
+
+// prepare is the starting image: the one kept, or one made by running prep's code and then kept.
+func (m *Module) prepare(ctx context.Context, prep *Preparation, kept cachedImage) ([]byte, error) {
+	if kept.image != nil {
+		return kept.image, nil
+	}
+	image, err := m.makeImage(ctx, prep)
+	if err != nil || kept.name == "" {
+		return image, err
+	}
+	// Written whole and renamed into place, so a reader finds the image whole or not at all. A failure to keep
+	// it costs only the next process the time to make it again.
+	dir := filepath.Dir(kept.name)
+	if err := os.MkdirAll(dir, 0o700); err == nil {
+		if f, err := os.CreateTemp(dir, "making"); err == nil {
+			_, err = f.Write(image)
+			if err = errors.Join(err, f.Close()); err == nil {
+				err = os.Rename(f.Name(), kept.name)
+			}
+			if err != nil {
+				_ = os.Remove(f.Name())
+			}
+		}
+		// An image is about 100 MB, and one made from another binary or code is no longer wanted: the others are
+		// removed, which costs a process that still wants one the time to make it again.
+		others, _ := filepath.Glob(filepath.Join(dir, "*"))
+		for _, other := range others {
+			if other != kept.name && !strings.HasPrefix(filepath.Base(other), "making") {
+				_ = os.Remove(other)
+			}
+		}
+	}
+	return image, nil
+}
+
+// makeImage runs prep's code in a new instance, as wasi-python's prepare runs it: after wizer.initialize, which
+// starts the interpreter as a snapshot's is started, unless the binary is a snapshot already.
+func (m *Module) makeImage(ctx context.Context, prep *Preparation) ([]byte, error) {
+	var out bytes.Buffer
+	r := prep.Run
+	if r.Stdout == nil {
+		r.Stdout = &out
+	}
+	if r.Stderr == nil {
+		r.Stderr = &out
+	}
+	mod, closeDirs, err := m.instantiate(ctx, r, true)
+	defer closeDirs()
+	if err != nil {
+		return nil, err
+	}
+	defer mod.Close(ctx)
+	prepare, alloc := mod.ExportedFunction("prepare"), mod.ExportedFunction("host_alloc")
+	if prepare == nil || alloc == nil {
+		return nil, errors.New("wasm: the program has no prepare, so no starting image can be made of it")
+	}
+	if start := mod.ExportedFunction("wizer.initialize"); start != nil {
+		if _, err := start.Call(ctx); err != nil {
+			return nil, fmt.Errorf("wasm: starting the program for its image: %w: %s", err, out.Bytes())
+		}
+	}
+	at, err := alloc.Call(ctx, uint64(len(prep.Code)))
+	if err != nil || at[0] == 0 || !mod.Memory().Write(uint32(at[0]), []byte(prep.Code)) {
+		return nil, errors.Join(errors.New("wasm: no memory for the starting image's code"), err)
+	}
+	res, err := prepare.Call(ctx, at[0], uint64(len(prep.Code)))
+	if err != nil {
+		return nil, fmt.Errorf("wasm: making the starting image: %w: %s", err, out.Bytes())
+	}
+	if status := int32(res[0]); status != 0 {
+		return nil, fmt.Errorf("wasm: the starting image's code ended with status %d: %s", status, out.Bytes())
+	}
+	image, _ := mod.Memory().Read(0, mod.Memory().Size())
+	return bytes.Clone(image), nil
 }
 
 // stdin is a program's standard input, read for it by a goroutine, so that a program waiting on its input is still
