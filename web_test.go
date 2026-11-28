@@ -57,6 +57,19 @@ func TestCGIEndsShortTheResponseOfAScriptThatFailsAfterItsHeaders(t *testing.T) 
 	webRequest(h, "GET", "/x/", "")
 }
 
+func TestCGIAnswersAStatusWithNoBodyThoughTheScriptWroteOne(t *testing.T) {
+	server := httptest.NewServer(cgi(newComputer(t, Config{}), `printf 'Status: 204 No Content\n\nextra'`))
+	defer server.Close()
+	res, err := http.Get(server.URL + "/x/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	if res.StatusCode != http.StatusNoContent {
+		t.Errorf("got %d", res.StatusCode)
+	}
+}
+
 func TestWebHandlerServesFilesByNameAndApplicationsByTheirs(t *testing.T) {
 	c := newComputer(t, Config{Python: python(t)})
 	run(t, c, `mkdir -p www/hello && cd www && echo '<h1>static</h1>' > hello/index.html && cat > hello/app.py <<'PY'

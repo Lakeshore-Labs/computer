@@ -187,9 +187,13 @@ func serveCGI(w http.ResponseWriter, r *http.Request, c *Computer, script, dir, 
 		w.Header()[name] = append(w.Header()[name], values...) // beside the host's own, such as its cookies
 	}
 	w.WriteHeader(status)
-	if _, err := io.Copy(w, io.MultiReader(page, out)); err != nil && ctx.Err() == nil {
-		// The status is sent already, so the client is told by a response that does not end as one should.
-		log.Printf("computer: the CGI response of %s: %v", r.URL.Path, err)
+	// A status that has no body, such as 204, has none of the script's either.
+	if _, err := io.Copy(w, io.MultiReader(page, out)); err != nil && !errors.Is(err, http.ErrBodyNotAllowed) {
+		// The status is sent already, so the client is told by a response that does not end as one should, also
+		// when it is the request that ended.
+		if ctx.Err() == nil {
+			log.Printf("computer: the CGI response of %s: %v", r.URL.Path, err)
+		}
 		panic(http.ErrAbortHandler)
 	}
 }
