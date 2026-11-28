@@ -224,7 +224,7 @@ the first `python3` waits. See [`python/README.md`](python/README.md).
 - wazero is replaced with [our fork](https://github.com/Lakeshore-Labs/wazero) of wazero main, which stops a run at
   its deadline at almost no cost (wazero#2533, not yet merged there) and does not copy the stack at every
   `try_table`. Go ignores a `replace` in a dependency, so a program that imports this module repeats the line in
-  its own `go.mod`; without it Python is three to four times slower. `wasm.Program.Unstoppable` no longer buys speed.
+  its own `go.mod`; without it Python is three to four times slower.
 - Python has no threads, processes, sockets, `ctypes` or `mmap`, and numpy's default integer is 32-bit.
 - wasi-python needs wazero's experimental exception handling: wazero is pinned to a main commit with the fix for
   wazero#2503, and wazero#2522, a use-after-free in that support, is open.

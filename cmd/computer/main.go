@@ -123,7 +123,6 @@ func run(ctx context.Context) error {
 	flag.Var(&servers, "mcp", "an MCP server whose tools become commands: name=URL, or name='command arguments' for a server started as a program and spoken to on its standard streams, each one command of that name; or a bare URL, to group its tools by the prefix of their names; repeatable; a bearer token for a URL is read from COMPUTER_MCP_TOKEN_<NAME>, with a hyphen as an underscore, or COMPUTER_MCP_TOKEN for a bare URL")
 	python := flag.String("python", "", "a directory holding a wasi-python release, laid out as computer.LoadPython reads it, in place of the one built in")
 	pythonRuns := flag.Int("python-runs", 8, "how many python3 may run at once, each with up to 512 MiB; a further one waits; 0 is no limit")
-	pythonFast := flag.Bool("python-unstoppable", false, "give up stopping a script that does not end; it no longer makes Python faster")
 	timeout := flag.Duration("timeout", 2*time.Minute, "in the mcp mode, how long a bash call may run when the agent sets no limit")
 	script := flag.String("c", "", "run this command and exit")
 	config := flag.String("config", "", `a JSON file of mounts and MCP servers, added to those the flags give: {"mounts": ["host:guest"], "mcpServers": {"name": {"url": "..."} or {"command": "...", "args": [...]}}}; mcpServers is as in Claude Code's .mcp.json, and ${NAME} in a header or an env value is read from the environment`)
@@ -206,7 +205,7 @@ func run(ctx context.Context) error {
 		cfg.Tools = append(cfg.Tools, tools.Source{Name: name, Session: cs})
 	}
 	cache, err := cacheDir(cfg.Mounts)
-	program := wasm.Program{MaxRuns: *pythonRuns, CacheDir: cache, Unstoppable: *pythonFast}
+	program := wasm.Program{MaxRuns: *pythonRuns, CacheDir: cache}
 	switch {
 	case *python != "" && err != nil:
 		return err
