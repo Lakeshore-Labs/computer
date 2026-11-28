@@ -14,3 +14,16 @@ To embed a new release:
     gzip -9 -n -c release/python.wasm > python/python.wasm.gz
     cp release/python-stdlib.zip release/SHA256SUMS release/MANIFEST python/
     rm -r python/LICENSES && cp -R release/LICENSES python/
+
+## Flask
+
+`site.zip` is Flask and what it needs beyond the release (which has Jinja2 and MarkupSafe), pure Python, from
+PyPI's wheels, each with its license in its `.dist-info`: Flask 3.1.3, Werkzeug 3.1.9, click 8.3.3,
+itsdangerous 2.2.0, blinker 1.9.0. `computer.EmbeddedPython` unpacks it as `site/` beside `lib/`, and a release
+directory with a `site/` has it on Python's path and Flask imported in the image every run starts from. To make
+it again:
+
+    pip download --no-deps --only-binary :all: --implementation py --abi none --platform any -d wheels \
+        Flask==3.1.3 Werkzeug==3.1.9 click==8.3.3 itsdangerous==2.2.0 blinker==1.9.0
+    for w in wheels/*.whl; do unzip -q "$w" -d site; done
+    (cd site && find . -type f | LC_ALL=C sort | zip -q -X -9 ../python/site.zip -@)

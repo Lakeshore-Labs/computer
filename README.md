@@ -210,6 +210,57 @@ matplotlib already imported, made once (about 4 to 8 seconds) and kept in `Cache
 interpreter, with its own memory, arguments, environment and files, and `random` and `numpy.random` seeded afresh.
 Its string hashes are not randomized: every run has the image's hash seed. See [`python/README.md`](python/README.md).
 
+### Serve the computer over HTTP
+
+One handler serves a folder of the computer as `python3 -m http.server` serves one: the URL is a path under the
+folder, a file is sent as it is, and a folder as its `index.html` or as a list.
+
+A Python web app is asked for by its name in the URL, written as gunicorn and uvicorn write one,
+`module:callable`, where the module's file is. Flask is built in.
+
+```
+/hello/app.py          the file hello/app.py, its source
+/hello/app:app/        the object app of hello/app.py, a Flask application say, asked for /
+/hello/app:app/cart    the same, asked for /cart
+```
+
+So nothing is declared: what the agent writes is there at its own path. In a Go host, mount the handler on your
+own mux, behind your own sign-in, limits and timeouts; you give it a function that returns the requester's
+computer and the folder, as `TerminalHandler` takes one:
+
+```go
+web := computer.WebHandler(func(r *http.Request) (*computer.Computer, string, error) {
+    return c, "/home/user", nil // or fs.ErrPermission, to refuse
+})
+mux.Handle("/computer/", http.StripPrefix("/computer", web))
+```
+
+Each request to an app is a new `python3`, started from an image with Flask imported, so it takes tens of
+milliseconds, requests run side by side, and nothing is kept in memory between them: an app keeps its state in
+files or SQLite. What an app writes to its error output, a failure's traceback too, goes to the host's own unless
+`computer.ErrorLog` says where, such as a file of the computer the agent can read; the browser is told only 500.
+Not there: ASGI, WebSockets and threads.
+
+The handler is made of three pieces, each of use alone to a host that routes for itself: `c.FS(ctx)`, the
+computer's files as an `fs.FS`; `computer.CGI`, which runs any script of the computer as a CGI program (RFC
+3875); and `computer.WSGI(c, "app:app", dir)`, a WSGI application as a handler.
+
+The CLI's `serve` is the handler on a local address, with `http.server`'s flags:
+`serve [-b address] [-d folder] [port]`, the working directory and port 8000 unless given.
+
+```
+mkdir -p work/hello
+cat > work/hello/app.py <<'PY'
+from flask import Flask
+app = Flask(__name__)
+
+@app.get("/")
+def index():
+    return "hello from the computer"
+PY
+./computer -mount ./work:/home/user serve    # http://127.0.0.1:8000/ lists the folder, /hello/app:app/ is the app
+```
+
 ## The boundary
 
 - **Files.** The shell and programs see only the mounted folders. Programs reach them through Go's `os.Root`.

@@ -14,6 +14,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 
 	"github.com/Lakeshore-Labs/computer/wasm"
@@ -28,6 +29,9 @@ var (
 	pythonStdlib []byte
 	//go:embed python/SHA256SUMS
 	pythonSums []byte
+	// Flask and what it needs beyond the release, pure Python (see python/README.md).
+	//go:embed python/site.zip
+	pythonSiteZip []byte
 )
 
 // The directory the embedded release is unpacked into, once by EmbeddedPython. A package-level
@@ -39,7 +43,7 @@ var (
 )
 
 // EmbeddedPython compiles the wasi-python release this module carries: CPython with numpy, pandas, scipy,
-// scikit-learn, statsmodels, matplotlib, Pillow, lxml, python-docx, python-pptx and more. On first use it unpacks
+// scikit-learn, statsmodels, matplotlib, Pillow, lxml, python-docx, python-pptx and more, and Flask. On first use it unpacks
 // the release, about 270 MB, into computer/python-<checksum> in the user's cache directory (os.UserCacheDir), and
 // later processes reuse it; a host must not mount that directory. Each call compiles the program again, so a host
 // calls it once and shares the Python, as with LoadPython.
@@ -59,7 +63,7 @@ func unpackPython() (_ string, err error) {
 	if err != nil {
 		return "", err
 	}
-	sum := sha256.Sum256(pythonSums)
+	sum := sha256.Sum256(slices.Concat(pythonSums, pythonSiteZip))
 	dir := filepath.Join(cache, "computer")
 	build := filepath.Join(dir, "python-"+hex.EncodeToString(sum[:8]))
 	if _, err := os.Stat(build); err == nil {
@@ -103,6 +107,13 @@ func unpackPython() (_ string, err error) {
 		return "", err
 	}
 	if err := os.CopyFS(filepath.Join(tmp, "mpl-data"), mpl); err != nil {
+		return "", err
+	}
+	web, err := zip.NewReader(bytes.NewReader(pythonSiteZip), int64(len(pythonSiteZip)))
+	if err != nil {
+		return "", err
+	}
+	if err := os.CopyFS(filepath.Join(tmp, "site"), web); err != nil {
 		return "", err
 	}
 	if err := os.Rename(tmp, build); err != nil {

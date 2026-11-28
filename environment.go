@@ -45,20 +45,25 @@ func (c *Computer) Describe(ctx context.Context) (string, error) {
 // commands may write at the same time. When ctx ends the command is stopped and ctx's error returned. A command
 // that ran and failed, or that the shell does not have (127), is an exit code and no error.
 func (e *Environment) Run(ctx context.Context, script, dir string, env map[string]string, replaceEnv bool, stdout, stderr io.Writer) (int, error) {
-	if _, err := e.c.Session(ctx); err != nil { // the tools as they are now
+	if env == nil {
+		env = map[string]string{}
+	}
+	return e.c.shell(ctx, &gbash.ExecutionRequest{Script: script, WorkDir: dir, Env: env, ReplaceEnv: replaceEnv, Stdout: stdout, Stderr: stderr})
+}
+
+// shell runs req in a shell of its own over the computer's files, and returns its exit code: see Environment.Run.
+func (c *Computer) shell(ctx context.Context, req *gbash.ExecutionRequest) (int, error) {
+	if _, err := c.Session(ctx); err != nil { // the tools as they are now
 		return 0, err
 	}
-	e.c.mu.Lock()
-	rt := e.c.runtime
-	e.c.mu.Unlock()
+	c.mu.Lock()
+	rt := c.runtime
+	c.mu.Unlock()
 	s, err := rt.NewSession(ctx)
 	if err != nil {
 		return 0, err
 	}
-	if env == nil {
-		env = map[string]string{}
-	}
-	res, err := s.Exec(ctx, &gbash.ExecutionRequest{Script: script, WorkDir: dir, Env: env, ReplaceEnv: replaceEnv, Stdout: stdout, Stderr: stderr})
+	res, err := s.Exec(ctx, req)
 	switch {
 	case ctx.Err() != nil:
 		return 0, ctx.Err()

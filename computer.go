@@ -61,6 +61,12 @@ type Python struct {
 	ready  chan struct{}
 	module *wasm.Module
 	err    error
+	web    []Mount // the release's site/, when it has one
+}
+
+func isDir(name string) bool {
+	info, err := os.Stat(name)
+	return err == nil && info.IsDir()
 }
 
 const (
@@ -68,6 +74,7 @@ const (
 	pythonLib  = "/usr/local/lib"             // where wasi-python looks for python315.zip
 	pythonMpl  = pythonLib + "/python315.zip/matplotlib/mpl-data"
 	pythonSite = "/usr/lib/python-tools" // where the generated package is mounted
+	pythonWeb  = "/usr/lib/python-web"   // where a release's site/ is mounted: Flask and what it needs
 	// pythonStartCode runs before every program. wasi-python runs in isolated mode, without site and without a
 	// working directory, so it moves to the shell's working directory, puts the script's directory (or the working
 	// directory) and the tools package on the path, and runs the program's arguments as wasi-python's runner does.
@@ -146,6 +153,13 @@ func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error
 		},
 	}
 	py := &Python{dir: dir, ready: make(chan struct{})}
+	// A release with a site/ beside its lib has Flask there, pure Python, which every run then starts with too:
+	// a web app's request (see WebHandler) is a run, and importing Flask is most of a second.
+	if site := filepath.Join(dir, "site"); isDir(site) {
+		py.web = []Mount{{Guest: pythonWeb, Host: site, ReadOnly: true}}
+		p.Prepare.Code += "import sys\nsys.path.append(\"" + pythonWeb + "\")\nimport flask\n"
+		p.Prepare.Run.Dirs = append(p.Prepare.Run.Dirs, py.web...)
+	}
 	go func() {
 		defer close(py.ready)
 		py.module, py.err = wasm.Compile(context.WithoutCancel(ctx), p)
@@ -542,7 +556,7 @@ func (c *Computer) python(name string, mounts []Mount) commands.Command {
 			Stdin: stdin, Stdout: inv.Stdout, Stderr: inv.Stderr,
 			// matplotlib's data is mounted inside the zip at pythonLib, which wazero allows and the shell's own
 			// mounts do not, so only Python sees it.
-			Dirs: append(mounts[:len(mounts):len(mounts)], Mount{Guest: pythonMpl, Host: filepath.Join(c.cfg.Python.dir, "mpl-data"), ReadOnly: true}),
+			Dirs: append(mounts[:len(mounts):len(mounts)], append(py.web, Mount{Guest: pythonMpl, Host: filepath.Join(py.dir, "mpl-data"), ReadOnly: true})...),
 		})
 		if err != nil {
 			return commands.Exitf(inv, code, "%s: %v", name, err)
