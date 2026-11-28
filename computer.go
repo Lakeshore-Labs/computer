@@ -67,7 +67,8 @@ const (
 	pythonExe  = "/usr/local/bin/python.wasm" // the program's name, as wasi-python's runner gives it
 	pythonLib  = "/usr/local/lib"             // where wasi-python looks for python315.zip
 	pythonMpl  = pythonLib + "/python315.zip/matplotlib/mpl-data"
-	pythonSite = "/usr/lib/python-tools" // where the generated package is mounted
+	pythonSite = "/usr/lib/python-tools"      // where the generated package is mounted
+	pythonMore = pythonLib + "/site-packages" // packages beside the release's zip, such as Flask in the embedded one
 	// pythonStartCode runs before every program. wasi-python runs in isolated mode, without site and without a
 	// working directory, so it moves to the shell's working directory, puts the script's directory (or the working
 	// directory) and the tools package on the path, and runs the program's arguments as wasi-python's runner does.
@@ -99,7 +100,7 @@ if i < len(args) and not args[i].startswith("-"):
     sys.path.insert(0, os.path.dirname(args[i]))
 else:
     sys.path.insert(0, os.getcwd())
-sys.path.append("` + pythonSite + `")
+sys.path += ["` + pythonSite + `", "` + pythonMore + `"]
 sys.exit(_reactor.run(["` + pythonExe + `", *args], dict(os.environ)))
 `
 	// pythonPrepareCode is run once, and every python3 starts from the memory it leaves: these modules are imported
@@ -107,14 +108,21 @@ sys.exit(_reactor.run(["` + pythonExe + `", *args], dict(os.environ)))
 	// builds its list of fonts on import, which then needs a writable MPLCONFIGDIR, the one every run is given.
 	// A module is here only when what it reads on import is the same for every run: not the tools package, which
 	// is each computer's own.
-	// Flask is imported too when the release has it, as the embedded one does: a web app's request (see WSGI) is
-	// a run, and importing Flask is most of a second.
-	pythonPrepareCode = "import numpy, pandas, matplotlib, matplotlib.pyplot\ntry:\n    import flask\nexcept ImportError:\n    pass\n"
-	pythonConfigDir   = "/tmp/.matplotlib"
+	// Flask is imported too when the release has it, as the embedded one does: a web app's request (see
+	// WebHandler) is a run, and importing Flask is most of a second.
+	pythonPrepareCode = `import sys, numpy, pandas, matplotlib, matplotlib.pyplot
+sys.path.append("` + pythonMore + `")
+try:
+    import flask
+except ImportError:
+    pass
+`
+	pythonConfigDir = "/tmp/.matplotlib"
 )
 
 // LoadPython reads the wasi-python release unpacked in dir, laid out as EmbeddedPython unpacks it:
-// python.wasm, lib/python315.zip (alone in lib) and mpl-data/, matplotlib's data, and starts compiling it; the
+// python.wasm, lib/python315.zip, mpl-data/, matplotlib's data, and, when it has more packages than the zip's,
+// lib/site-packages/, and starts compiling it; the
 // first python3 waits for the compile, and fails with its error. p's Binary is read from the file, its host call
 // is answered by the computer's tools, and a zero MemoryPages is 8192 (512 MiB); its other fields are the caller's.
 func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error) {

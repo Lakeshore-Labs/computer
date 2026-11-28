@@ -63,9 +63,7 @@ func unpackPython() (_ string, err error) {
 	if err != nil {
 		return "", err
 	}
-	// The directory is named for what is unpacked and for how: "zip" is Flask's files in the release's zip, where
-	// an earlier layout had them in a directory of their own.
-	sum := sha256.Sum256(slices.Concat(pythonSums, pythonFlask, []byte("zip")))
+	sum := sha256.Sum256(slices.Concat(pythonSums, pythonFlask))
 	dir := filepath.Join(cache, "computer")
 	build := filepath.Join(dir, "python-"+hex.EncodeToString(sum[:8]))
 	if _, err := os.Stat(build); err == nil {
@@ -92,29 +90,14 @@ func unpackPython() (_ string, err error) {
 	if err := writeFile(filepath.Join(tmp, "python.wasm"), gz); err != nil {
 		return "", err
 	}
+	if err := writeFile(filepath.Join(tmp, "lib", "python315.zip"), bytes.NewReader(pythonStdlib)); err != nil {
+		return "", err
+	}
+	// matplotlib reads its data from a directory, which the release keeps as a zip inside the zip.
 	stdlib, err := zip.NewReader(bytes.NewReader(pythonStdlib), int64(len(pythonStdlib)))
 	if err != nil {
 		return "", err
 	}
-	flask, err := zip.NewReader(bytes.NewReader(pythonFlask), int64(len(pythonFlask)))
-	if err != nil {
-		return "", err
-	}
-	// Flask's files go where the release's own packages are, in its zip, so Python finds them as it finds those.
-	packed := new(bytes.Buffer)
-	both := zip.NewWriter(packed)
-	for _, file := range slices.Concat(stdlib.File, flask.File) {
-		if err := both.Copy(file); err != nil {
-			return "", err
-		}
-	}
-	if err := both.Close(); err != nil {
-		return "", err
-	}
-	if err := writeFile(filepath.Join(tmp, "lib", "python315.zip"), packed); err != nil {
-		return "", err
-	}
-	// matplotlib reads its data from a directory, which the release keeps as a zip inside the zip.
 	inner, err := fs.ReadFile(stdlib, "matplotlib/mpl-data.zip")
 	if err != nil {
 		return "", err
@@ -124,6 +107,14 @@ func unpackPython() (_ string, err error) {
 		return "", err
 	}
 	if err := os.CopyFS(filepath.Join(tmp, "mpl-data"), mpl); err != nil {
+		return "", err
+	}
+	// Flask's files go beside the release's zip, in the directory Python is already given.
+	flask, err := zip.NewReader(bytes.NewReader(pythonFlask), int64(len(pythonFlask)))
+	if err != nil {
+		return "", err
+	}
+	if err := os.CopyFS(filepath.Join(tmp, "lib", "site-packages"), flask); err != nil {
 		return "", err
 	}
 	if err := os.Rename(tmp, build); err != nil {
