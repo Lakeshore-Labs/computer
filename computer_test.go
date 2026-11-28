@@ -3,6 +3,7 @@ package computer
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -280,6 +281,36 @@ python3 recap.py`)
 	}
 }
 
+// Every python3 starts from one image with the heavy modules imported, and is still a program of its own: what a run
+// changes is gone in the next, the generators are seeded afresh, the clock is the host's, and a run's end still runs
+// its atexit handlers and writes what it left unflushed.
+func TestPythonStartsWithItsModulesImportedAndEachRunIsItsOwn(t *testing.T) {
+	c := newComputer(t, Config{Tools: testTools(t, listNotes), Python: python(t)})
+	script := `import sys, time, random, atexit, numpy, matplotlib
+print(sorted(m for m in ("numpy", "pandas", "matplotlib.pyplot", "tools") if m in sys.modules))
+print(hasattr(numpy, "marked"), abs(time.time() - float(sys.argv[1])) < 60, matplotlib.get_configdir())
+print(random.random(), numpy.random.rand())
+numpy.marked = True
+open("left.txt", "a").write(sys.argv[2])
+atexit.register(print, "at exit")`
+	run(t, c, "cat > fresh.py <<'EOF'\n"+script+"\nEOF")
+	var draws []string
+	for _, arg := range []string{"one", "two"} {
+		got := strings.Split(run(t, c, fmt.Sprintf("python3 fresh.py %d %s", time.Now().Unix(), arg)), "\n")
+		if want := []string{"['matplotlib.pyplot', 'numpy', 'pandas']", "False True /tmp/.matplotlib", "at exit"}; len(got) != 4 ||
+			got[0] != want[0] || got[1] != want[1] || got[3] != want[2] {
+			t.Fatalf("got %q", got)
+		}
+		draws = append(draws, got[2])
+	}
+	if draws[0] == draws[1] {
+		t.Errorf("two runs drew the same numbers: %q", draws[0])
+	}
+	if got := run(t, c, "cat left.txt; A=b python3 -c 'from tools import notes; import os; print(os.environ[\"A\"], len(notes.list_notes()))'"); got != "onetwob 3" {
+		t.Errorf("got %q", got)
+	}
+}
+
 func TestAPythonScriptImportsTheModulesBesideItAndInTheWorkingDirectory(t *testing.T) {
 	c := newComputer(t, Config{Python: python(t)})
 	got := run(t, c, `mkdir d && echo 'X = 1' > d/helper.py && echo 'import helper, os; print(helper.X, os.path.isabs(__file__))' > d/main.py
@@ -514,5 +545,18 @@ func TestARedirectReportsAFileThatFailsToClose(t *testing.T) {
 	}
 	if res.ExitCode != 1 || res.Stdout != "" || !strings.Contains(res.Stderr, "upload failed") {
 		t.Errorf("exit %d, stdout %q, stderr %q", res.ExitCode, res.Stdout, res.Stderr)
+	}
+}
+
+// matplotlib is imported before a run begins, and still reads the run's own settings.
+func TestMatplotlibReadsARunsOwnBackendAndRcFile(t *testing.T) {
+	c := newComputer(t, Config{Python: python(t)})
+	got := run(t, c, `MPLBACKEND=svg python3 -c 'import matplotlib; print(matplotlib.get_backend())'
+echo 'lines.linewidth: 7' > matplotlibrc
+python3 -c 'import matplotlib; print(matplotlib.rcParams["lines.linewidth"])'
+rm matplotlibrc
+python3 -c 'import matplotlib; print(matplotlib.rcParams["lines.linewidth"])'`)
+	if got != "svg\n7.0\n1.5" {
+		t.Errorf("got %q", got)
 	}
 }

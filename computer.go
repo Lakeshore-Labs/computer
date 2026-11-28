@@ -32,6 +32,7 @@ import (
 	gbfs "github.com/Lakeshore-Labs/gbash/fs"
 	"github.com/Lakeshore-Labs/gbash/policy"
 	"github.com/Lakeshore-Labs/gbash/shell/syntax"
+	"github.com/spf13/afero"
 	"github.com/tetratelabs/wazero/experimental"
 )
 
@@ -71,7 +72,8 @@ const (
 	// working directory, so it moves to the shell's working directory, puts the script's directory (or the working
 	// directory) and the tools package on the path, and runs the program's arguments as wasi-python's runner does.
 	// wasi-python's time.sleep waits for an absolute time, which wazero does not support; select waits for a
-	// relative one.
+	// relative one. matplotlib is imported already, in the image every run starts from, so what it reads on import
+	// from the run's own environment and directory is read here: a matplotlibrc, and MPLBACKEND.
 	pythonStartCode = `import os, sys, time, select, linecache, _reactor
 linecache._interactive_cache.clear()
 time.sleep = lambda secs: select.select([], [], [], secs)
@@ -79,6 +81,16 @@ try:
     os.chdir(os.environ.get("PYCWD", "/"))
 except OSError:
     pass
+mpl = sys.modules.get("matplotlib")
+if mpl is not None:
+    try:
+        rc = mpl.matplotlib_fname()
+        if os.path.dirname(rc) != mpl.get_data_path():
+            mpl.rc_file(rc)
+        if os.environ.get("MPLBACKEND"):
+            mpl.use(os.environ["MPLBACKEND"])
+    except Exception as e:
+        print("matplotlib:", e, file=sys.stderr)
 args, i = sys.argv[1:], 0
 while i < len(args) and args[i].startswith("-") and args[i] not in ("-", "-c", "-m"):
     i += 2 if args[i] == "-X" else 1
@@ -90,6 +102,13 @@ else:
 sys.path.append("` + pythonSite + `")
 sys.exit(_reactor.run(["` + pythonExe + `", *args], dict(os.environ)))
 `
+	// pythonPrepareCode is run once, and every python3 starts from the memory it leaves: these modules are imported
+	// already, at no cost to a program, and one that does not use them pays nothing for them either. matplotlib
+	// builds its list of fonts on import, which then needs a writable MPLCONFIGDIR, the one every run is given.
+	// A module is here only when what it reads on import is the same for every run: not the tools package, which
+	// is each computer's own.
+	pythonPrepareCode = "import numpy, pandas, matplotlib, matplotlib.pyplot\n"
+	pythonConfigDir   = "/tmp/.matplotlib"
 )
 
 // LoadPython reads the wasi-python release unpacked in dir, laid out as EmbeddedPython unpacks it:
@@ -106,6 +125,25 @@ func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error
 	p.Features |= experimental.CoreFeaturesExceptionHandling
 	if p.MemoryPages == 0 {
 		p.MemoryPages = 8192
+	}
+	// The image depends on the binary and on the standard library the code imports from, which a file's size and
+	// time name well enough for a release that is unpacked once and not changed.
+	zip, err := os.Stat(filepath.Join(dir, "lib", "python315.zip"))
+	if err != nil {
+		return nil, err
+	}
+	p.Prepare = &wasm.Preparation{
+		Code: pythonPrepareCode,
+		Key:  fmt.Sprintf("python315.zip %d %d", zip.Size(), zip.ModTime().UnixNano()),
+		Run: wasm.Run{
+			Args: []string{pythonExe},
+			Env:  map[string]string{"MPLCONFIGDIR": pythonConfigDir},
+			Dirs: []wasm.Dir{
+				{Guest: pythonLib, Host: filepath.Join(dir, "lib"), ReadOnly: true},
+				{Guest: pythonMpl, Host: filepath.Join(dir, "mpl-data"), ReadOnly: true},
+				{Guest: "/tmp", FS: afero.NewMemMapFs()},
+			},
+		},
 	}
 	py := &Python{dir: dir, ready: make(chan struct{})}
 	go func() {
@@ -485,7 +523,7 @@ func (c *Computer) python(name string, mounts []Mount) commands.Command {
 			env[k] = v
 		}
 		// matplotlib keeps its font list in a writable directory; /tmp outlives the run.
-		env["PYCWD"], env["MPLCONFIGDIR"] = inv.Cwd, "/tmp/.matplotlib"
+		env["PYCWD"], env["MPLCONFIGDIR"] = inv.Cwd, pythonConfigDir
 		stdin := inv.Stdin
 		if stdin == nil {
 			stdin = strings.NewReader("")
