@@ -43,7 +43,7 @@ var (
 )
 
 // EmbeddedPython compiles the wasi-python release this module carries: CPython with numpy, pandas, scipy,
-// scikit-learn, statsmodels, matplotlib, Pillow, lxml, python-docx, python-pptx and more, and Flask. On first use it unpacks
+// scikit-learn, statsmodels, matplotlib, Pillow, lxml, python-docx, python-pptx, Flask and more. On first use it unpacks
 // the release, about 270 MB, into computer/python-<checksum> in the user's cache directory (os.UserCacheDir), and
 // later processes reuse it; a host must not mount that directory. Each call compiles the program again, so a host
 // calls it once and shares the Python, as with LoadPython.
@@ -102,18 +102,10 @@ func unpackPython() (_ string, err error) {
 	if err != nil {
 		return "", err
 	}
-	mpl, err := zip.NewReader(bytes.NewReader(inner), int64(len(inner)))
-	if err != nil {
+	if err := unpackZip(filepath.Join(tmp, "mpl-data"), inner); err != nil {
 		return "", err
 	}
-	if err := os.CopyFS(filepath.Join(tmp, "mpl-data"), mpl); err != nil {
-		return "", err
-	}
-	web, err := zip.NewReader(bytes.NewReader(pythonSiteZip), int64(len(pythonSiteZip)))
-	if err != nil {
-		return "", err
-	}
-	if err := os.CopyFS(filepath.Join(tmp, "site"), web); err != nil {
+	if err := unpackZip(filepath.Join(tmp, "site"), pythonSiteZip); err != nil {
 		return "", err
 	}
 	if err := os.Rename(tmp, build); err != nil {
@@ -124,6 +116,14 @@ func unpackPython() (_ string, err error) {
 		return "", err
 	}
 	return build, nil
+}
+
+func unpackZip(dir string, data []byte) error {
+	z, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		return err
+	}
+	return os.CopyFS(dir, z)
 }
 
 func writeFile(name string, r io.Reader) error {

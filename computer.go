@@ -4,6 +4,7 @@
 package computer
 
 import (
+	"archive/tar"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
@@ -61,12 +62,7 @@ type Python struct {
 	ready  chan struct{}
 	module *wasm.Module
 	err    error
-	web    []Mount // the release's site/, when it has one
-}
-
-func isDir(name string) bool {
-	info, err := os.Stat(name)
-	return err == nil && info.IsDir()
+	dirs   []Mount // read-only mounts needed by the starting image and every Python run
 }
 
 const (
@@ -107,6 +103,8 @@ if i < len(args) and not args[i].startswith("-"):
 else:
     sys.path.insert(0, os.getcwd())
 sys.path.append("` + pythonSite + `")
+if "flask" in sys.modules:
+    sys.path.append("` + pythonWeb + `")
 sys.exit(_reactor.run(["` + pythonExe + `", *args], dict(os.environ)))
 `
 	// pythonPrepareCode is run once, and every python3 starts from the memory it leaves: these modules are imported
@@ -119,9 +117,10 @@ sys.exit(_reactor.run(["` + pythonExe + `", *args], dict(os.environ)))
 )
 
 // LoadPython reads the wasi-python release unpacked in dir, laid out as EmbeddedPython unpacks it:
-// python.wasm, lib/python315.zip (alone in lib) and mpl-data/, matplotlib's data, and starts compiling it; the
-// first python3 waits for the compile, and fails with its error. p's Binary is read from the file, its host call
-// is answered by the computer's tools, and a zero MemoryPages is 8192 (512 MiB); its other fields are the caller's.
+// python.wasm, lib/python315.zip (alone in lib), mpl-data/ for matplotlib, and optionally site/ for Flask and
+// its dependencies. The first python3 waits for the background compile, and fails with its error.
+// LoadPython reads p's Binary from the release and supplies the computer's tools for host calls.
+// MemoryPages defaults to 8192 (512 MiB).
 func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error) {
 	var err error
 	if p.Binary, err = os.ReadFile(filepath.Join(dir, "python.wasm")); err != nil {
@@ -139,6 +138,9 @@ func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error
 	if err != nil {
 		return nil, err
 	}
+	py := &Python{dir: dir, ready: make(chan struct{}), dirs: []Mount{
+		{Guest: pythonMpl, Host: filepath.Join(dir, "mpl-data"), ReadOnly: true},
+	}}
 	p.Prepare = &wasm.Preparation{
 		Code: pythonPrepareCode,
 		Key:  fmt.Sprintf("python315.zip %d %d", zip.Size(), zip.ModTime().UnixNano()),
@@ -147,19 +149,27 @@ func LoadPython(ctx context.Context, dir string, p wasm.Program) (*Python, error
 			Env:  map[string]string{"MPLCONFIGDIR": pythonConfigDir},
 			Dirs: []wasm.Dir{
 				{Guest: pythonLib, Host: filepath.Join(dir, "lib"), ReadOnly: true},
-				{Guest: pythonMpl, Host: filepath.Join(dir, "mpl-data"), ReadOnly: true},
 				{Guest: "/tmp", FS: afero.NewMemMapFs()},
 			},
 		},
 	}
-	py := &Python{dir: dir, ready: make(chan struct{})}
-	// A release with a site/ beside its lib has Flask there, pure Python, which every run then starts with too:
-	// a web app's request (see WebHandler) is a run, and importing Flask is most of a second.
-	if site := filepath.Join(dir, "site"); isDir(site) {
-		py.web = []Mount{{Guest: pythonWeb, Host: site, ReadOnly: true}}
-		p.Prepare.Code += "import sys\nsys.path.append(\"" + pythonWeb + "\")\nimport flask\n"
-		p.Prepare.Run.Dirs = append(p.Prepare.Run.Dirs, py.web...)
+	site := filepath.Join(dir, "site")
+	if info, err := os.Stat(site); err == nil && info.IsDir() {
+		py.dirs = append(py.dirs, Mount{Guest: pythonWeb, Host: site, ReadOnly: true})
+		p.Prepare.Code += "import sys\nsys.path.append('" + pythonWeb + "')\nimport flask\n"
+		if p.CacheDir != "" {
+			// A custom release can replace a package in place, leaving the directory's own timestamp unchanged.
+			hash := sha256.New()
+			archive := tar.NewWriter(hash)
+			if err := errors.Join(archive.AddFS(os.DirFS(site)), archive.Close()); err != nil {
+				return nil, fmt.Errorf("hashing %s: %w", site, err)
+			}
+			p.Prepare.Key += fmt.Sprintf(" site %x", hash.Sum(nil))
+		}
+	} else if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return nil, err
 	}
+	p.Prepare.Run.Dirs = append(p.Prepare.Run.Dirs, py.dirs...)
 	go func() {
 		defer close(py.ready)
 		py.module, py.err = wasm.Compile(context.WithoutCancel(ctx), p)
@@ -531,6 +541,9 @@ func (c *Computer) About(toolCommands, toolModules []string) string {
 
 // python is CPython as the command name.
 func (c *Computer) python(name string, mounts []Mount) commands.Command {
+	py := c.cfg.Python
+	// matplotlib's data is mounted inside its zip, which wazero allows and the shell's own mounts do not.
+	mounts = slices.Concat(mounts, py.dirs)
 	return commands.DefineCommand(name, func(ctx context.Context, inv *commands.Invocation) error {
 		env := map[string]string{}
 		for k, v := range inv.Env {
@@ -542,7 +555,6 @@ func (c *Computer) python(name string, mounts []Mount) commands.Command {
 		if stdin == nil {
 			stdin = strings.NewReader("")
 		}
-		py := c.cfg.Python
 		select {
 		case <-py.ready:
 		case <-ctx.Done():
@@ -554,9 +566,7 @@ func (c *Computer) python(name string, mounts []Mount) commands.Command {
 		code, err := py.module.Run(tools.With(ctx, c.cfg.Tools, inv.FS), wasm.Run{
 			Args: append([]string{pythonExe, "-c", pythonStart}, inv.Args...), Env: env,
 			Stdin: stdin, Stdout: inv.Stdout, Stderr: inv.Stderr,
-			// matplotlib's data is mounted inside the zip at pythonLib, which wazero allows and the shell's own
-			// mounts do not, so only Python sees it.
-			Dirs: append(mounts[:len(mounts):len(mounts)], append(py.web, Mount{Guest: pythonMpl, Host: filepath.Join(py.dir, "mpl-data"), ReadOnly: true})...),
+			Dirs: mounts,
 		})
 		if err != nil {
 			return commands.Exitf(inv, code, "%s: %v", name, err)

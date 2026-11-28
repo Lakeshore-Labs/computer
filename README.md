@@ -212,41 +212,29 @@ Its string hashes are not randomized: every run has the image's hash seed. See [
 
 ### Serve the computer over HTTP
 
-One handler serves a folder of the computer as `python3 -m http.server` serves one: the URL is a path under the
-folder, a file is sent as it is, and a folder as its `index.html` or as a list.
-
-A Python web app is asked for by its name in the URL, written as gunicorn and uvicorn write one,
-`module:callable`, where the module's file is. Flask is built in.
-
-```
-/hello/app.py          the file hello/app.py, its source
-/hello/app:app/        the object app of hello/app.py, a Flask application say, asked for /
-/hello/app:app/cart    the same, asked for /cart
-```
-
-So nothing is declared: what the agent writes is there at its own path. In a Go host, mount the handler on your
-own mux, behind your own sign-in, limits and timeouts; you give it a function that returns the requester's
-computer and the folder, as `TerminalHandler` takes one:
+`WebHandler` serves files, directory indexes and listings from a folder of the computer.
+`/hello/app.py` serves the Python source. `/hello/app:app/cart` sends `/cart` to the
+WSGI callable `app` in that file. A file or directory with the literal name `app:app`
+takes precedence. Symlinks follow the computer's mount rules.
 
 ```go
 web := computer.WebHandler(func(r *http.Request) (*computer.Computer, string, error) {
-    return c, "/home/user", nil // or fs.ErrPermission, to refuse
+    return c, "/home/user", nil // return fs.ErrPermission to refuse the request
 })
 mux.Handle("/computer/", http.StripPrefix("/computer", web))
 ```
 
-Each request to an app is a new `python3`, started from an image with Flask imported, so it takes tens of
-milliseconds, requests run side by side, and nothing is kept in memory between them: an app keeps its state in
-files or SQLite. What an app writes to its error output, a failure's traceback too, goes to the host's own unless
-`computer.ErrorLog` says where, such as a file of the computer the agent can read; the browser is told only 500.
-Not there: ASGI, WebSockets and threads.
+The host handles sign-in, limits and timeouts, and removes any header the app should
+not see, such as its own credential or cookie. Each app request runs in a fresh Python
+interpreter. The embedded release starts with Flask imported. Use files or SQLite for
+state shared between requests. Application stderr goes to the host's stderr by default.
+Pass `computer.ErrorLog` to choose a writer per request.
 
-The handler is made of three pieces, each of use alone to a host that routes for itself: `c.FS(ctx)`, the
-computer's files as an `fs.FS`; `computer.CGI`, which runs any script of the computer as a CGI program (RFC
-3875); and `computer.WSGI(c, "app:app", dir)`, a WSGI application as a handler.
+Hosts with their own routing can use `c.FS(ctx)` as an `fs.FS`, `computer.CGI` to run a
+shell script per request, or `computer.WSGI(c, "app:app", dir)` to mount an application.
 
-The CLI's `serve` is the handler on a local address, with `http.server`'s flags:
-`serve [-b address] [-d folder] [port]`, the working directory and port 8000 unless given.
+To try it locally, run `serve [-b address] [-d folder] [port]`. It defaults to the
+computer's working directory at `127.0.0.1:8000`.
 
 ```
 mkdir -p work/hello

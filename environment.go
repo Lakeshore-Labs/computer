@@ -45,9 +45,6 @@ func (c *Computer) Describe(ctx context.Context) (string, error) {
 // commands may write at the same time. When ctx ends the command is stopped and ctx's error returned. A command
 // that ran and failed, or that the shell does not have (127), is an exit code and no error.
 func (e *Environment) Run(ctx context.Context, script, dir string, env map[string]string, replaceEnv bool, stdout, stderr io.Writer) (int, error) {
-	if env == nil {
-		env = map[string]string{}
-	}
 	return e.c.shell(ctx, &gbash.ExecutionRequest{Script: script, WorkDir: dir, Env: env, ReplaceEnv: replaceEnv, Stdout: stdout, Stderr: stderr})
 }
 
@@ -59,18 +56,14 @@ func (c *Computer) shell(ctx context.Context, req *gbash.ExecutionRequest) (int,
 	c.mu.Lock()
 	rt := c.runtime
 	c.mu.Unlock()
-	s, err := rt.NewSession(ctx)
-	if err != nil {
-		return 0, err
-	}
-	res, err := s.Exec(ctx, req)
+	res, err := rt.Run(ctx, req)
 	switch {
 	case ctx.Err() != nil:
 		return 0, ctx.Err()
 	case res == nil:
 		return 0, err
 	}
-	return res.ExitCode, nil
+	return res.ExitCode, err
 }
 
 // told is err as a caller is told it: about name, the path in the computer, with the kind of failure kept.
