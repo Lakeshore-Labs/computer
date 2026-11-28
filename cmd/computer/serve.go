@@ -9,7 +9,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/Lakeshore-Labs/computer"
@@ -33,25 +32,20 @@ func serve(ctx context.Context, c *computer.Computer, args []string) error {
 	if err != nil {
 		return err
 	}
-	var connections sync.WaitGroup
 	server := &http.Server{
 		Handler: handler, ReadHeaderTimeout: 5 * time.Second,
 		BaseContext: func(net.Listener) context.Context { return ctx }, // an interrupt stops the requests that run
-		ConnState: func(_ net.Conn, state http.ConnState) {
-			switch state {
-			case http.StateNew:
-				connections.Add(1)
-			case http.StateClosed, http.StateHijacked:
-				connections.Done()
-			}
-		},
 	}
-	defer connections.Wait() // the computer stays open until its last handler returns
-	defer server.Close()
-	defer context.AfterFunc(ctx, func() { _ = server.Close() })()
+	idle := make(chan struct{}) // closed once no request runs, so the computer is not closed under one
+	go func() {
+		<-ctx.Done()
+		_ = server.Shutdown(context.Background())
+		close(idle)
+	}()
 	fmt.Fprintf(os.Stderr, "computer: serving at http://%s/\n", listener.Addr())
 	if err := server.Serve(listener); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
+	<-idle
 	return nil
 }

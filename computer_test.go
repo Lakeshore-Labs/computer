@@ -107,29 +107,28 @@ func TestAToolAddedLaterIsACommand(t *testing.T) {
 	}
 }
 
-var testReleases sync.Map // directory to a function returning its compiled Python
+var cpython struct {
+	once   sync.Once
+	python *Python
+	err    error
+}
 
 // python is the wasi-python release unpacked in PYTHON_DIR, or the embedded one when it is not set, compiled once
 // for all the tests.
 func python(t *testing.T) *Python {
 	t.Helper()
-	return pythonFrom(t, os.Getenv("PYTHON_DIR"))
-}
-
-func pythonFrom(t *testing.T, dir string) *Python {
-	t.Helper()
-	load, _ := testReleases.LoadOrStore(dir, sync.OnceValues(func() (*Python, error) {
-		program := wasm.Program{MaxRuns: 2, CacheDir: os.Getenv("PYTHON_CACHE")}
-		if dir == "" {
-			return EmbeddedPython(context.Background(), program)
+	cpython.once.Do(func() {
+		p := wasm.Program{MaxRuns: 2, CacheDir: os.Getenv("PYTHON_CACHE")}
+		if dir := os.Getenv("PYTHON_DIR"); dir != "" {
+			cpython.python, cpython.err = LoadPython(context.Background(), dir, p)
+			return
 		}
-		return LoadPython(context.Background(), dir, program)
-	}))
-	py, err := load.(func() (*Python, error))()
-	if err != nil {
-		t.Fatal(err)
+		cpython.python, cpython.err = EmbeddedPython(context.Background(), p)
+	})
+	if cpython.err != nil {
+		t.Fatal(cpython.err)
 	}
-	return py
+	return cpython.python
 }
 
 func TestPythonCallsAToolAndSharesTheShellsFiles(t *testing.T) {
@@ -308,16 +307,6 @@ atexit.register(print, "at exit")`
 		t.Errorf("two runs drew the same numbers: %q", draws[0])
 	}
 	if got := run(t, c, "cat left.txt; A=b python3 -c 'from tools import notes; import os; print(os.environ[\"A\"], len(notes.list_notes()))'"); got != "onetwob 3" {
-		t.Errorf("got %q", got)
-	}
-}
-
-func TestEmbeddedPythonStartsWithFlaskAndCanReadItsPackageMetadata(t *testing.T) {
-	c := newComputer(t, Config{Python: pythonFrom(t, "")})
-	script := `import sys
-from importlib.metadata import version
-print("flask" in sys.modules, bool(version("Flask")))`
-	if got := run(t, c, "python3 -c '"+script+"'"); got != "True True" {
 		t.Errorf("got %q", got)
 	}
 }

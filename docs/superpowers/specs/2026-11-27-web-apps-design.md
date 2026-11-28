@@ -41,12 +41,10 @@ Python application has one too, its standard name. The host mounts one handler a
    `http.FileServer`. A path part written `module:callable`, as gunicorn and uvicorn name an application, is that
    application, where the module's file is, and the rest of the path is the application's (CGI's SCRIPT_NAME and
    PATH_INFO): `/shop/app:app/cart`. `/shop/app.py` stays the file. Only a module that is a file there is run.
-2. The pieces it is made of, exported for a host that routes for itself:
-   - **`c.FS(ctx)`**, the computer's files as an `fs.FS`.
-   - **`CGI`**, an `http.Handler` shaped as `net/http/cgi.Handler` is, which runs a shell script of the computer
-     for each request (RFC 3875). The path a host's `http.StripPrefix` took is part of where it is mounted.
-   - **`WSGI(c, "module:callable", dir)`**, a `CGI` that serves that WSGI application (PEP 3333) through
-     Python's own `wsgiref`.
+2. Inside it, unexported until a host needs one alone: the computer's files as an `fs.FS` for
+   `http.FileServer`; a function that runs a shell script of the computer as a CGI program (RFC 3875), the way
+   `net/http/cgi` runs one, with the request's body read first; and the one-line use of Python's own `wsgiref`
+   that serves a WSGI application (PEP 3333) over it. An `ErrorLog` says where an application's error output goes.
 3. **Flask in the start image.** The module carries Flask and its pure-Python dependencies as `python/site.zip`,
    whose files are added to the release's own zip of packages as it is unpacked, so no mount or path is new, and
    the code that makes the image imports Flask when the release has it.

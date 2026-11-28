@@ -214,8 +214,7 @@ Its string hashes are not randomized: every run has the image's hash seed. See [
 
 `WebHandler` serves files, directory indexes and listings from a folder of the computer.
 `/hello/app.py` serves the Python source. `/hello/app:app/cart` sends `/cart` to the
-WSGI callable `app` in that file. A file or directory with the literal name `app:app`
-takes precedence. Symlinks follow the computer's mount rules.
+WSGI callable `app` in that file. Symlinks follow the computer's mount rules.
 
 ```go
 web := computer.WebHandler(func(r *http.Request) (*computer.Computer, string, error) {
@@ -229,9 +228,6 @@ not see, such as its own credential or cookie. Each app request runs in a fresh 
 interpreter. The embedded release starts with Flask imported. Use files or SQLite for
 state shared between requests. Application stderr goes to the host's stderr by default.
 Pass `computer.ErrorLog` to choose a writer per request.
-
-Hosts with their own routing can use `c.FS(ctx)` as an `fs.FS`, `computer.CGI` to run a
-shell script per request, or `computer.WSGI(c, "app:app", dir)` to mount an application.
 
 To try it locally, run `serve [-b address] [-d folder] [port]`. It defaults to the
 computer's working directory at `127.0.0.1:8000`.

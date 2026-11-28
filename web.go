@@ -9,7 +9,6 @@ import (
 	"io"
 	"io/fs"
 	"log"
-	"maps"
 	"net"
 	"net/http"
 	"net/textproto"
@@ -19,264 +18,51 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/Lakeshore-Labs/gbash"
 	"github.com/Lakeshore-Labs/gbash/commands"
 	gbfs "github.com/Lakeshore-Labs/gbash/fs"
 )
 
-// CGI runs a shell script for each HTTP request. The script receives CGI variables
-// (RFC 3875) and the request body on stdin. It writes headers, a blank line and
-// the response body to stdout. The request context controls the lifetime of the
-// shell. A script that fails after its headers are sent ends the response short.
-//
-// Policy is the host's: who may ask, how large a request may be (http.MaxBytesHandler),
-// how long it may take (a deadline on the request's context), and which of the
-// request's headers the script sees. Every header reaches the script, a credential
-// or a cookie too, as with net/http/cgi; the host removes what is its own first.
-type CGI struct {
-	Computer *Computer
-	Script   string            // the shell script, such as `python3 app.py`
-	Dir      string            // where it runs; the computer's WorkDir when empty
-	Root     string            // mount path after http.StripPrefix; the remaining path is PATH_INFO
-	Env      map[string]string // further variables
-	Stderr   io.Writer         // the script's error output; os.Stderr when nil
-}
+// An ErrorLog is where the error output of the application a request asks goes, a failure's traceback among it,
+// such as a file of the computer its author reads; os.Stderr for a request it returns nil for. The writer is the
+// host's: it is written to while the request runs, by requests side by side, and is not closed.
+type ErrorLog func(*http.Request) io.Writer
 
-func (h *CGI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	root := strings.TrimRight(h.Root, "/")
-	p := r.URL.Path
-	prefix := stripped(r)
-	if strings.HasSuffix(prefix, "/") {
-		prefix = strings.TrimSuffix(prefix, "/")
-		p = "/" + p
-	}
-	h.serveHTTP(w, r, prefix+root, strings.TrimPrefix(p, root))
-}
+// wsgiName is a WSGI application's name as gunicorn and uvicorn write one, module:callable, each a dotted name.
+var wsgiName = regexp.MustCompile(`^([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*):([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)$`)
 
-func (h *CGI) serveHTTP(w http.ResponseWriter, r *http.Request, scriptName, pathInfo string) {
-	ctx, cancel := context.WithCancel(r.Context())
-	out, in := io.Pipe()
-	conn := http.NewResponseController(w)
-	if r.ContentLength > 0 {
-		_ = conn.EnableFullDuplex() // a script can write its page before it finishes reading
-	}
-	closed := make(chan struct{})
-	stop := context.AfterFunc(ctx, func() {
-		defer close(closed)
-		out.CloseWithError(ctx.Err())
-		if r.Context().Err() != nil {
-			_ = conn.SetWriteDeadline(time.Now())
-		}
-		if r.Body != nil && r.Body != http.NoBody {
-			_ = conn.SetReadDeadline(time.Now())
-			_ = r.Body.Close() // unblock a script waiting for input
-		}
-	})
-	defer func() {
-		if !stop() {
-			<-closed
-		}
-		cancel()
-	}()
-	// A script is told its input's length, so a body of unknown length is read first.
-	body, length := io.Reader(r.Body), r.ContentLength
-	if length < 0 {
-		b, err := io.ReadAll(r.Body)
-		if err != nil {
-			status := http.StatusBadRequest
-			if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
-				status = http.StatusRequestEntityTooLarge
-			}
-			http.Error(w, http.StatusText(status), status)
-			return
-		}
-		body, length = bytes.NewReader(b), int64(len(b))
-	}
-
-	stderr := h.Stderr
-	if stderr == nil {
-		stderr = os.Stderr
-	}
-	done := make(chan struct{})
-	defer func() {
-		select {
-		case <-done:
-		default:
-			cancel()
-			<-done
-		}
-	}()
-	go func() {
-		code, err := h.Computer.shell(ctx, &gbash.ExecutionRequest{
-			Script: h.Script, WorkDir: h.Dir, Env: h.environment(r, scriptName, pathInfo, length),
-			Stdin: body, Stdout: in, Stderr: stderr,
-		})
-		if err == nil && code != 0 {
-			err = fmt.Errorf("exit status %d", code)
-		}
-		close(done)
-		in.CloseWithError(err)
-	}()
-
-	page := bufio.NewReader(io.LimitReader(out, http.DefaultMaxHeaderBytes))
-	headers, err := textproto.NewReader(page).ReadMIMEHeader()
-	status := http.StatusOK
-	if err == nil {
-		switch {
-		case headers["Status"] != nil:
-			code, _, _ := strings.Cut(headers.Get("Status"), " ")
-			status, err = strconv.Atoi(code)
-			if len(headers["Status"]) != 1 || len(code) != 3 || status < 200 || status > 599 {
-				err = fmt.Errorf("invalid CGI status %q", headers["Status"])
-			}
-		case headers.Get("Location") != "":
-			status = http.StatusFound
-		}
-	}
-	hasBody := status != http.StatusNoContent && status != http.StatusResetContent && status != http.StatusNotModified
-	if err == nil && hasBody && headers.Get("Content-Type") == "" && headers.Get("Location") == "" {
-		err = errors.New("missing CGI Content-Type")
-	}
-	if err != nil {
-		if ctx.Err() == nil {
-			log.Printf("computer: the CGI script of %s: %v", r.URL.Path, err)
-		}
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	headers.Del("Status")
-	for name, values := range headers {
-		w.Header()[name] = append(w.Header()[name], values...)
-	}
-	w.WriteHeader(status)
-	var dst io.Writer = w
-	if r.Method == http.MethodHead || !hasBody {
-		dst = io.Discard
-	}
-	if _, err := io.Copy(dst, io.MultiReader(page, out)); err != nil && ctx.Err() == nil {
-		// The status is sent already, so the client is told by a response that does not end as one should.
-		log.Printf("computer: the CGI response of %s: %v", r.URL.Path, err)
-		panic(http.ErrAbortHandler)
-	}
-}
-
-func (h *CGI) environment(r *http.Request, scriptName, pathInfo string, length int64) map[string]string {
-	host, port := r.Host, "80"
-	if r.TLS != nil {
-		port = "443"
-	}
-	if p := (&url.URL{Host: host}).Port(); p != "" {
-		host, port = strings.TrimSuffix(host, ":"+p), p
-	}
-	remote, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		remote = r.RemoteAddr
-	}
-	env := map[string]string{
-		"GATEWAY_INTERFACE": "CGI/1.1", "SERVER_SOFTWARE": "computer", "SERVER_PROTOCOL": r.Proto,
-		"SERVER_NAME": host, "SERVER_PORT": port, "REMOTE_ADDR": remote, "REMOTE_HOST": remote,
-		"REQUEST_METHOD": r.Method, "REQUEST_URI": r.RequestURI, "QUERY_STRING": r.URL.RawQuery,
-		"SCRIPT_NAME": scriptName, "PATH_INFO": pathInfo,
-		"HTTP_HOST": r.Host,
-	}
-	if length > 0 {
-		env["CONTENT_LENGTH"] = strconv.FormatInt(length, 10)
-	}
-	if r.TLS != nil {
-		env["HTTPS"] = "on"
-	}
-	for name, values := range r.Header {
-		// Proxy would be HTTP_PROXY, which programs read as their proxy; a name with an underscore would pass for
-		// another header's.
-		name = http.CanonicalHeaderKey(name)
-		if len(values) == 0 {
-			continue
-		}
-		if name == "Content-Type" {
-			env["CONTENT_TYPE"] = values[0]
-			continue
-		}
-		if name == "Content-Length" || name == "Proxy" || strings.Contains(name, "_") {
-			continue
-		}
-		sep := ", "
-		if name == "Cookie" {
-			sep = "; "
-		}
-		env["HTTP_"+strings.ToUpper(strings.ReplaceAll(name, "-", "_"))] = strings.Join(values, sep)
-	}
-	maps.Copy(env, h.Env)
-	return env
-}
-
-const pythonName = `[A-Za-z_][A-Za-z0-9_]*`
-const dottedName = pythonName + `(?:\.` + pythonName + `)*`
-
-var wsgiName = regexp.MustCompile(`^(` + dottedName + `):(` + dottedName + `)$`)
-
-// WSGI serves a Python application named "module:callable", such as "app:app",
-// through CGI. Each request imports the module in a fresh interpreter with dir
-// as its working directory (the computer's WorkDir when empty). Application
-// prints and tracebacks go to the CGI handler's Stderr.
-func WSGI(c *Computer, app, dir string) (*CGI, error) {
-	name := wsgiName.FindStringSubmatch(app)
-	if name == nil {
-		return nil, fmt.Errorf("computer: a WSGI application is named module:callable, not %q", app)
-	}
-	return wsgi(c, dir, name), nil
-}
-
-func wsgi(c *Computer, dir string, name []string) *CGI {
-	script := `import functools, importlib, sys
+// wsgiScript serves one request with the application its two arguments name, as wsgiref's CGIHandler does. What
+// the application prints goes to the error output, not into the page.
+var wsgiScript = "python3 -c " + quote(`import functools, importlib, sys
 from wsgiref.handlers import CGIHandler
 handler = CGIHandler()
 sys.stdout = sys.stderr
-module, target = sys.argv[1:]
-handler.run(functools.reduce(getattr, target.split("."), importlib.import_module(module)))
-`
-	return &CGI{Computer: c, Dir: dir, Script: "python3 -c " + quote(script) + " " + name[1] + " " + name[2]}
-}
+handler.run(functools.reduce(getattr, sys.argv[2].split("."), importlib.import_module(sys.argv[1])))
+`)
 
-// stripped recovers the mount removed by http.StripPrefix from the original request URI.
-func stripped(r *http.Request) string {
-	asked, err := url.ParseRequestURI(r.RequestURI)
-	if err != nil {
-		return ""
-	}
-	prefix, ok := strings.CutSuffix(asked.Path, r.URL.Path)
-	if !ok {
-		return ""
-	}
-	return prefix
-}
-
-// A WebOption changes how WebHandler serves.
-type WebOption func(*webOptions)
-
-type webOptions struct{ errorLog func(*http.Request) io.Writer }
-
-// ErrorLog selects a writer for each application's stderr. A nil writer uses
-// os.Stderr. The host owns the writer and may receive output from concurrent requests.
-func ErrorLog(of func(*http.Request) io.Writer) WebOption {
-	return func(o *webOptions) { o.errorLog = of }
-}
-
-// WebHandler serves files, directory indexes and listings using http.FileServerFS.
-// A path component of the form "module:callable" mounts a local Python WSGI app
-// unless a file or directory has that literal name. For example, /shop/app:app/cart
-// sends /cart to the app in shop/app.py. /shop/app.py serves the source file.
+// WebHandler serves a folder of a computer as python3 -m http.server serves one: the request's path is a path
+// under the folder, a file is sent as it is, a Python file's source too, and a folder as its index.html or as a
+// list of what it holds (http.FileServer).
 //
-// get authorizes the request and returns the host's computer and folder. Relative
-// folders resolve under the computer's WorkDir. fs.ErrPermission returns 403.
-// Other errors are logged and return 500. The host can mount the handler under
-// http.StripPrefix and select the application's stderr with ErrorLog.
-func WebHandler(get func(*http.Request) (*Computer, string, error), opts ...WebOption) http.Handler {
-	var o webOptions
-	for _, opt := range opts {
-		opt(&o)
-	}
+// A Python web application is asked for by its name in the path, written as gunicorn and uvicorn write one,
+// module:callable, where the module's file is: /shop/app:app/cart is the object app of shop/app.py, asked for
+// /cart, and /shop/app.py is that file. So nothing is declared: a file is reached by its name, and an application
+// by its own. The application is a WSGI one (PEP 3333), served as a CGI script is (RFC 3875): each request is a
+// python3 of its own, in the module's folder, so requests run side by side and nothing is kept in memory between
+// them. A request that ends stops its python3, and an application that fails once its answer has begun ends the
+// answer short.
+//
+// get is the host's, as TerminalHandler's is: it returns the requester's computer and the folder, after the
+// host's own checks of who is asking; a folder that is not absolute is under the computer's WorkDir. An error that
+// is fs.ErrPermission refuses the request with 403, and another with 500, which is logged and not told to the
+// client. The computer stays the host's, to close. The handler may be mounted under http.StripPrefix.
+//
+// Policy is the host's too: how large a request may be (http.MaxBytesHandler; a request to an application is
+// read whole before the application runs), how long it may take (a deadline on the request's context), and which
+// of the request's headers an application sees: every one reaches it, a credential or a cookie too, unless the
+// host removes it first. An application's error output is the host's own, unless an ErrorLog says where.
+func WebHandler(get func(*http.Request) (*Computer, string, error), errorLog ...ErrorLog) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		c, root, err := get(r)
@@ -295,7 +81,7 @@ func WebHandler(get func(*http.Request) (*Computer, string, error), opts ...WebO
 		}
 		files.dir = gbfs.Resolve(files.dir, root)
 		folder := webFS{ctx, files}
-		clean := path.Clean("/" + r.URL.Path)
+		clean := path.Clean("/" + r.URL.Path) // rooted, so no .. is left in it
 		if strings.HasSuffix(r.URL.Path, "/") && clean != "/" {
 			clean += "/"
 		}
@@ -303,7 +89,7 @@ func WebHandler(get func(*http.Request) (*Computer, string, error), opts ...WebO
 			info, err := folder.Stat(name)
 			return err == nil && info.Mode().IsRegular()
 		}
-		end := 0
+		end := 0 // of the part of the path looked at
 		for part := range strings.SplitSeq(clean[1:], "/") {
 			dir := strings.TrimPrefix(clean[:end], "/")
 			end += 1 + len(part)
@@ -311,39 +97,148 @@ func WebHandler(get func(*http.Request) (*Computer, string, error), opts ...WebO
 			if name == nil {
 				continue
 			}
-			mount := clean[1:end]
-			if _, err := folder.Stat(mount); !errors.Is(err, fs.ErrNotExist) {
-				continue // a literal file or directory takes precedence
-			}
+			// Only a module that is a file of the folder is run.
 			file := path.Join(dir, strings.ReplaceAll(name[1], ".", "/"))
 			if !regular(file+".py") && !regular(file+"/__init__.py") {
 				continue
 			}
-			app := wsgi(c, path.Join(files.dir, dir), name)
-			if o.errorLog != nil {
-				app.Stderr = o.errorLog(r)
+			stderr := io.Writer(os.Stderr)
+			for _, of := range errorLog {
+				if to := of(r); to != nil {
+					stderr = to
+				}
 			}
-			if strings.HasPrefix(r.URL.Path, "/") {
-				mount = "/" + mount
-			}
-			app.serveHTTP(w, r, stripped(r)+mount, clean[end:])
+			// The path a host's http.StripPrefix took is part of where the application is mounted.
+			mount := strings.TrimSuffix(stripped(r), "/") + clean[:end]
+			serveCGI(w, r, c, wsgiScript+" "+name[1]+" "+name[2], path.Join(files.dir, dir), mount, clean[end:], stderr)
 			return
 		}
 		http.FileServerFS(folder).ServeHTTP(w, r)
 	})
 }
 
-// FS exposes the computer's files from its root, under the shell's policy.
-// Open and Stat use ctx. Regular files support seeking for http.FileServerFS.
-func (c *Computer) FS(ctx context.Context) (fs.FS, error) {
-	files, err := c.files(ctx)
+// stripped is the prefix an http.StripPrefix before the handler took from the request's path; "" when none was.
+func stripped(r *http.Request) string {
+	asked, err := url.ParseRequestURI(r.RequestURI)
 	if err != nil {
-		return nil, err
+		return ""
 	}
-	files.dir = "/"
-	return webFS{ctx, files}, nil
+	prefix, _ := strings.CutSuffix(asked.Path, r.URL.Path)
+	if prefix == asked.Path {
+		return ""
+	}
+	return prefix
 }
 
+// serveCGI runs script in the computer's shell as a CGI program (RFC 3875), as net/http/cgi's Handler runs one:
+// the request is its variables and its standard input, and what it writes, headers, an empty line and a body, is
+// the response. It returns when the script is over, which a request that ends stops.
+func serveCGI(w http.ResponseWriter, r *http.Request, c *Computer, script, dir, scriptName, pathInfo string, stderr io.Writer) {
+	// A script is told its input's length, and is not kept waiting on the client for it.
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		status := http.StatusBadRequest
+		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
+			status = http.StatusRequestEntityTooLarge
+		}
+		http.Error(w, http.StatusText(status), status)
+		return
+	}
+	ctx, cancel := context.WithCancel(r.Context())
+	out, in := io.Pipe()
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		code, err := c.shell(ctx, &gbash.ExecutionRequest{
+			Script: script, WorkDir: dir, Env: cgiEnv(r, scriptName, pathInfo, len(body)),
+			Stdin: bytes.NewReader(body), Stdout: in, Stderr: stderr,
+		})
+		if err == nil && code != 0 {
+			err = fmt.Errorf("exit status %d", code)
+		}
+		in.CloseWithError(err)
+	}()
+	defer func() { cancel(); out.Close(); <-done }()
+
+	page := bufio.NewReader(io.LimitReader(out, http.DefaultMaxHeaderBytes)) // the headers, and no more held of them
+	headers, err := textproto.NewReader(page).ReadMIMEHeader()
+	status := http.StatusOK
+	switch {
+	case err != nil:
+	case headers.Get("Status") != "":
+		code, _, _ := strings.Cut(headers.Get("Status"), " ")
+		if status, err = strconv.Atoi(code); err == nil && (status < 200 || status > 599) {
+			err = fmt.Errorf("status %d", status)
+		}
+	case headers.Get("Location") != "":
+		status = http.StatusFound
+	case headers.Get("Content-Type") == "":
+		err = errors.New("no Content-Type")
+	}
+	if err != nil {
+		if ctx.Err() == nil {
+			log.Printf("computer: the CGI script of %s: %v", r.URL.Path, err)
+		}
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	headers.Del("Status")
+	for name, values := range headers {
+		w.Header()[name] = append(w.Header()[name], values...) // beside the host's own, such as its cookies
+	}
+	w.WriteHeader(status)
+	if _, err := io.Copy(w, io.MultiReader(page, out)); err != nil && ctx.Err() == nil {
+		// The status is sent already, so the client is told by a response that does not end as one should.
+		log.Printf("computer: the CGI response of %s: %v", r.URL.Path, err)
+		panic(http.ErrAbortHandler)
+	}
+}
+
+// cgiEnv is the request as a CGI script's variables.
+func cgiEnv(r *http.Request, scriptName, pathInfo string, length int) map[string]string {
+	host, port := r.Host, "80"
+	if r.TLS != nil {
+		port = "443"
+	}
+	if p := (&url.URL{Host: host}).Port(); p != "" {
+		host, port = strings.TrimSuffix(host, ":"+p), p
+	}
+	remote, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		remote = r.RemoteAddr
+	}
+	env := map[string]string{
+		"GATEWAY_INTERFACE": "CGI/1.1", "SERVER_SOFTWARE": "computer", "SERVER_PROTOCOL": r.Proto,
+		"SERVER_NAME": host, "SERVER_PORT": port, "REMOTE_ADDR": remote, "REMOTE_HOST": remote,
+		"REQUEST_METHOD": r.Method, "REQUEST_URI": r.RequestURI, "QUERY_STRING": r.URL.RawQuery,
+		"SCRIPT_NAME": scriptName, "PATH_INFO": pathInfo, "HTTP_HOST": r.Host,
+	}
+	if length > 0 {
+		env["CONTENT_LENGTH"] = strconv.Itoa(length)
+	}
+	if r.TLS != nil {
+		env["HTTPS"] = "on"
+	}
+	for name, values := range r.Header {
+		name = http.CanonicalHeaderKey(name)
+		switch {
+		case len(values) == 0, name == "Content-Length":
+		case name == "Content-Type":
+			env["CONTENT_TYPE"] = values[0]
+		// Proxy would be HTTP_PROXY, which programs read as their proxy; a name with an underscore would pass for
+		// another header's.
+		case name == "Proxy", strings.Contains(name, "_"):
+		case name == "Cookie":
+			env["HTTP_COOKIE"] = strings.Join(values, "; ")
+		default:
+			env["HTTP_"+strings.ToUpper(strings.ReplaceAll(name, "-", "_"))] = strings.Join(values, ", ")
+		}
+	}
+	return env
+}
+
+// webFS is a folder of a computer's files, the one its files' relative names are under, as an fs.FS for
+// http.FileServerFS, for one request.
 type webFS struct {
 	ctx   context.Context
 	files *ruled
