@@ -37,11 +37,6 @@ type Program struct {
 	MemoryPages uint32           // the most memory one run may hold, in 64 KiB pages; 0 is wazero's limit of 4 GiB
 	CacheDir    string           // where compiled code is kept between processes; empty keeps none
 
-	// Unstoppable runs the program at full speed and gives up stopping it: a run then ends only when the program
-	// does, whatever its context. Stopping costs a call into Go on every loop iteration, which slows an interpreter
-	// such as CPython three to four times. Set it only for a program trusted to end.
-	Unstoppable bool
-
 	// MaxRuns is how many runs there may be at once; a further one waits for its turn until its context ends. Each
 	// run may take MemoryPages of memory, so this is what bounds the memory of all of them. Zero is no limit.
 	MaxRuns int
@@ -84,7 +79,7 @@ type Module struct {
 func Compile(ctx context.Context, p Program) (*Module, error) {
 	// ponytail: a goroutine cannot be killed, so wazero stops a run by having it check at every loop. The upgrade
 	// that keeps both speed and the stop is to run programs in a worker process, which the system can kill.
-	cfg := wazero.NewRuntimeConfig().WithCoreFeatures(api.CoreFeaturesV2 | p.Features).WithCloseOnContextDone(!p.Unstoppable).
+	cfg := wazero.NewRuntimeConfig().WithCoreFeatures(api.CoreFeaturesV2 | p.Features).WithCloseOnContextDone(true).
 		WithDebugInfoEnabled(false) // or a stopped run spends seconds reading the binary's debug data for a stack trace
 	if p.MemoryPages > 0 {
 		cfg = cfg.WithMemoryLimitPages(p.MemoryPages)

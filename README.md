@@ -224,8 +224,10 @@ Its string hashes are not randomized: every run has the image's hash seed. See [
 
 ## Known limits
 
-- Stopping a WebAssembly run at its deadline makes Python three to four times slower. `wasm.Program.Unstoppable`
-  trades that away for trusted scripts.
+- wazero is replaced with [our fork](https://github.com/Lakeshore-Labs/wazero) of wazero main, which stops a run at
+  its deadline at almost no cost (wazero#2533, not yet merged there) and does not copy the stack at every
+  `try_table`. Go ignores a `replace` in a dependency, so a program that imports this module repeats the line in
+  its own `go.mod`; without it Python is three to four times slower.
 - Python has no threads, processes, sockets, `ctypes` or `mmap`, and numpy's default integer is 32-bit.
 - wasi-python needs wazero's experimental exception handling: wazero is pinned to a main commit with the fix for
   wazero#2503, and wazero#2522, a use-after-free in that support, is open.
