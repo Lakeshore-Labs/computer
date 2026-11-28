@@ -171,8 +171,7 @@ PY
 mkdir -p hello/pkg hello/missing.py
 echo 'from . import app' > hello/pkg/__init__.py
 cp hello/app.py hello/pkg/app.py
-echo 'literal' > 'hello/pkg:app'
-touch hello/os.py`)
+echo 'literal' > 'hello/pkg:app'`)
 	var errorLog bytes.Buffer // one request at a time writes to it here
 	h := WebHandler(func(*http.Request) (*Computer, string, error) { return c, "www", nil },
 		ErrorLog(func(*http.Request) io.Writer { return &errorLog }))

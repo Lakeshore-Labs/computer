@@ -225,26 +225,16 @@ func WSGI(c *Computer, app, dir string) (*CGI, error) {
 	if name == nil {
 		return nil, fmt.Errorf("computer: a WSGI application is named module:callable, not %q", app)
 	}
-	return wsgi(c, dir, name, ""), nil
+	return wsgi(c, dir, name), nil
 }
 
-// localModule answers 404 unless the module imported is a file of the working directory: a module Python has
-// already, its own or the image's, has the name of a local file at times, and is not the folder's to serve.
-const localModule = `
-import os
-if not (getattr(sys.modules[module], "__file__", None) or "").startswith(os.getcwd().rstrip("/") + "/"):
-    app = lambda environ, start: start("404 Not Found", [("Content-Type", "text/plain")]) and [] or [b"404 page not found\n"]
-`
-
-func wsgi(c *Computer, dir string, name []string, guard string) *CGI {
+func wsgi(c *Computer, dir string, name []string) *CGI {
 	script := `import functools, importlib, sys
 from wsgiref.handlers import CGIHandler
 handler = CGIHandler()
 sys.stdout = sys.stderr
 module, target = sys.argv[1:]
-app = functools.reduce(getattr, target.split("."), importlib.import_module(module))
-` + guard + `
-handler.run(app)
+handler.run(functools.reduce(getattr, target.split("."), importlib.import_module(module)))
 `
 	return &CGI{Computer: c, Dir: dir, Script: "python3 -c " + quote(script) + " " + name[1] + " " + name[2]}
 }
@@ -329,7 +319,7 @@ func WebHandler(get func(*http.Request) (*Computer, string, error), opts ...WebO
 			if !regular(file+".py") && !regular(file+"/__init__.py") {
 				continue
 			}
-			app := wsgi(c, path.Join(files.dir, dir), name, localModule)
+			app := wsgi(c, path.Join(files.dir, dir), name)
 			if o.errorLog != nil {
 				app.Stderr = o.errorLog(r)
 			}

@@ -48,8 +48,8 @@ Python application has one too, its standard name. The host mounts one handler a
    - **`WSGI(c, "module:callable", dir)`**, a `CGI` that serves that WSGI application (PEP 3333) through
      Python's own `wsgiref`.
 3. **Flask in the start image.** The module carries Flask and its pure-Python dependencies as `python/site.zip`,
-   unpacked beside the release and imported by the code that makes the image. A release directory without it
-   (`-python DIR`) works as before, without Flask.
+   whose files are added to the release's own zip of packages as it is unpacked, so no mount or path is new, and
+   the code that makes the image imports Flask when the release has it.
 4. **`computer serve [-b address] [-d folder] [port]`**, the handler on a local address, with `http.server`'s
    flags.
 

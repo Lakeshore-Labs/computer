@@ -19,9 +19,9 @@ To embed a new release:
 
 `site.zip` is Flask and what it needs beyond the release (which has Jinja2 and MarkupSafe), pure Python, from
 PyPI's wheels, each with its license in its `.dist-info`: Flask 3.1.3, Werkzeug 3.1.9, click 8.3.3,
-itsdangerous 2.2.0, blinker 1.9.0. `computer.EmbeddedPython` unpacks it as `site/` beside `lib/`, and a release
-directory with a `site/` has it on Python's path and Flask imported in the image every run starts from. To make
-it again:
+itsdangerous 2.2.0, blinker 1.9.0. `computer.EmbeddedPython` adds its files to `lib/python315.zip` as it unpacks
+the release, where the release's own packages are, and a release with Flask in its zip has it imported in the
+image every run starts from. To make it again:
 
     pip download --no-deps --only-binary :all: --implementation py --abi none --platform any -d wheels \
         Flask==3.1.3 Werkzeug==3.1.9 click==8.3.3 itsdangerous==2.2.0 blinker==1.9.0

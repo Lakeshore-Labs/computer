@@ -31,7 +31,7 @@ var (
 	pythonSums []byte
 	// Flask and what it needs beyond the release, pure Python (see python/README.md).
 	//go:embed python/site.zip
-	pythonSiteZip []byte
+	pythonFlask []byte
 )
 
 // The directory the embedded release is unpacked into, once by EmbeddedPython. A package-level
@@ -43,7 +43,7 @@ var (
 )
 
 // EmbeddedPython compiles the wasi-python release this module carries: CPython with numpy, pandas, scipy,
-// scikit-learn, statsmodels, matplotlib, Pillow, lxml, python-docx, python-pptx, Flask and more. On first use it unpacks
+// scikit-learn, statsmodels, matplotlib, Pillow, lxml, python-docx, python-pptx and more, and Flask. On first use it unpacks
 // the release, about 270 MB, into computer/python-<checksum> in the user's cache directory (os.UserCacheDir), and
 // later processes reuse it; a host must not mount that directory. Each call compiles the program again, so a host
 // calls it once and shares the Python, as with LoadPython.
@@ -63,7 +63,9 @@ func unpackPython() (_ string, err error) {
 	if err != nil {
 		return "", err
 	}
-	sum := sha256.Sum256(slices.Concat(pythonSums, pythonSiteZip))
+	// The directory is named for what is unpacked and for how: "zip" is Flask's files in the release's zip, where
+	// an earlier layout had them in a directory of their own.
+	sum := sha256.Sum256(slices.Concat(pythonSums, pythonFlask, []byte("zip")))
 	dir := filepath.Join(cache, "computer")
 	build := filepath.Join(dir, "python-"+hex.EncodeToString(sum[:8]))
 	if _, err := os.Stat(build); err == nil {
@@ -90,22 +92,38 @@ func unpackPython() (_ string, err error) {
 	if err := writeFile(filepath.Join(tmp, "python.wasm"), gz); err != nil {
 		return "", err
 	}
-	if err := writeFile(filepath.Join(tmp, "lib", "python315.zip"), bytes.NewReader(pythonStdlib)); err != nil {
-		return "", err
-	}
-	// matplotlib reads its data from a directory, which the release keeps as a zip inside the zip.
 	stdlib, err := zip.NewReader(bytes.NewReader(pythonStdlib), int64(len(pythonStdlib)))
 	if err != nil {
 		return "", err
 	}
+	flask, err := zip.NewReader(bytes.NewReader(pythonFlask), int64(len(pythonFlask)))
+	if err != nil {
+		return "", err
+	}
+	// Flask's files go where the release's own packages are, in its zip, so Python finds them as it finds those.
+	packed := new(bytes.Buffer)
+	both := zip.NewWriter(packed)
+	for _, file := range slices.Concat(stdlib.File, flask.File) {
+		if err := both.Copy(file); err != nil {
+			return "", err
+		}
+	}
+	if err := both.Close(); err != nil {
+		return "", err
+	}
+	if err := writeFile(filepath.Join(tmp, "lib", "python315.zip"), packed); err != nil {
+		return "", err
+	}
+	// matplotlib reads its data from a directory, which the release keeps as a zip inside the zip.
 	inner, err := fs.ReadFile(stdlib, "matplotlib/mpl-data.zip")
 	if err != nil {
 		return "", err
 	}
-	if err := unpackZip(filepath.Join(tmp, "mpl-data"), inner); err != nil {
+	mpl, err := zip.NewReader(bytes.NewReader(inner), int64(len(inner)))
+	if err != nil {
 		return "", err
 	}
-	if err := unpackZip(filepath.Join(tmp, "site"), pythonSiteZip); err != nil {
+	if err := os.CopyFS(filepath.Join(tmp, "mpl-data"), mpl); err != nil {
 		return "", err
 	}
 	if err := os.Rename(tmp, build); err != nil {
@@ -116,14 +134,6 @@ func unpackPython() (_ string, err error) {
 		return "", err
 	}
 	return build, nil
-}
-
-func unpackZip(dir string, data []byte) error {
-	z, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
-	if err != nil {
-		return err
-	}
-	return os.CopyFS(dir, z)
 }
 
 func writeFile(name string, r io.Reader) error {
