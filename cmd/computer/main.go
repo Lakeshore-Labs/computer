@@ -234,6 +234,9 @@ func run(ctx context.Context) error {
 	// An interrupt ends what is running as a deadline would, and the computer removes its temporary directories.
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	if *script == "" && flag.Arg(0) == "serve" {
+		return serve(ctx, c, flag.Args()[1:])
+	}
 	if flag.Arg(0) == "mcp" {
 		server, err := c.MCPServer(ctx, *timeout)
 		if err != nil {

@@ -210,6 +210,41 @@ matplotlib already imported, made once (about 4 to 8 seconds) and kept in `Cache
 interpreter, with its own memory, arguments, environment and files, and `random` and `numpy.random` seeded afresh.
 Its string hashes are not randomized: every run has the image's hash seed. See [`python/README.md`](python/README.md).
 
+### Serve the computer over HTTP
+
+`WebHandler` serves files, directory indexes and listings from a folder of the computer.
+`/hello/app.py` serves the Python source. `/hello/app:app/cart` sends `/cart` to the
+WSGI callable `app` in that file. Symlinks follow the computer's mount rules.
+
+```go
+web := computer.WebHandler(func(r *http.Request) (*computer.Computer, string, error) {
+    return c, "/home/user", nil // return fs.ErrPermission to refuse the request
+})
+mux.Handle("/computer/", http.StripPrefix("/computer", web))
+```
+
+The host handles sign-in, limits and timeouts, and removes any header the app should
+not see, such as its own credential or cookie. Each app request runs in a fresh Python
+interpreter. The embedded release starts with Flask imported. Use files or SQLite for
+state shared between requests. Application stderr goes to the host's stderr by default.
+Pass `computer.ErrorLog` to choose a writer per request.
+
+To try it locally, run `serve [-b address] [-d folder] [port]`. It defaults to the
+computer's working directory at `127.0.0.1:8000`.
+
+```
+mkdir -p work/hello
+cat > work/hello/app.py <<'PY'
+from flask import Flask
+app = Flask(__name__)
+
+@app.get("/")
+def index():
+    return "hello from the computer"
+PY
+./computer -mount ./work:/home/user serve    # http://127.0.0.1:8000/ lists the folder, /hello/app:app/ is the app
+```
+
 ## The boundary
 
 - **Files.** The shell and programs see only the mounted folders. Programs reach them through Go's `os.Root`.
