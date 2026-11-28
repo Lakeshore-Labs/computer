@@ -30,8 +30,8 @@ type Program struct {
 	CacheDir    string           // where compiled code is kept between processes; empty keeps none
 
 	// Unstoppable runs the program at full speed and gives up stopping it: a run then ends only when the program
-	// does, whatever its context. Stopping costs a call into Go on every loop iteration, which slows an interpreter
-	// such as CPython three to four times. Set it only for a program trusted to end.
+	// does, whatever its context. With the wazero this module's go.mod names, stopping costs almost nothing and this
+	// buys no speed; with upstream wazero it slows CPython three to four times. Set it only for a program trusted to end.
 	Unstoppable bool
 
 	// MaxRuns is how many runs there may be at once; a further one waits for its turn until its context ends. Each

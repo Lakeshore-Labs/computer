@@ -63,3 +63,5 @@ require (
 	golang.org/x/tools v0.52.0 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 )
+
+replace github.com/tetratelabs/wazero => github.com/Lakeshore-Labs/wazero v1.12.1-wippy.1.0.20261120220218-998265e15537
